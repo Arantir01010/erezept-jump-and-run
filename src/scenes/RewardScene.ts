@@ -7,6 +7,7 @@ import { createQrTexture } from '../reward/QrRenderer'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
 import { sealTextureKey } from '../gfx/TextureFactory'
+import { addText } from '../gfx/text'
 import { t } from '../i18n'
 
 const AVATAR_COUNT = 12
@@ -55,25 +56,8 @@ export class RewardScene extends Phaser.Scene {
       })
     }
 
-    this.add
-      .text(W / 2, 34, 'Dein e-Rezept ist da!', {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '22px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-        stroke: '#2f6fd0',
-        strokeThickness: 3,
-      })
-      .setResolution(2)
-      .setOrigin(0.5)
-    this.add
-      .text(W / 2, 56, 'Löse es am Medikamentenautomaten ein!', {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '11px',
-        color: '#bfd4ff',
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
+    addText(this, W / 2, 32, 'Dein e-Rezept ist da!', 23, { stroke: '#2f6fd0', strokeThickness: 3 }).setOrigin(0.5)
+    addText(this, W / 2, 56, 'Löse es am Medikamentenautomaten ein!', 12, { color: '#cfe0ff' }).setOrigin(0.5)
 
     // Weg-Zeile: alle Siegel des Durchlaufs
     const seals = gameState.seals
@@ -83,8 +67,7 @@ export class RewardScene extends Phaser.Scene {
     })
 
     // QR-Code (offline generiert)
-    const qrFrame = this.add.rectangle(W / 2, 158, 108, 108, 0xffffff).setStrokeStyle(2, 0xffd75e)
-    void qrFrame
+    this.add.rectangle(W / 2, 158, 108, 108, 0xffffff).setStrokeStyle(2, 0xffd75e)
     const provider = createRewardCodeProvider(cfg)
     createQrTexture(this, 'qr-reward', provider.payload())
       .then((key) => {
@@ -94,27 +77,16 @@ export class RewardScene extends Phaser.Scene {
 
     // Score + Sicherheitsstufe
     const rank = gameState.rank()
-    this.add
-      .text(W / 2, 226, `${gameState.score} Punkte  ·  Sicherheitsstufe: ${t(rank.label)}`, {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '11px',
-        fontStyle: 'bold',
-        color: rank.key === 'gold' ? '#ffd75e' : rank.key === 'silber' ? '#c8d4e8' : '#d09a6a',
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
+    addText(this, W / 2, 226, `${gameState.score} Punkte  ·  Sicherheitsstufe: ${t(rank.label)}`, 12, {
+      color: rank.key === 'gold' ? '#ffd75e' : rank.key === 'silber' ? '#c8d4e8' : '#d09a6a',
+    }).setOrigin(0.5)
 
     // Highscore-Eintrag per Avatar-Wahl
     if (qualifies(gameState.score)) {
       this.pickerActive = true
-      this.add
-        .text(W / 2, 250, 'Tages-Top-5! Icon wählen (←/→ oder Joystick), BLAU/E bestätigt:', {
-          fontFamily: 'Courier New, monospace',
-          fontSize: '9px',
-          color: '#7fd07f',
-        })
-        .setResolution(3)
-        .setOrigin(0.5)
+      addText(this, W / 2, 249, 'Tages-Top-5! Icon wählen (←/→ oder Joystick), BLAU/E bestätigt:', 10, {
+        color: '#7fd07f',
+      }).setOrigin(0.5)
       const pickerStartX = W / 2 - ((AVATAR_COUNT - 1) * 22) / 2
       for (let i = 0; i < AVATAR_COUNT; i++) {
         this.add.image(pickerStartX + i * 22, 272, `avatar-${i}`)
@@ -124,12 +96,7 @@ export class RewardScene extends Phaser.Scene {
         .setStrokeStyle(2, 0xffd75e)
     }
 
-    this.hintText = this.add
-      .text(W / 2, H - 16, '', { fontFamily: 'Courier New, monospace', fontSize: '9px', color: '#8a93a8' })
-      .setResolution(3)
-      .setOrigin(0.5)
-
-    // Auto-Reset (elapsedMs-basiert, siehe update): Die Schlange am Stand läuft weiter
+    this.hintText = addText(this, W / 2, H - 16, '', 10, { color: '#aab6d4' }).setOrigin(0.5)
   }
 
   private backToAttract(): void {
@@ -160,15 +127,9 @@ export class RewardScene extends Phaser.Scene {
         this.avatarSaved = true
         this.avatarCursor.setStrokeStyle(2, 0x7fd07f)
         const rankPos = getHighscores().findIndex((e) => e.score === gameState.score) + 1
-        this.add
-          .text(this.cameras.main.width / 2, 290, `Gespeichert — Platz ${rankPos} heute!`, {
-            fontFamily: 'Courier New, monospace',
-            fontSize: '9px',
-            fontStyle: 'bold',
-            color: '#7fd07f',
-          })
-          .setResolution(3)
-          .setOrigin(0.5)
+        addText(this, this.cameras.main.width / 2, 292, `Gespeichert — Platz ${rankPos} heute!`, 10, {
+          color: '#7fd07f',
+        }).setOrigin(0.5)
       }
     }
 

@@ -4,6 +4,7 @@ import type { LevelConfig } from '../level/schema'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { sealTextureKey } from '../gfx/TextureFactory'
+import { addText } from '../gfx/text'
 import { t } from '../i18n'
 
 /**
@@ -13,7 +14,7 @@ import { t } from '../i18n'
  */
 export class UIScene extends Phaser.Scene {
   private stationText!: Phaser.GameObjects.Text
-  private bitsText!: Phaser.GameObjects.Text
+  bitsText!: Phaser.GameObjects.Text
   private sealSlots: { frame: Phaser.GameObjects.Rectangle; icon: Phaser.GameObjects.Image }[] = []
   private idleText!: Phaser.GameObjects.Text
   private lastIdleWarnMs = 0
@@ -30,17 +31,13 @@ export class UIScene extends Phaser.Scene {
     this.sealSlots = []
 
     const bar = this.add.graphics().setDepth(0)
-    bar.fillStyle(0x06090f, 0.55)
-    bar.fillRect(0, 0, W, 22)
+    bar.fillStyle(0x06090f, 0.6)
+    bar.fillRect(0, 0, W, 24)
 
-    this.stationText = this.add
-      .text(6, 5, '', { fontFamily: 'Courier New, monospace', fontSize: '10px', fontStyle: 'bold', color: '#ffffff' })
-      .setResolution(3)
+    this.stationText = addText(this, 6, 5, '', 11)
 
-    this.add.image(W - 52, 11, 'datenbit')
-    this.bitsText = this.add
-      .text(W - 44, 5, '0', { fontFamily: 'Courier New, monospace', fontSize: '10px', fontStyle: 'bold', color: '#4de3ff' })
-      .setResolution(3)
+    this.add.image(W - 56, 12, 'datenbit')
+    this.bitsText = addText(this, W - 47, 5, '0', 11, { color: '#4de3ff' })
 
     // TI-Streckenkarte: ein Slot pro Station der Playlist (rein datengetrieben)
     const levels = configService.levels
@@ -48,24 +45,19 @@ export class UIScene extends Phaser.Scene {
     const startX = W / 2 - ((levels.length - 1) * slotW) / 2
     levels.forEach((level, i) => {
       const x = startX + i * slotW
-      const frame = this.add.rectangle(x, 11, 18, 18).setStrokeStyle(1, 0x8a93a8, 0.9)
-      const icon = this.add.image(x, 11, sealTextureKey(this, level.siegelIcon)).setAlpha(0.25)
+      const frame = this.add.rectangle(x, 12, 18, 18).setStrokeStyle(1, 0x8a93a8, 0.9)
+      const icon = this.add.image(x, 12, sealTextureKey(this, level.siegelIcon)).setAlpha(0.25)
       this.sealSlots.push({ frame, icon })
       if (i < levels.length - 1) {
-        this.add.rectangle(x + slotW / 2, 11, 6, 2, 0x8a93a8, 0.7)
+        this.add.rectangle(x + slotW / 2, 12, 6, 2, 0x8a93a8, 0.7)
       }
     })
 
-    this.idleText = this.add
-      .text(W / 2, 44, '', {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '11px',
-        fontStyle: 'bold',
-        color: '#ffd75e',
-        backgroundColor: '#20242e',
-        padding: { x: 6, y: 3 },
-      })
-      .setResolution(3)
+    this.idleText = addText(this, W / 2, 46, '', 12, {
+      color: '#ffd75e',
+      bg: '#20242e',
+      padding: { x: 7, y: 4 },
+    })
       .setOrigin(0.5)
       .setVisible(false)
 
@@ -73,9 +65,7 @@ export class UIScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-F8', () => this.toggleCalibration())
 
     if (new URLSearchParams(location.search).get('debug') === '1') {
-      this.fpsText = this.add
-        .text(6, this.cameras.main.height - 14, '', { fontFamily: 'monospace', fontSize: '9px', color: '#7fd07f' })
-        .setResolution(3)
+      this.fpsText = addText(this, 6, this.cameras.main.height - 16, '', 10, { color: '#7fd07f' })
     }
 
     // --- globale Events ---
@@ -106,27 +96,12 @@ export class UIScene extends Phaser.Scene {
   private showPortalText(level: LevelConfig): void {
     this.portalOverlay?.destroy()
     const W = this.cameras.main.width
-    const name = this.add
-      .text(0, -10, t(level.station.name), {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '16px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
-    const line = this.add
-      .text(0, 8, t(level.station.portalText), {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '9px',
-        color: '#bfd4ff',
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
+    const name = addText(this, 0, -11, t(level.station.name), 17).setOrigin(0.5)
+    const line = addText(this, 0, 9, t(level.station.portalText), 11, { color: '#cfe0ff' }).setOrigin(0.5)
     const bg = this.add
-      .rectangle(0, 0, Math.max(name.width, line.width) + 30, 44, 0x06090f, 0.75)
+      .rectangle(0, 0, Math.max(name.width, line.width) + 34, 48, 0x06090f, 0.8)
       .setStrokeStyle(1, 0x4de3ff, 0.8)
-    this.portalOverlay = this.add.container(W / 2, 60, [bg, name, line]).setDepth(50).setAlpha(0)
+    this.portalOverlay = this.add.container(W / 2, 62, [bg, name, line]).setDepth(50).setAlpha(0)
     this.tweens.add({ targets: this.portalOverlay, alpha: 1, duration: 250 })
     this.time.delayedCall(2100, () => {
       if (!this.portalOverlay) return
@@ -165,16 +140,11 @@ export class UIScene extends Phaser.Scene {
       this.calibText = undefined
       return
     }
-    this.calibText = this.add
-      .text(6, 30, '', {
-        fontFamily: 'monospace',
-        fontSize: '8px',
-        color: '#7fd07f',
-        backgroundColor: '#06090f',
-        padding: { x: 4, y: 3 },
-      })
-      .setResolution(3)
-      .setDepth(90)
+    this.calibText = addText(this, 6, 32, '', 9, {
+      color: '#7fd07f',
+      bg: '#06090f',
+      padding: { x: 5, y: 4 },
+    }).setDepth(90)
     this.time.addEvent({
       delay: 100,
       loop: true,

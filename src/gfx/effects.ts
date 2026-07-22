@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { addText } from './text'
 
 /**
  * Der Marken-Gag des Spiels: Ein Angreifer scheitert sichtbar an der TI —
@@ -6,26 +7,16 @@ import Phaser from 'phaser'
  * Barrierefreiheit: keine Blitzeffekte > 3 Hz (nur einmalige Pop-Animation).
  */
 export function showDenyStamp(scene: Phaser.Scene, x: number, y: number, text: string): void {
-  const label = scene.add
-    .text(0, 0, text, {
-      fontFamily: 'Courier New, monospace',
-      fontSize: '10px',
-      fontStyle: 'bold',
-      color: '#ff4040',
-      backgroundColor: '#fff0f0',
-      padding: { x: 4, y: 2 },
-    })
-    .setResolution(3)
-    .setOrigin(0.5)
+  const label = addText(scene, 0, 0, text, 11, {
+    color: '#ff4040',
+    bg: '#fff0f0',
+    padding: { x: 5, y: 3 },
+  }).setOrigin(0.5)
   const container = scene.add.container(x, y, [label]).setDepth(70).setAngle(-12).setScale(0.2)
 
   const stars: Phaser.GameObjects.Text[] = []
   for (let i = 0; i < 4; i++) {
-    const star = scene.add
-      .text(x, y, '✶', { fontFamily: 'monospace', fontSize: '10px', color: '#ffd75e' })
-      .setResolution(3)
-      .setOrigin(0.5)
-      .setDepth(69)
+    const star = addText(scene, x, y, '✶', 11, { color: '#ffd75e' }).setOrigin(0.5).setDepth(69)
     stars.push(star)
     const angle = (i / 4) * Math.PI * 2 + 0.5
     scene.tweens.add({

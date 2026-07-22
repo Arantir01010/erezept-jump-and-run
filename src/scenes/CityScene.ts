@@ -6,6 +6,7 @@ import { GameAction } from '../input/actions'
 import { gameState } from '../state/GameState'
 import { sealTextureKey } from '../gfx/TextureFactory'
 import { drawBackdrop } from '../gfx/backdrop'
+import { addText } from '../gfx/text'
 import { t } from '../i18n'
 
 const WALK_MS = 2200
@@ -78,27 +79,16 @@ export class CityScene extends Phaser.Scene {
   private showArrivalStamp(from: ReturnType<typeof configService.level>, done: () => void): void {
     const W = this.cameras.main.width
     const box = this.add.container(W / 2, 70).setDepth(80).setScale(0.3)
-    const text = this.add
-      .text(0, 0, t(from.station.stampText), {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '12px',
-        fontStyle: 'bold',
-        color: '#20242e',
-        backgroundColor: '#ffffff',
-        padding: { x: 8, y: 5 },
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
-    const badge = this.add
-      .text(0, 20, from.station.badge, {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '8px',
-        color: '#ffffff',
-        backgroundColor: '#2f6fd0',
-        padding: { x: 4, y: 2 },
-      })
-      .setResolution(3)
-      .setOrigin(0.5)
+    const text = addText(this, 0, 0, t(from.station.stampText), 13, {
+      color: '#20242e',
+      bg: '#ffffff',
+      padding: { x: 9, y: 6 },
+    }).setOrigin(0.5)
+    const badge = addText(this, 0, 22, from.station.badge, 10, {
+      color: '#ffffff',
+      bg: '#2f6fd0',
+      padding: { x: 5, y: 3 },
+    }).setOrigin(0.5)
     const seal = this.add.image(-text.width / 2 - 14, 0, sealTextureKey(this, from.siegelIcon))
     box.add([text, badge, seal])
     this.tweens.add({ targets: box, scale: 1, duration: 250, ease: 'Back.easeOut' })
@@ -171,16 +161,11 @@ export class CityScene extends Phaser.Scene {
         g.fillRect(cx - w / 2 + 12 + col * 26, H - 40 - h + 14 + row * 32, 14, 18)
       }
     }
-    this.add
-      .text(cx, H - 40 - h - 10, label, {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '9px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-        backgroundColor: '#20242e',
-        padding: { x: 4, y: 2 },
-      })
-      .setResolution(3)
+    addText(this, cx, H - 40 - h - 11, label, 10, {
+      color: '#ffffff',
+      bg: '#20242e',
+      padding: { x: 5, y: 3 },
+    })
       .setOrigin(0.5)
       .setDepth(3)
   }

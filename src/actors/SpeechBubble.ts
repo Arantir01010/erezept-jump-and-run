@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { addText } from '../gfx/text'
 
 /**
  * Sprechblase im Spielraum (pausiert das Spiel nie).
@@ -12,16 +13,11 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0)
     this.bg = scene.add.graphics()
-    this.label = scene.add
-      .text(0, 0, '', {
-        fontFamily: 'Courier New, monospace',
-        fontSize: '9px',
-        color: '#20242e',
-        align: 'center',
-        wordWrap: { width: 150 },
-      })
-      .setResolution(3)
-      .setOrigin(0.5, 0.5)
+    this.label = addText(scene, 0, 0, '', 10, {
+      color: '#20242e',
+      align: 'center',
+      wrapWidth: 160,
+    }).setOrigin(0.5, 0.5)
     this.add([this.bg, this.label])
     this.setDepth(60)
     this.setVisible(false)
@@ -30,7 +26,7 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
 
   show(text: string, holdMs = 2800): void {
     this.label.setText(text)
-    const w = Math.min(160, this.label.width + 12)
+    const w = Math.min(172, this.label.width + 14)
     const h = this.label.height + 10
     this.bg.clear()
     this.bg.fillStyle(0xffffff, 0.95)
@@ -50,7 +46,7 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
   /** Blase über einem Punkt positionieren, im Kamerabild halten. */
   pointAt(x: number, y: number): void {
     const cam = this.scene.cameras.main
-    const halfW = Math.min(160, this.label.width + 12) / 2
+    const halfW = Math.min(172, this.label.width + 14) / 2
     const clampedX = Phaser.Math.Clamp(x, cam.worldView.x + halfW + 2, cam.worldView.right - halfW - 2)
     this.setPosition(clampedX, y)
   }
