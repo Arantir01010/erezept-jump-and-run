@@ -1,0 +1,22 @@
+{
+  "event": "Messe-Prototyp — Das e-Rezept",
+  "language": "de",
+  "titleScreen": {
+    "headline": { "de": "Das e-Rezept", "en": "The e-prescription" },
+    "subline": {
+      "de": "Spiele dich durch die TI und erhalte dein e-Rezept!",
+      "en": "Play your way through the TI and get your e-prescription!"
+    },
+    "pressStart": { "de": "Drück den roten Knopf!", "en": "Press the red button!" },
+    "pressStartKeyboard": { "de": "Drück LEERTASTE!", "en": "Press SPACE!" }
+  },
+  "levelOrder": ["02-kartenterminal", "03-kov-gateway"],
+  "ending": {
+    "type": "static",
+    "staticPayload": "EREZEPT-MESSE-GEWINN",
+    "rewardScreenSeconds": 45,
+    "minQrSeconds": 10
+  },
+  "idleResetSeconds": 60,
+  "softAutopilotSeconds": 240
+}

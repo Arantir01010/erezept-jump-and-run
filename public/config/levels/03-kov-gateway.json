@@ -1,0 +1,43 @@
+{
+  "id": "03-kov-gateway",
+  "station": {
+    "name": { "de": "KOV Gateway", "en": "KOV gateway" },
+    "portalText": {
+      "de": "Station: KOV Gateway — dein sicherer Tunnel in die TI.",
+      "en": "Station: KOV gateway — your secure tunnel into the TI."
+    },
+    "reziText": {
+      "de": "Verschlüsselt kann mich niemand mitlesen!",
+      "en": "Encrypted, nobody can read me!"
+    },
+    "stampText": {
+      "de": "✓ Verschlüsselt unterwegs im geschützten Netz.",
+      "en": "✓ Travelling encrypted in the protected network."
+    },
+    "badge": "VPN · E2E-Verschlüsselung"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": { "facade": "gateway", "label": { "de": "Tor zur TI", "en": "Gate to the TI" } },
+  "cameraMode": "tube",
+  "theme": "kov-gateway",
+  "enemySkin": "datenkrake",
+  "tilemap": "assets/tilemaps/03-kov-gateway.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 10,
+    "label": { "de": "Datenbits", "en": "Data bits" }
+  },
+  "mechanics": {
+    "tube-scroll": { "speed": 55 },
+    "stillstand-podest": {
+      "scanMs": 1200,
+      "hint": { "de": "Stillstehen: Das Gateway prüft dich!", "en": "Stand still: the gateway checks you!" },
+      "denyText": { "de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED" }
+    },
+    "krypto-dusche": {
+      "hint": { "de": "Blauer Knopf: Verschlüsselung anlegen!", "en": "Blue button: apply encryption!" }
+    },
+    "door-exit": { "sealId": "seal-vpn" }
+  },
+  "parTimeSeconds": 35
+}

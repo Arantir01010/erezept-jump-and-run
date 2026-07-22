@@ -1,0 +1,26 @@
+{
+  "city": {
+    "skyTop": "#2a3550",
+    "skyBottom": "#4a5b82",
+    "ground": "#3a3f4a",
+    "groundTop": "#565d6e",
+    "accent": "#ffd75e",
+    "detail": "#7f8ba6"
+  },
+  "kartenterminal": {
+    "skyTop": "#101a12",
+    "skyBottom": "#1c2e1e",
+    "ground": "#24402a",
+    "groundTop": "#3a6644",
+    "accent": "#ffd75e",
+    "detail": "#c9a53a"
+  },
+  "kov-gateway": {
+    "skyTop": "#060a1e",
+    "skyBottom": "#0d1638",
+    "ground": "#16255c",
+    "groundTop": "#2c47a8",
+    "accent": "#4de3ff",
+    "detail": "#7a5cff"
+  }
+}
