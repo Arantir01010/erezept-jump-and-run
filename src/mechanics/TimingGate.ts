@@ -5,6 +5,7 @@ import { assist } from '../state/Assist'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
+import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -32,12 +33,23 @@ export class TimingGate extends Mechanic {
   /** Bis zu diesem Zeitpunkt bleibt das rote Fehler-Feedback stehen. */
   private failUntilMs = 0
   private hintShown = false
+  private lastTipMs = -Infinity
+  private activeGlow?: Phaser.GameObjects.Image
 
   spawn(): void {
     const { x, y, w, h } = objCenter(this.obj)
     this.steps = this.param<number>('steps', 4)
     this.stepMs = this.param<number>('stepMs', 900)
     this.zone = new Phaser.Geom.Rectangle(this.obj.x ?? 0, this.obj.y ?? 0, w || 48, h || 48)
+
+    // Anrempel-Tipp am verknüpften Tor: sagt, WIE es aufgeht
+    const gate = this.linkedGate()
+    if (gate) {
+      gate.openHint = this.paramText('gateHint', {
+        de: 'Das Tor ist zu! Schaff erst die PIN-Schleuse: im Takt der pulsierenden Lichter drücken.',
+        en: 'The gate is locked! Pass the PIN check first: press on the beat of the pulsing lights.',
+      })
+    }
 
     const spread = 16
     const startX = x - ((this.steps - 1) * spread) / 2
@@ -47,6 +59,13 @@ export class TimingGate extends Mechanic {
       light.setDepth(6)
       this.lights.push(light)
     }
+    // Halo hinter dem gerade fälligen Licht — der Takt wird auch peripher lesbar
+    this.activeGlow = addGlow(this.host.scene, startX, this.lights[0]?.y ?? y, 0xffd75e, 11, {
+      alpha: 0.55,
+      depth: 5,
+      pulse: false,
+    })
+    this.activeGlow.setVisible(false)
   }
 
   private get slowMs(): number {
@@ -107,10 +126,24 @@ export class TimingGate extends Mechanic {
 
   /** Falscher Moment: alle Lichter rot, kurze Pause, dann Neustart der Sequenz. */
   private failFlash(time: number): void {
-    assist.fail(`timing-gate-${this.obj.id}`)
+    const key = `timing-gate-${this.obj.id}`
+    assist.fail(key)
     this.progress = 0
     this.failUntilMs = time + FAIL_FLASH_MS
     this.stepStartMs = time + FAIL_FLASH_MS
+    this.activeGlow?.setVisible(false)
+
+    // Ab dem 2. Fehlversuch erklärt REZI den Trick konkret (Assist macht parallel langsamer)
+    if (assist.failCount(key) >= 2 && time - this.lastTipMs > 6000) {
+      this.lastTipMs = time
+      const btn = inputManager.hasGamepad() ? 'BLAU' : 'Taste E'
+      this.host.rezi.say(
+        this.paramText('failHint', {
+          de: `Tipp: Drück ${btn} genau dann, wenn das gelbe Licht groß aufleuchtet!`,
+          en: `Tip: press ${inputManager.hasGamepad() ? 'BLUE' : 'E'} right when the yellow light glows big!`,
+        }),
+      )
+    }
     this.lights.forEach((light, i) => {
       light.setFillStyle(0xff4040, 1)
       light.setRadius(4)
@@ -131,6 +164,11 @@ export class TimingGate extends Mechanic {
         light.setRadius(4)
       }
     })
+    // Halo folgt dem aktiven Licht
+    const active = this.lights[this.progress]
+    if (this.activeGlow && active) {
+      this.activeGlow.setPosition(active.x, active.y).setVisible(pulseActive && this.running && !this.done)
+    }
   }
 
   private flashLight(index: number, color: number): void {
@@ -143,6 +181,7 @@ export class TimingGate extends Mechanic {
   private succeed(): void {
     this.done = true
     this.running = false
+    this.activeGlow?.setVisible(false)
     this.lights.forEach((l) => {
       l.setFillStyle(0x7fd07f, 1)
       l.setRadius(4)

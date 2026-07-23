@@ -3,6 +3,8 @@ import type { LevelConfig } from '../level/schema'
 import type { Player } from '../player/Player'
 import type { Rezi } from '../actors/Rezi'
 import type { Gate } from './basics'
+import { t } from '../i18n'
+import type { LText } from '../i18n'
 
 /**
  * Schnittstelle, die die GameScene den Mechanik-Bausteinen bereitstellt.
@@ -15,8 +17,8 @@ export interface MechanicHost {
   level: LevelConfig
   /** Benannte Tore (Objekt-Name in Tiled), die Mechaniken öffnen können. */
   gates: Map<string, Gate>
-  /** Kollision Spieler ↔ solider Körper registrieren. */
-  addSolid(body: Phaser.Physics.Arcade.Image): void
+  /** Kollision Spieler ↔ solider Körper registrieren (optional mit Berührungs-Callback). */
+  addSolid(body: Phaser.Physics.Arcade.Image, onCollide?: (player: Player) => void): void
   /** Overlap Spieler ↔ Sensor registrieren. */
   addSensor(
     body: Phaser.Physics.Arcade.Image,
@@ -63,6 +65,15 @@ export abstract class Mechanic {
   protected param<T>(key: string, fallback: T): T {
     const v = this.params[key]
     return v === undefined ? fallback : (v as T)
+  }
+
+  /**
+   * Lokalisierter Redaktions-Text aus params[key] (LText aus dem Level-JSON)
+   * mit eingebautem Fallback — Grundlage aller REZI-Tipps.
+   */
+  protected paramText(key: string, fallback: LText): string {
+    const v = this.params[key] as LText | undefined
+    return t(v && typeof v === 'object' && 'de' in v ? v : fallback)
   }
 
   /** Benanntes Tor aus den Objekt-/Level-Parametern auflösen. */

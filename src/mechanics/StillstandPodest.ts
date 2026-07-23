@@ -4,7 +4,7 @@ import { registerMechanic } from './registry'
 import { assist } from '../state/Assist'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
-import { showDenyStamp } from '../gfx/effects'
+import { showDenyStamp, addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -16,11 +16,13 @@ import type { LText } from '../i18n'
 export class StillstandPodest extends Mechanic {
   private podest!: Phaser.Physics.Arcade.Image
   private scanBar!: Phaser.GameObjects.Rectangle
+  private scanGlow?: Phaser.GameObjects.Image
   private krake?: Phaser.GameObjects.Sprite
   private progressMs = 0
   private done = false
   private hintShown = false
   private interruptions = 0
+  private lastTipMs = -Infinity
 
   spawn(): void {
     const { x, y, w } = objCenter(this.obj)
@@ -32,13 +34,25 @@ export class StillstandPodest extends Mechanic {
 
     this.host.scene.add.rectangle(x, y - 26, 36, 6).setStrokeStyle(1, 0x4de3ff, 1).setDepth(6)
     this.scanBar = this.host.scene.add.rectangle(x - 17, y - 26, 0, 4, 0x4de3ff, 1).setOrigin(0, 0.5).setDepth(6)
+    // Scan-Licht: schwillt mit dem Fortschritt an (Feedback ohne Hinschauen)
+    this.scanGlow = addGlow(this.host.scene, x, y - 14, 0x4de3ff, 24, { alpha: 0, depth: 3, pulse: false })
 
     // Tube-Modus: Auto-Scroll hält an, sobald das Podest ins Bild rückt, bis gescannt ist
+    // (worldView statt scrollX/width: bleibt auch bei gezoomter Kamera korrekt)
     this.host.registerScrollLock(() => {
       if (this.done) return false
-      const cam = this.host.scene.cameras.main
-      return cam.scrollX + cam.width * 0.7 >= this.podest.x
+      const view = this.host.scene.cameras.main.worldView
+      return view.width > 0 && view.x + view.width * 0.7 >= this.podest.x
     })
+
+    // Anrempel-Tipp am verknüpften Tor: sagt, WIE es aufgeht
+    const gate = this.linkedGate()
+    if (gate) {
+      gate.openHint = this.paramText('gateHint', {
+        de: 'Das Tor ist zu! Stell dich aufs Podest und steh still, bis der Scan durch ist.',
+        en: 'The gate is locked! Step onto the pedestal and stand still until the scan completes.',
+      })
+    }
 
     // Die Krake schleicht hinterher — Sichtbarkeit für den Deny-Gag
     this.krake = this.host.scene.add.sprite(x - 90, y - 20, 'krake-0').setDepth(2).setAlpha(0.9)
@@ -57,7 +71,7 @@ export class StillstandPodest extends Mechanic {
     return onTop && inX && p.body.blocked.down
   }
 
-  update(_time: number, delta: number): void {
+  update(time: number, delta: number): void {
     if (this.done) return
 
     const scanning = this.playerOnPodest() && inputManager.isNeutral()
@@ -74,7 +88,19 @@ export class StillstandPodest extends Mechanic {
       this.progressMs = Math.max(0, this.progressMs - delta * 2)
       if (this.progressMs === 0) {
         this.interruptions += 1
-        if (this.interruptions >= 2) assist.fail(`podest-${this.obj.id}`)
+        if (this.interruptions >= 2) {
+          assist.fail(`podest-${this.obj.id}`)
+          // Ab dem 2. abgebrochenen Scan sagt REZI klar, was fehlt (Assist verkürzt parallel)
+          if (time - this.lastTipMs > 6000) {
+            this.lastTipMs = time
+            this.host.rezi.say(
+              this.paramText('stillHint', {
+                de: 'Tipp: Alles loslassen und ganz stillstehen — erst dann läuft der Scan durch!',
+                en: 'Tip: let go of everything and stand perfectly still — only then the scan completes!',
+              }),
+            )
+          }
+        }
       }
     } else if (this.playerOnPodest() && !this.hintShown) {
       this.hintShown = true
@@ -82,7 +108,9 @@ export class StillstandPodest extends Mechanic {
       if (hint) this.host.rezi.say(t(hint))
     }
 
-    this.scanBar.width = 34 * Math.min(1, this.progressMs / this.scanMs)
+    const ratio = Math.min(1, this.progressMs / this.scanMs)
+    this.scanBar.width = 34 * ratio
+    if (this.scanGlow) this.scanGlow.setAlpha(0.4 * ratio)
     // Krake nähert sich während des Scans
     if (this.krake && scanning) this.krake.x = Math.min(this.krake.x + delta * 0.02, this.podest.x - 40)
   }
@@ -91,6 +119,11 @@ export class StillstandPodest extends Mechanic {
     this.done = true
     this.scanBar.width = 34
     this.scanBar.setFillStyle(0x7fd07f)
+    // Erfolg: Licht springt auf Grün und verglimmt
+    if (this.scanGlow) {
+      this.scanGlow.setTint(0x7fd07f).setAlpha(0.55)
+      this.host.scene.tweens.add({ targets: this.scanGlow, alpha: 0, duration: 1100, delay: 300 })
+    }
     if (assist.wasClean(`podest-${this.obj.id}`)) gameState.addSecurityBonus()
     const gate = this.linkedGate()
     gate?.open()

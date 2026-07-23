@@ -38,6 +38,8 @@ export const LevelSchema = z.object({
   }),
   mechanics: z.record(z.record(z.unknown())).default({}),
   parTimeSeconds: z.number().positive(),
+  /** Optionaler Generaltipp bei Festhängen (Default nennt die Grundsteuerung). */
+  stuckHint: LTextSchema.optional(),
 })
 
 export const GameConfigSchema = z.object({

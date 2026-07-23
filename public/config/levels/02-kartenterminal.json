@@ -38,7 +38,6 @@
     },
     "deny-enemy": { "grabsBeforeBlock": 2, "denyText": { "de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED" } },
     "stamp-exit": {
-      "sealId": "seal-egk",
       "hint": { "de": "Blauer Knopf unter dem Stempel: Signatur annehmen!", "en": "Blue button under the stamp: accept the signature!" }
     }
   },

@@ -178,7 +178,7 @@ const REZI_FRAMES: Record<string, string[]> = {
   'rezi-0': [
     '..OOOOOOOO..',
     '.OMMMMMMMMO.',
-    'W OMEEMMEEMO',
+    'WOMEEMMEEMO.',
     '.OMEPMMEPMO.',
     '.OMMMMMMMMO.',
     '.OMMCCCCMMO.',
@@ -474,19 +474,26 @@ function makeTileset(scene: Phaser.Scene, themeKey: string, theme: Theme): void 
     ctx.fillRect(i * TILE_SIZE + x, y, w, h)
   }
 
-  // 0: Boden-Füllung mit Leiterbahn-Punkten
+  // 0: Boden-Füllung mit Leiterbahn-Punkten (+ Speckle & leuchtende Knoten)
   fill(0, theme.ground)
   px(0, 3, 5, 2, 2, theme.detail)
   px(0, 10, 11, 2, 2, theme.detail)
   px(0, 7, 8, 6, 1, theme.detail)
-  // 1: Boden-Oberkante
+  px(0, 12, 8, 1, 1, theme.accent) // Leiterbahn-Knoten „unter Strom"
+  px(0, 1, 13, 1, 1, 'rgba(0,0,0,0.25)')
+  px(0, 6, 2, 1, 1, 'rgba(0,0,0,0.2)')
+  px(0, 14, 4, 1, 1, 'rgba(255,255,255,0.06)')
+  // 1: Boden-Oberkante (+ 1-px-Kantenlicht — lässt Plattformkanten „gefasst" wirken)
   fill(1, theme.ground)
   px(1, 0, 0, 16, 4, theme.groundTop)
+  px(1, 0, 0, 16, 1, 'rgba(255,255,255,0.22)')
   px(1, 2, 1, 2, 1, theme.accent)
   px(1, 11, 2, 2, 1, theme.accent)
-  // 2: Plattform
+  px(1, 5, 6, 1, 1, 'rgba(0,0,0,0.18)')
+  // 2: Plattform (+ Kantenlicht)
   fill(2, theme.detail)
   px(2, 0, 0, 16, 2, theme.groundTop)
+  px(2, 0, 0, 16, 1, 'rgba(255,255,255,0.2)')
   px(2, 0, 14, 16, 2, theme.skyTop)
   // 3: Gold-Pad (Kontaktfläche)
   fill(3, '#c9a53a')
@@ -498,12 +505,14 @@ function makeTileset(scene: Phaser.Scene, themeKey: string, theme: Theme): void 
   px(4, 0, 15, 16, 1, theme.accent)
   px(4, 0, 0, 1, 16, theme.accent)
   px(4, 15, 0, 1, 16, theme.accent)
-  // 5: Glas (Tunnelwand)
+  // 5: Glas (Tunnelwand) — doppelter Lichtreflex wirkt „gläserner"
   ctx.fillStyle = 'rgba(140, 220, 255, 0.35)'
   ctx.fillRect(5 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
   px(5, 0, 0, 16, 1, theme.accent)
   px(5, 0, 15, 16, 1, theme.accent)
   px(5, 3, 3, 1, 6, 'rgba(255,255,255,0.6)')
+  px(5, 5, 2, 1, 3, 'rgba(255,255,255,0.3)')
+  px(5, 11, 8, 1, 5, 'rgba(255,255,255,0.22)')
   // 6: dunkle Füllung
   fill(6, theme.skyTop)
   // 7: Strebe
@@ -513,9 +522,65 @@ function makeTileset(scene: Phaser.Scene, themeKey: string, theme: Theme): void 
   canvas.refresh()
 }
 
+// ---------------------------------------------------------------- Licht-/Effekt-Texturen
+
+/**
+ * Weiche Verlaufs-Texturen für Lichteffekte (Glows, Staub, Vignette).
+ * Per Canvas-Gradient erzeugt und LINEAR gefiltert — bewusst NICHT pixelig:
+ * Licht liegt als weiche Schicht ÜBER der knackigen Pixel-Art (moderner
+ * Indie-Look à la „Pixel-Art + Soft Lighting").
+ */
+function makeFxTextures(scene: Phaser.Scene): void {
+  const makeRadial = (key: string, size: number, stops: [number, string][]): void => {
+    if (scene.textures.exists(key)) return
+    const canvas = scene.textures.createCanvas(key, size, size)
+    if (!canvas) return
+    const ctx = canvas.context
+    const grd = ctx.createRadialGradient(size / 2, size / 2, size * 0.03, size / 2, size / 2, size / 2)
+    for (const [pos, color] of stops) grd.addColorStop(pos, color)
+    ctx.fillStyle = grd
+    ctx.fillRect(0, 0, size, size)
+    canvas.refresh()
+    scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR)
+  }
+
+  // Punktlicht (ADD-Blend, per Tint eingefärbt)
+  makeRadial('fx-glow', 64, [
+    [0, 'rgba(255,255,255,1)'],
+    [0.45, 'rgba(255,255,255,0.32)'],
+    [1, 'rgba(255,255,255,0)'],
+  ])
+  // Staubkorn / Datenfunke
+  makeRadial('fx-mote', 16, [
+    [0, 'rgba(255,255,255,0.9)'],
+    [0.5, 'rgba(255,255,255,0.35)'],
+    [1, 'rgba(255,255,255,0)'],
+  ])
+
+  // Vignette: transparente Mitte, dunkle Ränder — Tiefe ohne Kosten
+  if (!scene.textures.exists('fx-vignette')) {
+    const w = 480
+    const h = 270
+    const canvas = scene.textures.createCanvas('fx-vignette', w, h)
+    if (canvas) {
+      const ctx = canvas.context
+      const r = Math.hypot(w / 2, h / 2)
+      const grd = ctx.createRadialGradient(w / 2, h / 2, r * 0.45, w / 2, h / 2, r * 1.02)
+      grd.addColorStop(0, 'rgba(4,7,13,0)')
+      grd.addColorStop(0.75, 'rgba(4,7,13,0.22)')
+      grd.addColorStop(1, 'rgba(4,7,13,0.6)')
+      ctx.fillStyle = grd
+      ctx.fillRect(0, 0, w, h)
+      canvas.refresh()
+      scene.textures.get('fx-vignette').setFilter(Phaser.Textures.FilterMode.LINEAR)
+    }
+  }
+}
+
 // ---------------------------------------------------------------- Öffentliche API
 
 export function generateAllTextures(scene: Phaser.Scene, themes: Themes): void {
+  makeFxTextures(scene)
   for (const [key, pattern] of Object.entries(PAUL_FRAMES)) drawPattern(scene, key, pattern, PAUL_COLORS)
   for (const [key, pattern] of Object.entries(REZI_FRAMES)) drawPattern(scene, key, pattern, REZI_COLORS)
   for (const [key, pattern] of Object.entries(KRALLE_FRAMES)) drawPattern(scene, key, pattern, KRALLE_COLORS)

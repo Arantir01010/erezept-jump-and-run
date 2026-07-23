@@ -36,8 +36,7 @@
     },
     "krypto-dusche": {
       "hint": { "de": "Blauer Knopf: Verschlüsselung anlegen!", "en": "Blue button: apply encryption!" }
-    },
-    "door-exit": { "sealId": "seal-vpn" }
+    }
   },
   "parTimeSeconds": 35
 }

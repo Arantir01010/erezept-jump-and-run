@@ -38,6 +38,10 @@ Kalibrier-Overlay im Spiel: **F8**).
 - Stadt-Band mit Portal-Dive zwischen den Stationen, HUD mit TI-Streckenkarte,
   Reward-Screen mit Offline-QR-Code, Tages-Highscore (Avatar-Icons, keine Personendaten),
   Kiosk-Modus (Attract, Idle-Reset, CrashGuard)
+- Automatische REZI-Tipps, wenn jemand nicht weiterkommt (wiederholtes Scheitern,
+  geschlossene Tore, kein Fortschritt) — Texte anpassbar, siehe [docs/LEVEL-EDITING.md](docs/LEVEL-EDITING.md)
+- Rendering intern in 1920×1080: Pixel-Art bleibt stilecht blockig (Kamera-Zoom 3×),
+  Schrift und QR-Code sind nativ scharf — auf dem Messe-TV wie im Browserfenster
 
 ## Für Redakteur:innen: Alles ist Daten
 
@@ -56,7 +60,7 @@ Leveldesign aller 6 Stationen, TI-Fachlichkeit und Messebetrieb: [docs/KONZEPT.m
 | `npm run gen:maps` | Prototyp-Tilemaps aus `tools/generate-tilemaps.ts` erzeugen |
 | `start-messe.bat` | Messestart: lokaler Server + Chrome-Kiosk (`?kiosk=1`) |
 
-URL-Parameter: `?debug=1` FPS-Anzeige · `?debug=2` Physik-Debug · `?kiosk=1` Kiosk-Härtung (Cursor aus, CrashGuard).
+URL-Parameter: `?debug=1` FPS-Anzeige · `?debug=2` Physik-Debug · `?kiosk=1` Kiosk-Härtung (Cursor aus, CrashGuard) · `?renderer=canvas` 2D-Fallback für Rechner ohne brauchbares WebGL.
 
 ## Tech-Stack
 

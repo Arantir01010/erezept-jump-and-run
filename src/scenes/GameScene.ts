@@ -7,6 +7,14 @@ import { spawnMechanic, type MechanicHost, Gate } from '../mechanics'
 import type { Mechanic } from '../mechanics'
 import { gameState } from '../state/GameState'
 import { drawBackdrop } from '../gfx/backdrop'
+import { inputManager } from '../input/InputManager'
+import { VIEW_ZOOM } from '../gfx/view'
+import { t } from '../i18n'
+import type { LText } from '../i18n'
+
+/** Kein Streckenfortschritt trotz Eingaben → genereller REZI-Schubs. */
+const STUCK_AFTER_MS = 18_000
+const STUCK_REPEAT_MS = 20_000
 
 /**
  * Ein Stationslevel. Alles Inhaltliche kommt aus Level-JSON + Tilemap —
@@ -31,6 +39,10 @@ export class GameScene extends Phaser.Scene {
    *  (55 px/s ≈ 0,92 px/Frame) würden sonst jeden Frame weggerundet. */
   private tubeScrollX = 0
   private mapWidth = 0
+  /** Festhäng-Erkennung: weitester Fortschritt + Zeitpunkte für den Generaltipp. */
+  private maxProgressX = 0
+  private lastProgressMs = -1
+  private lastStuckTipMs = -Infinity
 
   constructor() {
     super('Game')
@@ -42,12 +54,17 @@ export class GameScene extends Phaser.Scene {
     this.mechanics = []
     this.scrollLocks = []
     this.completed = false
+    this.maxProgressX = 0
+    this.lastProgressMs = -1
+    this.lastStuckTipMs = -Infinity
   }
 
   create(): void {
     this.level = configService.level(this.levelIndex)
     gameState.markLevelStart()
     const theme = configService.theme(this.level.theme)
+    // 3x-Zoom zuerst: drawBackdrop & Co. lesen displayWidth/worldView der Kamera
+    this.cameras.main.setZoom(VIEW_ZOOM)
 
     // --- Tilemap ---
     const map = this.make.tilemap({ key: `map-${this.level.id}` })
@@ -55,7 +72,7 @@ export class GameScene extends Phaser.Scene {
     if (!tileset) throw new Error(`Tileset für Theme "${this.level.theme}" fehlt`)
     this.mapWidth = map.widthInPixels
 
-    drawBackdrop(this, theme, map.widthInPixels, map.heightInPixels)
+    drawBackdrop(this, theme, map.widthInPixels, map.heightInPixels, { lightShafts: true })
 
     const terrain = map.createLayer('terrain', tileset, 0, 0)
     if (!terrain) throw new Error(`Layer "terrain" fehlt in ${this.level.tilemap}`)
@@ -73,6 +90,7 @@ export class GameScene extends Phaser.Scene {
     this.player = new Player(this, sx, sy)
     this.player.setRespawn(sx, sy)
     this.physics.add.collider(this.player, terrain)
+    this.maxProgressX = sx
 
     this.rezi = new Rezi(this, sx - 16, sy - 26)
     this.rezi.follow(this.player)
@@ -103,6 +121,7 @@ export class GameScene extends Phaser.Scene {
       const tubeParams = (this.level.mechanics['tube-scroll'] ?? {}) as { speed?: number }
       this.tubeSpeed = tubeParams.speed ?? 50
       this.tubeScrollX = 0
+      cam.centerOn(cam.displayWidth / 2, cam.displayHeight / 2)
     } else {
       if (this.level.cameraMode !== 'horizontal') {
         console.warn(`[camera] Modus "${this.level.cameraMode}" ist Ausbaustufe — fallback auf horizontal`)
@@ -130,8 +149,8 @@ export class GameScene extends Phaser.Scene {
       get level() {
         return self.level
       },
-      addSolid: (body) => {
-        this.physics.add.collider(this.player, body)
+      addSolid: (body, onCollide) => {
+        this.physics.add.collider(this.player, body, onCollide ? () => onCollide(this.player) : undefined)
       },
       addSensor: (body, onOverlap) => this.physics.add.overlap(this.player, body, () => onOverlap(this.player)),
       registerScrollLock: (lock) => {
@@ -169,19 +188,22 @@ export class GameScene extends Phaser.Scene {
     this.player.update()
     for (const mechanic of this.mechanics) mechanic.update(time, delta)
     if (this.level.cameraMode === 'tube' && !this.completed) this.updateTubeCamera(delta)
+    if (!this.completed) this.checkStuckTip(time)
   }
 
   private updateTubeCamera(delta: number): void {
     const cam = this.cameras.main
+    const viewW = cam.displayWidth // sichtbare Breite im Design-Raum (Zoom-fest)
     const held = this.scrollLocks.some((lock) => lock())
     if (!held) {
-      this.tubeScrollX = Math.min(this.tubeScrollX + (this.tubeSpeed * delta) / 1000, this.mapWidth - cam.width)
+      this.tubeScrollX = Math.min(this.tubeScrollX + (this.tubeSpeed * delta) / 1000, this.mapWidth - viewW)
     }
-    cam.scrollX = this.tubeScrollX
+    // centerOn statt scrollX: rechnet den Kamera-Zoom automatisch heraus
+    cam.centerOn(this.tubeScrollX + viewW / 2, cam.displayHeight / 2)
     // Der Tunnel nimmt Paul mit: linke Bildkante schiebt sanft (kein Schaden — im
     // Tunnel ist man unantastbar), rechte Kante hält ihn im Bild — der Tunnel gibt das Tempo vor
-    const minX = cam.scrollX + 14
-    const maxX = cam.scrollX + cam.width - 14
+    const minX = this.tubeScrollX + 14
+    const maxX = this.tubeScrollX + viewW - 14
     if (this.player.x < minX) {
       this.player.x = minX
       if (this.player.body.velocity.x < 0) this.player.setVelocityX(0)
@@ -190,5 +212,31 @@ export class GameScene extends Phaser.Scene {
       if (this.player.body.velocity.x > 0) this.player.setVelocityX(0)
     }
     // Kamera folgt vertikal nicht — der Korridor ist bildschirmhoch
+  }
+
+  /**
+   * Generaltipp gegen Festhängen: Der Spieler ist aktiv (Eingaben kommen),
+   * macht aber seit STUCK_AFTER_MS keinen Streckenfortschritt → REZI gibt
+   * einen Schubs mit der Grundsteuerung. Komplett inaktive Spieler behandelt
+   * der IdleWatchdog (Reset in den Attract-Mode), nicht dieser Tipp.
+   */
+  private checkStuckTip(time: number): void {
+    if (this.lastProgressMs < 0) this.lastProgressMs = time
+    if (this.player.x > this.maxProgressX + 4) {
+      this.maxProgressX = this.player.x
+      this.lastProgressMs = time
+      return
+    }
+    if (this.player.controlsLocked || performance.now() - inputManager.lastInputMs > 5000) {
+      this.lastProgressMs = time // Setpiece bzw. Inaktivität zählt nicht als „hängt"
+      return
+    }
+    if (time - this.lastProgressMs >= STUCK_AFTER_MS && time - this.lastStuckTipMs >= STUCK_REPEAT_MS) {
+      this.lastStuckTipMs = time
+      const fallback: LText = inputManager.hasGamepad()
+        ? { de: 'Weiter nach rechts! ROT = springen · BLAU = TI-Aktion', en: 'Keep heading right! RED = jump · BLUE = TI action' }
+        : { de: 'Weiter nach rechts! LEERTASTE = springen · E = TI-Aktion', en: 'Keep heading right! SPACE = jump · E = TI action' }
+      this.rezi.say(t(this.level.stuckHint ?? fallback))
+    }
   }
 }

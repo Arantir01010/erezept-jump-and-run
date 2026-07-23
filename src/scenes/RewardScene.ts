@@ -8,6 +8,8 @@ import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
 import { sealTextureKey } from '../gfx/TextureFactory'
 import { addText } from '../gfx/text'
+import { addGlow, addVignette } from '../gfx/effects'
+import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 
 const AVATAR_COUNT = 12
@@ -37,8 +39,7 @@ export class RewardScene extends Phaser.Scene {
     this.avatarIndex = 0
 
     const cfg = configService.gameConfig
-    const W = this.cameras.main.width
-    const H = this.cameras.main.height
+    const { W, H } = setupDesignCamera(this)
     this.cameras.main.setBackgroundColor('#0d1638')
     this.cameras.main.fadeIn(400)
 
@@ -66,12 +67,18 @@ export class RewardScene extends Phaser.Scene {
       this.add.image(startX + i * 26, 82, sealTextureKey(this, seal.sealId)).setScale(1.2)
     })
 
-    // QR-Code (offline generiert)
+    // Titel-Aura + goldenes Licht hinter dem QR-Rahmen (der Payoff strahlt)
+    addGlow(this, W / 2, 32, 0x2f6fd0, 95, { alpha: 0.28 })
+    addGlow(this, W / 2, 158, 0xffd75e, 85, { alpha: 0.22 })
+
+    // QR-Code (offline generiert) — nativ 1:1 gezeichnet, nie skaliert:
+    // Nur so bleiben alle Module gleich breit und der Scan zuverlässig.
     this.add.rectangle(W / 2, 158, 108, 108, 0xffffff).setStrokeStyle(2, 0xffd75e)
     const provider = createRewardCodeProvider(cfg)
     createQrTexture(this, 'qr-reward', provider.payload())
       .then((key) => {
-        this.add.image(W / 2, 158, key).setDisplaySize(100, 100)
+        if (!this.scene.isActive('Reward')) return // Szene inzwischen verlassen
+        this.add.image(W / 2, 158, key)
       })
       .catch((err: unknown) => console.error('[reward] QR fehlgeschlagen', err))
 
@@ -97,6 +104,8 @@ export class RewardScene extends Phaser.Scene {
     }
 
     this.hintText = addText(this, W / 2, H - 16, '', 10, { color: '#aab6d4' }).setOrigin(0.5)
+
+    addVignette(this, W, H)
   }
 
   private backToAttract(): void {
@@ -119,7 +128,7 @@ export class RewardScene extends Phaser.Scene {
     if (this.pickerActive && !this.avatarSaved && this.avatarCursor) {
       if (inputManager.justPressed(GameAction.Left)) this.avatarIndex = (this.avatarIndex + AVATAR_COUNT - 1) % AVATAR_COUNT
       if (inputManager.justPressed(GameAction.Right)) this.avatarIndex = (this.avatarIndex + 1) % AVATAR_COUNT
-      const W = this.cameras.main.width
+      const W = this.cameras.main.displayWidth
       const pickerStartX = W / 2 - ((AVATAR_COUNT - 1) * 22) / 2
       this.avatarCursor.x = pickerStartX + this.avatarIndex * 22
       if (inputManager.justPressed(GameAction.Action)) {
@@ -127,7 +136,7 @@ export class RewardScene extends Phaser.Scene {
         this.avatarSaved = true
         this.avatarCursor.setStrokeStyle(2, 0x7fd07f)
         const rankPos = getHighscores().findIndex((e) => e.score === gameState.score) + 1
-        addText(this, this.cameras.main.width / 2, 292, `Gespeichert — Platz ${rankPos} heute!`, 10, {
+        addText(this, this.cameras.main.displayWidth / 2, 292, `Gespeichert — Platz ${rankPos} heute!`, 10, {
           color: '#7fd07f',
         }).setOrigin(0.5)
       }

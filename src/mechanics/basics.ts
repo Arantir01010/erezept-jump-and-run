@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { Mechanic, objCenter } from './Mechanic'
 import { registerMechanic } from './registry'
 import { gameState } from '../state/GameState'
-import { collectSparkle } from '../gfx/effects'
+import { collectSparkle, addGlow, destroyGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -13,10 +13,23 @@ import type { LText } from '../i18n'
 
 // ---------------------------------------------------------------- Gate
 
+const GATE_BUMP_FALLBACK: LText = {
+  de: 'Zu! Eine TI-Prüfung in der Nähe öffnet dieses Tor — schau dich um.',
+  en: 'Locked! A nearby TI check opens this gate — look around.',
+}
+
 /** Benanntes Tor: blockiert, bis eine Sicherheits-Mechanik es öffnet. */
 export class Gate extends Mechanic {
   private sprite!: Phaser.Physics.Arcade.Image
   isOpen = false
+  /** Tipp fürs Anrempeln — setzt die öffnende Mechanik beim Spawn (gateHint). */
+  openHint?: string
+  private lastBumpMs = -Infinity
+  private bumpStartMs = -Infinity
+  private lastShakeMs = -Infinity
+  private lastTipMs = -Infinity
+
+  private lockLight?: Phaser.GameObjects.Image
 
   spawn(): void {
     const { x, y, h } = objCenter(this.obj)
@@ -24,9 +37,32 @@ export class Gate extends Mechanic {
     this.sprite.setDisplaySize(8, h || 48)
     this.sprite.refreshBody()
     this.sprite.setDepth(5)
-    this.host.addSolid(this.sprite)
+    this.host.addSolid(this.sprite, () => this.onBump())
+    // Status-Licht: rot = gesperrt, grün beim Öffnen (liest sich ohne Worte)
+    this.lockLight = addGlow(this.host.scene, x, y - (h || 48) / 2 + 3, 0xff5050, 7, { alpha: 0.5, depth: 6 })
     const name = this.obj.name || `gate-${this.obj.id}`
     this.host.gates.set(name, this)
+  }
+
+  /**
+   * Spieler drückt gegen das geschlossene Tor: sofort sichtbares „Zu!"-Wackeln,
+   * nach ~2 s Dagegenstemmen sagt REZI, WIE es aufgeht (openHint der Mechanik).
+   */
+  private onBump(): void {
+    if (this.isOpen) return
+    const body = this.host.player.body
+    if (!body.touching.left && !body.touching.right) return // nur seitliches Anrempeln, nicht draufstehen
+    const now = this.host.scene.time.now
+    if (now - this.lastBumpMs > 600) this.bumpStartMs = now // neuer Anlauf
+    this.lastBumpMs = now
+    if (now - this.lastShakeMs > 1500) {
+      this.lastShakeMs = now
+      this.shake()
+    }
+    if (now - this.bumpStartMs > 1800 && now - this.lastTipMs > 7000) {
+      this.lastTipMs = now
+      this.host.rezi.say(this.openHint ?? this.paramText('bumpHint', GATE_BUMP_FALLBACK))
+    }
   }
 
   open(): void {
@@ -40,6 +76,18 @@ export class Gate extends Mechanic {
       duration: 450,
       ease: 'Cubic.easeOut',
     })
+    // Licht springt auf Grün und verglimmt
+    if (this.lockLight) {
+      this.host.scene.tweens.killTweensOf(this.lockLight)
+      this.lockLight.setTint(0x7fd07f).setAlpha(0.7)
+      this.host.scene.tweens.add({
+        targets: this.lockLight,
+        alpha: 0,
+        duration: 900,
+        delay: 350,
+        onComplete: () => destroyGlow(this.host.scene, this.lockLight),
+      })
+    }
   }
 
   /** Kurzes „Zu!"-Wackeln, wenn jemand ohne Berechtigung dagegen läuft. */
@@ -63,8 +111,10 @@ export class Collectible extends Mechanic {
     const { x, y } = objCenter(this.obj)
     const sprite = this.host.scene.physics.add.staticImage(x, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
     sprite.setDepth(4)
+    // Cyan-Schimmer macht Sammelbits aus dem Augenwinkel sichtbar
+    const glow = addGlow(this.host.scene, x, y, 0x4de3ff, 9, { alpha: 0.28, depth: 3 })
     this.host.scene.tweens.add({
-      targets: sprite,
+      targets: [sprite, glow],
       y: y - 3,
       duration: 900 + Math.random() * 400,
       yoyo: true,
@@ -74,6 +124,7 @@ export class Collectible extends Mechanic {
     const collider = this.host.addSensor(sprite, () => {
       collider.destroy()
       sprite.destroy()
+      destroyGlow(this.host.scene, glow)
       gameState.addBits(1)
       collectSparkle(this.host.scene, x, y)
       this.host.scene.game.events.emit('hud:update')
@@ -98,6 +149,9 @@ export class Checkpoint extends Mechanic {
       sprite.setAlpha(1)
       sprite.setTint(0xffffff)
       player.setRespawn(x, y - 8)
+      // Aktivierungs-Blitz + dauerhaftes grünes Glimmen: „hier bist du sicher"
+      const glow = addGlow(this.host.scene, x, y - 2, 0x7fd07f, 12, { alpha: 0.4, depth: 3 })
+      this.host.scene.tweens.add({ targets: glow, alpha: { from: 0.85, to: 0.4 }, duration: 450, ease: 'Cubic.easeOut' })
     })
   }
 }
@@ -132,6 +186,7 @@ registerMechanic('info-sign', InfoSign)
 /** Levelausgang: öffnet erst, wenn genug Datenbits gesammelt sind. */
 export class DoorExit extends Mechanic {
   private door!: Phaser.Physics.Arcade.Image
+  private doorGlow?: Phaser.GameObjects.Image
   private hintShown = false
   private completed = false
 
@@ -139,6 +194,8 @@ export class DoorExit extends Mechanic {
     const { x, y } = objCenter(this.obj)
     this.door = this.host.scene.physics.add.staticImage(x, y, 'door') as unknown as Phaser.Physics.Arcade.Image
     this.door.setDepth(3)
+    // Gedimmt solange verschlossen — leuchtet auf, sobald genug Bits gesammelt sind
+    this.doorGlow = addGlow(this.host.scene, x, y, 0xffd75e, 16, { alpha: 0.1, depth: 2, pulse: false })
     this.host.addSensor(this.door, () => this.tryEnter())
   }
 
@@ -165,6 +222,9 @@ export class DoorExit extends Mechanic {
     if (this.door && this.unlocked && !this.door.getData('glow')) {
       this.door.setData('glow', true)
       this.host.scene.tweens.add({ targets: this.door, alpha: { from: 1, to: 0.75 }, duration: 500, yoyo: true, repeat: -1 })
+      if (this.doorGlow) {
+        this.host.scene.tweens.add({ targets: this.doorGlow, alpha: 0.45, duration: 600, yoyo: true, repeat: -1 })
+      }
     }
   }
 }

@@ -43,7 +43,11 @@ export function addText(
   if (opts.padding) style.padding = opts.padding
 
   const text = scene.add.text(x, y, content, style)
-  text.setResolution(4)
-  text.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
+  // Nur unter WebGL: Der Canvas-Renderer verrechnet Text-Resolution falsch
+  // (Riesen-Text) und kennt keine Textur-Filter — dort bleibt Resolution 1.
+  if (scene.game.renderer.type === Phaser.WEBGL) {
+    text.setResolution(4)
+    text.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
+  }
   return text
 }

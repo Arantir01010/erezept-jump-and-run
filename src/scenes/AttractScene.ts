@@ -6,6 +6,8 @@ import { assist } from '../state/Assist'
 import { getHighscores } from '../state/Highscore'
 import { drawBackdrop } from '../gfx/backdrop'
 import { addText } from '../gfx/text'
+import { addGlow, addVignette } from '../gfx/effects'
+import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 
 /**
@@ -26,9 +28,12 @@ export class AttractScene extends Phaser.Scene {
 
   create(): void {
     const cfg = configService.gameConfig
-    const W = this.cameras.main.width
-    const H = this.cameras.main.height
+    const { W, H } = setupDesignCamera(this)
     drawBackdrop(this, configService.theme('city'), W, H)
+
+    // Titel-Aura + sanftes Bühnenlicht auf Paul & REZI
+    addGlow(this, W / 2, 78, 0x2f6fd0, 120, { alpha: 0.3 })
+    addGlow(this, W / 2, 185, 0xcfe0ff, 65, { alpha: 0.12 })
 
     addText(this, W / 2, 76, t(cfg.titleScreen.headline), 34, {
       stroke: '#2f6fd0',
@@ -65,6 +70,8 @@ export class AttractScene extends Phaser.Scene {
     }
 
     addText(this, W / 2, H - 12, cfg.event + ' — Einfach. Sicher. Digital.', 9, { color: '#7c88a6' }).setOrigin(0.5)
+
+    addVignette(this, W, H)
   }
 
   private refreshControlLabels(): void {

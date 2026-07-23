@@ -5,6 +5,7 @@ import { assist } from '../state/Assist'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
+import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -22,6 +23,7 @@ export class StampExit extends Mechanic {
   private done = false
   private hintShown = false
   private cycleTween?: Phaser.Tweens.Tween
+  private lastTipMs = -Infinity
 
   /** Robust statt Callback-Buchhaltung: oben = Annahme-Fenster. */
   private get stampIsUp(): boolean {
@@ -34,6 +36,8 @@ export class StampExit extends Mechanic {
     this.topY = y - (h || 48) / 2 - 10
     this.bottomY = y + (h || 48) / 2 - 12
     this.stamp = this.host.scene.add.image(x, this.topY, 'stempel').setDepth(6)
+    // Goldenes Glimmen an der Warteposition: „hier passiert der Signatur-Moment"
+    addGlow(this.host.scene, x, this.topY, 0xffd75e, 15, { alpha: 0.22, depth: 5 })
     this.startCycle()
   }
 
@@ -70,8 +74,21 @@ export class StampExit extends Mechanic {
       if (this.stampIsUp) this.succeed()
       else {
         // Falscher Takt: kurzer Shake, auf den nächsten Hub warten — keine Strafe
-        assist.fail(`stamp-${this.obj.id}`)
+        const key = `stamp-${this.obj.id}`
+        assist.fail(key)
         this.host.scene.cameras.main.shake(80, 0.002)
+        // Ab dem 2. Fehlgriff erklärt REZI das Timing (Assist verlängert parallel die Wartephase)
+        const now = this.host.scene.time.now
+        if (assist.failCount(key) >= 2 && now - this.lastTipMs > 6000) {
+          this.lastTipMs = now
+          const btn = inputManager.hasGamepad() ? 'BLAU' : 'Taste E'
+          this.host.rezi.say(
+            this.paramText('failHint', {
+              de: `Tipp: Warte, bis der Stempel OBEN kurz stehen bleibt — dann ${btn}!`,
+              en: `Tip: wait until the stamp rests at the TOP — then ${inputManager.hasGamepad() ? 'BLUE' : 'E'}!`,
+            }),
+          )
+        }
       }
     }
   }

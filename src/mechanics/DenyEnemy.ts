@@ -22,6 +22,8 @@ export class DenyEnemy extends Mechanic {
   private started = false
   private activationRange = 220
   private overlap?: Phaser.Physics.Arcade.Collider
+  private playerHits = 0
+  private lastTipMs = -Infinity
 
   spawn(): void {
     const { x, y } = objCenter(this.obj)
@@ -42,7 +44,22 @@ export class DenyEnemy extends Mechanic {
     // Schaden nur beim Zugriff — geducktem Spieler greift die Kralle über den Kopf
     this.overlap = this.host.addSensor(this.claw, (player) => {
       if (!this.grabbing || this.blocked) return
+      const wasVulnerable = !player.isInvulnerable
       player.hurt(this.claw.x)
+      // Ab dem 2. echten Treffer erklärt REZI das Ausweichen (Ducken)
+      if (wasVulnerable) {
+        this.playerHits += 1
+        const now = this.host.scene.time.now
+        if (this.playerHits >= 2 && now - this.lastTipMs > 7000) {
+          this.lastTipMs = now
+          this.host.rezi.say(
+            this.paramText('duckHint', {
+              de: 'Tipp: Nach UNTEN drücken zum Ducken — die Kralle greift über dich hinweg!',
+              en: 'Tip: press DOWN to duck — the claw grabs right over you!',
+            }),
+          )
+        }
+      }
     })
 
     this.activationRange = this.param<number>('activationRange', 220)

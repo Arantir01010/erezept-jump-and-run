@@ -21,11 +21,15 @@ document.addEventListener('contextmenu', (e) => e.preventDefault())
 // läuft auch ohne sichtbares Fenster weiter (automatisierte Tests/QA)
 const params = new URLSearchParams(location.search)
 
+// Interne Auflösung 1920×1080: Die Welt wird per Kamera-Zoom 3× vergrößert
+// (Pixel-Art bleibt blockig), Texte/QR rendern dagegen nativ scharf in Full HD.
+// Layout und Physik bleiben im 640×360-Design-Raum (src/gfx/view.ts).
 const game = new Phaser.Game({
-  type: Phaser.AUTO,
+  // ?renderer=canvas: 2D-Fallback für Rechner ohne brauchbares WebGL (Not-Option am Stand)
+  type: params.get('renderer') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO,
   parent: 'game',
-  width: 640,
-  height: 360,
+  width: 1920,
+  height: 1080,
   fps: params.get('testloop') === '1' ? { forceSetTimeOut: true, target: 60 } : undefined,
   backgroundColor: '#06090f',
   pixelArt: true,
@@ -43,6 +47,20 @@ const game = new Phaser.Game({
   },
   scene: [BootScene, PreloadScene, AttractScene, CityScene, GameScene, UIScene, RewardScene],
 })
+
+// Lesbare Schrift in JEDER Fenstergröße: pixelArt:true setzt image-rendering:
+// pixelated als Inline-Stil auf das Canvas (Phaser, CreateRenderer) — der
+// überstimmt jede CSS-Regel. Bei ganzzahliger Skalierung (Messe-TV 1080p = 3x)
+// ist Nearest-Neighbor perfekt; bei krummen Faktoren (Browserfenster) zerlegt
+// er 11-px-Schrift in ungleiche Blöcke. Deshalb dynamisch: ganzzahlig → knackig
+// pixelig, sonst → Browser-Glättung (weich, aber lesbar).
+const applyCanvasSmoothing = (): void => {
+  const zoom = game.scale.displaySize.width / game.scale.gameSize.width
+  const nearInteger = zoom >= 1 && Math.abs(zoom - Math.round(zoom)) < 0.02
+  game.canvas.style.imageRendering = nearInteger ? 'pixelated' : 'auto'
+}
+game.events.once(Phaser.Core.Events.READY, applyCanvasSmoothing)
+game.scale.on(Phaser.Scale.Events.RESIZE, applyCanvasSmoothing)
 
 // Debug-/Diagnose-Zugriff (Standaufbau, Tests) — greift nicht ins Spiel ein
 ;(window as unknown as { __game: Phaser.Game }).__game = game

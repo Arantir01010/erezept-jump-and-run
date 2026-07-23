@@ -7,6 +7,8 @@ import { gameState } from '../state/GameState'
 import { sealTextureKey } from '../gfx/TextureFactory'
 import { drawBackdrop } from '../gfx/backdrop'
 import { addText } from '../gfx/text'
+import { addGlow } from '../gfx/effects'
+import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 
 const WALK_MS = 2200
@@ -37,8 +39,7 @@ export class CityScene extends Phaser.Scene {
 
   create(): void {
     const theme = configService.theme('city')
-    const W = this.cameras.main.width
-    const H = this.cameras.main.height
+    const { W, H } = setupDesignCamera(this)
     drawBackdrop(this, theme, W, H)
 
     // Straße
@@ -57,6 +58,8 @@ export class CityScene extends Phaser.Scene {
     this.drawFacade(this.portalX + 50, t(target.cityAnchor.label), theme)
     this.portal = this.add.sprite(this.portalX, H - 40 - 16, 'portal-0').setDepth(3)
     this.portal.play('portal-spin')
+    // Portal-Aura: das Ziel leuchtet — der Blick geht automatisch nach rechts
+    addGlow(this, this.portalX, H - 40 - 16, 0x4de3ff, 26, { alpha: 0.4, depth: 2 })
 
     // Paul + REZI
     this.paul = this.add.sprite(80, H - 40 - 12, 'player-idle0').setDepth(10)
@@ -77,7 +80,7 @@ export class CityScene extends Phaser.Scene {
 
   /** Auftauch-Stempel: Lernsatz-Bestätigung + Siegel-Moment des letzten Levels. */
   private showArrivalStamp(from: ReturnType<typeof configService.level>, done: () => void): void {
-    const W = this.cameras.main.width
+    const W = this.cameras.main.displayWidth
     const box = this.add.container(W / 2, 70).setDepth(80).setScale(0.3)
     const text = addText(this, 0, 0, t(from.station.stampText), 13, {
       color: '#20242e',
@@ -149,16 +152,25 @@ export class CityScene extends Phaser.Scene {
   }
 
   private drawFacade(cx: number, label: string, theme: { detail: string; skyTop: string; accent: string }): void {
-    const H = this.cameras.main.height
+    const H = this.cameras.main.displayHeight
     const g = this.add.graphics().setDepth(2)
     const w = 90
     const h = 150
     g.fillStyle(Phaser.Display.Color.HexStringToColor(theme.detail).color, 1)
     g.fillRect(cx - w / 2, H - 40 - h, w, h)
-    g.fillStyle(Phaser.Display.Color.HexStringToColor(theme.skyTop).color, 1)
+    // Dach-Kantenlicht
+    g.fillStyle(0xffffff, 0.14)
+    g.fillRect(cx - w / 2, H - 40 - h, w, 1)
+    const dark = Phaser.Display.Color.HexStringToColor(theme.skyTop).color
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
-        g.fillRect(cx - w / 2 + 12 + col * 26, H - 40 - h + 14 + row * 32, 14, 18)
+        const wx = cx - w / 2 + 12 + col * 26
+        const wy = H - 40 - h + 14 + row * 32
+        // Jedes dritte Fenster ist warm erleuchtet — die Stadt lebt
+        const lit = (row * 3 + col + Math.floor(cx / 10)) % 3 === 0
+        g.fillStyle(lit ? 0xffd75e : dark, lit ? 0.85 : 1)
+        g.fillRect(wx, wy, 14, 18)
+        if (lit) addGlow(this, wx + 7, wy + 9, 0xffd75e, 12, { alpha: 0.14, depth: 2 })
       }
     }
     addText(this, cx, H - 40 - h - 11, label, 10, {

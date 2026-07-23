@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Leeres Favicon: verhindert den 404-Request (Dev-Konsole & Messe-Server-Log) -->
+    <link rel="icon" href="data:," />
     <title>Das e-Rezept — Spiele dich durch die TI</title>
     <style>
       html,
@@ -20,11 +22,9 @@
         align-items: center;
         justify-content: center;
       }
-      /* Pixelige Kanten nur im Kiosk-Modus: Der Messe-TV skaliert ganzzahlig (3x),
-         im Browserfenster wuerde nearest-neighbor die Schriften unlesbar machen. */
-      body.kiosk #game canvas {
-        image-rendering: pixelated;
-      }
+      /* image-rendering steuert src/main.ts dynamisch (Phaser setzt es als
+         Inline-Stil, CSS kaeme hier nie zum Zug): ganzzahlige Skalierung
+         (Messe-TV 3x) -> pixelated, krumme Faktoren -> Browser-Glaettung. */
       body.kiosk {
         cursor: none;
       }

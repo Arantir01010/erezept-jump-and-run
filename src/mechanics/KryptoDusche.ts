@@ -4,6 +4,7 @@ import { registerMechanic } from './registry'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
+import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -23,13 +24,25 @@ export class KryptoDusche extends Mechanic {
     this.zone = new Phaser.Geom.Rectangle(this.obj.x ?? 0, this.obj.y ?? 0, w || 48, h || 64)
     this.head = this.host.scene.add.image(x, (this.obj.y ?? 0) + 6, 'dusche').setDepth(6)
     this.host.scene.tweens.add({ targets: this.head, alpha: { from: 1, to: 0.7 }, duration: 800, yoyo: true, repeat: -1 })
+    // Violettes Duschlicht markiert die Station schon von Weitem
+    addGlow(this.host.scene, x, (this.obj.y ?? 0) + 10, 0x7a5cff, 18, { alpha: 0.35, depth: 5 })
 
     // Tube-Modus: Ohne Verschlüsselung rollt der Tunnel nicht weiter
+    // (worldView statt scrollX/width: bleibt auch bei gezoomter Kamera korrekt)
     this.host.registerScrollLock(() => {
       if (this.done) return false
-      const cam = this.host.scene.cameras.main
-      return cam.scrollX + cam.width * 0.7 >= this.head.x
+      const view = this.host.scene.cameras.main.worldView
+      return view.width > 0 && view.x + view.width * 0.7 >= this.head.x
     })
+
+    // Anrempel-Tipp am verknüpften Tor: sagt, WIE es aufgeht
+    const gate = this.linkedGate()
+    if (gate) {
+      gate.openHint = this.paramText('gateHint', {
+        de: 'Das Tor ist zu! Erst verschlüsseln: unter der Dusche die TI-Aktion drücken.',
+        en: 'The gate is locked! Encrypt first: press the TI action under the shower.',
+      })
+    }
   }
 
   update(): void {

@@ -3,6 +3,7 @@ import { configService } from '../level/ConfigService'
 import { inputManager } from '../input/InputManager'
 import { idleWatchdog } from '../kiosk/IdleWatchdog'
 import { addText } from '../gfx/text'
+import { setupDesignCamera } from '../gfx/view'
 
 /**
  * Lädt und validiert alle JSON-Konfigurationen, bevor irgendetwas startet.
@@ -15,8 +16,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    const W = this.cameras.main.width
-    const H = this.cameras.main.height
+    const { W, H } = setupDesignCamera(this)
     addText(this, W / 2, H / 2, 'Lade Konfiguration …', 13, { color: '#8a93a8' }).setOrigin(0.5)
 
     configService

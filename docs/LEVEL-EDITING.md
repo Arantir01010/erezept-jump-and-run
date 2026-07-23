@@ -57,7 +57,24 @@ Die `.tmj`-Dateien in `public/assets/tilemaps/` sind **normale Tiled-Dateien**
 Für die Prototyp-Level gibt es zusätzlich einen Generator (`npm run gen:maps`,
 Quellen in `tools/generate-tilemaps.ts`) — Tiled-Bearbeitung überschreibt er nur bei erneutem Aufruf.
 
-## 4. Endscreen / QR-Code
+## 4. Tipps bei Hängern (automatisch)
+
+REZI hilft von selbst, wenn jemand nicht weiterkommt — alle Texte sind optional
+per JSON überschreibbar (`{ "de": "…", "en": "…" }`); ohne Eintrag greifen
+eingebaute Standardtexte, die sich automatisch an Tastatur/Arcade anpassen:
+
+| Wo | Schlüssel | Wann |
+|---|---|---|
+| Level-Datei (oberste Ebene) | `stuckHint` | 18 s kein Streckenfortschritt trotz Eingaben |
+| `mechanics.timing-gate` | `failHint` | ab dem 2. Druck im falschen Takt |
+| `mechanics.stamp-exit` | `failHint` | ab dem 2. Druck im falschen Takt |
+| `mechanics.stillstand-podest` | `stillHint` | ab dem 2. abgebrochenen Scan |
+| `mechanics.deny-enemy` | `duckHint` | ab dem 2. Treffer durch die Kralle |
+| `mechanics.timing-gate` / `stillstand-podest` / `krypto-dusche` | `gateHint` | Spieler drückt ~2 s gegen das zugehörige geschlossene Tor (das Tor wackelt sofort) |
+
+Komplett inaktive Spieler behandelt weiterhin der Idle-Reset (`idleResetSeconds`).
+
+## 5. Endscreen / QR-Code
 
 `public/config/game-config.json` → `ending`:
 
@@ -65,7 +82,7 @@ Quellen in `tools/generate-tilemaps.ts`) — Tiled-Bearbeitung überschreibt er 
 - `rewardScreenSeconds`: automatischer Rücksprung zum Startbildschirm
 - `minQrSeconds`: so lange ist Überspringen gesperrt (Handy-Scan-Garantie)
 
-## 5. Wenn etwas schiefgeht
+## 6. Wenn etwas schiefgeht
 
 - Beim Start erscheint eine **rote Fehlermeldung** mit Dateiname und Feld → dort korrigieren, F5.
 - `npm run validate` findet dieselben Fehler (und fehlende Dateien) ohne Browser.

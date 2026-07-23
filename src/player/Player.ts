@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { GameAction } from '../input/actions'
 import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
-import { bitScatter } from '../gfx/effects'
+import { bitScatter, dustPuff } from '../gfx/effects'
 import { PLAYER_TUNING as T } from './PlayerConfig'
 
 export type PlayerState = 'idle' | 'run' | 'jump' | 'fall' | 'duck' | 'hurt'
@@ -22,6 +22,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private lastGroundedMs = 0
   private jumpBufferedMs = -Infinity
   private invulnUntilMs = 0
+  private wasOnFloor = false
+  private lastRunDustMs = 0
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player-idle0')
@@ -46,6 +48,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const now = this.scene.time.now
     const onFloor = this.body.blocked.down
     if (onFloor) this.lastGroundedMs = now
+
+    // Staub-Feedback (rein visuell): Aufsetzen nach Sprung/Fall + Laufschritte
+    if (onFloor && !this.wasOnFloor) dustPuff(this.scene, this.x, this.body.bottom, 4)
+    if (onFloor && Math.abs(this.body.velocity.x) > 70 && now - this.lastRunDustMs > 170) {
+      this.lastRunDustMs = now
+      dustPuff(this.scene, this.x - Math.sign(this.body.velocity.x) * 5, this.body.bottom, 1)
+    }
+    this.wasOnFloor = onFloor
 
     const locked = this.controlsLocked
     const ax = locked ? 0 : inputManager.axisX()

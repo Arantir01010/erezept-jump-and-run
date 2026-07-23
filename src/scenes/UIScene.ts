@@ -5,6 +5,8 @@ import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { sealTextureKey } from '../gfx/TextureFactory'
 import { addText } from '../gfx/text'
+import { addVignette } from '../gfx/effects'
+import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 
 /**
@@ -28,8 +30,12 @@ export class UIScene extends Phaser.Scene {
   }
 
   create(): void {
-    const W = this.cameras.main.width
+    const { W, H } = setupDesignCamera(this)
     this.sealSlots = []
+
+    // Vignette über dem Spielgeschehen (UI liegt als Overlay über City & Game),
+    // unterhalb der HUD-Elemente (deren Depth ≥ 0)
+    addVignette(this, W, H).setDepth(-10)
 
     const bar = this.add.graphics().setDepth(0)
     bar.fillStyle(0x06090f, 0.6)
@@ -66,7 +72,7 @@ export class UIScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-F8', () => this.toggleCalibration())
 
     if (new URLSearchParams(location.search).get('debug') === '1') {
-      this.fpsText = addText(this, 6, this.cameras.main.height - 16, '', 10, { color: '#7fd07f' })
+      this.fpsText = addText(this, 6, H - 16, '', 10, { color: '#7fd07f' })
     }
 
     // --- globale Events ---
@@ -96,7 +102,7 @@ export class UIScene extends Phaser.Scene {
   /** Portal-Einblendung: Stationsname groß, 1 Lernsatz, ~2 s. */
   private showPortalText(level: LevelConfig): void {
     this.portalOverlay?.destroy()
-    const W = this.cameras.main.width
+    const W = this.cameras.main.displayWidth
     const name = addText(this, 0, -11, t(level.station.name), 17).setOrigin(0.5)
     const line = addText(this, 0, 9, t(level.station.portalText), 11, { color: '#cfe0ff' }).setOrigin(0.5)
     const bg = this.add
