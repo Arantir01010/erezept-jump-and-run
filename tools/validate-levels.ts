@@ -1,25 +1,21 @@
 /**
- * Redaktions-Sicherheitsnetz: prüft alle JSON-Konfigurationen gegen die
- * zod-Schemas, ob referenzierte Dateien existieren und ob jede Tilemap nur
- * bekannte Mechanik-Typen verwendet. CI-fähig (Exit-Code ≠ 0 bei Fehlern).
+ * KOMPLETT-PRÜFUNG — das Sicherheitsnetz vor jedem Commit/Start.
  *
- * Aufruf: npm run validate
+ * Aufruf: npm run validate   (CI-fähig, Exit-Code ≠ 0 bei Fehlern)
+ *
+ * Prüft in einem Durchlauf:
+ *   1. Basis-Konfigurationen (game-config, themes, input-bindings) gegen die zod-Schemas
+ *   2. Alle Level-Quellen in design/ (Compiler im Check-Modus: Struktur, Vokabular,
+ *      Softlocks, Erreichbarkeit) UND ob die erzeugten public/-Dateien aktuell sind
+ *   3. Den Spielkern (npm run guard): keine geschützte Datei verändert/ergänzt/gelöscht
+ *
+ * GESCHÜTZTE DATEI: Änderungen nur durch Menschen (npm run guard).
  */
 import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import {
-  GameConfigSchema,
-  ThemesSchema,
-  BindingsSchema,
-  LevelSchema,
-  formatZodError,
-} from '../src/level/schema'
-import { isKnownMechanicType, MECHANIC_TYPE_IDS } from '../src/mechanics/typeIds'
-import { compileLevelSource } from './compile-levels'
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const PUBLIC = join(ROOT, 'public')
+import { join } from 'node:path'
+import { GameConfigSchema, ThemesSchema, BindingsSchema, formatZodError } from '../src/level/schema'
+import { runPipeline, PUBLIC } from './lib/pipeline'
+import { checkCore } from './check-core'
 
 let errors = 0
 const fail = (msg: string): void => {
@@ -42,134 +38,44 @@ function readJson(relPath: string): unknown {
   }
 }
 
-// --- game-config ---
+// --- 1. Basis-Konfigurationen ---
+console.log('— Basis-Konfigurationen —')
 const gameRaw = readJson('config/game-config.json')
 const game = gameRaw ? GameConfigSchema.safeParse(gameRaw) : null
 if (game && !game.success) fail(formatZodError('config/game-config.json', game.error))
 else if (game) ok('config/game-config.json')
 
-// --- themes ---
 const themesRaw = readJson('config/themes.json')
 const themes = themesRaw ? ThemesSchema.safeParse(themesRaw) : null
 if (themes && !themes.success) fail(formatZodError('config/themes.json', themes.error))
 else if (themes) ok('config/themes.json')
 
-// --- bindings ---
 const bindingsRaw = readJson('config/input-bindings.json')
 const bindings = bindingsRaw ? BindingsSchema.safeParse(bindingsRaw) : null
 if (bindings && !bindings.success) fail(formatZodError('config/input-bindings.json', bindings.error))
 else if (bindings) ok('config/input-bindings.json')
 
-// --- Levels der Playlist ---
-if (game?.success) {
-  for (const id of game.data.levelOrder) {
-    const rel = `config/levels/${id}.json`
-    const raw = readJson(rel)
-    if (!raw) continue
-    const parsed = LevelSchema.safeParse(raw)
-    if (!parsed.success) {
-      fail(formatZodError(rel, parsed.error))
-      continue
-    }
-    const level = parsed.data
-    if (level.id !== id) fail(`${rel}: Feld "id" (${level.id}) entspricht nicht dem Dateinamen`)
-    if (themes?.success && !themes.data[level.theme]) {
-      fail(`${rel}: Theme "${level.theme}" fehlt in config/themes.json`)
-    }
-    for (const type of Object.keys(level.mechanics)) {
-      if (!isKnownMechanicType(type)) {
-        fail(`${rel}: unbekannter Mechanik-Typ "${type}" (bekannt: ${MECHANIC_TYPE_IDS.join(', ')})`)
-      }
-    }
+// --- 2. Level-Quellen + erzeugte Dateien ---
+console.log('\n— Level (design/ → public/) —')
+const report = runPipeline({ write: false })
+for (const w of report.warnings) console.warn(`⚠ ${w}`)
+for (const e of report.errors) fail(e)
+if (report.ok) for (const level of report.levels) ok(`design/levels/${level.id}/ → Struktur, Vokabular, Tore, Erreichbarkeit`)
 
-    // Tilemap: Existenz + Objekt-Typen + Pflicht-Layer
-    const mapFile = join(PUBLIC, level.tilemap)
-    if (!existsSync(mapFile)) {
-      fail(`${rel}: Tilemap "${level.tilemap}" fehlt (npm run gen:maps vergessen?)`)
-      continue
-    }
-    try {
-      interface TiledObj {
-        id?: number
-        type?: string
-        name?: string
-        x?: number
-        y?: number
-        properties?: { name: string; value: unknown }[]
-      }
-      const map = JSON.parse(readFileSync(mapFile, 'utf-8')) as {
-        layers?: { type: string; name: string; objects?: TiledObj[] }[]
-      }
-      const terrain = map.layers?.find((l) => l.type === 'tilelayer' && l.name === 'terrain')
-      const objectLayer = map.layers?.find((l) => l.type === 'objectgroup' && l.name === 'objects')
-      if (!terrain) fail(`${level.tilemap}: Tile-Layer "terrain" fehlt`)
-      if (!objectLayer) fail(`${level.tilemap}: Objekt-Layer "objects" fehlt`)
-      const objects = objectLayer?.objects ?? []
-      if (!objects.some((o) => o.type === 'spawn')) fail(`${level.tilemap}: kein "spawn"-Objekt`)
-      // finale-sprint ist im Prototyp ein Stub (kein completeLevel) → zählt NICHT als Ausgang
-      const hasExit = objects.some((o) => o.type === 'door-exit' || o.type === 'stamp-exit')
-      if (!hasExit) fail(`${level.tilemap}: kein funktionsfähiger Levelausgang (door-exit / stamp-exit)`)
-
-      // Tor-Verknüpfungen: props.gate muss auf ein existierendes gate-Objekt zeigen —
-      // sonst bleibt das Tor zur Laufzeit still für immer zu (Softlock am Stand)
-      const gateNames = new Set(
-        objects.filter((o) => o.type === 'gate').map((o) => o.name || `gate-${o.id}`),
-      )
-      const checkGateRef = (ref: unknown, where: string): void => {
-        if (typeof ref === 'string' && ref && !gateNames.has(ref)) {
-          fail(
-            `${level.tilemap}: ${where} verweist auf unbekanntes Tor "${ref}" (vorhanden: ${[...gateNames].join(', ') || 'keine'})`,
-          )
-        }
-      }
-      for (const obj of objects) {
-        const type = obj.type ?? ''
-        if (type && !isKnownMechanicType(type)) {
-          fail(`${level.tilemap}: unbekannter Objekt-Typ "${type}" bei x=${obj.x}, y=${obj.y}`)
-        }
-        const gateProp = (obj.properties ?? []).find((p) => p.name === 'gate')
-        if (gateProp) checkGateRef(gateProp.value, `Objekt "${type}" bei x=${obj.x}`)
-      }
-      for (const [mechType, params] of Object.entries(level.mechanics)) {
-        checkGateRef((params as Record<string, unknown>)['gate'], `mechanics.${mechType}`)
-      }
-      ok(`${rel} + ${level.tilemap}`)
-    } catch (e) {
-      fail(`${level.tilemap}: kein gültiges Tiled-JSON (${e instanceof Error ? e.message : e})`)
-    }
-  }
-}
-
-// --- Baukasten-Synchronität: levels-src ↔ generierte Dateien ---
-// Verhindert, dass jemand generierte Dateien von Hand ändert oder das
-// Kompilieren vergisst (npm run levels).
-const SRC_DIR = join(ROOT, 'levels-src')
-if (existsSync(SRC_DIR)) {
-  const { readdirSync } = await import('node:fs')
-  for (const file of readdirSync(SRC_DIR).filter((f) => f.endsWith('.level.json') && !f.startsWith('_'))) {
-    try {
-      const raw = JSON.parse(readFileSync(join(SRC_DIR, file), 'utf-8')) as unknown
-      const compiled = compileLevelSource(raw, `levels-src/${file}`)
-      const cfgPath = join(PUBLIC, 'config', 'levels', `${compiled.id}.json`)
-      const mapPath = join(PUBLIC, 'assets', 'tilemaps', `${compiled.id}.tmj`)
-      const cfgOnDisk = existsSync(cfgPath) ? readFileSync(cfgPath, 'utf-8').trim() : ''
-      const mapOnDisk = existsSync(mapPath) ? readFileSync(mapPath, 'utf-8').trim() : ''
-      const cfgExpected = JSON.stringify(compiled.config, null, 2).trim()
-      const mapExpected = JSON.stringify(compiled.tmj).trim()
-      if (cfgOnDisk !== cfgExpected || mapOnDisk !== mapExpected) {
-        fail(`levels-src/${file}: generierte Dateien sind NICHT aktuell — "npm run levels" ausführen (generierte Dateien nie von Hand ändern)`)
-      } else {
-        ok(`levels-src/${file} ↔ generierte Dateien synchron`)
-      }
-    } catch (e) {
-      fail(`levels-src/${file}: ${e instanceof Error ? e.message : e}`)
-    }
-  }
+// --- 3. Spielkern-Schutz ---
+console.log('\n— Spielkern (geschützte Dateien) —')
+const guard = checkCore()
+if (guard.ok) {
+  ok('Kern unverändert (tools/core-manifest.json)')
+} else {
+  for (const p of guard.problems) fail(p)
+  console.error('  → Bewusste Engine-Änderung durch einen Menschen? Dann: npm run guard:update')
+  console.error('  → Levelbau-KI? Änderung zurücknehmen — erlaubt sind nur design/levels/**, design/playlist.json, public/config/themes.json')
 }
 
 console.log('')
 if (errors > 0) {
-  console.error(`${errors} Problem(e) gefunden.`)
+  console.error(`${errors} Problem(e) gefunden. Anleitung: design/LEVELBAU.md`)
   process.exit(1)
 }
-console.log('Alle Konfigurationen sind gültig.')
+console.log('Alles gültig: Konfigurationen ✓ Level ✓ Spielkern ✓')

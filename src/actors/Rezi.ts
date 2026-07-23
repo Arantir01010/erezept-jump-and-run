@@ -17,6 +17,15 @@ export class Rezi extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y)
+    // Weiches Eigenlicht: REZI ist ein digitales Wesen und leuchtet dezent
+    const glow = scene.add
+      .image(0, 0, 'fx-glow')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(0xbfe9ff)
+      .setAlpha(0.22)
+    glow.setDisplaySize(30, 30)
+    scene.tweens.add({ targets: glow, alpha: 0.13, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    this.add(glow)
     this.body_ = scene.add.sprite(0, 0, 'rezi-0')
     this.body_.play('rezi-float')
     this.add(this.body_)
@@ -69,7 +78,30 @@ export class Rezi extends Phaser.GameObjects.Container {
       const ty = this.target.y - 26 + Math.sin(this.bobT * 3) * 3
       this.x = Phaser.Math.Linear(this.x, tx, 0.08)
       this.y = Phaser.Math.Linear(this.y, ty, 0.08)
+      // Funkenspur, wenn REZI zügig unterwegs ist (dezent, selbstlöschend)
+      this.trailCooldown -= delta
+      if (this.trailCooldown <= 0 && Math.abs(tx - this.x) > 6) {
+        this.trailCooldown = 150
+        const spark = this.scene.add
+          .image(this.x, this.y + 2, 'fx-mote')
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setTint(0x9fd8ff)
+          .setAlpha(0.4)
+          .setScale(0.5)
+          .setDepth(10)
+        this.scene.tweens.add({
+          targets: spark,
+          alpha: 0,
+          scale: 0.15,
+          y: spark.y + 4,
+          duration: 420,
+          ease: 'Cubic.easeOut',
+          onComplete: () => spark.destroy(),
+        })
+      }
     }
     this.bubble.pointAt(this.x, this.y - 26)
   }
+
+  private trailCooldown = 0
 }

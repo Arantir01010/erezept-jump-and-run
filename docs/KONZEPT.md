@@ -508,7 +508,8 @@ erezept-jump-and-run/
 │   ├── scenes/           Boot, Preload, Attract, City, Game, UI, Reward
 │   ├── mechanics/        Registry + Bausteine (+ typeIds.ts, Node-tauglich)
 │   ├── input/ player/ actors/ gfx/ kiosk/ reward/ state/ level/
-├── tools/                generate-tilemaps, validate-levels, serve.mjs
+├── design/               LEVEL-QUELLEN: pro Level layout.txt + level.json, playlist.json, LEVELBAU.md
+├── tools/                build-levels (Compiler+Prüfungen), validate-levels, check-core, new-level, serve.mjs
 ├── docs/                 KONZEPT.md, LEVEL-EDITING.md
 └── start-messe.bat       Kiosk-Start (portable Node in .tools/)
 ```
@@ -618,7 +619,7 @@ gematik: E-Rezept-Anwendungsseite + FAQ, Fachportal E-Rezept, TI-Gateway-Leitfad
 - Paul mit Duck-State/Coyote-Time/Jump-Buffering, REZI mit Sprechblasen + sichtbaren Siegeln, Stadt-Band mit Portal-Dive und Auftauch-Stempel
 - Kiosk-Basis (Attract, IdleWatchdog, CrashGuard), HUD mit TI-Streckenkarte, Assist-Basisstufe, Reward-Screen mit Offline-QR (Variante A), Tages-Highscore mit Avatar-Icons
 - Input: Arcade-Encoder UND Tastatur parallel, F8-Kalibrierung, automatische Steuerungslegende
-- Tooling: `npm run validate`, `npm run gen:maps`, `docs/LEVEL-EDITING.md`
+- Tooling: `npm run build:levels` (Level-Compiler mit Spielbarkeits-Prüfung), `npm run validate`, `npm run guard` (Kern-Schutz), `design/LEVELBAU.md`
 
 ## 11.2 Abnahmekriterien
 

@@ -1,0 +1,66 @@
+{
+  "_generiert": "AUS design/levels/01-stammdaten/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "01-stammdaten",
+  "station": {
+    "name": {
+      "de": "Versichertenstammdaten",
+      "en": "Insured master data"
+    },
+    "portalText": {
+      "de": "Station 1: Versichertenstammdaten — deine Karte wird online geprüft.",
+      "en": "Station 1: insured master data — your card is checked online."
+    },
+    "reziText": {
+      "de": "Deine Daten stimmen — deshalb gibt es mich jetzt!",
+      "en": "Your data is correct — that's why I exist now!"
+    },
+    "stampText": {
+      "de": "✓ Daten vollständig & aktuell.",
+      "en": "✓ Data complete & up to date."
+    },
+    "badge": "VSDM"
+  },
+  "siegelIcon": "seal-vsdm",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Arztpraxis",
+      "en": "Doctor's office"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "stammdaten",
+  "enemySkin": "neugier-geist",
+  "tilemap": "assets/tilemaps/01-stammdaten.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 3,
+    "label": {
+      "de": "Daten-Kacheln",
+      "en": "data tiles"
+    }
+  },
+  "mechanics": {
+    "timing-gate": {
+      "steps": 2,
+      "stepMs": 1100,
+      "hint": {
+        "de": "Aktualisierungs-Terminal: Blauer Knopf im Takt — die TI holt deine frischen Stammdaten!",
+        "en": "Update terminal: blue button on the beat — the TI fetches your fresh master data!"
+      },
+      "failHint": {
+        "de": "Tipp: Drück genau dann, wenn das gelbe Licht groß aufleuchtet — ganz in Ruhe.",
+        "en": "Tip: press right when the yellow light glows big — take your time."
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst am Terminal die Daten aktualisieren: blauer Knopf im Takt der Lichter.",
+        "en": "The gate is locked! Update your data at the terminal first: blue button on the beat."
+      }
+    }
+  },
+  "parTimeSeconds": 25,
+  "stuckHint": {
+    "de": "Immer nach rechts! Sammle 3 Daten-Kacheln, dann öffnet das Portal am Ende.",
+    "en": "Keep heading right! Collect 3 data tiles, then the portal at the end opens."
+  }
+}

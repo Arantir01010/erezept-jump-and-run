@@ -4,6 +4,8 @@ import type { Theme } from '../level/schema'
 export interface BackdropOpts {
   /** Weiche Lichtkegel von oben (digitale Level) — Stadt/Attract lassen das aus. */
   lightShafts?: boolean
+  /** Schwebende Datenpartikel in Spielfeldnähe + Vordergrund-Bokeh (Default: an). */
+  ambient?: boolean
 }
 
 /**
@@ -46,6 +48,37 @@ export function drawBackdrop(
       g.fillStyle(Phaser.Display.Color.GetColor(c.r, c.g, c.b), 1)
       g.fillRect(0, (gradH / STEPS) * s, gradW, gradH / STEPS + 1)
     }
+  }
+
+  // --- „Daten-Kern": großes, ruhig atmendes Himmelslicht (Faktor 0,92) ---
+  const core = scene.add.container(0, 0).setDepth(0)
+  {
+    const cx = viewW * 0.68
+    const cy = viewH * 0.2
+    const halo = scene.add
+      .image(cx, cy, 'fx-glow')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(accent)
+      .setAlpha(0.16)
+    halo.setDisplaySize(viewH * 0.9, viewH * 0.9)
+    const heart = scene.add
+      .image(cx, cy, 'fx-glow')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(0xffffff)
+      .setAlpha(0.12)
+    heart.setDisplaySize(viewH * 0.28, viewH * 0.28)
+    scene.tweens.add({
+      targets: halo,
+      alpha: 0.09,
+      displayWidth: viewH * 1.0,
+      displayHeight: viewH * 1.0,
+      duration: 5200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
+    scene.tweens.add({ targets: heart, alpha: 0.06, duration: 3600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    core.add([halo, heart])
   }
 
   // --- Sterne / Datenfunken (sehr fern, Faktor 0,9 — glimmen asynchron) ---
@@ -148,13 +181,71 @@ export function drawBackdrop(
     }
   }
 
+  // --- Ambiente Datenpartikel: zwei Schwebe-Ebenen im Mittelgrund +
+  //     wenige große Bokeh-Punkte VOR dem Spielfeld (Faktor negativ = näher
+  //     als die Kamera-Ebene). Alles driftet langsam und schimmert asynchron —
+  //     die Welt wirkt „bewohnt", ohne vom Spiel abzulenken. ---
+  const midMotes = scene.add.container(0, 0).setDepth(2)
+  const nearMotes = scene.add.container(0, 0).setDepth(2)
+  const frontBokeh = scene.add.container(0, 0).setDepth(30)
+  if (opts.ambient !== false) {
+    const detailColor = Phaser.Display.Color.HexStringToColor(theme.detail).color
+    const spawnMotes = (
+      container: Phaser.GameObjects.Container,
+      factor: number,
+      count: number,
+      scaleMin: number,
+      scaleMax: number,
+      alphaMax: number,
+    ): void => {
+      const span = worldWidth * (1 - factor) + viewW + 80
+      for (let i = 0; i < count; i++) {
+        const mote = scene.add
+          .image(Math.random() * span, 20 + Math.random() * (worldHeight - 40), 'fx-mote')
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setTint(i % 4 === 0 ? accent : i % 4 === 1 ? detailColor : 0xffffff)
+          .setScale(scaleMin + Math.random() * (scaleMax - scaleMin))
+          .setAlpha(alphaMax * (0.35 + Math.random() * 0.65))
+        // Langsame Schwebe-Drift (auf/ab + leicht seitlich) + Schimmern
+        scene.tweens.add({
+          targets: mote,
+          y: mote.y - (8 + Math.random() * 18),
+          x: mote.x + (Math.random() * 22 - 11),
+          duration: 4200 + Math.random() * 4200,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+          delay: Math.random() * 3000,
+        })
+        scene.tweens.add({
+          targets: mote,
+          alpha: mote.alpha * 0.4,
+          duration: 1400 + Math.random() * 2200,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+          delay: Math.random() * 2000,
+        })
+        container.add(mote)
+      }
+    }
+    spawnMotes(midMotes, 0.6, Math.round(10 + worldWidth / 90), 0.22, 0.45, 0.5)
+    spawnMotes(nearMotes, 0.35, Math.round(8 + worldWidth / 110), 0.35, 0.7, 0.4)
+    // Vordergrund-Bokeh: groß, extrem transparent, zieht schneller vorbei
+    spawnMotes(frontBokeh, -0.18, Math.max(4, Math.round(worldWidth / 260)), 1.6, 2.8, 0.09)
+  }
+
   // --- Parallax: Ebenen folgen der Kamera mit ihrem Faktor ---
   const onUpdate = (): void => {
     const wx = cam.worldView.x
+    core.x = wx * 0.92
     stars.x = wx * 0.9
     farSil.x = wx * 0.85
     shafts.x = wx * 0.8
     sil.x = wx * 0.75
+    midMotes.x = wx * 0.6
+    nearMotes.x = wx * 0.35
+    frontBokeh.x = wx * -0.18
   }
   scene.events.on(Phaser.Scenes.Events.UPDATE, onUpdate)
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

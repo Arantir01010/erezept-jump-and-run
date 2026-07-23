@@ -22,5 +22,13 @@
     "groundTop": "#2c47a8",
     "accent": "#4de3ff",
     "detail": "#7a5cff"
+  },
+  "stammdaten": {
+    "skyTop": "#0a1a2f",
+    "skyBottom": "#14355c",
+    "ground": "#1f5148",
+    "groundTop": "#2f7a6b",
+    "accent": "#ffd75e",
+    "detail": "#79c9b7"
   }
 }

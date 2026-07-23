@@ -404,6 +404,19 @@ const OBJECT_FRAMES: { key: string; pattern: string[]; colors: ColorMap }[] = [
     colors: { C: '#4de3ff', W: '#ffffff' },
   },
   {
+    // Karten-Häkchen (VSDM): geprüfte Gesundheitskarte mit goldenem Chip
+    key: 'seal-vsdm',
+    pattern: [
+      'TTTTTTTT',
+      'TCCTTTTT',
+      'TCCTTTWT',
+      'TTTTTWWT',
+      'TWTTWWTT',
+      'TTWWWTTT',
+    ],
+    colors: { T: '#4a9b7d', C: '#ffd75e', W: '#ffffff' },
+  },
+  {
     key: 'seal-generic',
     pattern: [
       '...GG...',

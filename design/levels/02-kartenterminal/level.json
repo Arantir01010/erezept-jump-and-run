@@ -1,6 +1,4 @@
 {
-  "_generiert": "AUS design/levels/02-kartenterminal/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
-  "id": "02-kartenterminal",
   "station": {
     "name": {
       "de": "Kartenterminal",
@@ -31,7 +29,6 @@
   "cameraMode": "horizontal",
   "theme": "kartenterminal",
   "enemySkin": "skimming-kralle",
-  "tilemap": "assets/tilemaps/02-kartenterminal.tmj",
   "collectible": {
     "type": "datenbit",
     "countRequired": 0,
@@ -63,5 +60,38 @@
       }
     }
   },
-  "parTimeSeconds": 30
+  "parTimeSeconds": 30,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 43.5,
+      "ty": 16,
+      "textDe": "Vorsicht, Skimming-Kralle — duck dich!",
+      "textEn": "Careful, skimming claw — duck!"
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 48.1,
+      "ty": 18.55,
+      "fromRight": true,
+      "reach": 42
+    },
+    {
+      "type": "timing-gate",
+      "tx": 58,
+      "ty": 15,
+      "gate": "gate-pin"
+    },
+    {
+      "type": "gate",
+      "name": "gate-pin",
+      "tx": 67,
+      "ty": 14
+    },
+    {
+      "type": "stamp-exit",
+      "tx": 89,
+      "ty": 14
+    }
+  ]
 }

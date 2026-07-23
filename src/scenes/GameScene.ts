@@ -7,6 +7,7 @@ import { spawnMechanic, type MechanicHost, Gate } from '../mechanics'
 import type { Mechanic } from '../mechanics'
 import { gameState } from '../state/GameState'
 import { drawBackdrop } from '../gfx/backdrop'
+import { addSpeedStreaks } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
 import { VIEW_ZOOM } from '../gfx/view'
 import { t } from '../i18n'
@@ -122,6 +123,8 @@ export class GameScene extends Phaser.Scene {
       this.tubeSpeed = tubeParams.speed ?? 50
       this.tubeScrollX = 0
       cam.centerOn(cam.displayWidth / 2, cam.displayHeight / 2)
+      // Tempo-Streifen verkaufen den Datenstrom im Tunnel
+      addSpeedStreaks(this, Phaser.Display.Color.HexStringToColor(theme.accent).color)
     } else {
       if (this.level.cameraMode !== 'horizontal') {
         console.warn(`[camera] Modus "${this.level.cameraMode}" ist Ausbaustufe — fallback auf horizontal`)

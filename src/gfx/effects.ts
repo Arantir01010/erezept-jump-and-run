@@ -71,6 +71,53 @@ export function dustPuff(scene: Phaser.Scene, x: number, y: number, count = 3): 
   }
 }
 
+/**
+ * Tempo-Streifen für Tube-Level: dünne Lichtlinien ziehen nach links durchs
+ * Bild und verkaufen die Tunnel-Geschwindigkeit. Screen-relativ umgesetzt
+ * (folgen der Kamera), Wrap am linken Rand. Aufräumen übernimmt der Scene-Shutdown.
+ */
+export function addSpeedStreaks(scene: Phaser.Scene, color: number, count = 12): void {
+  const cam = scene.cameras.main
+  interface Streak {
+    img: Phaser.GameObjects.Image
+    ox: number
+    oy: number
+    speed: number
+  }
+  const streaks: Streak[] = []
+  for (let i = 0; i < count; i++) {
+    const img = scene.add
+      .image(0, 0, 'fx-mote')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(i % 3 === 0 ? 0xffffff : color)
+      .setAlpha(0.05 + Math.random() * 0.09)
+      .setDepth(2)
+    img.setScale(2.2 + Math.random() * 3.4, 0.1 + Math.random() * 0.08)
+    streaks.push({
+      img,
+      ox: Math.random() * 800,
+      oy: 24 + Math.random() * 250,
+      speed: 120 + Math.random() * 160,
+    })
+  }
+  const onUpdate = (_t: number, delta: number): void => {
+    const view = cam.worldView
+    if (view.width === 0) return
+    for (const s of streaks) {
+      s.ox -= (s.speed * delta) / 1000
+      if (s.ox < -30) {
+        s.ox = view.width + 20
+        s.oy = 24 + Math.random() * (view.height - 60)
+      }
+      s.img.setPosition(view.x + s.ox, view.y + s.oy)
+    }
+  }
+  scene.events.on(Phaser.Scenes.Events.UPDATE, onUpdate)
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    scene.events.off(Phaser.Scenes.Events.UPDATE, onUpdate)
+  })
+}
+
 /** Vignette über den Bildrändern — billige Tiefe, Fokus auf die Mitte. */
 export function addVignette(scene: Phaser.Scene, W: number, H: number, alpha = 0.85): Phaser.GameObjects.Image {
   const v = scene.add.image(W / 2, H / 2, 'fx-vignette').setDepth(900).setAlpha(alpha)

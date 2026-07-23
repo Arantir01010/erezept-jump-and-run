@@ -24,6 +24,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private invulnUntilMs = 0
   private wasOnFloor = false
   private lastRunDustMs = 0
+  /** Squash & Stretch (rein visuell — die Physik-Hitbox bleibt unberührt). */
+  private squashTween?: Phaser.Tweens.Tween
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player-idle0')
@@ -50,7 +52,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (onFloor) this.lastGroundedMs = now
 
     // Staub-Feedback (rein visuell): Aufsetzen nach Sprung/Fall + Laufschritte
-    if (onFloor && !this.wasOnFloor) dustPuff(this.scene, this.x, this.body.bottom, 4)
+    if (onFloor && !this.wasOnFloor) {
+      dustPuff(this.scene, this.x, this.body.bottom, 4)
+      this.squashStretch(1.22, 0.82) // Lande-Squash
+    }
     if (onFloor && Math.abs(this.body.velocity.x) > 70 && now - this.lastRunDustMs > 170) {
       this.lastRunDustMs = now
       dustPuff(this.scene, this.x - Math.sign(this.body.velocity.x) * 5, this.body.bottom, 1)
@@ -92,6 +97,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityY(-T.jumpVelocity)
       this.jumpBufferedMs = -Infinity
       this.lastGroundedMs = -Infinity
+      this.squashStretch(0.84, 1.18) // Absprung-Stretch
     }
 
     // --- Zustand bestimmen ---
@@ -131,6 +137,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   setRespawn(x: number, y: number): void {
     this.respawnPoint.set(x, y)
+  }
+
+  /** Kurzer Kadergummi-Impuls (Landung/Absprung) — federt zurück auf 1:1. */
+  private squashStretch(sx: number, sy: number): void {
+    this.squashTween?.stop()
+    this.setScale(sx, sy)
+    this.squashTween = this.scene.tweens.add({
+      targets: this,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 160,
+      ease: 'Back.easeOut',
+    })
   }
 
   /**

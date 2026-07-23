@@ -1,0 +1,47 @@
+{
+  "station": {
+    "name": {
+      "de": "NEU: Stationsname",
+      "en": "NEW: station name"
+    },
+    "portalText": {
+      "de": "NEU: Ein Satz beim Abtauchen in die Station.",
+      "en": "NEW: one sentence when diving in."
+    },
+    "reziText": {
+      "de": "NEU: Was REZI im Kern-Moment sagt.",
+      "en": "NEW: what REZI says at the key moment."
+    },
+    "stampText": {
+      "de": "✓ NEU: Erfolgs-Satz auf dem Stempel.",
+      "en": "✓ NEW: success line on the stamp."
+    },
+    "badge": "NEU"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "NEU: Gebäudename",
+      "en": "NEW: building name"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "city",
+  "enemySkin": "datenkrake",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 2,
+    "label": {
+      "de": "Datenbits",
+      "en": "Data bits"
+    }
+  },
+  "mechanics": {},
+  "parTimeSeconds": 30,
+  "stuckHint": {
+    "de": "Immer nach rechts — sammle die Datenbits, dann öffnet die Tür!",
+    "en": "Keep right — collect the data bits, then the door opens!"
+  },
+  "objects": []
+}

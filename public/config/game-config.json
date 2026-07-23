@@ -20,6 +20,7 @@
     }
   },
   "levelOrder": [
+    "01-stammdaten",
     "02-kartenterminal",
     "03-kov-gateway"
   ],
