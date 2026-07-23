@@ -19,6 +19,7 @@ export class UIScene extends Phaser.Scene {
   private idleText!: Phaser.GameObjects.Text
   private lastIdleWarnMs = 0
   private calibText?: Phaser.GameObjects.Text
+  private calibTimer?: Phaser.Time.TimerEvent
   private fpsText?: Phaser.GameObjects.Text
   private portalOverlay?: Phaser.GameObjects.Container
 
@@ -136,6 +137,9 @@ export class UIScene extends Phaser.Scene {
 
   toggleCalibration(): void {
     if (this.calibText) {
+      // Timer MIT ausschalten — sonst leakt jeder Toggle einen 10-Hz-Loop
+      this.calibTimer?.remove()
+      this.calibTimer = undefined
       this.calibText.destroy()
       this.calibText = undefined
       return
@@ -145,7 +149,7 @@ export class UIScene extends Phaser.Scene {
       bg: '#06090f',
       padding: { x: 5, y: 4 },
     }).setDepth(90)
-    this.time.addEvent({
+    this.calibTimer = this.time.addEvent({
       delay: 100,
       loop: true,
       callback: () => {

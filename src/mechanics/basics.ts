@@ -143,7 +143,8 @@ export class DoorExit extends Mechanic {
   }
 
   private get unlocked(): boolean {
-    return gameState.bits >= this.host.level.collectible.countRequired
+    // Sammelziel gilt PRO Level — Bits aus früheren Stationen zählen nicht
+    return gameState.bitsThisLevel >= this.host.level.collectible.countRequired
   }
 
   private tryEnter(): void {
@@ -153,7 +154,7 @@ export class DoorExit extends Mechanic {
       this.host.completeLevel()
     } else if (!this.hintShown) {
       this.hintShown = true
-      const need = this.host.level.collectible.countRequired - gameState.bits
+      const need = this.host.level.collectible.countRequired - gameState.bitsThisLevel
       const label = t(this.host.level.collectible.label)
       this.host.rezi.say(`Noch ${need} ${label} sammeln!`)
       this.host.scene.time.delayedCall(3000, () => (this.hintShown = false))

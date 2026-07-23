@@ -8,10 +8,14 @@ import { GameAction } from '../input/actions'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
+const FAIL_FLASH_MS = 450
+
 /**
- * Timing-Gate („PIN-Schleuse"): N Lichter pulsieren nacheinander; der blaue
- * Knopf muss im Pulsfenster gedrückt werden. Fachliches Framing kommt aus dem
- * Level-JSON (hier: Dr. Pixel signiert mit eHBA + Arzt-PIN — nie eine echte PIN).
+ * Timing-Gate („PIN-Schleuse"): N Lichter — es pulsiert IMMER das nächste
+ * fällige Licht (kein Weiterwandern bei verpasstem Fenster: verpasst = einfach
+ * auf den nächsten Puls desselben Schritts warten, ohne Strafe). Blauer Knopf
+ * im Pulsfenster bestätigt; Druck außerhalb = sichtbare rote Phase + Reset.
+ * Fachliches Framing aus dem Level-JSON (Dr. Pixel signiert mit eHBA + Arzt-PIN).
  * Barrierefreiheit: aktives Licht zusätzlich GRÖSSER, nicht nur andersfarbig.
  * Assist: Fehlversuche verlangsamen die Sequenz sichtbar.
  */
@@ -25,14 +29,15 @@ export class TimingGate extends Mechanic {
   private running = false
   private done = false
   private stepStartMs = 0
-  private activeStep = 0
+  /** Bis zu diesem Zeitpunkt bleibt das rote Fehler-Feedback stehen. */
+  private failUntilMs = 0
   private hintShown = false
 
   spawn(): void {
     const { x, y, w, h } = objCenter(this.obj)
     this.steps = this.param<number>('steps', 4)
     this.stepMs = this.param<number>('stepMs', 900)
-    this.zone = new Phaser.Geom.Rectangle((this.obj.x ?? 0), (this.obj.y ?? 0), w || 48, h || 48)
+    this.zone = new Phaser.Geom.Rectangle(this.obj.x ?? 0, this.obj.y ?? 0, w || 48, h || 48)
 
     const spread = 16
     const startX = x - ((this.steps - 1) * spread) / 2
@@ -56,10 +61,12 @@ export class TimingGate extends Mechanic {
   update(time: number): void {
     if (this.done) return
 
+    // Rote Fehler-Phase: Feedback sichtbar stehen lassen, Eingaben ignorieren
+    if (time < this.failUntilMs) return
+
     if (!this.running && this.playerInZone) {
       this.running = true
       this.progress = 0
-      this.activeStep = 0
       this.stepStartMs = time
       if (!this.hintShown) {
         this.hintShown = true
@@ -71,7 +78,7 @@ export class TimingGate extends Mechanic {
     if (!this.playerInZone) {
       // Weggelaufen: Sequenz pausiert ohne Strafe
       this.running = false
-      this.renderLights(-1)
+      this.renderLights(false)
       return
     }
 
@@ -79,37 +86,44 @@ export class TimingGate extends Mechanic {
     const inWindow = stepElapsed < this.slowMs * this.windowRatio
 
     if (stepElapsed >= this.slowMs) {
-      // Fenster verpasst → Schritt läuft weiter zum nächsten Licht, kein Reset
-      this.activeStep = (this.activeStep + 1) % this.steps
+      // Fenster verpasst → DERSELBE Schritt pulsiert erneut, kein Reset, keine Strafe
       this.stepStartMs = time
     }
 
     if (inputManager.justPressed(GameAction.Action)) {
-      if (inWindow && this.activeStep === this.progress) {
+      if (inWindow) {
         this.progress += 1
         this.flashLight(this.progress - 1, 0x7fd07f)
         if (this.progress >= this.steps) return this.succeed()
-        this.activeStep = (this.activeStep + 1) % this.steps
         this.stepStartMs = time
       } else {
-        // Falscher Moment: rotes Blinken, Fortschritt zurück, Assist merkt sich das
-        assist.fail(`timing-gate-${this.obj.id}`)
-        this.progress = 0
-        this.activeStep = 0
-        this.stepStartMs = time
-        this.lights.forEach((l) => this.flashLight(this.lights.indexOf(l), 0xff4040))
+        this.failFlash(time)
+        return
       }
     }
 
-    this.renderLights(inWindow ? this.activeStep : -1)
+    this.renderLights(inWindow)
   }
 
-  private renderLights(active: number): void {
+  /** Falscher Moment: alle Lichter rot, kurze Pause, dann Neustart der Sequenz. */
+  private failFlash(time: number): void {
+    assist.fail(`timing-gate-${this.obj.id}`)
+    this.progress = 0
+    this.failUntilMs = time + FAIL_FLASH_MS
+    this.stepStartMs = time + FAIL_FLASH_MS
+    this.lights.forEach((light, i) => {
+      light.setFillStyle(0xff4040, 1)
+      light.setRadius(4)
+      this.host.scene.tweens.add({ targets: light, scale: { from: 1.5, to: 1 }, duration: 200, delay: i * 30 })
+    })
+  }
+
+  private renderLights(pulseActive: boolean): void {
     this.lights.forEach((light, i) => {
       if (i < this.progress) {
         light.setFillStyle(0x7fd07f, 1)
         light.setRadius(4)
-      } else if (i === active) {
+      } else if (i === this.progress && pulseActive) {
         light.setFillStyle(0xffd75e, 1)
         light.setRadius(6) // größer, nicht nur andersfarbig (Farbfehlsichtigkeit)
       } else {
@@ -129,7 +143,10 @@ export class TimingGate extends Mechanic {
   private succeed(): void {
     this.done = true
     this.running = false
-    this.lights.forEach((l) => l.setFillStyle(0x7fd07f, 1))
+    this.lights.forEach((l) => {
+      l.setFillStyle(0x7fd07f, 1)
+      l.setRadius(4)
+    })
     if (assist.wasClean(`timing-gate-${this.obj.id}`)) gameState.addSecurityBonus()
     this.linkedGate()?.open()
     this.host.scene.game.events.emit('hud:update')

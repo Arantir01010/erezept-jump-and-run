@@ -46,6 +46,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.level = configService.level(this.levelIndex)
+    gameState.markLevelStart()
     const theme = configService.theme(this.level.theme)
 
     // --- Tilemap ---

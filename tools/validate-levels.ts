@@ -88,8 +88,16 @@ if (game?.success) {
       continue
     }
     try {
+      interface TiledObj {
+        id?: number
+        type?: string
+        name?: string
+        x?: number
+        y?: number
+        properties?: { name: string; value: unknown }[]
+      }
       const map = JSON.parse(readFileSync(mapFile, 'utf-8')) as {
-        layers?: { type: string; name: string; objects?: { type?: string; x?: number; y?: number }[] }[]
+        layers?: { type: string; name: string; objects?: TiledObj[] }[]
       }
       const terrain = map.layers?.find((l) => l.type === 'tilelayer' && l.name === 'terrain')
       const objectLayer = map.layers?.find((l) => l.type === 'objectgroup' && l.name === 'objects')
@@ -97,13 +105,32 @@ if (game?.success) {
       if (!objectLayer) fail(`${level.tilemap}: Objekt-Layer "objects" fehlt`)
       const objects = objectLayer?.objects ?? []
       if (!objects.some((o) => o.type === 'spawn')) fail(`${level.tilemap}: kein "spawn"-Objekt`)
-      const hasExit = objects.some((o) => o.type === 'door-exit' || o.type === 'stamp-exit' || o.type === 'finale-sprint')
-      if (!hasExit) fail(`${level.tilemap}: kein Levelausgang (door-exit / stamp-exit / finale-sprint)`)
+      // finale-sprint ist im Prototyp ein Stub (kein completeLevel) → zählt NICHT als Ausgang
+      const hasExit = objects.some((o) => o.type === 'door-exit' || o.type === 'stamp-exit')
+      if (!hasExit) fail(`${level.tilemap}: kein funktionsfähiger Levelausgang (door-exit / stamp-exit)`)
+
+      // Tor-Verknüpfungen: props.gate muss auf ein existierendes gate-Objekt zeigen —
+      // sonst bleibt das Tor zur Laufzeit still für immer zu (Softlock am Stand)
+      const gateNames = new Set(
+        objects.filter((o) => o.type === 'gate').map((o) => o.name || `gate-${o.id}`),
+      )
+      const checkGateRef = (ref: unknown, where: string): void => {
+        if (typeof ref === 'string' && ref && !gateNames.has(ref)) {
+          fail(
+            `${level.tilemap}: ${where} verweist auf unbekanntes Tor "${ref}" (vorhanden: ${[...gateNames].join(', ') || 'keine'})`,
+          )
+        }
+      }
       for (const obj of objects) {
         const type = obj.type ?? ''
         if (type && !isKnownMechanicType(type)) {
           fail(`${level.tilemap}: unbekannter Objekt-Typ "${type}" bei x=${obj.x}, y=${obj.y}`)
         }
+        const gateProp = (obj.properties ?? []).find((p) => p.name === 'gate')
+        if (gateProp) checkGateRef(gateProp.value, `Objekt "${type}" bei x=${obj.x}`)
+      }
+      for (const [mechType, params] of Object.entries(level.mechanics)) {
+        checkGateRef((params as Record<string, unknown>)['gate'], `mechanics.${mechType}`)
       }
       ok(`${rel} + ${level.tilemap}`)
     } catch (e) {

@@ -20,6 +20,8 @@ class GameState {
   encrypted = false
   runStartMs = 0
   cleanInteractions = 0
+  /** Bit-Stand beim Levelstart — Sammelziele gelten PRO Level, Bits bleiben Run-Währung. */
+  private levelStartBits = 0
 
   reset(): void {
     this.levelIndex = 0
@@ -29,6 +31,17 @@ class GameState {
     this.encrypted = false
     this.runStartMs = performance.now()
     this.cleanInteractions = 0
+    this.levelStartBits = 0
+  }
+
+  /** Beim Betreten eines Levels aufrufen (GameScene.create). */
+  markLevelStart(): void {
+    this.levelStartBits = this.bits
+  }
+
+  /** In DIESEM Level gesammelte Bits (Verluste zählen gegen, nie negativ). */
+  get bitsThisLevel(): number {
+    return Math.max(0, this.bits - this.levelStartBits)
   }
 
   addBits(n: number): void {

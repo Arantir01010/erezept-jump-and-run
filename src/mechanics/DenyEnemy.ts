@@ -19,6 +19,8 @@ export class DenyEnemy extends Mechanic {
   private grabsBeforeBlock = 2
   private blocked = false
   private grabbing = false
+  private started = false
+  private activationRange = 220
   private overlap?: Phaser.Physics.Arcade.Collider
 
   spawn(): void {
@@ -43,7 +45,17 @@ export class DenyEnemy extends Mechanic {
       player.hurt(this.claw.x)
     })
 
-    this.scheduleGrab()
+    this.activationRange = this.param<number>('activationRange', 220)
+    // Kein Auto-Start: Die Kralle wird erst aktiv, wenn der Spieler in der Nähe ist —
+    // sonst hat sie ihre 2 Grabs längst verbraucht und ist geblockt, bevor jemand sie sieht.
+  }
+
+  update(): void {
+    if (this.started || this.blocked) return
+    if (Math.abs(this.host.player.x - this.baseX) <= this.activationRange) {
+      this.started = true
+      this.scheduleGrab()
+    }
   }
 
   private scheduleGrab(): void {
