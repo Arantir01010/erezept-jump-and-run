@@ -43,10 +43,20 @@ Kalibrier-Overlay im Spiel: **F8**).
 - Rendering intern in 1920×1080: Pixel-Art bleibt stilecht blockig (Kamera-Zoom 3×),
   Schrift und QR-Code sind nativ scharf — auf dem Messe-TV wie im Browserfenster
 
+## Neue Level bauen: der Baukasten (auch für KIs)
+
+Level entstehen als **ASCII-Karten + Metadaten** in `levels-src/<id>.level.json` —
+bewusst so einfach, dass auch schwächere KI-Modelle sicher damit arbeiten können.
+`npm run levels` prüft Spielbarkeit (Sprungphysik, Erreichbarkeit, Tor-Verknüpfung)
+und generiert daraus die Runtime-Dateien; kaputte Level werden abgelehnt, der
+Spielkern bleibt unangetastet. **Die komplette Anleitung:**
+[levels-src/ANLEITUNG.md](levels-src/ANLEITUNG.md) · Leitplanken für KI-Agenten:
+[CLAUDE.md](CLAUDE.md)
+
 ## Für Redakteur:innen: Alles ist Daten
 
 Stationen umbenennen, umsortieren, Texte ändern — **ohne Rebuild** in `public/config/`
-(JSON, zod-validiert mit lesbaren Fehlermeldungen). Levels sind Standard-Tiled-Maps.
+(JSON, zod-validiert mit lesbaren Fehlermeldungen).
 Anleitung: [docs/LEVEL-EDITING.md](docs/LEVEL-EDITING.md) · Gesamtkonzept inkl.
 Leveldesign aller 6 Stationen, TI-Fachlichkeit und Messebetrieb: [docs/KONZEPT.md](docs/KONZEPT.md)
 
@@ -56,8 +66,8 @@ Leveldesign aller 6 Stationen, TI-Fachlichkeit und Messebetrieb: [docs/KONZEPT.m
 |---|---|
 | `npm run dev` | Entwicklung (Vite, HMR) |
 | `npm run build` | Offline-fähiger Produktions-Build nach `dist/` |
-| `npm run validate` | Alle Konfigurationen + Tilemaps prüfen (CI-tauglich) |
-| `npm run gen:maps` | Prototyp-Tilemaps aus `tools/generate-tilemaps.ts` erzeugen |
+| `npm run validate` | Alle Konfigurationen + Tilemaps + Baukasten-Synchronität prüfen (CI-tauglich) |
+| `npm run levels` | Level-Quellen aus `levels-src/` kompilieren (mit Spielbarkeits-Prüfung) |
 | `start-messe.bat` | Messestart: lokaler Server + Chrome-Kiosk (`?kiosk=1`) |
 
 URL-Parameter: `?debug=1` FPS-Anzeige · `?debug=2` Physik-Debug · `?kiosk=1` Kiosk-Härtung (Cursor aus, CrashGuard) · `?renderer=canvas` 2D-Fallback für Rechner ohne brauchbares WebGL.

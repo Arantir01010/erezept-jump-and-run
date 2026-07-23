@@ -1,7 +1,11 @@
 {
+  "_generiert": "AUS levels-src/02-kartenterminal.level.json — NICHT von Hand bearbeiten (npm run levels)",
   "id": "02-kartenterminal",
   "station": {
-    "name": { "de": "Kartenterminal", "en": "Card terminal" },
+    "name": {
+      "de": "Kartenterminal",
+      "en": "Card terminal"
+    },
     "portalText": {
       "de": "Station: Kartenterminal — dein Identitäts-Check.",
       "en": "Station: card terminal — your identity check."
@@ -17,7 +21,13 @@
     "badge": "eGK · eHBA · QES"
   },
   "siegelIcon": "seal-egk",
-  "cityAnchor": { "facade": "praxis", "label": { "de": "Arztpraxis", "en": "Doctor's office" } },
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Arztpraxis",
+      "en": "Doctor's office"
+    }
+  },
   "cameraMode": "horizontal",
   "theme": "kartenterminal",
   "enemySkin": "skimming-kralle",
@@ -25,7 +35,10 @@
   "collectible": {
     "type": "datenbit",
     "countRequired": 0,
-    "label": { "de": "Datenbits", "en": "Data bits" }
+    "label": {
+      "de": "Datenbits",
+      "en": "Data bits"
+    }
   },
   "mechanics": {
     "timing-gate": {
@@ -36,9 +49,18 @@
         "en": "Blue button on the beat: Dr. Pixel enters his doctor PIN!"
       }
     },
-    "deny-enemy": { "grabsBeforeBlock": 2, "denyText": { "de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED" } },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      }
+    },
     "stamp-exit": {
-      "hint": { "de": "Blauer Knopf unter dem Stempel: Signatur annehmen!", "en": "Blue button under the stamp: accept the signature!" }
+      "hint": {
+        "de": "Blauer Knopf unter dem Stempel: Signatur annehmen!",
+        "en": "Blue button under the stamp: accept the signature!"
+      }
     }
   },
   "parTimeSeconds": 30

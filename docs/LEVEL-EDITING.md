@@ -42,20 +42,21 @@ Alle Texte sind Objekte mit `de` (Pflicht) und `en` (optional): `{ "de": "…", 
 
 Neues Theme = neuer Eintrag in `config/themes.json` (6 Hex-Farben) — kein Code.
 
-## 3. Level-Geometrie (Tilemaps)
+## 3. Level-Geometrie: der Baukasten
 
-Die `.tmj`-Dateien in `public/assets/tilemaps/` sind **normale Tiled-Dateien**
-([Tiled Map Editor](https://www.mapeditor.org/), kostenlos). Konventionen:
+Neue Level entstehen **nicht** in Tiled, sondern als ASCII-Karte + Metadaten in
+`levels-src/<id>.level.json` — die vollständige Anleitung (Legende, Physik-Grenzen,
+Arbeitsschritte) steht in [`levels-src/ANLEITUNG.md`](../levels-src/ANLEITUNG.md).
 
-- Tile-Layer **`terrain`**: die Plattform-Geometrie (GID 8 = Deko, nicht solide; alles andere solide)
-- Objekt-Layer **`objects`**: Spielelemente über das Feld **Typ/Klasse**, z. B.
-  `spawn`, `collectible`, `checkpoint`, `gate` (mit Namen), `timing-gate`, `deny-enemy`,
-  `stillstand-podest`, `krypto-dusche`, `stamp-exit`, `door-exit`, `deco`, `info-sign`
-- Tore verknüpfen: dem Sicherheits-Objekt die Property `gate` = Name des Tor-Objekts geben
-- Jedes Level braucht genau einen `spawn` und einen Ausgang (`door-exit` oder `stamp-exit`)
+```bash
+npm run levels     # kompiliert alle Quellen und prüft die Spielbarkeit
+```
 
-Für die Prototyp-Level gibt es zusätzlich einen Generator (`npm run gen:maps`,
-Quellen in `tools/generate-tilemaps.ts`) — Tiled-Bearbeitung überschreibt er nur bei erneutem Aufruf.
+Der Compiler generiert daraus `public/config/levels/<id>.json` und
+`public/assets/tilemaps/<id>.tmj` — **diese generierten Dateien nie von Hand
+bearbeiten** (`npm run validate` schlägt sonst Alarm). Unspielbare Level
+(zu hohe Sprünge, unerreichbare Ausgänge, Tore ohne Öffner) werden abgelehnt,
+bevor sie das Spiel erreichen.
 
 ## 4. Tipps bei Hängern (automatisch)
 

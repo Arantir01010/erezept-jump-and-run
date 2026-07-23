@@ -1,7 +1,11 @@
 {
+  "_generiert": "AUS levels-src/03-kov-gateway.level.json — NICHT von Hand bearbeiten (npm run levels)",
   "id": "03-kov-gateway",
   "station": {
-    "name": { "de": "KOV Gateway", "en": "KOV gateway" },
+    "name": {
+      "de": "KOV Gateway",
+      "en": "KOV gateway"
+    },
     "portalText": {
       "de": "Station: KOV Gateway — dein sicherer Tunnel in die TI.",
       "en": "Station: KOV gateway — your secure tunnel into the TI."
@@ -17,7 +21,13 @@
     "badge": "VPN · E2E-Verschlüsselung"
   },
   "siegelIcon": "seal-vpn",
-  "cityAnchor": { "facade": "gateway", "label": { "de": "Tor zur TI", "en": "Gate to the TI" } },
+  "cityAnchor": {
+    "facade": "gateway",
+    "label": {
+      "de": "Tor zur TI",
+      "en": "Gate to the TI"
+    }
+  },
   "cameraMode": "tube",
   "theme": "kov-gateway",
   "enemySkin": "datenkrake",
@@ -25,17 +35,31 @@
   "collectible": {
     "type": "datenbit",
     "countRequired": 10,
-    "label": { "de": "Datenbits", "en": "Data bits" }
+    "label": {
+      "de": "Datenbits",
+      "en": "Data bits"
+    }
   },
   "mechanics": {
-    "tube-scroll": { "speed": 55 },
+    "tube-scroll": {
+      "speed": 55
+    },
     "stillstand-podest": {
       "scanMs": 1200,
-      "hint": { "de": "Stillstehen: Das Gateway prüft dich!", "en": "Stand still: the gateway checks you!" },
-      "denyText": { "de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED" }
+      "hint": {
+        "de": "Stillstehen: Das Gateway prüft dich!",
+        "en": "Stand still: the gateway checks you!"
+      },
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      }
     },
     "krypto-dusche": {
-      "hint": { "de": "Blauer Knopf: Verschlüsselung anlegen!", "en": "Blue button: apply encryption!" }
+      "hint": {
+        "de": "Blauer Knopf: Verschlüsselung anlegen!",
+        "en": "Blue button: apply encryption!"
+      }
     }
   },
   "parTimeSeconds": 35

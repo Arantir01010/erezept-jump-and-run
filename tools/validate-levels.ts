@@ -16,6 +16,7 @@ import {
   formatZodError,
 } from '../src/level/schema'
 import { isKnownMechanicType, MECHANIC_TYPE_IDS } from '../src/mechanics/typeIds'
+import { compileLevelSource } from './compile-levels'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const PUBLIC = join(ROOT, 'public')
@@ -135,6 +136,33 @@ if (game?.success) {
       ok(`${rel} + ${level.tilemap}`)
     } catch (e) {
       fail(`${level.tilemap}: kein gültiges Tiled-JSON (${e instanceof Error ? e.message : e})`)
+    }
+  }
+}
+
+// --- Baukasten-Synchronität: levels-src ↔ generierte Dateien ---
+// Verhindert, dass jemand generierte Dateien von Hand ändert oder das
+// Kompilieren vergisst (npm run levels).
+const SRC_DIR = join(ROOT, 'levels-src')
+if (existsSync(SRC_DIR)) {
+  const { readdirSync } = await import('node:fs')
+  for (const file of readdirSync(SRC_DIR).filter((f) => f.endsWith('.level.json') && !f.startsWith('_'))) {
+    try {
+      const raw = JSON.parse(readFileSync(join(SRC_DIR, file), 'utf-8')) as unknown
+      const compiled = compileLevelSource(raw, `levels-src/${file}`)
+      const cfgPath = join(PUBLIC, 'config', 'levels', `${compiled.id}.json`)
+      const mapPath = join(PUBLIC, 'assets', 'tilemaps', `${compiled.id}.tmj`)
+      const cfgOnDisk = existsSync(cfgPath) ? readFileSync(cfgPath, 'utf-8').trim() : ''
+      const mapOnDisk = existsSync(mapPath) ? readFileSync(mapPath, 'utf-8').trim() : ''
+      const cfgExpected = JSON.stringify(compiled.config, null, 2).trim()
+      const mapExpected = JSON.stringify(compiled.tmj).trim()
+      if (cfgOnDisk !== cfgExpected || mapOnDisk !== mapExpected) {
+        fail(`levels-src/${file}: generierte Dateien sind NICHT aktuell — "npm run levels" ausführen (generierte Dateien nie von Hand ändern)`)
+      } else {
+        ok(`levels-src/${file} ↔ generierte Dateien synchron`)
+      }
+    } catch (e) {
+      fail(`levels-src/${file}: ${e instanceof Error ? e.message : e}`)
     }
   }
 }

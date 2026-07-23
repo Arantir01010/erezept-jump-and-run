@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "validate": "tsx tools/validate-levels.ts",
-    "gen:maps": "tsx tools/generate-tilemaps.ts"
+    "levels": "tsx tools/compile-levels.ts",
+    "gen:maps": "tsx tools/compile-levels.ts"
   },
   "dependencies": {
     "phaser": "^3.90.0",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/qrcode": "^1.5.5",
+    "playwright": "^1.61.1",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vite": "^7.0.0"
