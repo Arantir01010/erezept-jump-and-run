@@ -1,0 +1,83 @@
+{
+  "_generiert": "AUS design/levels/04-fachdienst/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "04-fachdienst",
+  "station": {
+    "name": {
+      "de": "e-Rezept-Fachdienst",
+      "en": "e-prescription service"
+    },
+    "portalText": {
+      "de": "Station 4: e-Rezept-Fachdienst — der Tresor der TI.",
+      "en": "Station 4: the e-prescription service — the TI's vault."
+    },
+    "reziText": {
+      "de": "Ich liege verschlüsselt im Tresor — nicht mal der Betreiber kann mich lesen!",
+      "en": "I'm stored encrypted in the vault — not even the operator can read me!"
+    },
+    "stampText": {
+      "de": "✓ Sicher verschlüsselt gespeichert (VAU).",
+      "en": "✓ Stored securely encrypted (trusted execution)."
+    },
+    "badge": "VAU · Ende-zu-Ende"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "gateway",
+    "label": {
+      "de": "Rechenzentrum",
+      "en": "Data center"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "fachdienst",
+  "enemySkin": "glitch-gremlin",
+  "tilemap": "assets/tilemaps/04-fachdienst.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 6,
+    "label": {
+      "de": "Datenpakete",
+      "en": "Data packets"
+    }
+  },
+  "mechanics": {
+    "timing-gate": {
+      "steps": 3,
+      "stepMs": 900,
+      "hint": {
+        "de": "Zutritts-Schleuse: Blauer Knopf im Takt — nur zugelassene Systeme kommen rein!",
+        "en": "Access lock: blue button on the beat — only approved systems get in!"
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst an der Schleuse den Zutritts-Schlüssel im Takt eingeben.",
+        "en": "The gate is locked! Enter the access key on the beat at the lock first."
+      }
+    },
+    "krypto-dusche": {
+      "hint": {
+        "de": "Die VAU: Blauer Knopf = Ende-zu-Ende verschlüsseln. Jetzt sieht niemand mehr mit!",
+        "en": "The trusted zone: blue button = end-to-end encrypt. Now nobody can read along!"
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst in der VAU verschlüsseln — dann geht es weiter.",
+        "en": "The gate is locked! Encrypt in the trusted zone first, then continue."
+      }
+    },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      },
+      "duckHint": {
+        "de": "Tipp: Nach UNTEN ducken — der Virus greift über dich hinweg, die TI blockt ihn gleich!",
+        "en": "Tip: duck DOWN — the virus grabs over you, the TI blocks it in a moment!"
+      }
+    }
+  },
+  "parTimeSeconds": 36,
+  "stuckHint": {
+    "de": "Weiter nach rechts durch den Tresor! Verschlüsseln, sammeln, Ausgang.",
+    "en": "Keep heading right through the vault! Encrypt, collect, exit."
+  }
+}

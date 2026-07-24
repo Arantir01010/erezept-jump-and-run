@@ -1,0 +1,150 @@
+{
+  "station": {
+    "name": {
+      "de": "e-Rezept-Fachdienst",
+      "en": "e-prescription service"
+    },
+    "portalText": {
+      "de": "Station 4: e-Rezept-Fachdienst — der Tresor der TI.",
+      "en": "Station 4: the e-prescription service — the TI's vault."
+    },
+    "reziText": {
+      "de": "Ich liege verschlüsselt im Tresor — nicht mal der Betreiber kann mich lesen!",
+      "en": "I'm stored encrypted in the vault — not even the operator can read me!"
+    },
+    "stampText": {
+      "de": "✓ Sicher verschlüsselt gespeichert (VAU).",
+      "en": "✓ Stored securely encrypted (trusted execution)."
+    },
+    "badge": "VAU · Ende-zu-Ende"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "gateway",
+    "label": {
+      "de": "Rechenzentrum",
+      "en": "Data center"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "fachdienst",
+  "enemySkin": "glitch-gremlin",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 6,
+    "label": {
+      "de": "Datenpakete",
+      "en": "Data packets"
+    }
+  },
+  "mechanics": {
+    "timing-gate": {
+      "steps": 3,
+      "stepMs": 900,
+      "hint": {
+        "de": "Zutritts-Schleuse: Blauer Knopf im Takt — nur zugelassene Systeme kommen rein!",
+        "en": "Access lock: blue button on the beat — only approved systems get in!"
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst an der Schleuse den Zutritts-Schlüssel im Takt eingeben.",
+        "en": "The gate is locked! Enter the access key on the beat at the lock first."
+      }
+    },
+    "krypto-dusche": {
+      "hint": {
+        "de": "Die VAU: Blauer Knopf = Ende-zu-Ende verschlüsseln. Jetzt sieht niemand mehr mit!",
+        "en": "The trusted zone: blue button = end-to-end encrypt. Now nobody can read along!"
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst in der VAU verschlüsseln — dann geht es weiter.",
+        "en": "The gate is locked! Encrypt in the trusted zone first, then continue."
+      }
+    },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      },
+      "duckHint": {
+        "de": "Tipp: Nach UNTEN ducken — der Virus greift über dich hinweg, die TI blockt ihn gleich!",
+        "en": "Tip: duck DOWN — the virus grabs over you, the TI blocks it in a moment!"
+      }
+    }
+  },
+  "parTimeSeconds": 36,
+  "stuckHint": {
+    "de": "Weiter nach rechts durch den Tresor! Verschlüsseln, sammeln, Ausgang.",
+    "en": "Keep heading right through the vault! Encrypt, collect, exit."
+  },
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "textDe": "Hochsicherheits-Rechenzentrum. Viren wollen an die Daten — die TI hält sie auf.",
+      "textEn": "High-security data center. Viruses want the data — the TI stops them."
+    },
+    {
+      "type": "timing-gate",
+      "tx": 14,
+      "ty": 15,
+      "gate": "tor-einlass"
+    },
+    {
+      "type": "gate",
+      "name": "tor-einlass",
+      "tx": 24,
+      "ty": 14
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 38,
+      "ty": 18.4,
+      "fromRight": true,
+      "reach": 40
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 52,
+      "ty": 18.4,
+      "fromRight": true,
+      "reach": 40
+    },
+    {
+      "type": "krypto-dusche",
+      "tx": 60,
+      "ty": 13,
+      "gate": "tor-vau"
+    },
+    {
+      "type": "gate",
+      "name": "tor-vau",
+      "tx": 70,
+      "ty": 14
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 88,
+      "ty": 18.4,
+      "fromRight": true,
+      "reach": 36
+    },
+    {
+      "type": "deco",
+      "tx": 34,
+      "ty": 6,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 4
+    },
+    {
+      "type": "deco",
+      "tx": 96,
+      "ty": 6,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 5
+    }
+  ]
+}

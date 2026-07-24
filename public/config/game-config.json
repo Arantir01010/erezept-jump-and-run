@@ -22,7 +22,9 @@
   "levelOrder": [
     "01-stammdaten",
     "02-kartenterminal",
-    "03-kov-gateway"
+    "03-kov-gateway",
+    "04-fachdienst",
+    "05-epa"
   ],
   "ending": {
     "type": "static",
