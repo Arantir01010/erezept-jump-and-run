@@ -29,6 +29,8 @@ export const MECHANIC_TYPE_IDS = [
   // Karten stecken (KAPSEL 2.1, Zusatzmechanik 1 — „Bewegung mit Identität")
   'karte',
   'kartenleser',
+  // Das Finale (KAPSEL v0.1, Welt 5): die Tür, die der Spieler nicht öffnet
+  'letzte-tuer',
   // Ausbaustufe (Stubs im Prototyp)
   'pruef-scanner',
   'rechte-tueren',

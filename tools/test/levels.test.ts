@@ -176,7 +176,7 @@ export function run(): void {
       for (const l of report.levels) {
         const objs = ((l.tmj as { layers?: { objects?: { type: string }[] }[] }).layers ?? [])
           .flatMap((layer) => layer.objects ?? [])
-        const exits = objs.filter((o) => o.type === 'door-exit' || o.type === 'stamp-exit')
+        const exits = objs.filter((o) => o.type === 'door-exit' || o.type === 'stamp-exit' || o.type === 'letzte-tuer')
         assertTrue(exits.length >= 1, `${l.id}: kein Ausgang`)
       }
     })

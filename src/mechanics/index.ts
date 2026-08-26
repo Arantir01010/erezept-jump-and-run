@@ -14,6 +14,7 @@ import './AndockPlattform'
 import './VauFeld'
 import './KontextAnker'
 import './Karten'
+import './LetzteTuer'
 import './stubs'
 
 export { spawnMechanic, registerMechanic } from './registry'

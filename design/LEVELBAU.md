@@ -186,6 +186,16 @@ sichtbar („ZUGRIFF VERWEIGERT"). **Markenregel: Gegner werden NIE bekämpft.**
 ```
 Setpiece-Alternative zur Tür `D`: blauer Knopf, wenn der Stempel oben wartet.
 
+**`letzte-tuer` — das Finale (nur für das letzte Level!)** (optional: `warteText`, `denyText`, `freigabeText`, `lueckenlosText`)
+```json
+{ "type": "letzte-tuer", "tx": 92, "ty": 14 }
+```
+Eine Tür OHNE Öffner — und das ist der Punkt: Der Spieler kann sie nicht
+öffnen (der blaue Knopf wird abgewiesen). Sein Zugriffsprotokoll erscheint,
+dann öffnet die Versicherte. Zählt als Levelausgang; wer nie gesehen wurde,
+bekommt eine eigene Freigabe-Zeile. Fachlich: Datensouveränität — die Tür
+gehört nicht dem Datensatz, sondern der Person.
+
 **`info-sign` — REZI-Hinweis-Zone** (Pflicht: `textDe`; optional `textEn`)
 ```json
 { "type": "info-sign", "tx": 43.5, "ty": 16, "textDe": "Vorsicht, Kralle — duck dich!" }

@@ -189,6 +189,20 @@ export const OBJECT_TYPES: Record<string, ObjectTypeDef> = {
     needsStandableInZone: true,
     doc: 'Signatur-Stempel-Finale: blauer Knopf, wenn der Stempel oben wartet → Level geschafft',
   },
+  'letzte-tuer': {
+    schema: z.strictObject({
+      type: z.literal('letzte-tuer'),
+      warteText: LTextSchema.optional(),
+      denyText: LTextSchema.optional(),
+      freigabeText: LTextSchema.optional(),
+      lueckenlosText: LTextSchema.optional(),
+      ...baseFields,
+    }),
+    defaults: { tw: 3, th: 6 },
+    isExit: true,
+    needsStandableInZone: true,
+    doc: 'Das Finale (Welt 5): eine Tür OHNE Öffner — das Zugriffsprotokoll erscheint, dann öffnet die Versicherte',
+  },
   'info-sign': {
     schema: z.strictObject({
       type: z.literal('info-sign'),

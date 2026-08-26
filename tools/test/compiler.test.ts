@@ -461,6 +461,27 @@ export function run(): void {
     })
   })
 
+  suite('Compiler — letzte Tür (das Finale)', () => {
+    test('letzte-tuer zählt als Levelausgang (kein D nötig)', () => {
+      const lay = layout()
+      const ohneD = lay.replace('D', '.')
+      const r = compileLevel('01-test', ohneD, L({ objects: [{ type: 'letzte-tuer', tx: 50, ty: 14, th: 6 }] }), THEMES)
+      assertNone(r.errors, /Kein Levelausgang/)
+    })
+
+    test('sie braucht bewusst KEINEN Öffner — das ist die Pointe', () => {
+      const lay = layout()
+      const ohneD = lay.replace('D', '.')
+      const r = compileLevel('01-test', ohneD, L({ objects: [{ type: 'letzte-tuer', tx: 50, ty: 14, th: 6 }] }), THEMES)
+      assertNone(r.errors, /hat KEINEN Öffner/)
+    })
+
+    test('unbekannte Felder werden wie überall abgelehnt', () => {
+      const r = compile(L({ objects: [{ type: 'letzte-tuer', tx: 50, ty: 14, oeffner: 'egk' }] }))
+      assertTrue(r.errors.length > 0, 'ein Öffner-Feld an der letzten Tür wäre ein Widerspruch in sich')
+    })
+  })
+
   suite('Compiler — Karten & Terminals (Softlock-Schutz)', () => {
     const leser = (over: Record<string, unknown> = {}) => ({
       type: 'kartenleser', tx: 30, ty: 16, karten: ['egk'], ...over,

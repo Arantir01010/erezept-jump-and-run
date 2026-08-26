@@ -15,6 +15,7 @@ import { run as huelle } from './huelle.test'
 import { run as protokoll } from './protokoll.test'
 import { run as karten } from './karten.test'
 import { run as kartenleser } from './kartenleser.test'
+import { run as finale } from './finale.test'
 import { run as lauscher } from './lauscher.test'
 import { run as podest } from './podest.test'
 import { run as tubekamera } from './tubekamera.test'
@@ -35,6 +36,7 @@ const SUITES: [string, () => void][] = [
   ['Hülle-Zustandsmaschine', huelle],
   ['Karten stecken', karten],
   ['Kartenleser (Terminal)', kartenleser],
+  ['Finale (letzte Tür)', finale],
   ['Zugriffsprotokoll', protokoll],
   ['Lauscher-Sichtlogik', lauscher],
   ['Podest-Fortschritt', podest],

@@ -244,7 +244,7 @@ function checkStructure(
     objects.filter((o) => OBJECT_TYPES[o.type]?.isExit).length
   if (exits === 0) {
     errors.push(
-      'Kein Levelausgang: Setze eine Tür "D" ins layout.txt ODER ein "stamp-exit"-Objekt ins level.json.',
+      'Kein Levelausgang: Setze eine Tür "D" ins layout.txt ODER ein "stamp-exit"- bzw. "letzte-tuer"-Objekt ins level.json.',
     )
   } else if (exits > 1) {
     warnings.push(`${exits} Levelausgänge gefunden — erlaubt, aber ungewöhnlich.`)
