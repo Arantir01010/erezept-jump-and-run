@@ -4,6 +4,7 @@ import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
 import { bitScatter, dustPuff } from '../gfx/effects'
 import { PLAYER_TUNING as T } from './PlayerConfig'
+import { HuelleState, Huelle } from '../state/HuelleState'
 
 export type PlayerState = 'idle' | 'run' | 'jump' | 'fall' | 'duck' | 'hurt'
 
@@ -18,6 +19,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   respawnPoint = new Phaser.Math.Vector2(0, 0)
   /** Eingaben gesperrt (Cutscenes, Setpieces) — Physik läuft weiter. */
   controlsLocked = false
+  /**
+   * Hülle-Mechanik. Immer vorhanden (nie null → keine Sonderfälle im Code),
+   * aber nur wirksam, wenn das Level sie einschaltet (huelleEnabled).
+   */
+  readonly huelle = new HuelleState()
+  huelleEnabled = false
 
   private lastGroundedMs = 0
   private jumpBufferedMs = -Infinity
@@ -44,6 +51,31 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   get isInvulnerable(): boolean {
     return this.scene.time.now < this.invulnUntilMs
+  }
+
+  /** Von der GameScene pro Frame aufgerufen (nur wenn die Hülle aktiv ist). */
+  tickHuelle(deltaMs: number): void {
+    if (this.huelleEnabled) this.huelle.tick(deltaMs)
+  }
+
+  /** Hülle wechseln (Joystick hoch / Shift). true bei echtem Wechsel. */
+  tryToggleHuelle(): boolean {
+    if (!this.huelleEnabled || this.controlsLocked) return false
+    return this.huelle.toggle(this.scene.time.now).ok
+  }
+
+  /** Sehen Lauscher den Spieler? Ohne Hülle-Level immer true. */
+  get istSichtbar(): boolean {
+    return this.huelleEnabled ? this.huelle.sichtbar : true
+  }
+
+  /** Tragen Andock-Plattformen? Ohne Hülle-Level immer true. */
+  get istAndockfaehig(): boolean {
+    return this.huelleEnabled ? this.huelle.andockfaehig : true
+  }
+
+  get huelleZustand(): Huelle {
+    return this.huelle.state
   }
 
   update(): void {
@@ -79,7 +111,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     // --- Horizontalbewegung ---
-    const speed = ducking ? T.runSpeed * T.duckSpeedFactor : T.runSpeed
+    // Die Hülle wirkt NUR aufs Tempo (Klartext schnell, Verschlüsselt langsam).
+    // Sprungkraft und Schwerkraft bleiben bewusst unberührt — sonst würde die
+    // Erreichbarkeits-Simulation des Level-Compilers ungültig.
+    const huelleFactor = this.huelleEnabled ? this.huelle.speedFactor : 1
+    const speed = (ducking ? T.runSpeed * T.duckSpeedFactor : T.runSpeed) * huelleFactor
     const accel = onFloor ? T.accel : T.airAccel
     if (ax !== 0) {
       this.setAccelerationX(ax * accel)

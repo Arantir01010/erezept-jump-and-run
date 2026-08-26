@@ -58,6 +58,11 @@
       }
     }
   },
+  "huelle": {
+    "enabled": false,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
   "parTimeSeconds": 25,
   "stuckHint": {
     "de": "Immer nach rechts! Sammle 3 Daten-Kacheln, dann öffnet das Portal am Ende.",

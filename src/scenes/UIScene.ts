@@ -6,6 +6,11 @@ import { inputManager } from '../input/InputManager'
 import { sealTextureKey } from '../gfx/TextureFactory'
 import { addText } from '../gfx/text'
 import { addVignette } from '../gfx/effects'
+import { Huelle } from '../state/HuelleState'
+import { badgeSpec, badgeColorCss, badgePoints, toggleHinweis } from '../gfx/huelleBadge'
+import { telemetry } from '../telemetry/Telemetry'
+import { exportiereDatei, ladeSitzungen } from '../telemetry/speicher'
+import { sitzungKennzahlen, benchmark } from '../telemetry/kennzahlen'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 
@@ -24,6 +29,16 @@ export class UIScene extends Phaser.Scene {
   private calibTimer?: Phaser.Time.TimerEvent
   private fpsText?: Phaser.GameObjects.Text
   private portalOverlay?: Phaser.GameObjects.Container
+  /** Hülle-Anzeige: Farbe UND Form UND Text (Barrierefreiheit, KAPSEL 3.3). */
+  private huelleBadge?: Phaser.GameObjects.Container
+  private huelleShape?: Phaser.GameObjects.Graphics
+  private huelleLabel?: Phaser.GameObjects.Text
+  private huelleHint?: Phaser.GameObjects.Text
+  /** Letzter gezeichneter Zustand — verhindert Neuzeichnen pro Frame. */
+  private huelleGezeigt: Huelle | null = null
+  /** F9-Auswertung (Playtest) — nur für das Standpersonal. */
+  private auswertungText?: Phaser.GameObjects.Text
+  private huellePadGezeigt: boolean | null = null
 
   constructor() {
     super('UI')
@@ -60,6 +75,15 @@ export class UIScene extends Phaser.Scene {
       }
     })
 
+    // --- Hülle-Badge unten links (nur in Leveln mit Hülle sichtbar) ---
+    this.huelleShape = this.add.graphics()
+    this.huelleLabel = addText(this, 17, 1, '', 10)
+    this.huelleHint = addText(this, 0, 15, '', 8, { color: '#8a93a8' })
+    this.huelleBadge = this.add
+      .container(8, H - 26, [this.huelleShape, this.huelleLabel, this.huelleHint])
+      .setDepth(20)
+      .setVisible(false)
+
     this.idleText = addText(this, W / 2, 46, '', 12, {
       color: '#ffd75e',
       bg: '#20242e',
@@ -70,6 +94,11 @@ export class UIScene extends Phaser.Scene {
 
     // F8 = Kalibrier-Overlay (bewusst nicht Ctrl+Shift+I — das sind die DevTools)
     this.input.keyboard?.on('keydown-F8', () => this.toggleCalibration())
+
+    // F9 = Playtest-Auswertung: Quote gegen das 80-%-Kriterium + Export.
+    // Für das Standpersonal gedacht, deshalb eine einzelne Taste und eine
+    // Anzeige, die ohne Erklärung verständlich ist (KAPSEL 4.4).
+    this.input.keyboard?.on('keydown-F9', () => this.zeigeAuswertung())
 
     if (new URLSearchParams(location.search).get('debug') === '1') {
       this.fpsText = addText(this, 6, H - 16, '', 10, { color: '#7fd07f' })
@@ -124,7 +153,53 @@ export class UIScene extends Phaser.Scene {
     })
   }
 
+  /**
+   * Hülle-Zustand anzeigen: eigene FORM je Zustand (Kreis/Raute/Sechseck),
+   * eigene Farbe UND ausgeschriebener Name — dreifach redundant, damit
+   * Farbfehlsichtigkeit den Zustand nie verdeckt (KAPSEL 3.3).
+   * Die Zuordnung liegt in src/gfx/huelleBadge.ts (getestet).
+   */
+  private refreshHuelle(): void {
+    if (!this.huelleBadge || !this.huelleShape || !this.huelleLabel || !this.huelleHint) return
+    const game = this.scene.get('Game') as
+      | (Phaser.Scene & { player?: { huelleEnabled: boolean; huelleZustand: Huelle } })
+      | undefined
+    const player = game?.player
+    if (!player?.huelleEnabled) {
+      this.huelleBadge.setVisible(false)
+      this.huelleGezeigt = null
+      return
+    }
+    this.huelleBadge.setVisible(true)
+
+    // Hinweistext folgt der Hardware (am Stand gibt es keinen dritten Knopf)
+    const hasPad = inputManager.hasGamepad()
+    if (hasPad !== this.huellePadGezeigt) {
+      this.huellePadGezeigt = hasPad
+      this.huelleHint.setText(toggleHinweis(hasPad))
+    }
+
+    const state = player.huelleZustand
+    if (state === this.huelleGezeigt) return
+    this.huelleGezeigt = state
+
+    const spec = badgeSpec(state)
+    const g = this.huelleShape
+    g.clear()
+    g.fillStyle(spec.color, 1)
+    if (spec.form === 'kreis') {
+      g.fillCircle(6, 6, 6)
+    } else {
+      g.fillPoints(
+        badgePoints(spec.form, 12).map((p) => new Phaser.Geom.Point(p.x, p.y)),
+        true,
+      )
+    }
+    this.huelleLabel.setText(spec.label).setColor(badgeColorCss(state))
+  }
+
   private refresh(): void {
+    this.refreshHuelle()
     this.bitsText.setText(String(gameState.bits))
     this.sealSlots.forEach((slot, i) => {
       const earned = i < gameState.seals.length
@@ -138,7 +213,48 @@ export class UIScene extends Phaser.Scene {
     if (this.idleText.visible && performance.now() - this.lastIdleWarnMs > 300) {
       this.idleText.setVisible(false)
     }
+    this.refreshHuelle()
     if (this.fpsText) this.fpsText.setText(`${Math.round(this.game.loop.actualFps)} fps`)
+  }
+
+  /**
+   * Playtest-Auswertung (F9): Wie viele Durchläufe haben die Hülle FREIWILLIG
+   * und rechtzeitig genutzt? Grün ab 80 % (KAPSEL 4.1). Der Export legt die
+   * Rohdaten als Datei ab — ohne Personenbezug (siehe telemetry/events.ts).
+   */
+  private zeigeAuswertung(): void {
+    // Den laufenden Durchlauf mitzählen, damit die Anzeige nicht hinterherhängt
+    const gespeichert = ladeSitzungen().filter((s) => s.sitzung !== telemetry.sitzung)
+    const alle = [...gespeichert, telemetry.toJSON()].filter((s) => s.events.length > 0)
+    const huelleLevel = configService.levels.filter((l) => l.huelle.enabled).map((l) => l.id)
+    const b = benchmark(alle.map((s) => sitzungKennzahlen(s.sitzung, s.events, huelleLevel)))
+    const anzahl = exportiereDatei()
+
+    const W = this.cameras.main.displayWidth
+    const H = this.cameras.main.displayHeight
+    const zeilen = [
+      `Playtest-Auswertung  (${b.n} Durchläufe)`,
+      '',
+      `verstanden (proaktiv):  ${b.proaktiv}`,
+      `erst nach Treffer:      ${b.reaktiv}`,
+      `nie verschlüsselt:      ${b.passiv}`,
+      '',
+      `Quote: ${b.quote} %   Ziel: 80 %   ${b.erfuellt ? 'ERREICHT' : 'NICHT ERREICHT'}`,
+      `${anzahl} Durchläufe exportiert`,
+    ]
+    this.auswertungText?.destroy()
+    this.auswertungText = addText(this, W / 2, H / 2, zeilen.join('\n'), 11, {
+      color: b.erfuellt ? '#7fd07f' : '#ffd75e',
+      bg: '#06090f',
+      align: 'center',
+      padding: { x: 12, y: 10 },
+    })
+      .setOrigin(0.5)
+      .setDepth(95)
+    this.time.delayedCall(9000, () => {
+      this.auswertungText?.destroy()
+      this.auswertungText = undefined
+    })
   }
 
   toggleCalibration(): void {

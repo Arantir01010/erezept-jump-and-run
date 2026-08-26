@@ -1,11 +1,15 @@
 # Baut das Spiel bei jedem Push auf main und veröffentlicht dist/ auf GitHub Pages.
 # Live-URL: https://arantir01010.github.io/erezept-jump-and-run/
 # (vite base './' macht den Build pfad-unabhängig — läuft unter jedem Unterpfad)
+#
+# Reihenfolge ist Absicht: test -> validate -> build. Die schnellste und
+# aussagekräftigste Prüfung läuft zuerst, damit ein Fehler früh sichtbar wird.
 name: Deploy Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -27,7 +31,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # Engine-Logik: Hülle, Sichtlogik, Eingabe, Compiler-Regeln, Verdrahtung
+      - name: Tests
+        run: npm test
+      # Level + Configs + Kern-Schutz (SHA-256-Manifest)
+      - name: Validierung
+        run: npm run validate
+      - name: Build
+        run: npm run build
       - uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -36,6 +47,8 @@ jobs:
           path: dist
 
   deploy:
+    # Nur veröffentlichen, wenn wirklich auf main gepusht wurde
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:

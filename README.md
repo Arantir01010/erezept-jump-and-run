@@ -23,6 +23,10 @@ ob ein Gamepad angeschlossen ist:
 | Laufen / Ducken / Hoch | Pfeiltasten oder WASD | Joystick |
 | Springen | **Leertaste** | roter Button |
 | TI-Aktion (signieren, verschlüsseln, freigeben) | **E** oder Enter | blauer Button |
+| Hülle wechseln (Klartext ⇄ Verschlüsselt) | **Shift**, **Q** oder Pfeil hoch | Joystick **hoch** |
+
+Der Messestand hat nur zwei Knöpfe — deshalb liegt der Hülle-Wechsel auf
+*Joystick hoch* (abschaltbar über `gamepad.toggleOnUp`).
 
 Beide Eingaben funktionieren immer parallel — ein USB-Arcade-Encoder wird ohne
 Konfiguration erkannt (Button-Belegung in `public/config/input-bindings.json`,
@@ -37,6 +41,9 @@ Kalibrier-Overlay im Spiel: **F8**).
   Signatur-Stempel-Finale
 - **Level „KOV Gateway"** (Auto-Scroll-Glastunnel): Prüf-Podeste (stillstehen!),
   Verschlüsselungs-Dusche, Datenkraken machtlos außen am Glas
+- **Level „Die Hülle"** (Lernlevel zur Kernmechanik): Lauscher sehen nur
+  unverschlüsselte Daten, Andock-Plattformen tragen nur Klartext, VAU-Feld mit
+  ablaufendem Kontextschlüssel — Vertraulichkeit wird gespielt, nicht erklärt
 - Stadt-Band mit Portal-Dive zwischen den Stationen, HUD mit TI-Streckenkarte,
   Reward-Screen mit Offline-QR-Code, Tages-Highscore (Avatar-Icons, keine Personendaten),
   Kiosk-Modus (Attract, Idle-Reset, CrashGuard)
@@ -67,6 +74,8 @@ Messebetrieb: [docs/KONZEPT.md](docs/KONZEPT.md)
 | Befehl | Zweck |
 |---|---|
 | `npm run dev` | Entwicklung (Vite, HMR) |
+| `npm test` | Engine-Logik: 353 Tests (Hülle, Sicht, Eingabe, Compiler, Recht, Telemetrie, Verdrahtung) |
+| `npm run playtest:report` | Playtest-Dateien auswerten → Quote + Handlungsempfehlung |
 | `npm run build` | Offline-fähiger Produktions-Build nach `dist/` (inkl. Level-Build) |
 | `npm run neues-level -- 04-name` | Neues Level aus der Vorlage anlegen |
 | `npm run build:levels` | Level kompilieren `design/` → `public/` + alle Prüfungen |
@@ -76,6 +85,72 @@ Messebetrieb: [docs/KONZEPT.md](docs/KONZEPT.md)
 | `start-messe.bat` | Messestart: lokaler Server + Chrome-Kiosk (`?kiosk=1`) |
 
 URL-Parameter: `?debug=1` FPS-Anzeige · `?debug=2` Physik-Debug · `?kiosk=1` Kiosk-Härtung (Cursor aus, CrashGuard) · `?renderer=canvas` 2D-Fallback für Rechner ohne brauchbares WebGL.
+
+## Die Hülle — die Kernmechanik der Lern-Level
+
+Drei Zustände, die **gleichzeitig auf mehrere Dinge** wirken (die Lehre aus
+Ikaruga/Outland: ein Toggle trägt nur mit echten Konsequenzen):
+
+| Zustand | Tempo | Lauscher sehen dich? | Andock-Plattform trägt? |
+|---|---|---|---|
+| Klartext | 100 % | **ja** | ja |
+| Verschlüsselt | 80 % | nein | **nein** |
+| VAU (nur im Feld) | 100 % | nein | ja |
+
+Daraus entsteht der Zielkonflikt: Sichtbar bist du schnell und kannst andocken —
+unsichtbar bist du langsam und wirst nicht getragen. Der Zustand ist im HUD
+**dreifach** codiert (Farbe, Form, Text), damit Farbfehlsichtigkeit ihn nie
+verdeckt.
+
+Fachlich sauber gehalten: Die VAU ist kein Tunnel, sondern ein Raum, in dem im
+Klartext gearbeitet wird, ohne dass Betreiber mitlesen. Verschlüsselung ist nicht
+Signatur. Eine abgelaufene Sitzung schützt nicht — sie fällt in den Klartext
+zurück (und damit in die Sichtbarkeit).
+
+Pro Level einschaltbar (`"huelle": { "enabled": true }`) — die drei Messe-Level
+laufen unverändert ohne sie. Alle Regeln: [`design/LEVELBAU.md`](design/LEVELBAU.md).
+
+## Playtest & Wirkungsmessung
+
+Das Konzept nennt ein **Abbruchkriterium**: Verstehen weniger als 80 % der
+Tester „sichtbar vs. sicher" ohne Text, wird die Mechanik überarbeitet — nicht
+weiterer Content gebaut. Dafür ist alles vorbereitet:
+
+- **Telemetrie** zählt mit, ob die Hülle **freiwillig und rechtzeitig** genutzt
+  wird. Entscheidend ist die Reihenfolge: Wer verschlüsselt, *bevor* ein Lauscher
+  ihn erwischt, hat die Regel aus der Situation gelesen (*proaktiv*). Wer erst
+  danach reagiert, hat die Strafe gebraucht (*reaktiv*).
+- **F9 im Spiel** zeigt die Quote gegen die 80-%-Schwelle und exportiert die
+  Rohdaten als Datei.
+- **`npm run playtest:report`** führt mehrere Exportdateien zusammen (auch von
+  verschiedenen Rechnern) und liefert eine **Ableitung**: Bei verfehltem Ziel
+  unterscheidet es, ob die Tester die Regel *zu spät* anwandten (dann ist die
+  Einführung zu leise) oder *gar nicht erkannten* (dann muss die Mechanik selbst
+  überarbeitet werden). Das sind völlig verschiedene Maßnahmen.
+- **Fragebogen** (7 Fragen) prüft das Wissen vor und nach dem Spielen. Jede Frage
+  hängt an einem der Vereinfachungsfehler, die das Konzept benennt — ein Test
+  erzwingt, dass keiner davon aus dem Bogen verschwindet.
+
+Anleitung für die Durchführung: **[`docs/PLAYTEST.md`](docs/PLAYTEST.md)**
+
+**Datenschutz:** Die Telemetrie erfasst keine Personendaten — kein Name, keine
+Kennung, keine IP, kein Datum, nur Millisekunden seit Sitzungsbeginn. Nichts wird
+übertragen; die Daten bleiben im Browser, bis jemand F9 drückt. Abschaltbar über
+`"telemetrie": false` in `public/config/game-config.json`. Das Spiel erklärt
+Vertraulichkeit — es hält sich selbst daran.
+
+## Tests
+
+```bash
+npm test        # Engine-Logik (232 Tests, ohne Browser)
+npm run validate  # Configs, Level, Erreichbarkeit, Kern-Schutz
+```
+
+Bewusst ohne Test-Framework: Das Harness (`tools/test/harness.ts`) hat keine
+Abhängigkeiten, `npm test` läuft damit auch auf einem frisch aufgesetzten
+Messe-PC. Geprüft wird u. a. Zustandslogik, Sichtkegel, Toggle-Belegung auf
+2-Button-Hardware, alle Compiler-Regeln, die Baustein-Registry und die
+Verdrahtung der Szenen.
 
 ## Tech-Stack
 

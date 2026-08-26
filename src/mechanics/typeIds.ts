@@ -20,6 +20,12 @@ export const MECHANIC_TYPE_IDS = [
   'stillstand-podest',
   'krypto-dusche',
   'tube-scroll',
+  // Hülle-Mechanik (KAPSEL 2.1) — Bausteine folgen in der Engine-Stufe,
+  // die IDs stehen hier, damit Katalog und Engine synchron bleiben.
+  'lauscher',
+  'andock-plattform',
+  'vau-feld',
+  'kontext-anker',
   // Ausbaustufe (Stubs im Prototyp)
   'pruef-scanner',
   'rechte-tueren',

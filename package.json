@@ -8,6 +8,8 @@
     "dev": "vite",
     "build": "npm run build:levels && tsc --noEmit && vite build",
     "preview": "vite preview",
+    "test": "tsx tools/test/run.ts",
+    "playtest:report": "tsx tools/playtest-report.ts",
     "build:levels": "tsx tools/build-levels.ts",
     "neues-level": "tsx tools/new-level.ts",
     "validate": "tsx tools/validate-levels.ts",

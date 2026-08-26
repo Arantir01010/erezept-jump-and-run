@@ -223,6 +223,36 @@ const KRALLE_FRAMES: Record<string, string[]> = {
   ],
 }
 
+/**
+ * LAUSCHER — das mitlesende Auge (KAPSEL Level 3).
+ * Warmes Orange als Gegenfarbe zur kühlen TI-Schutzoptik (Cyan/Violett):
+ * „warm = offen/sichtbar, kühl = geschützt" zieht sich durch das ganze Spiel.
+ * Frame 1 ist der Blinzler — er macht das Auge lebendig, ohne zu blitzen.
+ */
+const LAUSCHER_COLORS: ColorMap = { L: '#ff8a3a', E: '#c8641e', W: '#ffe9c8', P: '#20242e' }
+const LAUSCHER_FRAMES: Record<string, string[]> = {
+  'lauscher-0': [
+    '..LLLLLL..',
+    '.LEEEEEEL.',
+    'LEWWWWWWEL',
+    'LEWWPPWWEL',
+    'LEWWPPWWEL',
+    'LEWWWWWWEL',
+    '.LEEEEEEL.',
+    '..LLLLLL..',
+  ],
+  'lauscher-1': [
+    '..LLLLLL..',
+    '.LEEEEEEL.',
+    'LEEEEEEEEL',
+    'LEEEEEEEEL',
+    'LEEEEEEEEL',
+    'LEEEEEEEEL',
+    '.LEEEEEEL.',
+    '..LLLLLL..',
+  ],
+}
+
 const KRAKE_COLORS: ColorMap = { K: '#7a4fd0', D: '#4a2f8a', E: '#ffffff', P: '#20242e' }
 const KRAKE_FRAMES: Record<string, string[]> = {
   'krake-0': [
@@ -598,6 +628,7 @@ export function generateAllTextures(scene: Phaser.Scene, themes: Themes): void {
   for (const [key, pattern] of Object.entries(REZI_FRAMES)) drawPattern(scene, key, pattern, REZI_COLORS)
   for (const [key, pattern] of Object.entries(KRALLE_FRAMES)) drawPattern(scene, key, pattern, KRALLE_COLORS)
   for (const [key, pattern] of Object.entries(KRAKE_FRAMES)) drawPattern(scene, key, pattern, KRAKE_COLORS)
+  for (const [key, pattern] of Object.entries(LAUSCHER_FRAMES)) drawPattern(scene, key, pattern, LAUSCHER_COLORS)
   for (const obj of OBJECT_FRAMES) drawPattern(scene, obj.key, obj.pattern, obj.colors)
   makeAvatars(scene)
   for (const [themeKey, theme] of Object.entries(themes)) makeTileset(scene, themeKey, theme)
@@ -621,5 +652,8 @@ export function createAnimations(scene: Phaser.Scene): void {
   ensure('player-hurt', ['player-hurt'], 1, 0)
   ensure('rezi-float', ['rezi-0', 'rezi-1'], 4, -1)
   ensure('krake-swim', ['krake-0', 'krake-1'], 3, -1)
+  // Blinzeln: 3 Frames offen, 1 zu -> ~0,75 Hz. Bewusst weit unter 3 Hz
+  // (Barrierefreiheit: keine Blitzeffekte, KAPSEL 3.3).
+  ensure('lauscher-blink', ['lauscher-0', 'lauscher-0', 'lauscher-0', 'lauscher-1'], 3, -1)
   ensure('portal-spin', ['portal-0', 'portal-1'], 4, -1)
 }

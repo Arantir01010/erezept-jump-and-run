@@ -1,0 +1,87 @@
+{
+  "_generiert": "AUS design/levels/04-die-huelle/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "04-die-huelle",
+  "station": {
+    "name": {
+      "de": "Die Hülle",
+      "en": "The shell"
+    },
+    "portalText": {
+      "de": "Station: Die Hülle — unverschlüsselt liest jeder mit.",
+      "en": "Station: the shell — unencrypted, anyone can read along."
+    },
+    "reziText": {
+      "de": "Verschlüsselt bin ich für Lauscher unsichtbar!",
+      "en": "Encrypted, eavesdroppers cannot see me!"
+    },
+    "stampText": {
+      "de": "✓ Vertraulich unterwegs — niemand hat mitgelesen.",
+      "en": "✓ Travelling confidentially — nobody read along."
+    },
+    "badge": "Vertraulichkeit"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Datenleitung",
+      "en": "Data line"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "kov-gateway",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/04-die-huelle.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden und schnell sein!",
+        "en": "This platform only carries plain text — become visible briefly and be quick!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody can see you!"
+      }
+    },
+    "kontext-anker": {
+      "hint": {
+        "de": "Sitzung aufgefrischt — der Kontextschlüssel gilt wieder!",
+        "en": "Session refreshed — the context key is valid again!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 75,
+  "stuckHint": {
+    "de": "Immer nach rechts! Hülle wechseln mit Joystick HOCH (oder Shift).",
+    "en": "Keep heading right! Switch your shell with joystick UP (or Shift)."
+  }
+}

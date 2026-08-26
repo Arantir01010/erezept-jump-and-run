@@ -5,6 +5,13 @@ type MechanicCtor = new (host: MechanicHost, obj: TiledObj, params: Record<strin
 
 const registry = new Map<string, MechanicCtor>()
 
+/**
+ * Nur für Tests (tools/test/registry.test.ts): Damit prüfbar ist, dass zu jedem
+ * baubaren Objekt-Typ wirklich eine Klasse registriert wurde. Fehlt eine, würde
+ * das Spiel das Objekt still überspringen — ein grüner Build mit leerem Level.
+ */
+export const registryFuerTests: ReadonlyMap<string, MechanicCtor> = registry
+
 export function registerMechanic(type: string, ctor: MechanicCtor): void {
   registry.set(type, ctor)
 }

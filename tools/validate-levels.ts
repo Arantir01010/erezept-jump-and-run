@@ -9,6 +9,9 @@
  *      Softlocks, Erreichbarkeit) UND ob die erzeugten public/-Dateien aktuell sind
  *   3. Den Spielkern (npm run guard): keine geschützte Datei verändert/ergänzt/gelöscht
  *
+ * Hinweis: Die Engine-Logik selbst (Hülle, Sichtlogik, Eingabe, Compiler-Regeln)
+ * prüft `npm test` — beides zusammen ist die vollständige Abnahme.
+ *
  * GESCHÜTZTE DATEI: Änderungen nur durch Menschen (npm run guard).
  */
 import { readFileSync, existsSync } from 'node:fs'
@@ -72,6 +75,9 @@ if (guard.ok) {
   console.error('  → Bewusste Engine-Änderung durch einen Menschen? Dann: npm run guard:update')
   console.error('  → Levelbau-KI? Änderung zurücknehmen — erlaubt sind nur design/levels/**, design/playlist.json, public/config/themes.json')
 }
+
+console.log('\n— Hinweis —')
+console.log('Engine-Logik (Hülle, Sicht, Eingabe, Compiler) prüft: npm test')
 
 console.log('')
 if (errors > 0) {

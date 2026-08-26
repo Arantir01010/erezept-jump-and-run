@@ -3,6 +3,9 @@ import { configService } from '../level/ConfigService'
 import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
 import { assist } from '../state/Assist'
+import { protokoll } from '../state/Protokoll'
+import { telemetry } from '../telemetry/Telemetry'
+import { speichereSitzung } from '../telemetry/speicher'
 import { getHighscores } from '../state/Highscore'
 import { drawBackdrop } from '../gfx/backdrop'
 import { addText } from '../gfx/text'
@@ -69,7 +72,11 @@ export class AttractScene extends Phaser.Scene {
       })
     }
 
-    addText(this, W / 2, H - 12, cfg.event + ' — Einfach. Sicher. Digital.', 9, { color: '#7c88a6' }).setOrigin(0.5)
+    addText(this, W / 2, H - 22, cfg.event + ' — Einfach. Sicher. Digital.', 9, { color: '#7c88a6' }).setOrigin(0.5)
+
+    // Rechtlicher Hinweis (KAPSEL 4.5): klein am Rand, aber immer sichtbar.
+    // Inhalt kommt aus der Config und wird von tools/test/recht.test.ts geprüft.
+    addText(this, W / 2, H - 10, t(cfg.disclaimer), 8, { color: '#5f6a85' }).setOrigin(0.5)
 
     addVignette(this, W, H)
   }
@@ -86,8 +93,13 @@ export class AttractScene extends Phaser.Scene {
   update(): void {
     this.refreshControlLabels()
     if (inputManager.anyButtonJustPressed()) {
+      // Der vorige Durchlauf ist vorbei: sichern, dann eine frische Sitzung.
+      // Reihenfolge ist wichtig — nach neueSitzung() waere er weg.
+      speichereSitzung(telemetry.toJSON())
+      telemetry.neueSitzung()
       gameState.reset()
       assist.reset()
+      protokoll.reset()
       if (!this.scene.isActive('UI')) this.scene.launch('UI')
       this.scene.start('City', { toLevelIndex: 0 })
     }

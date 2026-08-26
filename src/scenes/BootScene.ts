@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { configService } from '../level/ConfigService'
 import { inputManager } from '../input/InputManager'
 import { idleWatchdog } from '../kiosk/IdleWatchdog'
+import { telemetry } from '../telemetry/Telemetry'
 import { addText } from '../gfx/text'
 import { setupDesignCamera } from '../gfx/view'
 
@@ -23,6 +24,8 @@ export class BootScene extends Phaser.Scene {
       .load()
       .then(() => {
         inputManager.init(this.game, configService.bindings)
+        // Telemetrie folgt der Config (KAPSEL 4.4) — im Messebetrieb abschaltbar
+        telemetry.aktiv = configService.gameConfig.telemetrie
         idleWatchdog.init(this.game, configService.gameConfig.idleResetSeconds)
         this.scene.start('Preload')
       })

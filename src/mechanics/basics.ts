@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { Mechanic, objCenter } from './Mechanic'
 import { registerMechanic } from './registry'
 import { gameState } from '../state/GameState'
+import { telemetry } from '../telemetry/Telemetry'
 import { collectSparkle, addGlow, destroyGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
@@ -126,6 +127,7 @@ export class Collectible extends Mechanic {
       sprite.destroy()
       destroyGlow(this.host.scene, glow)
       gameState.addBits(1)
+      telemetry.note('gesammelt', this.host.scene.time.now)
       collectSparkle(this.host.scene, x, y)
       this.host.scene.game.events.emit('hud:update')
     })
@@ -146,6 +148,7 @@ export class Checkpoint extends Mechanic {
     this.host.addSensor(sprite, (player) => {
       if (this.active) return
       this.active = true
+      telemetry.note('checkpoint', this.host.scene.time.now)
       sprite.setAlpha(1)
       sprite.setTint(0xffffff)
       player.setRespawn(x, y - 8)

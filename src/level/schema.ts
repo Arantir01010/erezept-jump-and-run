@@ -37,6 +37,17 @@ export const LevelSchema = z.object({
     label: LTextSchema,
   }),
   mechanics: z.record(z.record(z.unknown())).default({}),
+  /**
+   * Hülle-Kernmechanik (KAPSEL 2.1). Fehlt der Block, ist sie im Level aus —
+   * die drei Messe-Level bleiben damit unverändert spielbar.
+   */
+  huelle: z
+    .object({
+      enabled: z.boolean().default(false),
+      start: z.enum(['klartext', 'verschluesselt']).default('klartext'),
+      toggleCooldownMs: z.number().min(0).max(1000).default(150),
+    })
+    .default({ enabled: false, start: 'klartext', toggleCooldownMs: 150 }),
   parTimeSeconds: z.number().positive(),
   /** Optionaler Generaltipp bei Festhängen (Default nennt die Grundsteuerung). */
   stuckHint: LTextSchema.optional(),
@@ -58,6 +69,16 @@ export const GameConfigSchema = z.object({
     rewardScreenSeconds: z.number().positive().default(45),
     minQrSeconds: z.number().positive().default(10),
   }),
+  /**
+   * Rechtlicher Hinweis (KAPSEL 4.5). Muss die Unabhängigkeit von der gematik
+   * aussprechen — src/legal.ts prüft das, tools/test/recht.test.ts erzwingt es.
+   */
+  disclaimer: LTextSchema.default({
+    de: 'Inoffizielles Lernspiel — kein Produkt der gematik. Dient der Wissensvermittlung.',
+    en: 'Unofficial educational game — not a gematik product. For knowledge transfer only.',
+  }),
+  /** Telemetrie (KAPSEL 4.4): im Playtest an, im reinen Messebetrieb abschaltbar. */
+  telemetrie: z.boolean().default(true),
   idleResetSeconds: z.number().positive().default(60),
   softAutopilotSeconds: z.number().positive().default(240),
 })
@@ -78,6 +99,10 @@ export const BindingsSchema = z.object({
     axisDeadzone: z.number().min(0).max(0.9).default(0.4),
     jumpButtons: z.array(z.number().int().min(0)),
     actionButtons: z.array(z.number().int().min(0)),
+    /** Optionaler dritter Button (falls die Hardware einen hat). */
+    toggleButtons: z.array(z.number().int().min(0)).default([]),
+    /** Joystick HOCH schaltet die Hülle — Standard auf 2-Button-Hardware. */
+    toggleOnUp: z.boolean().default(true),
     useDpad: z.boolean().default(true),
   }),
   keyboard: z.object({
@@ -87,6 +112,8 @@ export const BindingsSchema = z.object({
     down: z.array(z.string()),
     jump: z.array(z.string()),
     action: z.array(z.string()),
+    /** Hülle wechseln — Default Shift/Q (Messe: Joystick hoch). */
+    toggle: z.array(z.string()).default(['SHIFT', 'Q']),
   }),
 })
 

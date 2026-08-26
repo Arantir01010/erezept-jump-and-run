@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
-import { GameAction, ALL_ACTIONS } from './actions'
+import { GameAction } from './actions'
 import { bindingNameToCode } from './keycodes'
+import { resolveAll, axisXOf, axisYOf, type PadSnapshot } from './resolve'
 import type { Bindings } from '../level/schema'
 
 /**
@@ -29,6 +30,7 @@ class InputManagerImpl {
       [GameAction.Down]: bindings.keyboard.down.map(bindingNameToCode),
       [GameAction.Jump]: bindings.keyboard.jump.map(bindingNameToCode),
       [GameAction.Action]: bindings.keyboard.action.map(bindingNameToCode),
+      [GameAction.Toggle]: bindings.keyboard.toggle.map(bindingNameToCode),
     }
     for (const codes of Object.values(this.keyboardMap)) codes.forEach((c) => this.preventCodes.add(c))
 
@@ -46,37 +48,31 @@ class InputManagerImpl {
     game.events.on(Phaser.Core.Events.PRE_STEP, () => this.update())
   }
 
-  private gamepadActions(): Set<GameAction> {
-    const actions = new Set<GameAction>()
+  /** Browser-Gamepads in prüfbare Momentaufnahmen übersetzen. */
+  private padSnapshots(): (PadSnapshot | null)[] {
     const pads = navigator.getGamepads ? navigator.getGamepads() : []
-    const { axisDeadzone, jumpButtons, actionButtons, useDpad } = this.bindings.gamepad
+    const out: (PadSnapshot | null)[] = []
     for (const pad of pads) {
-      if (!pad || !pad.connected) continue
-      const ax = pad.axes[0] ?? 0
-      const ay = pad.axes[1] ?? 0
-      if (ax < -axisDeadzone) actions.add(GameAction.Left)
-      if (ax > axisDeadzone) actions.add(GameAction.Right)
-      if (ay < -axisDeadzone) actions.add(GameAction.Up)
-      if (ay > axisDeadzone) actions.add(GameAction.Down)
-      if (useDpad) {
-        if (pad.buttons[12]?.pressed) actions.add(GameAction.Up)
-        if (pad.buttons[13]?.pressed) actions.add(GameAction.Down)
-        if (pad.buttons[14]?.pressed) actions.add(GameAction.Left)
-        if (pad.buttons[15]?.pressed) actions.add(GameAction.Right)
+      if (!pad) {
+        out.push(null)
+        continue
       }
-      if (jumpButtons.some((i) => pad.buttons[i]?.pressed)) actions.add(GameAction.Jump)
-      if (actionButtons.some((i) => pad.buttons[i]?.pressed)) actions.add(GameAction.Action)
+      out.push({
+        connected: pad.connected,
+        buttons: pad.buttons.map((b) => b.pressed),
+        axes: [...pad.axes],
+      })
     }
-    return actions
+    return out
   }
 
+  /**
+   * Einmal pro Frame: Rohzustände einsammeln und von src/input/resolve.ts in
+   * Aktionen übersetzen (dort liegt die getestete Logik inkl. Toggle-auf-Hoch).
+   */
   private update(): void {
     this.prev = this.curr
-    const next = this.gamepadActions()
-    for (const action of ALL_ACTIONS) {
-      if (this.keyboardMap[action]?.some((code) => this.pressedCodes.has(code))) next.add(action)
-    }
-    this.curr = next
+    this.curr = resolveAll(this.padSnapshots(), this.pressedCodes, this.keyboardMap, this.bindings)
     if (this.curr.size > 0) this.lastInputMs = performance.now()
   }
 
@@ -90,11 +86,11 @@ class InputManagerImpl {
 
   /** -1 | 0 | 1 für horizontale Joystick-Lage. */
   axisX(): number {
-    return (this.isDown(GameAction.Right) ? 1 : 0) - (this.isDown(GameAction.Left) ? 1 : 0)
+    return axisXOf(this.curr)
   }
 
   axisY(): number {
-    return (this.isDown(GameAction.Down) ? 1 : 0) - (this.isDown(GameAction.Up) ? 1 : 0)
+    return axisYOf(this.curr)
   }
 
   /** Roter ODER blauer Button frisch gedrückt (Attract-Start, Overlays). */
@@ -102,7 +98,11 @@ class InputManagerImpl {
     return this.justPressed(GameAction.Jump) || this.justPressed(GameAction.Action)
   }
 
-  /** Steht der Joystick komplett neutral? (Stillstand-Podest) */
+  /**
+   * Steht der Joystick komplett neutral? (Stillstand-Podest)
+   * Hinweis: Toggle-aus-Hoch zählt mit — „hoch" ist eine echte Eingabe und
+   * darf den Scan zu Recht unterbrechen.
+   */
   isNeutral(): boolean {
     return this.curr.size === 0
   }

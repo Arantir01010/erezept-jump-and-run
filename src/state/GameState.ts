@@ -22,6 +22,8 @@ class GameState {
   cleanInteractions = 0
   /** Bit-Stand beim Levelstart — Sammelziele gelten PRO Level, Bits bleiben Run-Währung. */
   private levelStartBits = 0
+  /** Endstand je Level — Grundlage der Siegel-Bilanz (src/state/siegelReport.ts). */
+  private bitsPerLevel: Record<string, number> = {}
 
   reset(): void {
     this.levelIndex = 0
@@ -32,6 +34,7 @@ class GameState {
     this.runStartMs = performance.now()
     this.cleanInteractions = 0
     this.levelStartBits = 0
+    this.bitsPerLevel = {}
   }
 
   /** Beim Betreten eines Levels aufrufen (GameScene.create). */
@@ -58,7 +61,14 @@ class GameState {
 
   addSeal(sealId: string, levelId: string): void {
     this.seals.push({ sealId, levelId })
+    // Bit-Stand dieses Levels festhalten, solange er noch bekannt ist
+    this.bitsPerLevel[levelId] = this.bitsThisLevel
     this.score += POINTS_PER_SEAL
+  }
+
+  /** In diesem Level gesammelte Prüfsummen (nach Levelende). */
+  bitsIn(levelId: string): number {
+    return this.bitsPerLevel[levelId] ?? 0
   }
 
   /** Fehlerfreie Sicherheits-Interaktion (Timing-Gate im ersten Anlauf usw.) */

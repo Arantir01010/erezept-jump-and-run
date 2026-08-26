@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 import { inputManager } from '../input/InputManager'
+import { telemetry } from '../telemetry/Telemetry'
+import { speichereSitzung } from '../telemetry/speicher'
 
 /** Szenen, in denen Inaktivität zum Reset in den Attract-Mode führt. */
 const GAMEPLAY_SCENES = ['City', 'Game', 'Reward', 'UI']
@@ -34,6 +36,11 @@ class IdleWatchdog {
   }
 
   reset(): void {
+    // Abbruchpunkt festhalten UND den Durchlauf sichern, BEVOR die Szenen
+    // gestoppt werden — sonst ist die Beobachtung verloren (KAPSEL 4.4).
+    telemetry.note('level-abbruch', performance.now(), 'idle')
+    speichereSitzung(telemetry.toJSON())
+
     const sm = this.game.scene
     for (const key of GAMEPLAY_SCENES) {
       if (sm.isActive(key) || sm.isSleeping(key)) sm.stop(key)

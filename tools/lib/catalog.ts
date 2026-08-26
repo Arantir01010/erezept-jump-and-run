@@ -90,6 +90,8 @@ export interface ObjectTypeDef {
   makesPlatform?: boolean
   /** Spieler muss die Zone betreten können (Spielbarkeits-Check). */
   needsStandableInZone?: boolean
+  /** Objekt funktioniert nur mit eingeschalteter Hülle (huelle.enabled). */
+  needsHuelle?: boolean
   /** Kurzbeschreibung für Fehlermeldungen. */
   doc: string
 }
@@ -196,6 +198,50 @@ export const OBJECT_TYPES: Record<string, ObjectTypeDef> = {
     defaults: { tw: 1, th: 1 },
     doc: 'Schadenszone (kostet Datenbits). In Tube-Leveln VERBOTEN (geschützter Tunnel)',
   },
+  lauscher: {
+    schema: z.strictObject({
+      type: z.literal('lauscher'),
+      patrol: z.number().min(-240).max(240).optional(),
+      speed: z.number().min(5).max(120).optional(),
+      reach: z.number().min(24).max(240).optional(),
+      spread: z.number().min(6).max(60).optional(),
+      pauseMs: z.number().min(0).max(4000).optional(),
+      ...baseFields,
+    }),
+    defaults: { tw: 1, th: 1 },
+    needsHuelle: true,
+    doc: 'Lauscher: sieht NUR Klartext — verschlüsselt/VAU bleibt unsichtbar (braucht huelle.enabled)',
+  },
+  'andock-plattform': {
+    schema: z.strictObject({
+      type: z.literal('andock-plattform'),
+      ...baseFields,
+    }),
+    defaults: { tw: 3, th: 0.4 },
+    makesPlatform: true,
+    needsHuelle: true,
+    doc: 'Plattform, die NUR im Klartext (oder in der VAU) traegt — erzwingt Sichtbarkeit',
+  },
+  'vau-feld': {
+    schema: z.strictObject({
+      type: z.literal('vau-feld'),
+      ttlMs: z.number().min(0).max(30000).optional(),
+      ...baseFields,
+    }),
+    defaults: { tw: 6, th: 5 },
+    needsStandableInZone: true,
+    needsHuelle: true,
+    doc: 'VAU-Feld: innen Klartext-schnell UND unsichtbar. ttlMs > 0 = Kontextschluessel laeuft ab',
+  },
+  'kontext-anker': {
+    schema: z.strictObject({
+      type: z.literal('kontext-anker'),
+      ...baseFields,
+    }),
+    defaults: { tw: 1, th: 1.5 },
+    needsHuelle: true,
+    doc: 'Frischt eine ablaufende VAU-Sitzung auf (nur sinnvoll bei vau-feld mit ttlMs)',
+  },
   deco: {
     schema: z.strictObject({
       type: z.literal('deco'),
@@ -264,6 +310,25 @@ export const MECHANICS_SCHEMAS: Record<string, z.ZodType<Record<string, unknown>
   'tube-scroll': z.strictObject({
     speed: z.number().min(30).max(90).optional(),
   }),
+  lauscher: z.strictObject({
+    speed: z.number().min(5).max(120).optional(),
+    reach: z.number().min(24).max(240).optional(),
+    spread: z.number().min(6).max(60).optional(),
+    pauseMs: z.number().min(0).max(4000).optional(),
+    seenText: LTextSchema.optional(),
+    akteur: LTextSchema.optional(),
+    huelleHint: LTextSchema.optional(),
+  }),
+  'andock-plattform': z.strictObject({
+    hint: LTextSchema.optional(),
+  }),
+  'vau-feld': z.strictObject({
+    ttlMs: z.number().min(0).max(30000).optional(),
+    hint: LTextSchema.optional(),
+  }),
+  'kontext-anker': z.strictObject({
+    hint: LTextSchema.optional(),
+  }),
   gate: z.strictObject({
     bumpHint: LTextSchema.optional(),
   }),
@@ -285,8 +350,8 @@ export const PLAYABLE_CAMERA_MODES = ['horizontal', 'tube'] as const
 export const KNOWN_SEAL_ICONS = ['seal-vsdm', 'seal-egk', 'seal-vpn', 'seal-generic']
 
 /** Sprites/Animationen, die deco benutzen darf (prozedural erzeugt, TextureFactory). */
-export const KNOWN_DECO_SPRITES = ['krake-0', 'krake-1', 'kralle-open', 'kralle-closed']
-export const KNOWN_DECO_ANIMS = ['krake-swim']
+export const KNOWN_DECO_SPRITES = ['krake-0', 'krake-1', 'kralle-open', 'kralle-closed', 'lauscher-0', 'lauscher-1']
+export const KNOWN_DECO_ANIMS = ['krake-swim', 'lauscher-blink']
 
 /** Gegner-Skins laut Konzept (rein kosmetische Kennung, Freitext erlaubt). */
 export const KNOWN_ENEMY_SKINS = [
@@ -321,10 +386,18 @@ export const DesignLevelSchema = z.strictObject({
   enemySkin: z.string(),
   collectible: z.strictObject({
     type: z.literal('datenbit'),
-    countRequired: z.number().int().min(0).max(40),
+    countRequired: z.number().int().min(0).max(60),
     label: LTextSchema,
   }),
   mechanics: z.record(z.record(z.unknown())).default({}),
+  /** Hülle-Kernmechanik (KAPSEL 2.1) — fehlt der Block, ist sie aus. */
+  huelle: z
+    .strictObject({
+      enabled: z.boolean(),
+      start: z.enum(['klartext', 'verschluesselt']).optional(),
+      toggleCooldownMs: z.number().min(0).max(1000).optional(),
+    })
+    .optional(),
   parTimeSeconds: z.number().min(10).max(120),
   stuckHint: LTextSchema.optional(),
   objects: z.array(z.record(z.unknown())).default([]),

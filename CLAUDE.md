@@ -11,8 +11,9 @@ ist fertig und versiegelt — Inhalte (Level) werden ausschließlich datengetrie
    erlaubte Zeichen, Objektkatalog, Designregeln, Befehle, Fehlermeldungen.
 2. Du änderst NUR: `design/levels/<level-id>/**`, `design/playlist.json` und
    (nur für neue Farbwelten) `public/config/themes.json`.
-3. Nach jeder Änderung: `npm run build:levels`, zum Abschluss `npm run validate` —
-   beides muss fehlerfrei (✓) sein. Erst dann ist deine Aufgabe erledigt.
+3. Nach jeder Änderung: `npm run build:levels`, zum Abschluss `npm run validate`
+   UND `npm test` — alle drei müssen fehlerfrei (✓) sein. Erst dann ist deine
+   Aufgabe erledigt.
 
 ## Absolute Tabuzonen (für Level-Aufgaben)
 
@@ -27,6 +28,22 @@ ist fertig und versiegelt — Inhalte (Level) werden ausschließlich datengetrie
   `npm run validate`). Jede Abweichung wird gemeldet und gilt als Fehler.
   `npm run guard:update` ist Menschen vorbehalten.
 
+## Hülle-Level (Klartext ⇄ Verschlüsselt ⇄ VAU)
+
+Der Baukasten kann die Kernmechanik der Lern-Level. Einschalten pro Level mit
+`"huelle": { "enabled": true }`; danach stehen `lauscher`, `andock-plattform`,
+`vau-feld` und `kontext-anker` zur Verfügung. **Alle Regeln dazu stehen in
+`design/LEVELBAU.md`, Abschnitt „Hülle-Mechanik".**
+
+Drei Dinge, die du fachlich NICHT verfälschen darfst:
+- Die VAU ist kein Tunnel, sondern ein Raum, in dem im Klartext gearbeitet wird,
+  ohne dass Betreiber mitlesen.
+- Verschlüsselung ist nicht Signatur (signiert wird per `stamp-exit`).
+- Eine abgelaufene Sitzung schützt nicht — sie fällt in den Klartext zurück.
+
+In Hülle-Leveln prüft der Compiler Sprungweiten strenger (~4 statt ~5 Kacheln),
+weil verschlüsselt langsamer gelaufen wird. Halte Pflichtsprünge kürzer.
+
 ## Wenn die Aufgabe mehr verlangt als der Baukasten kann
 
 Neue Mechanik, neue Grafik, neuer Kameramodus, Engine-/Physik-Änderungen:
@@ -37,7 +54,8 @@ Ende deiner Antwort unter „Benötigt Engine-Arbeit (Mensch/Senior-KI)" auf.
 
 | Befehl | Zweck |
 |---|---|
-| `npm run neues-level -- 04-name` | neues Level aus der Vorlage anlegen |
+| `npm test` | Engine-Logik prüfen (Hülle, Sicht, Eingabe, Compiler, Verdrahtung) |
+| `npm run neues-level -- 05-name` | neues Level aus der Vorlage anlegen |
 | `npm run build:levels` | design/ → Spieldateien kompilieren + prüfen |
 | `npm run validate` | Komplett-Prüfung (Configs, Level, Erreichbarkeit, Kern-Schutz) |
 | `npm run dev` | Spiel lokal starten (http://localhost:5173) |

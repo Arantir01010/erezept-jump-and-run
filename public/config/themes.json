@@ -30,21 +30,5 @@
     "groundTop": "#2f7a6b",
     "accent": "#ffd75e",
     "detail": "#79c9b7"
-  },
-  "fachdienst": {
-    "skyTop": "#04101c",
-    "skyBottom": "#0a2436",
-    "ground": "#123043",
-    "groundTop": "#1d5a70",
-    "accent": "#ffd75e",
-    "detail": "#4bb8c9"
-  },
-  "akte": {
-    "skyTop": "#1a1024",
-    "skyBottom": "#2e1c3e",
-    "ground": "#3a2a4a",
-    "groundTop": "#5a3f6e",
-    "accent": "#ffb64a",
-    "detail": "#b98ad0"
   }
 }

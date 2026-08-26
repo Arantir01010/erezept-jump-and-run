@@ -62,5 +62,10 @@
       }
     }
   },
+  "huelle": {
+    "enabled": false,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
   "parTimeSeconds": 35
 }

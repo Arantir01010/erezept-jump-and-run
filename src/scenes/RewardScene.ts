@@ -7,6 +7,10 @@ import { createQrTexture } from '../reward/QrRenderer'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
 import { sealTextureKey } from '../gfx/TextureFactory'
+import { protokoll } from '../state/Protokoll'
+import { telemetry } from '../telemetry/Telemetry'
+import { speichereSitzung } from '../telemetry/speicher'
+import { bildeBilanz, formatSumme } from '../state/siegelReport'
 import { addText } from '../gfx/text'
 import { addGlow, addVignette } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
@@ -33,6 +37,8 @@ export class RewardScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Erfolgreich durchgespielt: Durchlauf sichern (KAPSEL 4.4)
+    speichereSitzung(telemetry.toJSON())
     this.scene.stop('UI')
     this.elapsedMs = 0
     this.avatarSaved = false
@@ -82,9 +88,30 @@ export class RewardScene extends Phaser.Scene {
       })
       .catch((err: unknown) => console.error('[reward] QR fehlgeschlagen', err))
 
+    // Zugriffsprotokoll (KAPSEL 2.7/3.2): Der Spieler sieht seinen eigenen Weg
+    // als Protokoll — und ob er dabei unbeobachtet blieb. Fachliches Motiv ist
+    // das echte ePA-Zugriffsprotokoll.
+    const bilanz = bildeBilanz(
+      protokoll,
+      gameState.seals.map((seal) => {
+        const level = configService.levels.find((l) => l.id === seal.levelId)
+        return {
+          levelId: seal.levelId,
+          name: level ? t(level.station.name) : seal.levelId,
+          bits: gameState.bitsIn(seal.levelId),
+          bitsRequired: level?.collectible.countRequired ?? 0,
+        }
+      }),
+    )
+    if (bilanz.zeilen.length > 0) {
+      addText(this, W / 2, 208, formatSumme(bilanz), 11, {
+        color: bilanz.lueckenlos ? '#7fd07f' : '#cfe0ff',
+      }).setOrigin(0.5)
+    }
+
     // Score + Sicherheitsstufe
     const rank = gameState.rank()
-    addText(this, W / 2, 226, `${gameState.score} Punkte  ·  Sicherheitsstufe: ${t(rank.label)}`, 12, {
+    addText(this, W / 2, 224, `${gameState.score} Punkte  ·  Sicherheitsstufe: ${t(rank.label)}`, 12, {
       color: rank.key === 'gold' ? '#ffd75e' : rank.key === 'silber' ? '#c8d4e8' : '#d09a6a',
     }).setOrigin(0.5)
 
@@ -103,7 +130,10 @@ export class RewardScene extends Phaser.Scene {
         .setStrokeStyle(2, 0xffd75e)
     }
 
-    this.hintText = addText(this, W / 2, H - 16, '', 10, { color: '#aab6d4' }).setOrigin(0.5)
+    this.hintText = addText(this, W / 2, H - 20, '', 10, { color: '#aab6d4' }).setOrigin(0.5)
+
+    // Rechtlicher Hinweis auch hier (KAPSEL 4.5): Dieser Screen wird abfotografiert.
+    addText(this, W / 2, H - 8, t(cfg.disclaimer), 8, { color: '#5f6a85' }).setOrigin(0.5)
 
     addVignette(this, W, H)
   }

@@ -9,7 +9,11 @@ import { gameState } from '../state/GameState'
 import { drawBackdrop } from '../gfx/backdrop'
 import { addSpeedStreaks } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
+import { GameAction } from '../input/actions'
 import { VIEW_ZOOM } from '../gfx/view'
+import { Huelle } from '../state/HuelleState'
+import { protokoll } from '../state/Protokoll'
+import { telemetry } from '../telemetry/Telemetry'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -63,6 +67,9 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.level = configService.level(this.levelIndex)
     gameState.markLevelStart()
+    // Telemetrie (KAPSEL 4.4): ab hier gehören alle Ereignisse zu dieser Station
+    telemetry.setLevel(this.level.id)
+    telemetry.note('level-start', this.time.now)
     const theme = configService.theme(this.level.theme)
     // 3x-Zoom zuerst: drawBackdrop & Co. lesen displayWidth/worldView der Kamera
     this.cameras.main.setZoom(VIEW_ZOOM)
@@ -90,6 +97,27 @@ export class GameScene extends Phaser.Scene {
     const sy = (spawn?.y ?? map.heightInPixels - 48) + (spawn?.height ?? 0) / 2
     this.player = new Player(this, sx, sy)
     this.player.setRespawn(sx, sy)
+
+    // --- Hülle-Mechanik: nur aktiv, wenn das Level sie einschaltet ---
+    // (Die drei Messe-Level haben huelle.enabled = false und bleiben unberührt.)
+    const huelleCfg = this.level.huelle
+    this.player.huelleEnabled = huelleCfg.enabled
+    if (huelleCfg.enabled) {
+      this.player.huelle.toggleCooldownMs = huelleCfg.toggleCooldownMs
+      this.player.huelle.reset(
+        huelleCfg.start === 'verschluesselt' ? Huelle.Verschluesselt : Huelle.Klartext,
+        this.time.now,
+      )
+      // HUD sofort nachziehen, wenn sich der Zustand ändert
+      this.player.huelle.onChange((c) => {
+        this.game.events.emit('hud:update')
+        // Der Zielzustand ist die entscheidende Information: Nur ein Wechsel
+        // nach „verschluesselt" ist ein Schutzwechsel (siehe kennzahlen.ts).
+        if (c.reason === 'toggle') telemetry.note('huelle-wechsel', this.time.now, c.to)
+        if (c.reason === 'enter-vau') telemetry.note('vau-betreten', this.time.now)
+        if (c.reason === 'session-expired') telemetry.note('vau-abgelaufen', this.time.now)
+      })
+    }
     this.physics.add.collider(this.player, terrain)
     this.maxProgressX = sx
 
@@ -166,6 +194,9 @@ export class GameScene extends Phaser.Scene {
   completeLevel(): void {
     if (this.completed) return
     this.completed = true
+    // Zugriffsprotokoll: Station abgeschlossen (Grundlage der drei Siegel)
+    protokoll.markAbgeschlossen(this.level.id, this.time.now)
+    telemetry.note('level-ende', this.time.now)
     gameState.addSeal(this.level.siegelIcon, this.level.id)
     this.rezi.addSealIcon(this.level.siegelIcon)
     this.game.events.emit('hud:update')
@@ -188,6 +219,11 @@ export class GameScene extends Phaser.Scene {
   // ------------------------------------------------------------- Update
 
   update(time: number, delta: number): void {
+    // Hülle vor der Spielerlogik: Sitzungsablauf soll im gleichen Frame wirken
+    if (this.player.huelleEnabled && !this.completed) {
+      this.player.tickHuelle(delta)
+      if (inputManager.justPressed(GameAction.Toggle)) this.player.tryToggleHuelle()
+    }
     this.player.update()
     for (const mechanic of this.mechanics) mechanic.update(time, delta)
     if (this.level.cameraMode === 'tube' && !this.completed) this.updateTubeCamera(delta)

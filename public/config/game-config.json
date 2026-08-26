@@ -23,8 +23,7 @@
     "01-stammdaten",
     "02-kartenterminal",
     "03-kov-gateway",
-    "04-fachdienst",
-    "05-epa"
+    "04-die-huelle"
   ],
   "ending": {
     "type": "static",
@@ -32,6 +31,11 @@
     "rewardScreenSeconds": 45,
     "minQrSeconds": 10
   },
+  "disclaimer": {
+    "de": "Inoffizielles Lernspiel — kein Produkt der gematik. Dient der Wissensvermittlung.",
+    "en": "Unofficial educational game — not a gematik product. For knowledge transfer only."
+  },
+  "telemetrie": true,
   "idleResetSeconds": 60,
   "softAutopilotSeconds": 240
 }

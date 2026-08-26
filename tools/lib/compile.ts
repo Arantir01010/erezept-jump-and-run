@@ -15,6 +15,7 @@
  */
 import { formatZodError } from '../../src/level/schema'
 import { PLAYER_TUNING } from '../../src/player/PlayerConfig'
+import { SLOWEST_SPEED_FACTOR } from '../../src/state/HuelleState'
 import {
   TILE,
   GRID_HEIGHT,
@@ -76,8 +77,28 @@ export const MAX_RISE_TILES = Math.floor(V ** 2 / (2 * G) / TILE)
  * Aus der Flugbahn hergeleitet (inkl. Coyote-Time und Kantentoleranz),
  * bewusst eine Spur strenger als das physikalische Maximum.
  */
-const MAX_DX_FOR_RISE: Record<number, number> = { 0: 6, 1: 5, 2: 5, 3: 5 }
-const MAX_DX_DROP = 7
+export const MAX_DX_FOR_RISE: Record<number, number> = { 0: 6, 1: 5, 2: 5, 3: 5 }
+export const MAX_DX_DROP = 7
+
+/**
+ * Sprungweiten für HÜLLE-Level.
+ *
+ * Im verschlüsselten Zustand läuft Paul langsamer (SLOWEST_SPEED_FACTOR = 0,8).
+ * Die Sprungkraft ist identisch, also ist die Flugzeit gleich — die FlugWEITE
+ * schrumpft aber proportional zur Anlaufgeschwindigkeit. Ein Level, das nur im
+ * Klartext lösbar wäre, wäre gemein: Der Spieler könnte an einer Stelle stehen,
+ * die verschlüsselt betreten wurde, und nicht mehr weiterkommen.
+ *
+ * Deshalb rechnet die Erreichbarkeits-Simulation bei `huelle.enabled` mit diesen
+ * reduzierten Werten (abgerundet, nie unter 1 Kachel).
+ */
+export const MAX_DX_FOR_RISE_SLOW: Record<number, number> = Object.fromEntries(
+  Object.entries(MAX_DX_FOR_RISE).map(([rise, dx]) => [
+    Number(rise),
+    Math.max(1, Math.floor(dx * SLOWEST_SPEED_FACTOR)),
+  ]),
+) as Record<number, number>
+export const MAX_DX_DROP_SLOW = Math.max(1, Math.floor(MAX_DX_DROP * SLOWEST_SPEED_FACTOR))
 
 // ------------------------------------------------------------------ Layout
 
@@ -342,6 +363,67 @@ function checkStructure(
     }
   }
 
+  // --- Hülle-Mechanik: Konsistenz & Softlock-Schutz (KAPSEL 2.1) ---
+  const huelleOn = design.huelle?.enabled === true
+  const huelleObjekte = objects.filter((o) => OBJECT_TYPES[o.type]?.needsHuelle)
+  if (!huelleOn && huelleObjekte.length > 0) {
+    const liste = [...new Set(huelleObjekte.map((o) => o.type))].join(', ')
+    errors.push(
+      `Objekte ${liste} brauchen die Hülle-Mechanik, aber sie ist nicht eingeschaltet. ` +
+        'Ergänze im level.json: "huelle": { "enabled": true }',
+    )
+  }
+  if (huelleOn && huelleObjekte.length === 0) {
+    warnings.push(
+      'huelle.enabled ist true, aber kein Hülle-Objekt (lauscher, andock-plattform, vau-feld) ' +
+        'im Level — der Spieler kann umschalten, es passiert aber nichts.',
+    )
+  }
+
+  // Andock-Plattformen tragen im verschlüsselten Start nicht: erlaubt, aber
+  // als erste Lernstufe verwirrend — deshalb ein Hinweis, damit es Absicht bleibt.
+  if (huelleOn && design.huelle?.start === 'verschluesselt' && objects.some((o) => o.type === 'andock-plattform')) {
+    warnings.push(
+      'Start ist "verschluesselt" und es gibt andock-plattform-Objekte — die tragen erst nach ' +
+        'dem Umschalten. Als erste Lernstufe unpassend, als Rätsel in Ordnung.',
+    )
+  }
+
+  // Kontext-Anker ohne ablaufendes VAU-Feld ist wirkungslos
+  const vauFelder = objects.filter((o) => o.type === 'vau-feld')
+  const vauMitTtl = vauFelder.filter((o) => ((o.props['ttlMs'] as number | undefined) ?? 0) > 0)
+  if (objects.some((o) => o.type === 'kontext-anker') && vauMitTtl.length === 0) {
+    warnings.push(
+      'kontext-anker gesetzt, aber kein vau-feld mit ttlMs > 0 — der Anker hat nichts aufzufrischen.',
+    )
+  }
+
+  // Ein ablaufendes VAU-Feld muss in der Sitzungszeit durchquerbar sein.
+  // Gerechnet wird mit dem LANGSAMSTEN Zustand: Wer verschlüsselt hineinläuft,
+  // darf nicht in der Mitte hängen bleiben.
+  for (const v of vauMitTtl) {
+    const ttl = (v.props['ttlMs'] as number) ?? 0
+    const reichweiteTiles = ((PLAYER_TUNING.runSpeed * SLOWEST_SPEED_FACTOR) / TILE) * (ttl / 1000)
+    if (v.tw > reichweiteTiles) {
+      errors.push(
+        `vau-feld bei tx=${v.tx} ist ${v.tw} Kacheln breit, aber die Sitzung (ttlMs=${ttl}) reicht ` +
+          `nur für ~${reichweiteTiles.toFixed(1)} Kacheln — der Spieler kann es nie durchqueren. ` +
+          'ttlMs erhöhen, Feld schmaler machen oder einen kontext-anker hineinsetzen.',
+      )
+    }
+  }
+
+  // Zwei Lauscher direkt übereinander: der Sichtkegel wird unlesbar
+  const lauscherX = objects.filter((o) => o.type === 'lauscher').map((o) => o.tx).sort((a, b) => a - b)
+  for (let i = 1; i < lauscherX.length; i++) {
+    if (lauscherX[i] - lauscherX[i - 1] < 2) {
+      warnings.push(
+        `Zwei Lauscher stehen bei tx=${lauscherX[i - 1]} und tx=${lauscherX[i]} fast übereinander — ` +
+          'mindestens 2 Kacheln Abstand halten, damit der Kegel lesbar bleibt.',
+      )
+    }
+  }
+
   // --- Bekannte Werte ---
   if (!themes[design.theme]) {
     errors.push(
@@ -386,6 +468,8 @@ function analyzeReachability(
   markers: Marker[],
   errors: string[],
   warnings: string[],
+  /** Hülle-Level: mit dem langsamsten Zustand rechnen (strengere Sprungweiten). */
+  slow = false,
 ): void {
   const spawn = markers.find((m) => m.type === 'spawn')
   if (!spawn) return // ohne Spawn wurde schon ein Fehler gemeldet
@@ -477,7 +561,9 @@ function analyzeReachability(
     }
     for (let ty = Math.max(0, y - MAX_RISE_TILES); ty < GRID_HEIGHT; ty++) {
       const rise = y - ty
-      const maxDx = rise >= 0 ? (MAX_DX_FOR_RISE[rise] ?? 0) : MAX_DX_DROP
+      const riseTable = slow ? MAX_DX_FOR_RISE_SLOW : MAX_DX_FOR_RISE
+      const dropDx = slow ? MAX_DX_DROP_SLOW : MAX_DX_DROP
+      const maxDx = rise >= 0 ? (riseTable[rise] ?? 0) : dropDx
       if (maxDx <= 0) continue
       for (let tx = Math.max(0, x - maxDx); tx <= Math.min(width - 1, x + maxDx); tx++) {
         if (tx === x && ty === y) continue
@@ -492,7 +578,9 @@ function analyzeReachability(
   for (const d of markers.filter((m) => m.type === 'door-exit')) {
     if (!nearReachable(reach, d.tx, d.ty, 1, 3)) {
       errors.push(
-        `Tür "D" bei tx=${d.tx}, ty=${d.ty} ist vom Spawn aus NICHT erreichbar — prüfe Sprunghöhen (max. ${MAX_RISE_TILES} Kacheln hoch, ~5 weit) und ob ein Tor ohne Öffner den Weg blockiert.`,
+        `Tür "D" bei tx=${d.tx}, ty=${d.ty} ist vom Spawn aus NICHT erreichbar — prüfe Sprunghöhen ` +
+          `(max. ${MAX_RISE_TILES} Kacheln hoch, ~${slow ? MAX_DX_FOR_RISE_SLOW[1] : MAX_DX_FOR_RISE[1]} weit` +
+          `${slow ? '; Hülle-Level rechnen mit dem LANGSAMEN Zustand' : ''}) und ob ein Tor ohne Öffner den Weg blockiert.`,
       )
     }
   }
@@ -705,6 +793,11 @@ function emitLevelJson(id: string, design: DesignLevel): Record<string, unknown>
     tilemap: `assets/tilemaps/${id}.tmj`,
     collectible: design.collectible,
     mechanics: design.mechanics,
+    huelle: {
+      enabled: design.huelle?.enabled ?? false,
+      start: design.huelle?.start ?? 'klartext',
+      toggleCooldownMs: design.huelle?.toggleCooldownMs ?? 150,
+    },
     parTimeSeconds: design.parTimeSeconds,
   }
   if (design.stuckHint) out.stuckHint = design.stuckHint
@@ -743,7 +836,7 @@ export function compileLevel(
   const objects = parseObjects(design, errors)
   checkStructure(design, objects, markers, width, themes, errors, warnings)
   if (errors.length === 0) {
-    analyzeReachability(grid, width, objects, markers, errors, warnings)
+    analyzeReachability(grid, width, objects, markers, errors, warnings, design.huelle?.enabled === true)
   }
 
   if (errors.length > 0) return { id, errors, warnings }

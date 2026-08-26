@@ -198,12 +198,94 @@ Setpiece-Alternative zur Tür `D`: blauer Knopf, wenn der Stempel oben wartet.
 
 **`hazard` — Schadenszone** — kostet Bits, nie Leben. **In Tube-Leveln verboten.**
 
-**`deco` — Kulisse ohne Physik** (optional: `sprite` aus `krake-0/krake-1/kralle-open/kralle-closed`, `anim` = `krake-swim`, `drift` 0–20)
+**`deco` — Kulisse ohne Physik** (optional: `sprite` aus `krake-0/krake-1/kralle-open/kralle-closed/lauscher-0/lauscher-1`, `anim` = `krake-swim` oder `lauscher-blink`, `drift` 0–20)
 ```json
 { "type": "deco", "tx": 18, "ty": 0.4, "sprite": "krake-0", "anim": "krake-swim", "drift": 4 }
 ```
 
+
+---
+
+### Hülle-Mechanik: Klartext ⇄ Verschlüsselt ⇄ VAU
+
+Die Hülle ist die Kernmechanik der Lern-Level (nicht der Messe-Level). Sie wird
+**pro Level eingeschaltet** — ohne diesen Block verhält sich alles wie bisher:
+
+```json
+"huelle": { "enabled": true, "start": "klartext" }
+```
+
+| Feld | Werte | Bedeutung |
+|---|---|---|
+| `enabled` | `true`/`false` (Pflicht) | Mechanik an/aus |
+| `start` | `klartext` \| `verschluesselt` | Startzustand (Standard `klartext`) |
+| `toggleCooldownMs` | 0–1000 | Anti-Prellen am Arcade-Joystick (Standard 150) |
+
+`start: "vau"` gibt es **nicht** — die VAU betritt man nur über ein `vau-feld`.
+
+**Was die drei Zustände tun** (Spieler schaltet mit Joystick HOCH bzw. Shift/Q):
+
+| Zustand | Tempo | Lauscher sehen dich? | Andock-Plattform trägt? |
+|---|---|---|---|
+| Klartext | 100 % | **ja** | ja |
+| Verschlüsselt | 80 % | nein | **nein** |
+| VAU (nur im Feld) | 100 % | nein | ja |
+
+Daraus entsteht der Zielkonflikt, der die Level trägt: Sichtbar bist du schnell und
+kannst andocken — unsichtbar bist du langsam und wirst von Andock-Plattformen nicht
+getragen.
+
+**`lauscher` — sieht NUR Klartext** (optional: `patrol` -240…240 px, `speed` 5–120,
+`reach` 24–240, `spread` 6–60, `pauseMs` 0–4000)
+```json
+{ "type": "lauscher", "tx": 30, "ty": 18, "patrol": 48, "reach": 110 }
+```
+Patrouilliert zwischen Startpunkt und `tx + patrol` (negativ = nach links). Erwischt
+er unverschlüsselte Daten, kostet das Bits und der Vorfall steht im Zugriffsprotokoll.
+Verschlüsselt oder in der VAU bist du unsichtbar. **Mindestens 2 Kacheln Abstand
+zwischen zwei Lauschern**, sonst wird der Sichtkegel unlesbar (Warnung).
+
+**`andock-plattform` — trägt nur im Klartext (oder in der VAU)**
+```json
+{ "type": "andock-plattform", "tx": 40, "ty": 15, "tw": 4 }
+```
+Der Spieler muss sich sichtbar machen, um weiterzukommen — die spannendste Stelle
+jedes Hülle-Levels. Bei `start: "verschluesselt"` gibt es eine Warnung, weil die
+Plattform dann erst nach dem Umschalten trägt.
+
+**`vau-feld` — Klartext-Tempo UND unsichtbar** (optional: `ttlMs` 0–30000)
+```json
+{ "type": "vau-feld", "tx": 60, "ty": 14, "tw": 8, "th": 5, "ttlMs": 4000 }
+```
+`ttlMs: 0` (Standard) = Sitzung läuft nie ab. `ttlMs > 0` = Kontextschlüssel: Nach
+Ablauf fällt der Spieler in den **Klartext** zurück (also sichtbar!) — genau das ist
+die Lernpointe. Der Compiler rechnet nach, ob das Feld in der Sitzungszeit
+durchquerbar ist, und lehnt zu breite Felder ab.
+
+**`kontext-anker` — frischt die Sitzung auf**
+```json
+{ "type": "kontext-anker", "tx": 64, "ty": 17 }
+```
+Nur sinnvoll in einem `vau-feld` mit `ttlMs > 0` (sonst Warnung).
+
+**Fachlich wichtig (bitte nicht verfälschen):**
+- Die VAU ist **kein Tunnel**, sondern ein Raum, in dem im Klartext gearbeitet wird,
+  ohne dass Betreiber mitlesen. Deshalb innen schnell UND unsichtbar.
+- **Verschlüsselung ≠ Signatur.** Die Hülle signiert nichts; dafür gibt es
+  `stamp-exit`.
+- Eine abgelaufene Sitzung schützt **nicht** — sie fällt in den Klartext.
+
+**Sprungweiten in Hülle-Leveln:** Weil verschlüsselt langsamer gelaufen wird, prüft
+der Compiler die Erreichbarkeit strenger — statt ~5 nur noch **~4 Kacheln
+Sprungweite**. Halte Pflichtsprünge in Hülle-Leveln also kürzer, sonst kommt
+„NICHT erreichbar … LANGSAMEN Zustand".
+
 ### `mechanics` — Feintuning & REZI-Texte pro Typ
+
+Für die Hülle-Bausteine gibt es zusätzlich:
+`lauscher` (`speed`, `reach`, `spread`, `pauseMs`, `seenText`, `akteur`, `huelleHint`),
+`vau-feld` (`ttlMs`, `hint`), `kontext-anker` (`hint`), `andock-plattform` (`hint`).
+
 
 Gleiche Parameter wie am Objekt (Level-weit statt pro Objekt; das Objekt gewinnt)
 plus Hinweistexte. Alle Texte optional — ohne sie greifen gute eingebaute Standards:
