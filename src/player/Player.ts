@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { GameAction } from '../input/actions'
 import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
-import { bitScatter, dustPuff } from '../gfx/effects'
+import { dustPuff } from '../gfx/effects'
 import { PLAYER_TUNING as T } from './PlayerConfig'
 import { HuelleState, Huelle } from '../state/HuelleState'
 
@@ -208,7 +208,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       onComplete: () => this.setAlpha(1),
     })
     const lost = gameState.loseBits(T.hurtBitsLost)
-    if (lost > 0) bitScatter(this.scene, this.x, this.y - 8, Math.min(lost, 6))
+    // Verstreute Bits sind ECHTE Objekte und wieder einsammelbar (GameScene
+    // hoert auf dieses Event). Vorher war bitScatter reine Optik — verlorene
+    // Bits waren endgueltig weg, und ein Level mit knappem Puffer wurde nach
+    // zwei Treffern unschaffbar (Tuer zu, kein Neustart im Kiosk = Softlock).
+    // Das halbe Sonic-Prinzip war die Falle: Ringe verlieren ohne Ringe
+    // wiederaufsammeln. Jetzt ist es das ganze.
+    if (lost > 0) this.scene.events.emit('bits:verstreut', { x: this.x, y: this.y - 8, count: lost })
     this.scene.game.events.emit('hud:update')
     this.emit('player:hurt', lost)
     return lost

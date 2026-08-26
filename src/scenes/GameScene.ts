@@ -7,7 +7,10 @@ import { spawnMechanic, type MechanicHost, Gate } from '../mechanics'
 import type { Mechanic } from '../mechanics'
 import { gameState } from '../state/GameState'
 import { drawBackdrop } from '../gfx/backdrop'
-import { addSpeedStreaks } from '../gfx/effects'
+import { drawTerrain } from '../gfx/TerrainRenderer'
+import { applyAtmosphere, attachLantern } from '../gfx/atmos'
+import { silhouettePaul } from '../gfx/PaulSilhouette'
+import { addSpeedStreaks, collectSparkle } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
 import { VIEW_ZOOM } from '../gfx/view'
@@ -88,8 +91,47 @@ export class GameScene extends Phaser.Scene {
     terrain.setDepth(1)
     // GID 8 = Deko-Strebe (nicht solide); alles andere kollidiert
     terrain.setCollisionByExclusion([-1, 0, 8])
+    // Die Kachel-Ebene bleibt Kollisionsgitter, wird aber nicht mehr gezeichnet:
+    // Das Gelände entsteht als zusammengefasste Silhouette mit Kantenlicht.
+    drawTerrain(this, map, terrain, theme)
 
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+
+    // --- Verstreute Bits: bleiben liegen und sind WIEDER einsammelbar ---
+    // (Anti-Softlock: das Sammelziel darf durch Treffer nie unerreichbar
+    // werden. Kein Despawn — die Bits warten, bis jemand sie holt.)
+    const onVerstreut = (payload: { x: number; y: number; count: number }): void => {
+      for (let i = 0; i < payload.count; i++) {
+        const bit = this.physics.add.image(payload.x, payload.y, 'datenbit').setDepth(6)
+        const body = bit.body as Phaser.Physics.Arcade.Body
+        body.setBounce(0.45, 0.45)
+        body.setDrag(60, 0)
+        // Nach oben auffaechern wie der alte Effekt — nur echt
+        body.setVelocity((Math.random() - 0.5) * 160, -120 - Math.random() * 80)
+        this.physics.add.collider(bit, terrain)
+        // Kurze Karenz, damit der Knockback sie nicht sofort wieder einsaugt
+        // (und der Verlust ueberhaupt als Verlust lesbar ist)
+        let sammelbar = false
+        this.time.delayedCall(700, () => {
+          sammelbar = true
+          // Dezentes Blinken: "die kannst du wiederhaben"
+          this.tweens.add({ targets: bit, alpha: { from: 1, to: 0.55 }, duration: 500, yoyo: true, repeat: -1 })
+        })
+        const overlap = this.physics.add.overlap(this.player, bit, () => {
+          if (!sammelbar) return
+          overlap.destroy()
+          bit.destroy()
+          // Bewusst OHNE Punkte (gameState.addBits gaebe Score): sonst waere
+          // absichtliches Getroffenwerden eine Punkte-Schleife. Der Spieler
+          // bekommt seine Bits zurueck, nicht mehr.
+          gameState.bits += 1
+          collectSparkle(this, bit.x, bit.y)
+          this.game.events.emit('hud:update')
+        })
+      }
+    }
+    this.events.on('bits:verstreut', onVerstreut)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off('bits:verstreut', onVerstreut))
 
     // --- Spieler + REZI ---
     const objects = map.getObjectLayer('objects')?.objects ?? []
@@ -124,6 +166,12 @@ export class GameScene extends Phaser.Scene {
 
     this.rezi = new Rezi(this, sx - 16, sy - 26)
     this.rezi.follow(this.player)
+    // REZI leuchtet — Paul läuft in ihrem Schein. Das hält die Figur in einer
+    // dunklen Kulisse jederzeit auffindbar, ohne das Bild aufzuhellen.
+    attachLantern(this, this.rezi, Phaser.Display.Color.HexStringToColor(theme.detail).color, 52)
+    // Paul wird als Vektor-Silhouette gezeichnet; die Physik-Sprite bleibt
+    // erhalten und liefert Pose, Blinken und Squash & Stretch.
+    silhouettePaul(this, this.player, theme, { light: this.rezi })
     for (const seal of gameState.seals) this.rezi.addSealIcon(seal.sealId)
     if (gameState.encrypted) {
       this.player.setTint(0x9fd8ff)
@@ -146,7 +194,9 @@ export class GameScene extends Phaser.Scene {
     // --- Kamera ---
     const cam = this.cameras.main
     cam.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
-    cam.setRoundPixels(true)
+    // Kein Pixel-Runden mehr: Die Parallax-Ebenen und das Kantenlicht sollen
+    // stufenlos gleiten. Der Tube-Akkumulator unten bleibt trotzdem korrekt.
+    cam.setRoundPixels(false)
     if (this.level.cameraMode === 'tube') {
       const tubeParams = (this.level.mechanics['tube-scroll'] ?? {}) as { speed?: number }
       this.tubeSpeed = tubeParams.speed ?? 50
@@ -161,6 +211,10 @@ export class GameScene extends Phaser.Scene {
       cam.startFollow(this.player, true, 0.15, 0.15)
     }
     cam.fadeIn(350)
+
+    // Leuchten, Randabdunklung, leichte Entsättigung — hält die Palette eng
+    // und lässt Kantenlicht und Datenfunken glühen. Nur WebGL.
+    applyAtmosphere(this)
 
     this.game.events.emit('level:start', { level: this.level, index: this.levelIndex })
   }
