@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { configService } from '../level/ConfigService'
+import type { GameScene } from './GameScene'
 import type { LevelConfig } from '../level/schema'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
@@ -213,10 +214,11 @@ export class UIScene extends Phaser.Scene {
    */
   private refreshHuelle(): void {
     if (!this.huelleBadge || !this.huelleShape || !this.huelleLabel || !this.huelleHint) return
-    const game = this.scene.get('Game') as
-      | (Phaser.Scene & { player?: { huelleEnabled: boolean; huelleZustand: Huelle } })
-      | undefined
-    const player = game?.player
+    // Typ-Import statt Struktur-Behauptung: Benennt jemand player/huelleEnabled
+    // um, bricht das hier beim Kompilieren statt still zur Laufzeit.
+    // (player ist erst nach GameScene.create() belegt — über der CityScene nicht.)
+    const game = this.scene.get('Game') as GameScene | undefined
+    const player: GameScene['player'] | undefined = game?.player
     if (!player?.huelleEnabled) {
       this.huelleBadge.setVisible(false)
       this.huelleGezeigt = null

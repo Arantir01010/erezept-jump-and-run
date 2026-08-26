@@ -667,10 +667,8 @@ function analyzeReachability(
 
   // --- Datenbits erreichbar? ---
   const unreachableBits: string[] = []
-  let reachableBits = 0
   for (const b of markers.filter((m) => m.type === 'collectible')) {
-    if (nearReachable(reach, b.tx, b.ty, 2, 4)) reachableBits += 1
-    else unreachableBits.push(`(tx=${b.tx}, ty=${b.ty})`)
+    if (!nearReachable(reach, b.tx, b.ty, 2, 4)) unreachableBits.push(`(tx=${b.tx}, ty=${b.ty})`)
   }
   if (unreachableBits.length > 0) {
     warnings.push(
@@ -777,7 +775,7 @@ function emitTmjObjects(objects: ParsedObject[], markers: Marker[]): TmjObject[]
   return out
 }
 
-function emitTmj(id: string, gidGrid: number[][], objects: TmjObject[]): Record<string, unknown> {
+function emitTmj(_id: string, gidGrid: number[][], objects: TmjObject[]): Record<string, unknown> {
   const height = gidGrid.length
   const width = gidGrid[0]?.length ?? 0
   return {

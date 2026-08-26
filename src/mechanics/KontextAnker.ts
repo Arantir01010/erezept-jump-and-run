@@ -22,7 +22,7 @@ export class KontextAnker extends Mechanic {
 
   spawn(): void {
     const { x, y } = objCenter(this.obj)
-    this.sprite = this.host.scene.physics.add.staticImage(x, y, 'checkpoint') as unknown as Phaser.Physics.Arcade.Image
+    this.sprite = this.staticImage(x, y, 'checkpoint')
     veredele(this.host.scene, this.sprite)
     this.sprite.setDepth(4).setTint(0xb9a6ff)
     addGlow(this.host.scene, x, y, 0xb9a6ff, 12, { alpha: 0.35, depth: 3 })

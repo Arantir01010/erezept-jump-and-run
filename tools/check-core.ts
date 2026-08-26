@@ -23,6 +23,8 @@ const PROTECTED_DIRS = ['src', 'tools', 'docs', '.github', join('design', 'level
 const PROTECTED_FILES = [
   'index.html',
   '.gitignore',
+  '.gitattributes',
+  'eslint.config.js',
   'vite.config.ts',
   'tsconfig.json',
   'package.json',

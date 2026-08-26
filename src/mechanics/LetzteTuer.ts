@@ -61,7 +61,7 @@ export class LetzteTuer extends Mechanic {
 
   spawn(): void {
     const { x, y, w, h } = objCenter(this.obj)
-    this.tuer = this.host.scene.physics.add.staticImage(x, y, 'door') as unknown as Phaser.Physics.Arcade.Image
+    this.tuer = this.staticImage(x, y, 'door')
     this.tuer.setDisplaySize(20, h || 48)
     ;(this.tuer.body as Phaser.Physics.Arcade.StaticBody).setSize(20, h || 48)
     this.tuer.refreshBody()
@@ -168,9 +168,7 @@ export class LetzteTuer extends Mechanic {
     // Durchgehen beendet das Level: Die Kontrolle kommt genau dann zurück,
     // wenn sie gewährt wurde.
     const { x, y, h } = objCenter(this.obj)
-    const sensor = scene.physics.add.staticImage(x + 20, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
-    sensor.setVisible(false)
-    sensor.body!.setSize(16, h || 48)
+    const sensor = this.sensorZone(x + 20, y, 16, h || 48)
     this.host.addSensor(sensor, () => this.host.completeLevel())
   }
 }

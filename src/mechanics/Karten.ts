@@ -47,7 +47,7 @@ export class KartenFund extends Mechanic {
       return
     }
 
-    const sprite = this.host.scene.physics.add.staticImage(x, y, `karte-${karte}`) as unknown as Phaser.Physics.Arcade.Image
+    const sprite = this.staticImage(x, y, `karte-${karte}`)
     veredele(this.host.scene, sprite)
     sprite.setDepth(4)
     // Goldener Schimmer: Ausweise sollen sich von den cyanfarbenen Prüfsummen

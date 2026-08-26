@@ -35,7 +35,7 @@ export class Gate extends Mechanic {
 
   spawn(): void {
     const { x, y, h } = objCenter(this.obj)
-    this.sprite = this.host.scene.physics.add.staticImage(x, y, 'gate') as unknown as Phaser.Physics.Arcade.Image
+    this.sprite = this.staticImage(x, y, 'gate')
     this.sprite.setDisplaySize(8, h || 48)
     this.sprite.refreshBody()
     this.sprite.setDepth(5)
@@ -112,7 +112,7 @@ registerMechanic('gate', Gate)
 export class Collectible extends Mechanic {
   spawn(): void {
     const { x, y } = objCenter(this.obj)
-    const sprite = this.host.scene.physics.add.staticImage(x, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
+    const sprite = this.staticImage(x, y, 'datenbit')
     sprite.setDepth(4)
     veredele(this.host.scene, sprite)
     // Cyan-Schimmer macht Sammelbits aus dem Augenwinkel sichtbar
@@ -145,7 +145,7 @@ export class Checkpoint extends Mechanic {
 
   spawn(): void {
     const { x, y } = objCenter(this.obj)
-    const sprite = this.host.scene.physics.add.staticImage(x, y, 'checkpoint') as unknown as Phaser.Physics.Arcade.Image
+    const sprite = this.staticImage(x, y, 'checkpoint')
     sprite.setDepth(3)
     sprite.setAlpha(0.6)
     veredele(this.host.scene, sprite)
@@ -169,9 +169,7 @@ registerMechanic('checkpoint', Checkpoint)
 export class InfoSign extends Mechanic {
   spawn(): void {
     const { x, y, w, h } = objCenter(this.obj)
-    const zone = this.host.scene.physics.add.staticImage(x, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
-    zone.setVisible(false)
-    zone.body!.setSize(Math.max(w, 24), Math.max(h, 24))
+    const zone = this.sensorZone(x, y, Math.max(w, 24), Math.max(h, 24))
     let lastShownMs = -Infinity
     this.host.addSensor(zone, () => {
       const now = this.host.scene.time.now
@@ -199,7 +197,7 @@ export class DoorExit extends Mechanic {
 
   spawn(): void {
     const { x, y } = objCenter(this.obj)
-    this.door = this.host.scene.physics.add.staticImage(x, y, 'door') as unknown as Phaser.Physics.Arcade.Image
+    this.door = this.staticImage(x, y, 'door')
     this.door.setDepth(3)
     veredele(this.host.scene, this.door)
     // Gedimmt solange verschlossen — leuchtet auf, sobald genug Bits gesammelt sind
@@ -281,9 +279,7 @@ registerMechanic('moving-platform', MovingPlatform)
 export class Hazard extends Mechanic {
   spawn(): void {
     const { x, y, w, h } = objCenter(this.obj)
-    const zone = this.host.scene.physics.add.staticImage(x, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
-    zone.setVisible(false)
-    zone.body!.setSize(w || 16, h || 16)
+    const zone = this.sensorZone(x, y, w || 16, h || 16)
     this.host.addSensor(zone, (player) => {
       player.hurt(x)
     })

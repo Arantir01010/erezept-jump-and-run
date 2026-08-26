@@ -1,0 +1,13 @@
+# Zeilenenden: im Repository immer LF (Stand heute ist das Repo bereits
+# vollständig LF-normalisiert — diese Datei hält das auf jedem Rechner so
+# und beendet das "LF will be replaced by CRLF"-Rauschen unter Windows).
+* text=auto
+
+# Windows-Batchdateien brauchen CRLF im Arbeitsverzeichnis (cmd.exe-Sprungmarken).
+*.bat text eol=crlf
+
+# Binärdateien nie anfassen
+*.png binary
+*.jpg binary
+*.tgz binary
+*.bundle binary

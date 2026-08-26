@@ -57,7 +57,6 @@ export abstract class Mechanic {
 
   abstract spawn(): void
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(_time: number, _delta: number): void {}
 
   destroy(): void {}
@@ -74,6 +73,23 @@ export abstract class Mechanic {
   protected paramText(key: string, fallback: LText): string {
     const v = this.params[key] as LText | undefined
     return t(v && typeof v === 'object' && 'de' in v ? v : fallback)
+  }
+
+  /**
+   * Statisches Physik-Bild. physics.add.staticImage liefert typseitig
+   * ImageWithStaticBody — Host-Signaturen (addSolid/addSensor) erwarten
+   * Arcade.Image. Die Typ-Anpassung lebt nur hier, nicht an jeder Spawn-Stelle.
+   */
+  protected staticImage(x: number, y: number, key: string): Phaser.Physics.Arcade.Image {
+    return this.host.scene.physics.add.staticImage(x, y, key) as unknown as Phaser.Physics.Arcade.Image
+  }
+
+  /** Unsichtbare Sensorzone w×h (Trägertextur wird nie gezeichnet). */
+  protected sensorZone(x: number, y: number, w: number, h: number): Phaser.Physics.Arcade.Image {
+    const zone = this.staticImage(x, y, 'datenbit')
+    zone.setVisible(false)
+    zone.body!.setSize(w, h)
+    return zone
   }
 
   /** Benanntes Tor aus den Objekt-/Level-Parametern auflösen. */

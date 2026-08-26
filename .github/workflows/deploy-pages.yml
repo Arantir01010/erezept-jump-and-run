@@ -34,6 +34,9 @@ jobs:
       # Engine-Logik: Hülle, Sichtlogik, Eingabe, Compiler-Regeln, Verdrahtung
       - name: Tests
         run: npm test
+      # Statik-Check über src/ und tools/ (ESLint, Regeln in eslint.config.js)
+      - name: Lint
+        run: npm run lint
       # Level + Configs + Kern-Schutz (SHA-256-Manifest)
       - name: Validierung
         run: npm run validate

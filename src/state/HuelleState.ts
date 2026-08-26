@@ -180,7 +180,7 @@ export class HuelleState {
    * (Level 14 „Die VAU"); `ttlMs > 0` ist die Kontextschlüssel-Variante
    * (Level 15 „Kontextschlüssel").
    */
-  enterVau(nowMs: number, ttlMs = 0): boolean {
+  enterVau(_nowMs: number, ttlMs = 0): boolean {
     if (this.inVau) {
       // Erneutes Betreten frischt die Sitzung auf, wechselt aber nichts.
       if (ttlMs > 0) {
