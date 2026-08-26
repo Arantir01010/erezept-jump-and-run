@@ -45,7 +45,7 @@
       "speed": 55
     },
     "stillstand-podest": {
-      "scanMs": 1200,
+      "scanMs": 850,
       "hint": {
         "de": "Stillstehen: Das Gateway prüft dich!",
         "en": "Stand still: the gateway checks you!"

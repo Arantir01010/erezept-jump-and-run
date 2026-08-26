@@ -5,6 +5,7 @@ import { assist } from '../state/Assist'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { showDenyStamp, addGlow } from '../gfx/effects'
+import { podestSchritt, podestAnteil } from './podestLogik'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 
@@ -13,12 +14,15 @@ import type { LText } from '../i18n'
  * das Tor öffnet. Die hinterherschleichende Datenkrake bekommt das Tor vor
  * die Nase — „ZUGRIFF VERWEIGERT". Im Tube-Modus pausiert der Auto-Scroll hier.
  */
+
 export class StillstandPodest extends Mechanic {
   private podest!: Phaser.Physics.Arcade.Image
   private scanBar!: Phaser.GameObjects.Rectangle
   private scanGlow?: Phaser.GameObjects.Image
   private krake?: Phaser.GameObjects.Sprite
   private progressMs = 0
+  /** Wie lange stört die Eingabe schon? Erst danach läuft der Balken zurück. */
+  private stoerungMs = 0
   private done = false
   private hintShown = false
   private interruptions = 0
@@ -75,40 +79,47 @@ export class StillstandPodest extends Mechanic {
     if (this.done) return
 
     const scanning = this.playerOnPodest() && inputManager.isNeutral()
-    if (scanning) {
-      if (!this.hintShown) {
-        this.hintShown = true
-        const hint = this.params['hint'] as LText | undefined
-        if (hint) this.host.rezi.say(t(hint))
-      }
-      this.progressMs += delta
-      if (this.progressMs >= this.scanMs) return this.succeed()
-    } else if (this.progressMs > 0) {
-      // Bewegt → Balken leert sich, ohne Strafe; wiederholtes Abbrechen füttert den Assist
-      this.progressMs = Math.max(0, this.progressMs - delta * 2)
-      if (this.progressMs === 0) {
-        this.interruptions += 1
-        if (this.interruptions >= 2) {
-          assist.fail(`podest-${this.obj.id}`)
-          // Ab dem 2. abgebrochenen Scan sagt REZI klar, was fehlt (Assist verkürzt parallel)
-          if (time - this.lastTipMs > 6000) {
-            this.lastTipMs = time
-            this.host.rezi.say(
-              this.paramText('stillHint', {
-                de: 'Tipp: Alles loslassen und ganz stillstehen — erst dann läuft der Scan durch!',
-                en: 'Tip: let go of everything and stand perfectly still — only then the scan completes!',
-              }),
-            )
-          }
-        }
-      }
-    } else if (this.playerOnPodest() && !this.hintShown) {
+    if (scanning && !this.hintShown) {
       this.hintShown = true
       const hint = this.params['hint'] as LText | undefined
       if (hint) this.host.rezi.say(t(hint))
     }
 
-    const ratio = Math.min(1, this.progressMs / this.scanMs)
+    // Die Fortschrittsregel liegt in podestLogik.ts (Phaser-frei, getestet).
+    const schritt = podestSchritt(
+      { progressMs: this.progressMs, stoerungMs: this.stoerungMs },
+      scanning,
+      delta,
+      this.scanMs,
+    )
+    this.progressMs = schritt.progressMs
+    this.stoerungMs = schritt.stoerungMs
+    if (schritt.fertig) return this.succeed()
+
+    if (schritt.abgebrochen) {
+      this.interruptions += 1
+      if (this.interruptions >= 2) {
+        assist.fail(`podest-${this.obj.id}`)
+        // Ab dem 2. abgebrochenen Scan sagt REZI klar, was fehlt (Assist verkürzt parallel)
+        if (time - this.lastTipMs > 6000) {
+          this.lastTipMs = time
+          this.host.rezi.say(
+            this.paramText('stillHint', {
+              de: 'Tipp: Alles loslassen und ganz stillstehen — erst dann läuft der Scan durch!',
+              en: 'Tip: let go of everything and stand perfectly still — only then the scan completes!',
+            }),
+          )
+        }
+      }
+    }
+
+    if (!scanning && this.playerOnPodest() && !this.hintShown) {
+      this.hintShown = true
+      const hint = this.params['hint'] as LText | undefined
+      if (hint) this.host.rezi.say(t(hint))
+    }
+
+    const ratio = podestAnteil(this.progressMs, this.scanMs)
     this.scanBar.width = 34 * ratio
     if (this.scanGlow) this.scanGlow.setAlpha(0.4 * ratio)
     // Krake nähert sich während des Scans

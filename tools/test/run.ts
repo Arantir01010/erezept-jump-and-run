@@ -15,6 +15,7 @@ import { run as huelle } from './huelle.test'
 import { run as protokoll } from './protokoll.test'
 import { run as karten } from './karten.test'
 import { run as lauscher } from './lauscher.test'
+import { run as podest } from './podest.test'
 import { run as input } from './input.test'
 import { run as katalog } from './katalog.test'
 import { run as compiler } from './compiler.test'
@@ -33,6 +34,7 @@ const SUITES: [string, () => void][] = [
   ['Karten stecken', karten],
   ['Zugriffsprotokoll', protokoll],
   ['Lauscher-Sichtlogik', lauscher],
+  ['Podest-Fortschritt', podest],
   ['Eingabe (Toggle-Belegung)', input],
   ['Objektkatalog', katalog],
   ['Level-Compiler', compiler],
