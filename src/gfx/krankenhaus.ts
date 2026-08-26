@@ -530,22 +530,24 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   g.strokeRect(184, 262, 40, 54)
   g.fillStyle(0x2f3a52, 1)
   g.fillRect(178, 256, 52, 4)
+  // Weißes H auf Blau: an der Wand NEBEN dem Eingang. Über dem Vordach wäre
+  // es im aufgeschnittenen Flur — dort rollen Tragen quer durchs Schild.
   g.fillStyle(0x1d4f9c, 1)
-  g.fillRect(196, 246, 16, 12)
+  g.fillRect(162, 257, 16, 12)
   g.fillStyle(0xffffff, 0.95)
-  g.fillRect(199, 248.5, 2.4, 7)
-  g.fillRect(206.6, 248.5, 2.4, 7)
-  g.fillRect(199, 251, 10, 2)
-  // EKG-Neonlinie überm Vordach — das Gesundheits-Zeichen des Spiels
-  malEkg(g, 230, 252, 40, 3, 0.35, 0)
+  g.fillRect(165, 259.5, 2.4, 7)
+  g.fillRect(172.6, 259.5, 2.4, 7)
+  g.fillRect(165, 262, 10, 2)
+  // EKG-Neonlinie über der Schiebetür — das Gesundheits-Zeichen des Spiels
+  malEkg(g, 186, 259.5, 36, 2, 0.35, 0)
   // Wegweiser in der Halle (drei farbige Pfeile — Kartenfarben)
   g.fillStyle(0x0e1a2c, 0.9)
-  g.fillRect(162, 268, 18, 14)
+  g.fillRect(162, 271, 18, 14)
   for (let i = 0; i < 3; i++) {
     const farben = [0x7fd07f, 0x4de3ff, 0xffd75e]
     g.fillStyle(farben[i], 0.85)
-    g.fillRect(164, 271 + i * 3.6, 10, 1.4)
-    g.fillTriangle(174, 270.2 + i * 3.6, 174, 273.4 + i * 3.6, 177, 271.8 + i * 3.6)
+    g.fillRect(164, 274 + i * 3.6, 10, 1.4)
+    g.fillTriangle(174, 273.2 + i * 3.6, 174, 276.4 + i * 3.6, 177, 274.8 + i * 3.6)
   }
   // E-Rezept-Plakat mit Pixel-QR (der Bogen zur Telemetrie-Wand des Spiels)
   g.fillStyle(0xf2f5fb, 0.92)
@@ -627,14 +629,17 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   // VAU: kühler, geschützter Raum mit Tresortür — hier wird im Klartext gearbeitet
   g.fillStyle(K, 0.05)
   g.fillRect(192, KELLER.oben + 1, 106, KELLER.unten - KELLER.oben - 2)
-  g.lineStyle(1.4, 0x8fa2c4, 0.9)
-  g.strokeCircle(191, 338, 6.5)
-  g.lineStyle(0.8, 0x8fa2c4, 0.8)
+  // Tresortür bewusst gedämpft und etwas höher: Auf Höhe 338 läuft die
+  // Footer-Zeile der AttractScene — eine helle Rosette dahinter las sich
+  // wie ein verunglücktes Zeichen vor dem Text.
+  g.lineStyle(1.2, 0x8fa2c4, 0.5)
+  g.strokeCircle(191, 336, 5.5)
+  g.lineStyle(0.7, 0x8fa2c4, 0.45)
   g.beginPath()
-  g.moveTo(186, 338)
-  g.lineTo(196, 338)
-  g.moveTo(191, 333)
-  g.lineTo(191, 343)
+  g.moveTo(186.5, 336)
+  g.lineTo(195.5, 336)
+  g.moveTo(191, 331.5)
+  g.lineTo(191, 340.5)
   g.strokePath()
   g.fillStyle(0x2f3a52, 1) // Arbeitsplatz in der VAU
   g.fillRect(238, 340, 30, 2.2)
@@ -774,10 +779,15 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   addText(scene, 100, 147.5, 'OP 1', 4.2, { color: '#9fb0cc', bold: false }).setOrigin(0.5)
   addText(scene, 434, 221, 'TIM', 4.4, { color: '#8fd6c8', spacing: 0.6 }).setOrigin(0.5)
   addText(scene, 245, 330, 'VAU', 6.5, { color: '#4de3ff', spacing: 1 }).setOrigin(0.5)
-  addText(scene, 156, 334, 'KONNEKTOR', 4, { color: '#9fb0cc', spacing: 0.5, bold: false }).setOrigin(0, 0.5)
-  addText(scene, 345, 331.5, 'FACHDIENST ePA', 4, { color: '#9fb0cc', spacing: 0.3, bold: false }).setOrigin(0.5)
+  // Als Unterschrift unter dem Kasten: rechts daneben hält alle 18 s der
+  // Rettungswagen und würde ein dort stehendes Label verdecken.
+  addText(scene, 118, 345.5, 'KONNEKTOR', 4, { color: '#9fb0cc', spacing: 0.5, bold: false }).setOrigin(0.5)
+  // Direkt unter der Kellerdecke — auf 331 käme die Footer-Zeile zu nah.
+  addText(scene, 345, 326.5, 'FACHDIENST ePA', 4, { color: '#9fb0cc', spacing: 0.3, bold: false }).setOrigin(0.5)
   addText(scene, 570, 267, 'APOTHEKE', 5.5, { color: '#ffd75e', spacing: 1.2 }).setOrigin(0.5)
-  const neon = addText(scene, 562, 297, 'E-REZEPT', 4.6, { color: '#4de3ff', spacing: 0.5 }).setOrigin(0.5)
+  // Rechts neben dem QR-Plakat in der freien Fensterfläche — mittig läge
+  // das Neon hinter Regalreihe und Plakat.
+  const neon = addText(scene, 564, 304, 'E-REZEPT', 4.4, { color: '#4de3ff', spacing: 0.5 }).setOrigin(0.5)
   scene.tweens.add({ targets: neon, alpha: 0.35, duration: 750, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
 
   // ---------------------------------------------------------------- Lichter
@@ -787,7 +797,7 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   addGlow(scene, 245, 338, K, 18, { alpha: 0.13 })
   addGlow(scene, 335, 338, K, 12, { alpha: 0.07 })
   addGlow(scene, 570, 270, accent, 16, { alpha: 0.09 })
-  addGlow(scene, 562, 297, K, 12, { alpha: 0.1 })
+  addGlow(scene, 564, 304, K, 11, { alpha: 0.1 })
   addGlow(scene, 76, 281, 0xffd9a0, 13, { alpha: 0.15 })
   addGlow(scene, 629, 281, 0xffd9a0, 13, { alpha: 0.15 })
   addGlow(scene, 138, 152, 0xffffff, 13, { alpha: 0.08 })
@@ -1164,17 +1174,19 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
 
     // ---- Rettungswagen: kommt, hält an der Notaufnahme, fährt weiter ----
     {
+      // Haltepunkt x=185 (vor Zebrastreifen/Eingang): Weiter rechts stünde
+      // der Wagen genau vor dem VAU-Schild im Keller-Schnitt.
       const P = 18
       const u = ((t + 6) % P)
       let x = -999
       let fahrend = false
       if (u < 3.2) {
-        x = 700 - (700 - 258) * (u / 3.2)
+        x = 700 - (700 - 185) * (u / 3.2)
         fahrend = true
       } else if (u < 8) {
-        x = 258
+        x = 185
       } else if (u < 11) {
-        x = 258 - (258 + 90) * ((u - 8) / 3)
+        x = 185 - (185 + 90) * ((u - 8) / 3)
         fahrend = true
       }
       if (x > -900) {
@@ -1210,7 +1222,7 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
         // Beim Halt: Sanitäter läuft zur Notaufnahme
         if (u >= 4 && u < 7.2) {
           const k = (u - 4) / 3.2
-          malFigur(l, 250 - k * 130, FUSS.strasse, P_PFLEGE, t * 2.6 * 0.5, -1)
+          malFigur(l, 176 - k * 56, FUSS.strasse, P_PFLEGE, t * 2.6 * 0.5, -1)
         }
       }
     }

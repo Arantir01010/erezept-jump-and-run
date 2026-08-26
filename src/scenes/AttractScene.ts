@@ -56,9 +56,13 @@ export class AttractScene extends Phaser.Scene {
       spacing: 0.5,
     }).setOrigin(0.5)
 
+    // Hauchdünne Kontur wie an der Headline: Durch die Kulisse fliegt u. a.
+    // ein heller Heli — ohne Kontur wäre der Text davor kurz weiß auf weiß.
     addText(this, W / 2, 112, t(cfg.titleScreen.subline), 11.5, {
       color: '#cfe0ff',
       bold: false,
+      stroke: '#0a1730',
+      strokeThickness: 1,
     }).setOrigin(0.5)
 
     // Paul + REZI als Blickfang
