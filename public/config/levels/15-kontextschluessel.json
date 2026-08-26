@@ -3,22 +3,22 @@
   "id": "15-kontextschluessel",
   "station": {
     "name": {
-      "de": "Der Kontextschluessel",
+      "de": "Der Kontextschlüssel",
       "en": "The context key"
     },
     "portalText": {
-      "de": "Station: Die Sitzung - Schutz gilt nicht ewig.",
-      "en": "Station: the session - protection does not last forever."
+      "de": "Station: Die Sitzung — Schutz gilt nicht ewig.",
+      "en": "Station: the session — protection does not last forever."
     },
     "reziText": {
-      "de": "Laeuft die Sitzung ab, falle ich in den Klartext zurueck.",
+      "de": "Läuft die Sitzung ab, falle ich in den Klartext zurück.",
       "en": "When the session expires, I fall back into plain text."
     },
     "stampText": {
-      "de": "Sitzung gehalten - abgelaufener Schutz schuetzt nicht.",
-      "en": "Session kept alive - expired protection protects nothing."
+      "de": "✓ Sitzung gehalten — abgelaufener Schutz schützt nicht.",
+      "en": "✓ Session kept alive — expired protection protects nothing."
     },
-    "badge": "Kontextschluessel"
+    "badge": "Kontextschlüssel"
   },
   "siegelIcon": "seal-generic",
   "cityAnchor": {
@@ -34,9 +34,9 @@
   "tilemap": "assets/tilemaps/15-kontextschluessel.tmj",
   "collectible": {
     "type": "datenbit",
-    "countRequired": 8,
+    "countRequired": 9,
     "label": {
-      "de": "Pruefsummen",
+      "de": "Prüfsummen",
       "en": "checksums"
     }
   },
@@ -51,20 +51,26 @@
         "en": "Eavesdropper"
       },
       "huelleHint": {
-        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
-        "en": "Unencrypted he reads everything - switch your shell!"
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
       }
     },
     "vau-feld": {
       "hint": {
-        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
-        "en": "VAU: here you work in plain text - and still nobody sees you!"
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
       }
     },
     "kontext-anker": {
       "hint": {
-        "de": "Sitzung aufgefrischt - der Kontextschluessel gilt wieder!",
-        "en": "Session refreshed - the context key is valid again!"
+        "de": "Sitzung aufgefrischt — der Kontextschlüssel gilt wieder!",
+        "en": "Session refreshed — the context key is valid again!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
       }
     }
   },
@@ -73,5 +79,5 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 95
+  "parTimeSeconds": 110
 }

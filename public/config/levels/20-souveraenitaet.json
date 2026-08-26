@@ -3,7 +3,7 @@
   "id": "20-souveraenitaet",
   "station": {
     "name": {
-      "de": "Souveraenitaet",
+      "de": "Souveränität",
       "en": "Sovereignty"
     },
     "portalText": {
@@ -15,10 +15,10 @@
       "en": "I was a data packet. Where I go was always your decision."
     },
     "stampText": {
-      "de": "Datensouveraenitaet - die letzte Tuer oeffnest du.",
-      "en": "Data sovereignty - the last door is yours to open."
+      "de": "✓ Datensouveränität — die letzte Tür öffnest du.",
+      "en": "✓ Data sovereignty — the last door is yours to open."
     },
-    "badge": "Welt 5 Abschluss"
+    "badge": "Welt 5 · Abschluss"
   },
   "siegelIcon": "seal-egk",
   "cityAnchor": {
@@ -36,15 +36,15 @@
     "type": "datenbit",
     "countRequired": 8,
     "label": {
-      "de": "Pruefsummen",
+      "de": "Prüfsummen",
       "en": "checksums"
     }
   },
   "mechanics": {
     "vau-feld": {
       "hint": {
-        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
-        "en": "VAU: here you work in plain text - and still nobody sees you!"
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
       }
     }
   },
@@ -53,9 +53,9 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 70,
+  "parTimeSeconds": 80,
   "stuckHint": {
-    "de": "Ganz ruhig nach rechts - hier jagt dich niemand mehr.",
-    "en": "Calmly to the right - nobody is chasing you any more."
+    "de": "Ganz ruhig nach rechts — hier jagt dich niemand mehr.",
+    "en": "Calmly to the right — nobody is chasing you any more."
   }
 }

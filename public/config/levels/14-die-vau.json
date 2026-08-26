@@ -7,16 +7,16 @@
       "en": "The VAU"
     },
     "portalText": {
-      "de": "Station: Die VAU - ein Raum, kein Tunnel.",
-      "en": "Station: the VAU - a room, not a tunnel."
+      "de": "Station: Die VAU — ein Raum, kein Tunnel.",
+      "en": "Station: the VAU — a room, not a tunnel."
     },
     "reziText": {
-      "de": "Hier arbeite ich im Klartext - und der Betreiber sieht trotzdem nichts.",
-      "en": "Here I work in plain text - and the operator still sees nothing."
+      "de": "Hier arbeite ich im Klartext — und der Betreiber sieht trotzdem nichts.",
+      "en": "Here I work in plain text — and the operator still sees nothing."
     },
     "stampText": {
-      "de": "Vertraulich verarbeitet - Klartext, ohne Mitleser.",
-      "en": "Processed confidentially - plain text, without onlookers."
+      "de": "✓ Vertraulich verarbeitet — Klartext, ohne Mitleser.",
+      "en": "✓ Processed confidentially — plain text, without onlookers."
     },
     "badge": "VAU"
   },
@@ -34,9 +34,9 @@
   "tilemap": "assets/tilemaps/14-die-vau.tmj",
   "collectible": {
     "type": "datenbit",
-    "countRequired": 8,
+    "countRequired": 9,
     "label": {
-      "de": "Pruefsummen",
+      "de": "Prüfsummen",
       "en": "checksums"
     }
   },
@@ -51,14 +51,20 @@
         "en": "Eavesdropper"
       },
       "huelleHint": {
-        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
-        "en": "Unencrypted he reads everything - switch your shell!"
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
       }
     },
     "vau-feld": {
       "hint": {
-        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
-        "en": "VAU: here you work in plain text - and still nobody sees you!"
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
       }
     }
   },
@@ -67,5 +73,5 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 90
+  "parTimeSeconds": 105
 }

@@ -57,14 +57,14 @@
     },
     "andock-plattform": {
       "hint": {
-        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden und schnell sein!",
-        "en": "This platform only carries plain text — become visible briefly and be quick!"
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
       }
     },
     "vau-feld": {
       "hint": {
         "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
-        "en": "VAU: here you work in plain text — and still nobody can see you!"
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
       }
     },
     "kontext-anker": {
@@ -79,7 +79,7 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 75,
+  "parTimeSeconds": 90,
   "stuckHint": {
     "de": "Immer nach rechts! Hülle wechseln mit Joystick HOCH (oder Shift).",
     "en": "Keep heading right! Switch your shell with joystick UP (or Shift)."

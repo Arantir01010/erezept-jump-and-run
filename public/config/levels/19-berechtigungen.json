@@ -7,16 +7,16 @@
       "en": "The permissions"
     },
     "portalText": {
-      "de": "Station: Berechtigungen - du entscheidest, wer hereinkommt.",
-      "en": "Station: permissions - you decide who gets in."
+      "de": "Station: Berechtigungen — du entscheidest, wer hereinkommt.",
+      "en": "Station: permissions — you decide who gets in."
     },
     "reziText": {
-      "de": "Diese Tueren gehen nur mit deiner Karte auf. Mit keiner anderen.",
+      "de": "Diese Türen gehen nur mit deiner Karte auf. Mit keiner anderen.",
       "en": "These doors only open with your card. With no other."
     },
     "stampText": {
-      "de": "Rechte vergeben - drei Tueren, eine Entscheidung: deine.",
-      "en": "Permissions granted - three doors, one decision: yours."
+      "de": "✓ Rechte vergeben — drei Türen, eine Entscheidung: deine.",
+      "en": "✓ Permissions granted — three doors, one decision: yours."
     },
     "badge": "Berechtigungen"
   },
@@ -34,9 +34,9 @@
   "tilemap": "assets/tilemaps/19-berechtigungen.tmj",
   "collectible": {
     "type": "datenbit",
-    "countRequired": 8,
+    "countRequired": 9,
     "label": {
-      "de": "Pruefsummen",
+      "de": "Prüfsummen",
       "en": "checksums"
     }
   },
@@ -51,8 +51,14 @@
         "en": "Eavesdropper"
       },
       "huelleHint": {
-        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
-        "en": "Unencrypted he reads everything - switch your shell!"
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
       }
     }
   },
@@ -61,5 +67,5 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 90
+  "parTimeSeconds": 100
 }

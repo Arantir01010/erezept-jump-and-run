@@ -7,16 +7,16 @@
       "en": "The e-prescription"
     },
     "portalText": {
-      "de": "Station: Die Apotheke - deine Karte gibt den Zugriff frei.",
-      "en": "Station: the pharmacy - your card releases the access."
+      "de": "Station: Die Apotheke — deine Karte gibt den Zugriff frei.",
+      "en": "Station: the pharmacy — your card releases the access."
     },
     "reziText": {
-      "de": "Auf der Karte steht nichts. Sie oeffnet nur - wie ein Schluessel.",
-      "en": "Nothing is stored on the card. It only opens - like a key."
+      "de": "Auf der Karte steht nichts. Sie öffnet nur — wie ein Schlüssel.",
+      "en": "Nothing is stored on the card. It only opens — like a key."
     },
     "stampText": {
-      "de": "Eingeloest - die Karte war der Schluessel, nicht der Speicher.",
-      "en": "Redeemed - the card was the key, not the storage."
+      "de": "✓ Eingelöst — die Karte war der Schlüssel, nicht der Speicher.",
+      "en": "✓ Redeemed — the card was the key, not the storage."
     },
     "badge": "E-Rezept"
   },
@@ -30,13 +30,13 @@
   },
   "cameraMode": "horizontal",
   "theme": "zentrale-zone",
-  "enemySkin": "lauscher-auge",
+  "enemySkin": "skimming-kralle",
   "tilemap": "assets/tilemaps/13-e-rezept.tmj",
   "collectible": {
     "type": "datenbit",
-    "countRequired": 8,
+    "countRequired": 9,
     "label": {
-      "de": "Pruefsummen",
+      "de": "Prüfsummen",
       "en": "checksums"
     }
   },
@@ -51,14 +51,25 @@
         "en": "Eavesdropper"
       },
       "huelleHint": {
-        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
-        "en": "Unencrypted he reads everything - switch your shell!"
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
       }
     },
     "andock-plattform": {
       "hint": {
-        "de": "Diese Plattform traegt nur Klartext - kurz sichtbar werden!",
-        "en": "This platform only carries plain text - become visible briefly!"
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      },
+      "duckHint": {
+        "de": "Ein falscher Kartenleser! Duck dich unter der Kralle durch.",
+        "en": "A fake card reader! Duck under the claw."
       }
     }
   },
@@ -67,5 +78,5 @@
     "start": "klartext",
     "toggleCooldownMs": 150
   },
-  "parTimeSeconds": 85
+  "parTimeSeconds": 100
 }
