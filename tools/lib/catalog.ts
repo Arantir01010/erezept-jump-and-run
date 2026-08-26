@@ -100,6 +100,26 @@ export interface ObjectTypeDef {
  * Alle Objekt-Typen, die ein Level im `objects`-Array verwenden darf.
  * (spawn / collectible / checkpoint / door-exit sind Marker im layout.txt.)
  */
+/**
+ * Die drei Ausweise (KAPSEL 1.1). Gerätekarten (gSMC-KT/gSMC-K) fehlen
+ * absichtlich: Sie stecken in der Wirklichkeit dauerhaft im Gerät und wären
+ * als Spielobjekt sinnlos.
+ */
+export const KARTEN_IDS = ['egk', 'hba', 'smcb'] as const
+
+/** Eine Karte, wie sie im Level geschrieben wird. */
+const karteSchema = z.enum(KARTEN_IDS)
+
+/**
+ * Erlaubte Karten eines Terminals: Liste im level.json ODER Komma-String
+ * (Tiled-Properties kennen keine Listen). Mindestens eine — ein Leser, den
+ * keine Karte öffnet, wäre eine Sackgasse.
+ */
+const karteListeSchema = z.union([
+  z.array(karteSchema).min(1),
+  z.string().min(1),
+])
+
 export const OBJECT_TYPES: Record<string, ObjectTypeDef> = {
   gate: {
     schema: z.strictObject({
@@ -241,6 +261,34 @@ export const OBJECT_TYPES: Record<string, ObjectTypeDef> = {
     defaults: { tw: 1, th: 1.5 },
     needsHuelle: true,
     doc: 'Frischt eine ablaufende VAU-Sitzung auf (nur sinnvoll bei vau-feld mit ttlMs)',
+  },
+  karte: {
+    schema: z.strictObject({
+      type: z.literal('karte'),
+      karte: karteSchema,
+      hint: LTextSchema.optional(),
+      ...baseFields,
+    }),
+    defaults: { tw: 1.2, th: 0.8 },
+    doc: 'Ausweis zum Aufsammeln (karte: "egk" | "hba" | "smcb") — Identität, kein Sammelziel',
+  },
+  kartenleser: {
+    schema: z.strictObject({
+      type: z.literal('kartenleser'),
+      karten: karteListeSchema,
+      gate: gateNameSchema.optional(),
+      hint: LTextSchema.optional(),
+      gateHint: LTextSchema.optional(),
+      denyText: LTextSchema.optional(),
+      'nicht-dabeiHint': LTextSchema.optional(),
+      'falsche-karteHint': LTextSchema.optional(),
+      belegtHint: LTextSchema.optional(),
+      ...baseFields,
+    }),
+    defaults: { tw: 3, th: 3 },
+    opensGate: true,
+    needsStandableInZone: true,
+    doc: 'Kartenterminal: TI-Aktion steckt die passende Karte (karten: ["egk"]) und öffnet das Tor',
   },
   deco: {
     schema: z.strictObject({

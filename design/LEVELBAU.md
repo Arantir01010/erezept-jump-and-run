@@ -280,6 +280,72 @@ der Compiler die Erreichbarkeit strenger — statt ~5 nur noch **~4 Kacheln
 Sprungweite**. Halte Pflichtsprünge in Hülle-Leveln also kürzer, sonst kommt
 „NICHT erreichbar … LANGSAMEN Zustand".
 
+### Karten stecken: eGK ⇄ HBA ⇄ SMC-B
+
+Die zweite Zusatzmechanik verbindet Bewegung mit **Identität**: Ein Terminal
+öffnet sein Tor nur, wenn der Spieler den passenden Ausweis dabei hat. Anders
+als die Hülle muss dafür **nichts eingeschaltet** werden — die zwei Objekte
+reichen.
+
+**Die drei Ausweise** (Gerätekarten gibt es bewusst nicht — die stecken in der
+Wirklichkeit dauerhaft im Gerät):
+
+| Wert | Karte | Wer | Rolle im Spiel |
+|---|---|---|---|
+| `"egk"` | elektronische Gesundheitskarte | Versicherte | Schlüssel, der Zugriff freigibt |
+| `"hba"` | Heilberufsausweis | Heilberuf | persönliche Identität eines Menschen |
+| `"smcb"` | Institutionskarte | Praxis/Apotheke | authentisiert die Einrichtung |
+
+**`karte` — Ausweis zum Aufsammeln** (Pflicht: `karte`; optional `hint`)
+```json
+{ "type": "karte", "tx": 22, "ty": 18, "karte": "egk" }
+```
+Wird beim Berühren eingesammelt und geht nie verloren — ein Ausweis bleibt beim
+Besitzer. **Karten sind KEIN Sammelziel:** Sie zählen nicht als Prüfsummen und
+öffnen keinen Tür-Ausgang `D`. Sie sind Identität, keine Währung.
+
+**`kartenleser` — das Terminal** (Pflicht: `karten`; optional `gate` und Texte)
+```json
+{ "type": "kartenleser", "tx": 46, "ty": 16, "karten": ["egk"], "gate": "tor-praxis" }
+```
+Blaue TI-Aktion in der Zone (Standard 3×3) steckt automatisch die erste
+passende Karte. Am Terminal steht sinngemäß „Karte stecken", nicht „wähle Karte
+2 von 3" — deshalb wählt das Spiel selbst. Wer weggeht, nimmt seinen Ausweis
+mit; der Schlitz ist dann wieder frei.
+
+Vier Ergebnisse, vier verschiedene REZI-Sätze — überschreibbar über
+`hint`, `nicht-dabeiHint`, `falsche-karteHint`, `belegtHint`, `gateHint`,
+`denyText`:
+
+| Ergebnis | Wann | Was passiert |
+|---|---|---|
+| Erfolg | passende Karte dabei | Tor öffnet, Schlitzlicht springt auf Grün, REZI sagt `station.reziText` |
+| `nicht-dabei` | Karte noch nicht gefunden | Hinweis, **kein** Stempel |
+| `falsche-karte` | Terminal akzeptiert sie nicht | „ZUGRIFF VERWEIGERT" mit Stempel |
+| `belegt` | Karte steckt noch woanders | Hinweis, **kein** Stempel |
+
+Nur die echte Zurückweisung durch die TI bekommt den Stempel. „Du hast sie noch
+nicht" ist kein Fehler des Spielers, sondern ein Zustand — dafür gibt es keinen
+erhobenen Zeigefinger (Markenregel).
+
+**Was der Compiler erzwingt:**
+- Jeder Leser braucht eine Karte, die er akzeptiert, **links von ihm** im Level.
+  Fehlt sie, ist das derselbe Fehler wie ein Tor ohne Öffner: Softlock.
+- Liegt die Karte rechts vom Leser, gibt es eine eigene Fehlermeldung — der
+  Spieler stünde ohne Ausweis am Terminal.
+- Eine Karte, die kein Terminal akzeptiert, warnt (sie liegt wirkungslos herum).
+
+**Fachlich wichtig (bitte nicht verfälschen):**
+- **Die eGK speichert keine Befunde.** Sie ist Schlüssel und Identität. Im
+  Baukasten hat eine Karte deshalb kein Inhaltsfeld — und es darf auch keins
+  dazukommen.
+- **Keine Rolle ersetzt eine andere.** Die eGK öffnet die Apotheke, nicht den
+  Praxiszugang. Wer beides braucht, baut zwei Terminals mit je eigener `karten`-Liste.
+- **Stecken ist keine Signatur.** Der HBA darf fachlich signieren (QES), aber
+  das ist eine eigene Aktion — dafür gibt es `stamp-exit`.
+
+---
+
 ### `mechanics` — Feintuning & REZI-Texte pro Typ
 
 Für die Hülle-Bausteine gibt es zusätzlich:

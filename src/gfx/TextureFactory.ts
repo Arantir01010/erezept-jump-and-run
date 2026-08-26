@@ -459,6 +459,72 @@ const OBJECT_FRAMES: { key: string; pattern: string[]; colors: ColorMap }[] = [
     ],
     colors: { G: '#ffd75e', W: '#ffffff' },
   },
+  // --- Karten stecken (KAPSEL 2.1) ------------------------------------------
+  // Die drei Ausweise teilen die Kartenform (Chip links oben, Schriftbalken),
+  // unterscheiden sich aber in der Grundfarbe UND im Muster: Farbe allein
+  // reicht bei Farbfehlsichtigkeit nicht (KAPSEL 3.3).
+  {
+    // eGK — Versicherte. Ruhige Fläche, ein Balken: die einfachste Karte.
+    key: 'karte-egk',
+    pattern: [
+      'KKKKKKKKKKKK',
+      'KCCKKKKKKKKK',
+      'KCCKKKKKKKKK',
+      'KKKKKKKKKKKK',
+      'KKWWWWWWKKKK',
+      'KKKKKKKKKKKK',
+      'KKWWWWKKKKKK',
+      'KKKKKKKKKKKK',
+    ],
+    colors: { K: '#3f8fd0', C: '#ffd75e', W: '#dceaf7' },
+  },
+  {
+    // HBA — Heilberuf. Zwei Balken + Signaturkerbe rechts: die Karte, die
+    // signieren darf (die Aktion selbst bleibt stamp-exit).
+    key: 'karte-hba',
+    pattern: [
+      'KKKKKKKKKKKK',
+      'KCCKKKKKKKKK',
+      'KCCKKKKKKKSK',
+      'KKKKKKKKKSSK',
+      'KKWWWWWWKSKK',
+      'KKKKKKKKKKKK',
+      'KKWWWWWWWKKK',
+      'KKKKKKKKKKKK',
+    ],
+    colors: { K: '#7a5cff', C: '#ffd75e', W: '#e4dcff', S: '#ffd75e' },
+  },
+  {
+    // SMC-B — Einrichtung. Gerahmt: eine Institution, kein Mensch.
+    key: 'karte-smcb',
+    pattern: [
+      'KKKKKKKKKKKK',
+      'KCCKRRRRRRKK',
+      'KCCKRKKKKRKK',
+      'KKKKRKKKKRKK',
+      'KKWWRKKKKRKK',
+      'KKKKRRRRRRKK',
+      'KKWWWWWKKKKK',
+      'KKKKKKKKKKKK',
+    ],
+    colors: { K: '#2f8f7d', C: '#ffd75e', W: '#d8f2ec', R: '#bff0dc' },
+  },
+  {
+    // Kartenleser: Gehäuse mit Schlitz oben und Statuslicht.
+    key: 'kartenleser',
+    pattern: [
+      '..GGGGGGGG..',
+      '.GSSSSSSSSG.',
+      '.GGGGGGGGGG.',
+      'GGGGGGGGGGGG',
+      'GGLGGGGGGGGG',
+      'GGGGGGGGGGGG',
+      'GGGGGGGGGGGG',
+      'GGGGGGGGGGGG',
+      '.GG......GG.',
+    ],
+    colors: { G: '#5a6274', S: '#20242e', L: '#ffd75e' },
+  },
 ]
 
 // ---------------------------------------------------------------- Avatar-Icons (Highscore)

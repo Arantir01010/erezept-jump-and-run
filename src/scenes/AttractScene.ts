@@ -4,6 +4,7 @@ import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
 import { assist } from '../state/Assist'
 import { protokoll } from '../state/Protokoll'
+import { kartenState } from '../state/KartenState'
 import { telemetry } from '../telemetry/Telemetry'
 import { speichereSitzung } from '../telemetry/speicher'
 import { getHighscores } from '../state/Highscore'
@@ -100,6 +101,9 @@ export class AttractScene extends Phaser.Scene {
       gameState.reset()
       assist.reset()
       protokoll.reset()
+      // Ausweise gehören dem Besucher, nicht dem Automaten — jeder Durchlauf
+      // fängt ohne Karten an (sonst erbt der Nächste fremde Identitäten).
+      kartenState.reset()
       if (!this.scene.isActive('UI')) this.scene.launch('UI')
       this.scene.start('City', { toLevelIndex: 0 })
     }

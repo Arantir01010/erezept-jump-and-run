@@ -460,4 +460,72 @@ export function run(): void {
       assertNone(compile(L(), towers(6)).errors, 'LANGSAMEN Zustand')
     })
   })
+
+  suite('Compiler — Karten & Terminals (Softlock-Schutz)', () => {
+    const leser = (over: Record<string, unknown> = {}) => ({
+      type: 'kartenleser', tx: 30, ty: 16, karten: ['egk'], ...over,
+    })
+    const karte = (over: Record<string, unknown> = {}) => ({
+      type: 'karte', tx: 12, ty: 18, karte: 'egk', ...over,
+    })
+
+    test('Leser MIT passender Karte davor kompiliert sauber', () => {
+      const r = compile(L({ objects: [karte(), leser()] }))
+      assertEqual(r.errors.length, 0, r.errors.join(' | '))
+    })
+
+    test('Leser OHNE passende Karte im Level ist ein FEHLER', () => {
+      const r = compile(L({ objects: [leser()] }))
+      assertSome(r.errors, /keine solche Karte/)
+    })
+
+    test('die Meldung schlägt das fehlende Karten-Objekt konkret vor', () => {
+      const r = compile(L({ objects: [leser()] }))
+      assertSome(r.errors, /"type": "karte", "karte": "egk"/)
+    })
+
+    test('falsche Kartenart zählt nicht als Öffner', () => {
+      const r = compile(L({ objects: [karte({ karte: 'hba' }), leser({ karten: ['egk'] })] }))
+      assertSome(r.errors, /keine solche Karte/)
+    })
+
+    test('Karte HINTER dem Leser ist ein FEHLER mit eigener Begründung', () => {
+      const r = compile(L({ objects: [karte({ tx: 40 }), leser({ tx: 30 })] }))
+      assertSome(r.errors, /liegt erst HINTER ihm/)
+    })
+
+    test('mehrere erlaubte Karten: eine davor genügt', () => {
+      const r = compile(L({ objects: [karte({ karte: 'smcb' }), leser({ karten: ['egk', 'smcb'] })] }))
+      assertEqual(r.errors.length, 0, r.errors.join(' | '))
+    })
+
+    test('Komma-String funktioniert wie eine Liste', () => {
+      const r = compile(L({ objects: [karte({ karte: 'smcb' }), leser({ karten: 'egk,smcb' })] }))
+      assertEqual(r.errors.length, 0, r.errors.join(' | '))
+    })
+
+    test('Karte, die kein Terminal akzeptiert, WARNT (liegt wirkungslos herum)', () => {
+      const r = compile(L({ objects: [karte(), karte({ karte: 'hba', tx: 16 }), leser()] }))
+      assertEqual(r.errors.length, 0, r.errors.join(' | '))
+      assertSome(r.warnings, /wirkungslos/)
+    })
+
+    test('unbekannte Kartenart wird schon vom Schema abgelehnt', () => {
+      const r = compile(L({ objects: [karte({ karte: 'personalausweis' })] }))
+      assertTrue(r.errors.length > 0, 'eine erfundene Karte darf nicht durchgehen')
+    })
+
+    test('Tor am Kartenleser gilt als versorgt (kein „Tor ohne Öffner")', () => {
+      const r = compile(
+        L({
+          objects: [
+            karte(),
+            leser({ gate: 'tor-praxis' }),
+            { type: 'gate', name: 'tor-praxis', tx: 40, ty: 14, th: 6 },
+          ],
+        }),
+      )
+      assertNone(r.errors, /hat KEINEN Öffner/)
+    })
+  })
 }

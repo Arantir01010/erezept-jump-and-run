@@ -13,6 +13,7 @@ import './Lauscher'
 import './AndockPlattform'
 import './VauFeld'
 import './KontextAnker'
+import './Karten'
 import './stubs'
 
 export { spawnMechanic, registerMechanic } from './registry'

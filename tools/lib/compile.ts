@@ -16,6 +16,7 @@
 import { formatZodError } from '../../src/level/schema'
 import { PLAYER_TUNING } from '../../src/player/PlayerConfig'
 import { SLOWEST_SPEED_FACTOR } from '../../src/state/HuelleState'
+import { parseKarten, kartenListe } from '../../src/mechanics/kartenLeserLogik'
 import {
   TILE,
   GRID_HEIGHT,
@@ -294,6 +295,56 @@ function checkStructure(
       errors.push(
         `Tor "${g.name}" (tx=${g.tx}) hat KEINEN Öffner — es bliebe für immer zu (Softlock). ` +
           `Verknüpfe eine Mechanik (timing-gate, stillstand-podest, krypto-dusche) per "gate": "${g.name}".`,
+      )
+    }
+  }
+
+  // --- Karten & Terminals (Softlock-Schutz, KAPSEL 2.1) ---
+  //
+  // Ein Kartenleser, dessen Karte im Level nirgends zu finden ist, ist
+  // dasselbe wie ein Tor ohne Öffner: Der Spieler steht davor und kommt nie
+  // weiter. Deshalb hier dieselbe Strenge.
+  const kartenFunde = objects.filter((o) => o.type === 'karte')
+  const leser = objects.filter((o) => o.type === 'kartenleser')
+
+  for (const l of leser) {
+    const erlaubt = parseKarten(l.props['karten'])
+    if (erlaubt.length === 0) {
+      errors.push(
+        `kartenleser bei tx=${l.tx}: "karten" nennt keine gültige Karte — erlaubt sind egk, hba, smcb.`,
+      )
+      continue
+    }
+    // Die passende Karte muss VOR dem Leser liegen (in Laufrichtung links).
+    const davor = kartenFunde.filter(
+      (k) => erlaubt.includes(parseKarten(k.props['karte'])[0]) && k.tx < l.tx,
+    )
+    if (davor.length > 0) continue
+
+    const irgendwo = kartenFunde.some((k) => erlaubt.includes(parseKarten(k.props['karte'])[0]))
+    if (irgendwo) {
+      errors.push(
+        `kartenleser bei tx=${l.tx} akzeptiert ${kartenListe(erlaubt)}, aber diese Karte liegt erst HINTER ihm — ` +
+          `der Spieler stünde ohne Ausweis am Terminal. Setze das karte-Objekt weiter nach links.`,
+      )
+    } else {
+      errors.push(
+        `kartenleser bei tx=${l.tx} akzeptiert ${kartenListe(erlaubt)}, aber im Level liegt keine solche Karte (Softlock). ` +
+          `Ergänze { "type": "karte", "karte": "${erlaubt[0]}", ... } links vom Terminal.`,
+      )
+    }
+  }
+
+  for (const k of kartenFunde) {
+    const karte = parseKarten(k.props['karte'])[0]
+    if (!karte) {
+      errors.push(`karte bei tx=${k.tx}: Feld "karte" fehlt oder ist unbekannt (egk, hba oder smcb).`)
+      continue
+    }
+    const gebraucht = leser.some((l) => parseKarten(l.props['karten']).includes(karte))
+    if (!gebraucht) {
+      warnings.push(
+        `karte "${karte}" bei tx=${k.tx} wird von keinem Kartenleser akzeptiert — sie liegt wirkungslos herum.`,
       )
     }
   }

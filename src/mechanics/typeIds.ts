@@ -26,6 +26,9 @@ export const MECHANIC_TYPE_IDS = [
   'andock-plattform',
   'vau-feld',
   'kontext-anker',
+  // Karten stecken (KAPSEL 2.1, Zusatzmechanik 1 — „Bewegung mit Identität")
+  'karte',
+  'kartenleser',
   // Ausbaustufe (Stubs im Prototyp)
   'pruef-scanner',
   'rechte-tueren',
