@@ -80,6 +80,8 @@ export interface LevelAuffaelligkeit {
   gesehen: number
   /** Durchschnittliche Spielzeit in Sekunden (nur beendete Läufe). */
   dauerSchnitt: number
+  /** Steckversuche mit der falschen Karte — Rollen werden verwechselt. */
+  falscheKarte: number
 }
 
 export type Ableitung =
@@ -119,13 +121,14 @@ const EMPFEHLUNG: Record<Ableitung, string> = {
 
 /** Auffälligkeiten aus allen Durchläufen aufsummieren. */
 function auffaelligkeiten(sitzungen: SitzungKennzahlen[]): LevelAuffaelligkeit[] {
-  const acc = new Map<string, { a: number; t: number; g: number; dauern: number[] }>()
+  const acc = new Map<string, { a: number; t: number; g: number; k: number; dauern: number[] }>()
   for (const s of sitzungen) {
     for (const l of s.level) {
-      const e = acc.get(l.levelId) ?? { a: 0, t: 0, g: 0, dauern: [] }
+      const e = acc.get(l.levelId) ?? { a: 0, t: 0, g: 0, k: 0, dauern: [] }
       if (l.abgebrochen) e.a += 1
       e.t += l.tipps
       e.g += l.gesehen
+      e.k += l.falscheKarte
       if (l.beendet && l.dauerSek > 0) e.dauern.push(l.dauerSek)
       acc.set(l.levelId, e)
     }
@@ -136,6 +139,7 @@ function auffaelligkeiten(sitzungen: SitzungKennzahlen[]): LevelAuffaelligkeit[]
       abbrueche: e.a,
       tipps: e.t,
       gesehen: e.g,
+      falscheKarte: e.k,
       dauerSchnitt:
         e.dauern.length > 0
           ? Math.round((e.dauern.reduce((x, y) => x + y, 0) / e.dauern.length) * 10) / 10
@@ -188,15 +192,32 @@ export function formatBericht(bericht: Bericht): string {
       `${bericht.benchmark.erfuellt ? 'ERREICHT' : 'NICHT ERREICHT'}`,
   )
   if (bericht.auffaellig.length > 0) {
+    // Die Karten-Spalte erscheint nur, wenn es überhaupt Kartenlevel gab —
+    // eine Spalte voller Nullen macht die Tabelle nur schwerer zu lesen.
+    const mitKarten = bericht.auffaellig.some((a) => a.falscheKarte > 0)
     z.push('')
     z.push('Auffälligkeiten je Station')
-    z.push('  Station                  Abbrüche  Tipps  Treffer  Zeit')
+    z.push(
+      '  Station                  Abbrüche  Tipps  Treffer  Zeit' +
+        (mitKarten ? '  falscheKarte' : ''),
+    )
     for (const a of bericht.auffaellig) {
       z.push(
         `  ${a.levelId.padEnd(24)}${String(a.abbrueche).padStart(8)}` +
           `${String(a.tipps).padStart(7)}${String(a.gesehen).padStart(9)}` +
-          `${(a.dauerSchnitt > 0 ? a.dauerSchnitt + 's' : '—').padStart(7)}`,
+          `${(a.dauerSchnitt > 0 ? a.dauerSchnitt + 's' : '—').padStart(7)}` +
+          (mitKarten ? String(a.falscheKarte).padStart(14) : ''),
       )
+    }
+    if (mitKarten) {
+      z.push('')
+      z.push(
+        '  falscheKarte = mit dem falschen Ausweis gesteckt. Häufig heißt: die Rollen',
+      )
+      z.push(
+        '  werden für austauschbar gehalten (eGK ist kein Praxisausweis) — das Level',
+      )
+      z.push('  muss den Unterschied deutlicher zeigen, nicht der Spieler besser raten.')
     }
   }
   z.push('')

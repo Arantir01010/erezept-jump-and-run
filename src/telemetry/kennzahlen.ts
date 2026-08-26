@@ -34,6 +34,19 @@ export interface LevelKennzahlen {
   checkpoints: number
   vauBetreten: number
   vauAbgelaufen: number
+  /** Gefundene Ausweise. */
+  kartenGefunden: number
+  /** Gelungene Steckversuche. */
+  kartenGesteckt: number
+  /**
+   * Steckversuche mit der FALSCHEN Karte.
+   *
+   * Die aussagekräftigste Kartenzahl: Sie heißt „der Spieler hält eine Rolle
+   * für austauschbar" — genau der Vereinfachungsfehler aus KAPSEL 1.4. Ein
+   * vergessener Ausweis („nicht-dabei") ist etwas anderes und zählt hier NICHT
+   * mit, sonst wäre die Zahl nicht deutbar.
+   */
+  falscheKarte: number
   beendet: boolean
   abgebrochen: boolean
   /** Die Kernfrage: freiwillig und sinnvoll gewechselt? */
@@ -74,6 +87,9 @@ export function levelKennzahlen(levelId: string, events: TelemetrieEvent[]): Lev
     checkpoints: eigene.filter((e) => e.typ === 'checkpoint').length,
     vauBetreten: eigene.filter((e) => e.typ === 'vau-betreten').length,
     vauAbgelaufen: eigene.filter((e) => e.typ === 'vau-abgelaufen').length,
+    kartenGefunden: eigene.filter((e) => e.typ === 'karte-gefunden').length,
+    kartenGesteckt: eigene.filter((e) => e.typ === 'karte-gesteckt').length,
+    falscheKarte: eigene.filter((e) => e.typ === 'karte-abgelehnt' && e.wert === 'falsche-karte').length,
     beendet: ende !== undefined,
     abgebrochen: abbruch !== undefined && ende === undefined,
     verstehen,

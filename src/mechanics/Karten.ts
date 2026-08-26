@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { Mechanic, objCenter } from './Mechanic'
 import { registerMechanic } from './registry'
 import { gameState } from '../state/GameState'
+import { telemetry } from '../telemetry/Telemetry'
 import { assist } from '../state/Assist'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
@@ -64,6 +65,7 @@ export class KartenFund extends Mechanic {
       sprite.destroy()
       destroyGlow(this.host.scene, glow)
       kartenState.nimm(karte)
+      telemetry.note('karte-gefunden', this.host.scene.time.now, karte)
       collectSparkle(this.host.scene, x, y)
       this.host.rezi.say(this.paramText('hint', this.fundText(karte)))
       this.host.scene.game.events.emit('hud:update')
@@ -191,6 +193,7 @@ export class KartenLeser extends Mechanic {
     }
     collectSparkle(scene, x, y - 4)
 
+    telemetry.note('karte-gesteckt', scene.time.now, kartenState.gesteckt ?? undefined)
     if (assist.wasClean(this.id)) gameState.addSecurityBonus()
     this.host.rezi.say(t(this.host.level.station.reziText))
     this.linkedGate()?.open()
@@ -201,6 +204,10 @@ export class KartenLeser extends Mechanic {
     assist.fail(this.id)
     const scene = this.host.scene
     const { x, y } = objCenter(this.obj)
+    // Der Grund gehört ins Ereignis: „falsche Karte" heißt, der Spieler hält
+    // eine Rolle für austauschbar — das ist etwas ganz anderes als „noch nicht
+    // gefunden" und braucht eine andere Konsequenz im Leveldesign.
+    telemetry.note('karte-abgelehnt', scene.time.now, resultat)
 
     if (istZurueckweisung(resultat)) {
       // Nur die echte Zurückweisung durch die TI bekommt den Stempel.

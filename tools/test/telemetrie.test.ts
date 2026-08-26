@@ -328,4 +328,64 @@ export function run(): void {
       assertTrue(b.erfuellt)
     })
   })
+
+  suite('Kennzahlen — Karten (KAPSEL 2.1, Paket B4)', () => {
+    const ev = (typ: string, tMs: number, wert?: string) =>
+      ({ typ, levelId: 'L', tMs, ...(wert !== undefined ? { wert } : {}) }) as never
+
+    test('gefundene Ausweise werden gezählt', () => {
+      const k = levelKennzahlen('L', [
+        ev('level-start', 0),
+        ev('karte-gefunden', 100, 'egk'),
+        ev('karte-gefunden', 200, 'smcb'),
+      ])
+      assertEqual(k.kartenGefunden, 2)
+    })
+
+    test('gelungene Steckversuche werden gezählt', () => {
+      const k = levelKennzahlen('L', [ev('level-start', 0), ev('karte-gesteckt', 500, 'egk')])
+      assertEqual(k.kartenGesteckt, 1)
+    })
+
+    test('NUR „falsche-karte" zählt als Rollenverwechslung', () => {
+      // Ein vergessener Ausweis ist etwas völlig anderes als der Glaube, eine
+      // Karte ersetze die andere. Würden beide in dieselbe Zahl laufen, wäre
+      // sie nicht deutbar (KAPSEL 1.4).
+      const k = levelKennzahlen('L', [
+        ev('level-start', 0),
+        ev('karte-abgelehnt', 100, 'falsche-karte'),
+        ev('karte-abgelehnt', 200, 'nicht-dabei'),
+        ev('karte-abgelehnt', 300, 'belegt'),
+        ev('karte-abgelehnt', 400, 'falsche-karte'),
+      ])
+      assertEqual(k.falscheKarte, 2)
+    })
+
+    test('ohne Karten-Ereignisse sind alle drei Zahlen 0', () => {
+      const k = levelKennzahlen('L', [ev('level-start', 0), ev('gesammelt', 100)])
+      assertEqual(k.kartenGefunden, 0)
+      assertEqual(k.kartenGesteckt, 0)
+      assertEqual(k.falscheKarte, 0)
+    })
+
+    test('Ereignisse fremder Level zählen nicht mit', () => {
+      const k = levelKennzahlen('L', [
+        ev('level-start', 0),
+        { typ: 'karte-abgelehnt', levelId: 'ANDERES', tMs: 100, wert: 'falsche-karte' } as never,
+      ])
+      assertEqual(k.falscheKarte, 0)
+    })
+
+    test('die drei Karten-Typen sind erfasst und datenschutzkonform', () => {
+      for (const typ of ['karte-gefunden', 'karte-gesteckt', 'karte-abgelehnt']) {
+        assertTrue((TELEMETRIE_TYPEN as readonly string[]).includes(typ), `${typ} fehlt`)
+      }
+      const t = new Telemetry()
+      t.setLevel('L')
+      t.note('karte-gefunden', 10, 'egk')
+      // Kein Feld über typ/levelId/tMs/wert hinaus — der Ausweis ist eine
+      // Kartenart, keine Person.
+      assertDeepEqual(Object.keys(t.alle()[0]).sort(), ['levelId', 'tMs', 'typ', 'wert'])
+    })
+  })
 }

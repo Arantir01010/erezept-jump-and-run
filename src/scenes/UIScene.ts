@@ -7,6 +7,7 @@ import { sealTextureKey } from '../gfx/TextureFactory'
 import { addText } from '../gfx/text'
 import { addVignette } from '../gfx/effects'
 import { Huelle } from '../state/HuelleState'
+import { kartenState, KARTEN_INFO, type Karte } from '../state/KartenState'
 import { badgeSpec, badgeColorCss, badgePoints, toggleHinweis } from '../gfx/huelleBadge'
 import { telemetry } from '../telemetry/Telemetry'
 import { exportiereDatei, ladeSitzungen, speichereSitzung } from '../telemetry/speicher'
@@ -39,6 +40,10 @@ export class UIScene extends Phaser.Scene {
   /** F9-Auswertung (Playtest) — nur für das Standpersonal. */
   private auswertungText?: Phaser.GameObjects.Text
   private huellePadGezeigt: boolean | null = null
+  /** Kartenanzeige unten rechts: gefundene Ausweise, gesteckter hervorgehoben. */
+  private kartenBadge?: Phaser.GameObjects.Container
+  /** Was zuletzt gezeichnet wurde — verhindert Neuaufbau pro Frame. */
+  private kartenGezeigt = ''
 
   constructor() {
     super('UI')
@@ -84,6 +89,12 @@ export class UIScene extends Phaser.Scene {
       .setDepth(20)
       .setVisible(false)
 
+    // --- Kartenanzeige unten rechts (Gegenstück zum Hülle-Badge links) ---
+    // Gezeigt werden nur GEFUNDENE Karten. Leere Slots für Unbekanntes wären
+    // eine Sammel-Checkliste — Karten sind aber Identität, keine Währung
+    // (KAPSEL 3.2: HUD minimal halten).
+    this.kartenBadge = this.add.container(W - 8, H - 18, []).setDepth(20).setVisible(false)
+
     this.idleText = addText(this, W / 2, 46, '', 12, {
       color: '#ffd75e',
       bg: '#20242e',
@@ -116,6 +127,11 @@ export class UIScene extends Phaser.Scene {
       this.lastIdleWarnMs = performance.now()
       this.idleText.setText(`Noch da? Neustart in ${seconds} s …`).setVisible(true)
     }
+    // Karten melden sich selbst — sie ändern sich auch ohne hud:update
+    // (Ziehen beim Verlassen eines Terminals passiert lautlos).
+    const offKarten = kartenState.onChange(() => this.refreshKarten())
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, offKarten)
+
     events.on('hud:update', onHud)
     events.on('level:start', onLevelStart)
     events.on('idle:warn', onIdleWarn)
@@ -198,8 +214,48 @@ export class UIScene extends Phaser.Scene {
     this.huelleLabel.setText(spec.label).setColor(badgeColorCss(state))
   }
 
+  /**
+   * Gefundene Ausweise unten rechts. Der gesteckte bekommt einen goldenen
+   * Rahmen — „Sitzung offen" ohne ein Wort, und ohne dass der Spieler das HUD
+   * lesen muss, um es zu bemerken.
+   *
+   * Karten sind zusätzlich beschriftet (eGK / HBA / SMC-B): Die drei Texturen
+   * unterscheiden sich zwar in Farbe UND Muster, aber im HUD sind sie nur
+   * 12 px breit — da trägt die Schrift die Unterscheidung (KAPSEL 3.3).
+   */
+  private refreshKarten(): void {
+    if (!this.kartenBadge) return
+    const gefunden = kartenState.gefunden
+    const signatur = `${gefunden.join(',')}|${kartenState.gesteckt ?? ''}`
+    if (signatur === this.kartenGezeigt) return
+    this.kartenGezeigt = signatur
+
+    this.kartenBadge.removeAll(true)
+    if (gefunden.length === 0) {
+      this.kartenBadge.setVisible(false)
+      return
+    }
+    this.kartenBadge.setVisible(true)
+
+    // Von rechts nach links aufbauen, damit die neueste Karte nicht springt
+    const SLOT = 34
+    gefunden.forEach((karte: Karte, i: number) => {
+      const x = -(gefunden.length - 1 - i) * SLOT
+      const gesteckt = kartenState.gesteckt === karte
+      const rahmen = this.add
+        .rectangle(x - 14, 0, 28, 22)
+        .setStrokeStyle(1, gesteckt ? 0xffd75e : 0x8a93a8, gesteckt ? 1 : 0.7)
+      const icon = this.add.image(x - 14, -3, `karte-${karte}`).setAlpha(gesteckt ? 1 : 0.75)
+      const label = addText(this, x - 14, 4, KARTEN_INFO[karte].kurz, 8, {
+        color: gesteckt ? '#ffd75e' : '#8a93a8',
+      }).setOrigin(0.5, 0)
+      this.kartenBadge?.add([rahmen, icon, label])
+    })
+  }
+
   private refresh(): void {
     this.refreshHuelle()
+    this.refreshKarten()
     this.bitsText.setText(String(gameState.bits))
     this.sealSlots.forEach((slot, i) => {
       const earned = i < gameState.seals.length

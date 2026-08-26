@@ -15,7 +15,16 @@
  * verdächtiges Feld bekommt.
  */
 
-/** Alle erfassten Ereignisarten. Bewusst knapp — jede muss eine Frage beantworten. */
+/**
+ * Alle erfassten Ereignisarten. Bewusst knapp — jede muss eine Frage beantworten.
+ *
+ * Die drei Karten-Ereignisse beantworten dieselbe Art Frage wie
+ * `huelle-wechsel` und `gesehen` bei der Hülle: Hat der Spieler die REGEL
+ * verstanden oder nur herumprobiert? Viele `karte-abgelehnt` mit dem Grund
+ * `falsche-karte` heißen: „Er glaubt, eine Karte ersetze die andere" — genau
+ * der Vereinfachungsfehler, den KAPSEL 1.4 benennt. Der Grund steht deshalb
+ * im `wert`, sonst wäre die Zahl nicht deutbar.
+ */
 export const TELEMETRIE_TYPEN = [
   'level-start',      // Station betreten
   'level-ende',       // Station geschafft
@@ -27,6 +36,9 @@ export const TELEMETRIE_TYPEN = [
   'tipp',             // REZI musste helfen -> Verständnisproblem
   'vau-betreten',     // dritter Zustand ausprobiert
   'vau-abgelaufen',   // Kontextschlüssel verfallen
+  'karte-gefunden',   // Ausweis aufgesammelt (wert = egk|hba|smcb)
+  'karte-gesteckt',   // Terminal hat die Identität akzeptiert
+  'karte-abgelehnt',  // Steckversuch gescheitert (wert = Grund)
 ] as const
 
 export type TelemetrieTyp = (typeof TELEMETRIE_TYPEN)[number]
