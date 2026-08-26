@@ -10,6 +10,11 @@ import { addText } from '../gfx/text'
 import { addGlow } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
+import { silhouettePaul } from '../gfx/PaulSilhouette'
+import { setzeZeichenTheme, veredele } from '../gfx/vektor'
+import { licht } from '../gfx/licht'
+import { pille } from '../gfx/material'
+import { darken } from '../gfx/atmos'
 
 const WALK_MS = 2200
 const STAMP_MS = 1700
@@ -39,6 +44,7 @@ export class CityScene extends Phaser.Scene {
 
   create(): void {
     const theme = configService.theme('city')
+    setzeZeichenTheme(theme)
     const { W, H } = setupDesignCamera(this)
     drawBackdrop(this, theme, W, H)
 
@@ -58,6 +64,7 @@ export class CityScene extends Phaser.Scene {
     this.drawFacade(this.portalX + 50, t(target.cityAnchor.label), theme)
     this.portal = this.add.sprite(this.portalX, H - 40 - 16, 'portal-0').setDepth(3)
     this.portal.play('portal-spin')
+    veredele(this, this.portal)
     // Portal-Aura: das Ziel leuchtet — der Blick geht automatisch nach rechts
     addGlow(this, this.portalX, H - 40 - 16, 0x4de3ff, 26, { alpha: 0.4, depth: 2 })
 
@@ -65,6 +72,8 @@ export class CityScene extends Phaser.Scene {
     this.paul = this.add.sprite(80, H - 40 - 12, 'player-idle0').setDepth(10)
     this.rezi = new Rezi(this, 60, H - 40 - 40)
     this.rezi.follow(this.paul)
+    // Silhouette erst NACH REZI: sie braucht die Lichtquelle beim Anlegen.
+    silhouettePaul(this, this.paul, theme, { light: this.rezi })
     for (const seal of gameState.seals) this.rezi.addSealIcon(seal.sealId)
     if (gameState.encrypted) this.rezi.setEncrypted(true)
 
@@ -156,29 +165,48 @@ export class CityScene extends Phaser.Scene {
     const g = this.add.graphics().setDepth(2)
     const w = 90
     const h = 150
-    g.fillStyle(Phaser.Display.Color.HexStringToColor(theme.detail).color, 1)
-    g.fillRect(cx - w / 2, H - 40 - h, w, h)
-    // Dach-Kantenlicht
-    g.fillStyle(0xffffff, 0.14)
-    g.fillRect(cx - w / 2, H - 40 - h, w, 1)
-    const dark = Phaser.Display.Color.HexStringToColor(theme.skyTop).color
+    const top = H - 40 - h
+    const wand = darken(theme.skyTop, 0.05)
+    const kante = Phaser.Display.Color.HexStringToColor(theme.detail).color
+
+    // Baukörper mit Sockel und leicht abgesetztem Obergeschoss — eine
+    // rechteckige Platte liest sich als Kulisse, gestufte Massen als Haus.
+    g.fillStyle(wand, 1)
+    g.fillRoundedRect(cx - w / 2, top, w, h, { tl: 4, tr: 4, bl: 0, br: 0 })
+    g.fillStyle(darken(theme.skyTop, 0.25), 1)
+    g.fillRect(cx - w / 2 - 4, top + h - 26, w + 8, 26)
+    // Kantenlicht auf Dach und Sockel
+    g.fillStyle(kante, 0.5)
+    g.fillRect(cx - w / 2, top, w, 1.2)
+    g.fillStyle(kante, 0.32)
+    g.fillRect(cx - w / 2 - 4, top + h - 26, w + 8, 1)
+
+    // Eingang: der Ort, auf den es ankommt — dunkel mit warmem Licht darin
+    const tuerB = 20
+    g.fillStyle(darken(theme.skyTop, 0.6), 1)
+    g.fillRoundedRect(cx - tuerB / 2, top + h - 24, tuerB, 24, { tl: 8, tr: 8, bl: 0, br: 0 })
+    g.lineStyle(0.8, 0xffd591, 0.5)
+    g.strokeRoundedRect(cx - tuerB / 2, top + h - 24, tuerB, 24, { tl: 8, tr: 8, bl: 0, br: 0 })
+    licht(this, { x: cx, y: top + h - 12, farbe: 0xffd591, radius: 26, staerke: 0.4, depth: 2, pfuetze: false })
+
+    // Fenster: schlanke Bogenfenster statt Klötze, ein Drittel bewohnt
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
-        const wx = cx - w / 2 + 12 + col * 26
-        const wy = H - 40 - h + 14 + row * 32
-        // Jedes dritte Fenster ist warm erleuchtet — die Stadt lebt
+        const wx = cx - w / 2 + 14 + col * 26
+        const wy = top + 16 + row * 31
         const lit = (row * 3 + col + Math.floor(cx / 10)) % 3 === 0
-        g.fillStyle(lit ? 0xffd75e : dark, lit ? 0.85 : 1)
-        g.fillRect(wx, wy, 14, 18)
-        if (lit) addGlow(this, wx + 7, wy + 9, 0xffd75e, 12, { alpha: 0.14, depth: 2 })
+        g.fillStyle(lit ? 0xffd591 : darken(theme.skyTop, 0.45), lit ? 0.9 : 1)
+        g.fillRect(wx, wy + 3, 11, 15)
+        g.fillTriangle(wx, wy + 3, wx + 11, wy + 3, wx + 5.5, wy - 2)
+        if (lit) {
+          licht(this, { x: wx + 5.5, y: wy + 8, farbe: 0xffd591, radius: 16, staerke: 0.22, depth: 2, pfuetze: false })
+        }
       }
     }
-    addText(this, cx, H - 40 - h - 11, label, 10, {
-      color: '#ffffff',
-      bg: '#20242e',
-      padding: { x: 5, y: 3 },
-    })
-      .setOrigin(0.5)
-      .setDepth(3)
+
+    // Beschriftung: Glas-Pille statt Farbkasten
+    const t2 = addText(this, cx, top - 13, label, 9.5, { color: '#eaf6ff' }).setOrigin(0.5).setDepth(4)
+    const p2 = this.add.graphics().setDepth(3)
+    pille(p2, cx - t2.width / 2 - 8, top - 18, t2.width + 16, 15)
   }
 }

@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
 import { darken } from './atmos'
+import { setzeBodenFinder } from './licht'
 import { TILE_SIZE } from './TextureFactory'
 
 /**
@@ -105,6 +106,23 @@ export function drawTerrain(
   theme: Theme,
 ): void {
   layer.setVisible(false)
+
+  // Lichtquellen brauchen den Boden unter sich, um eine Pfütze zu werfen.
+  // Der TerrainRenderer ist der Einzige, der die Kachelkarte kennt — also
+  // meldet er hier den Finder an und beim Szenenende wieder ab.
+  const T0 = TILE_SIZE
+  setzeBodenFinder((wx, wy) => {
+    const cx = Math.floor(wx / T0)
+    if (cx < 0 || cx >= map.width) return null
+    let cy = Math.max(0, Math.floor(wy / T0))
+    for (; cy < map.height; cy++) {
+      const tile = layer.getTileAt(cx, cy, true)
+      const k = tile ? klasse(tile.index) : null
+      if (k === 'fels' || k === 'pad') return cy * T0
+    }
+    return null
+  })
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => setzeBodenFinder(null))
 
   const cols = map.width
   const rows = map.height

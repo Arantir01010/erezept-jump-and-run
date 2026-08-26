@@ -9,6 +9,9 @@ import { LauscherLogik } from './lauscherLogik'
 import { inputManager } from '../input/InputManager'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
+import { sichtkegel, licht, type LichtHandle } from '../gfx/licht'
+import { WARM_OFFEN } from '../gfx/material'
 
 /**
  * LAUSCHER (KAPSEL Level 3 „Lauscher") — sieht ausschließlich KLARTEXT.
@@ -26,7 +29,7 @@ import type { LText } from '../i18n'
  */
 export class Lauscher extends Mechanic {
   private auge!: Phaser.GameObjects.Sprite
-  private kegel!: Phaser.GameObjects.Graphics
+  private kegel!: ReturnType<typeof sichtkegel>
   private baseX = 0
   private patrolTo = 0
   private speed = 30
@@ -37,7 +40,9 @@ export class Lauscher extends Mechanic {
   /** Abklingzeiten und Tipp-Eskalation (getestet, Phaser-frei). */
   private logik = new LauscherLogik()
   /** Merkt den letzten Kegel-Zustand, damit nur bei Änderung neu gezeichnet wird. */
+  /** Letzter Zustand — nur für die Telemetrie-Kante interessant. */
   private kegelAktiv: boolean | null = null
+  private augeLicht?: LichtHandle
 
   spawn(): void {
     const { x, y } = objCenter(this.obj)
@@ -48,9 +53,19 @@ export class Lauscher extends Mechanic {
     this.pauseMs = this.param<number>('pauseMs', 600)
     this.patrolTo = x + this.param<number>('patrol', 0)
 
-    this.kegel = this.host.scene.add.graphics().setDepth(3)
+    this.kegel = sichtkegel(this.host.scene, 3)
     this.auge = this.host.scene.add.sprite(x, y, 'lauscher-0').setDepth(6)
     if (this.host.scene.anims.exists('lauscher-blink')) this.auge.play('lauscher-blink')
+    veredele(this.host.scene, this.auge)
+    // Das Auge leuchtet selbst — warm, weil offen/sichtbar (siehe material.ts)
+    this.augeLicht = licht(this.host.scene, {
+      ziel: this.auge,
+      farbe: WARM_OFFEN,
+      radius: 26,
+      staerke: 0.5,
+      flackern: 0.15,
+      depth: 4,
+    })
     // Warmes Eigenlicht: der Lauscher ist auch im Augenwinkel sichtbar
     addGlow(this.host.scene, x, y, 0xff8a3a, 12, { alpha: 0.3, depth: 5 })
   }
@@ -118,26 +133,26 @@ export class Lauscher extends Mechanic {
    * KAPSEL 3.3). Neu gezeichnet wird nur bei Zustandswechsel oder Bewegung.
    */
   private zeichneKegel(aktiv: boolean): void {
-    const bewegt = Math.abs(this.patrolTo - this.baseX) >= 1
-    if (!bewegt && this.kegelAktiv === aktiv) return
+    // Der Kegel ist Spielinformation, deshalb wird er jeden Frame neu gelegt:
+    // Er soll dem Auge folgen und beim Erfassen SOFORT reagieren. Gezeichnet
+    // wird er als gestaffeltes Volumen — eine harte Kante läse sich als Wand.
+    const wechsel = this.kegelAktiv !== aktiv
     this.kegelAktiv = aktiv
-    const g = this.kegel
-    g.clear()
-    const x = this.auge.x
-    const y = this.auge.y
-    const end = x + this.dir * this.reach
-    g.fillStyle(aktiv ? 0xff4040 : 0xffb347, aktiv ? 0.3 : 0.12)
-    g.beginPath()
-    g.moveTo(x, y - 2)
-    g.lineTo(end, y - this.spread)
-    g.lineTo(end, y + this.spread)
-    g.lineTo(x, y + 2)
-    g.closePath()
-    g.fillPath()
+    void wechsel
+    this.kegel.zeichne(
+      this.auge.x,
+      this.auge.y,
+      this.reach,
+      this.spread * 2,
+      this.dir,
+      aktiv ? 0.34 : 0.14,
+      aktiv ? 0xff5a3a : 0xffb347,
+    )
   }
 
   destroy(): void {
     this.kegel.destroy()
+    this.augeLicht?.destroy()
   }
 }
 registerMechanic('lauscher', Lauscher)

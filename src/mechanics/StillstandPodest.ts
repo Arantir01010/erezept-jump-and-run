@@ -8,6 +8,7 @@ import { showDenyStamp, addGlow } from '../gfx/effects'
 import { podestSchritt, podestAnteil } from './podestLogik'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * Stillstand-Podest (Firewall-Tor): Joystick loslassen, der Scan läuft durch,
@@ -31,6 +32,7 @@ export class StillstandPodest extends Mechanic {
   spawn(): void {
     const { x, y, w } = objCenter(this.obj)
     this.podest = this.host.scene.physics.add.staticImage(x, y, 'podest')
+    this.host.scene.time.delayedCall(0, () => veredele(this.host.scene, this.podest))
     this.podest.setDisplaySize(Math.max(w, 32), 6)
     ;(this.podest.body as Phaser.Physics.Arcade.StaticBody).setSize(Math.max(w, 32), 6)
     this.podest.setDepth(4)
@@ -61,6 +63,7 @@ export class StillstandPodest extends Mechanic {
     // Die Krake schleicht hinterher — Sichtbarkeit für den Deny-Gag
     this.krake = this.host.scene.add.sprite(x - 90, y - 20, 'krake-0').setDepth(2).setAlpha(0.9)
     this.krake.play('krake-swim')
+    veredele(this.host.scene, this.krake)
   }
 
   private get scanMs(): number {

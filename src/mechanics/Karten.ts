@@ -12,6 +12,7 @@ import { parseKarten, kartenListe, terminalId, STECK_MELDUNG, istZurueckweisung 
 import { addGlow, destroyGlow, collectSparkle, showDenyStamp } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * KARTEN STECKEN — Zusatzmechanik 1 aus KAPSEL 2.1, Paket B2 (die Bausteine).
@@ -47,6 +48,7 @@ export class KartenFund extends Mechanic {
     }
 
     const sprite = this.host.scene.physics.add.staticImage(x, y, `karte-${karte}`) as unknown as Phaser.Physics.Arcade.Image
+    veredele(this.host.scene, sprite)
     sprite.setDepth(4)
     // Goldener Schimmer: Ausweise sollen sich von den cyanfarbenen Prüfsummen
     // deutlich unterscheiden — verschiedene Dinge sehen verschieden aus.
@@ -132,7 +134,7 @@ export class KartenLeser extends Mechanic {
       console.warn(`[mechanics] kartenleser "${this.id}" akzeptiert keine Karte (Parameter "karten") — Tor bliebe zu`)
     }
 
-    this.host.scene.add.image(x, y, 'kartenleser').setDepth(6)
+    veredele(this.host.scene, this.host.scene.add.image(x, y, 'kartenleser').setDepth(6))
     this.schlitzLicht = addGlow(this.host.scene, x, y - 6, 0xffd75e, 10, { alpha: 0.35, depth: 5 })
 
     // Tube-Modus: Der Tunnel wartet, bis die Identität geprüft ist

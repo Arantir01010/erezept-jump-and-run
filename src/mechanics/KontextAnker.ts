@@ -4,6 +4,7 @@ import { registerMechanic } from './registry'
 import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /** Mindestabstand zwischen zwei Auffrischungen. */
 const REFRESH_COOLDOWN_MS = 400
@@ -22,6 +23,7 @@ export class KontextAnker extends Mechanic {
   spawn(): void {
     const { x, y } = objCenter(this.obj)
     this.sprite = this.host.scene.physics.add.staticImage(x, y, 'checkpoint') as unknown as Phaser.Physics.Arcade.Image
+    veredele(this.host.scene, this.sprite)
     this.sprite.setDepth(4).setTint(0xb9a6ff)
     addGlow(this.host.scene, x, y, 0xb9a6ff, 12, { alpha: 0.35, depth: 3 })
 

@@ -12,6 +12,7 @@ import { telemetry } from '../telemetry/Telemetry'
 import { speichereSitzung } from '../telemetry/speicher'
 import { bildeBilanz, formatSumme } from '../state/siegelReport'
 import { addText } from '../gfx/text'
+import { setzeZeichenTheme, veredele } from '../gfx/vektor'
 import { addGlow, addVignette } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
@@ -46,12 +47,14 @@ export class RewardScene extends Phaser.Scene {
 
     const cfg = configService.gameConfig
     const { W, H } = setupDesignCamera(this)
+    setzeZeichenTheme(configService.theme('city'))
     this.cameras.main.setBackgroundColor('#0d1638')
     this.cameras.main.fadeIn(400)
 
     // Konfetti-Bits (dezent, keine Blitze)
     for (let i = 0; i < 24; i++) {
       const bit = this.add.image(Math.random() * W, -10 - Math.random() * 150, 'datenbit').setAlpha(0.7)
+      veredele(this, bit)
       this.tweens.add({
         targets: bit,
         y: H + 10,
@@ -63,7 +66,7 @@ export class RewardScene extends Phaser.Scene {
       })
     }
 
-    addText(this, W / 2, 32, 'Dein e-Rezept ist da!', 23, { stroke: '#2f6fd0', strokeThickness: 3 }).setOrigin(0.5)
+    addText(this, W / 2, 32, 'Dein e-Rezept ist da!', 25, { stroke: '#0a1730', strokeThickness: 1.2, spacing: 0.5 }).setOrigin(0.5)
     addText(this, W / 2, 56, 'Löse es am Medikamentenautomaten ein!', 12, { color: '#cfe0ff' }).setOrigin(0.5)
 
     // Weg-Zeile: alle Siegel des Durchlaufs
@@ -123,7 +126,7 @@ export class RewardScene extends Phaser.Scene {
       }).setOrigin(0.5)
       const pickerStartX = W / 2 - ((AVATAR_COUNT - 1) * 22) / 2
       for (let i = 0; i < AVATAR_COUNT; i++) {
-        this.add.image(pickerStartX + i * 22, 272, `avatar-${i}`)
+        veredele(this, this.add.image(pickerStartX + i * 22, 272, `avatar-${i}`))
       }
       this.avatarCursor = this.add
         .rectangle(pickerStartX, 272, 20, 20)

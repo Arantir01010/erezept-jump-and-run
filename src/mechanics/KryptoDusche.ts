@@ -7,6 +7,7 @@ import { GameAction } from '../input/actions'
 import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * Verschlüsselungs-Dusche: Blauer Knopf = „Ich beauftrage die TI" —
@@ -23,6 +24,7 @@ export class KryptoDusche extends Mechanic {
     const { x, w, h } = objCenter(this.obj)
     this.zone = new Phaser.Geom.Rectangle(this.obj.x ?? 0, this.obj.y ?? 0, w || 48, h || 64)
     this.head = this.host.scene.add.image(x, (this.obj.y ?? 0) + 6, 'dusche').setDepth(6)
+    veredele(this.host.scene, this.head)
     this.host.scene.tweens.add({ targets: this.head, alpha: { from: 1, to: 0.7 }, duration: 800, yoyo: true, repeat: -1 })
     // Violettes Duschlicht markiert die Station schon von Weitem
     addGlow(this.host.scene, x, (this.obj.y ?? 0) + 10, 0x7a5cff, 18, { alpha: 0.35, depth: 5 })

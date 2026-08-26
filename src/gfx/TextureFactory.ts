@@ -32,6 +32,10 @@ function drawPattern(
   })
   g.generateTexture(key, pattern[0].length * pixelSize, pattern.length * pixelSize)
   g.destroy()
+  // Global ist jetzt Antialiasing an (Vektorgrafik). Die verbliebenen
+  // Pixel-Art-Texturen brauchen trotzdem NEAREST — sonst verwaschen sie
+  // beim 3-fachen Kamera-Zoom zu Matsch.
+  scene.textures.get(key)?.setFilter(Phaser.Textures.FilterMode.NEAREST)
 }
 
 // ---------------------------------------------------------------- Paul

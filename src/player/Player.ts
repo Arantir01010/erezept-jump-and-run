@@ -87,6 +87,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (onFloor && !this.wasOnFloor) {
       dustPuff(this.scene, this.x, this.body.bottom, 4)
       this.squashStretch(1.22, 0.82) // Lande-Squash
+      // BEWUSST KEIN Kamera-Shake beim Aufsetzen: Er feuert bei jedem Sprung —
+      // in einem Jump'n'Run also im Sekundentakt — und wackelt damit das ganze
+      // Bild durch (Playtest-Rückmeldung: „rüttelt, mega nervig"). Gewicht
+      // vermitteln Squash und Staub; der Shake bleibt den seltenen, großen
+      // Momenten vorbehalten (Signatur-Stempel).
     }
     if (onFloor && Math.abs(this.body.velocity.x) > 70 && now - this.lastRunDustMs > 170) {
       this.lastRunDustMs = now
@@ -209,11 +214,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     })
     const lost = gameState.loseBits(T.hurtBitsLost)
     // Verstreute Bits sind ECHTE Objekte und wieder einsammelbar (GameScene
-    // hoert auf dieses Event). Vorher war bitScatter reine Optik — verlorene
-    // Bits waren endgueltig weg, und ein Level mit knappem Puffer wurde nach
-    // zwei Treffern unschaffbar (Tuer zu, kein Neustart im Kiosk = Softlock).
-    // Das halbe Sonic-Prinzip war die Falle: Ringe verlieren ohne Ringe
-    // wiederaufsammeln. Jetzt ist es das ganze.
+    // hört auf dieses Event) — Anti-Softlock: Das Sammelziel darf durch
+    // Treffer nie unerreichbar werden. NICHT durch bitScatter ersetzen,
+    // das ist nur Optik und macht Level mit knappem Puffer unschaffbar.
     if (lost > 0) this.scene.events.emit('bits:verstreut', { x: this.x, y: this.y - 8, count: lost })
     this.scene.game.events.emit('hud:update')
     this.emit('player:hurt', lost)

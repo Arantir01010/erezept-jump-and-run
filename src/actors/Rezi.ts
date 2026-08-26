@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import { SpeechBubble } from './SpeechBubble'
 import { sealTextureKey } from '../gfx/TextureFactory'
+import { zeichneReziKoerper } from '../gfx/ReziBody'
+import { veredeleImContainer } from '../gfx/vektor'
 
 /**
  * REZI — das e-Rezept als Begleiter. Schwebt beim Spieler, spricht die
@@ -23,12 +25,18 @@ export class Rezi extends Phaser.GameObjects.Container {
       .setBlendMode(Phaser.BlendModes.ADD)
       .setTint(0xbfe9ff)
       .setAlpha(0.22)
-    glow.setDisplaySize(30, 30)
+    glow.setDisplaySize(44, 44)
     scene.tweens.add({ targets: glow, alpha: 0.13, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
     this.add(glow)
     this.body_ = scene.add.sprite(0, 0, 'rezi-0')
     this.body_.play('rezi-float')
+    // Der Pixelkörper bleibt als Animations- und Zustandsträger erhalten,
+    // gezeichnet wird aber die Vektorform: eine dunkle Kapsel mit
+    // leuchtender Kontur. Sie passt zu Pauls Silhouette und macht REZI
+    // sichtbar zur Lichtquelle der Szene.
+    this.body_.setVisible(false)
     this.add(this.body_)
+    this.add(zeichneReziKoerper(scene))
     this.setDepth(11)
     scene.add.existing(this)
     // Container stehen nicht automatisch auf der UpdateList → preUpdate aktivieren
@@ -47,6 +55,7 @@ export class Rezi extends Phaser.GameObjects.Container {
   addSealIcon(sealId: string): void {
     const icon = this.scene.add.image(0, 0, sealTextureKey(this.scene, sealId)).setScale(0.5)
     this.add(icon)
+    veredeleImContainer(this.scene, this, icon)
     this.sealIcons.push(icon)
     this.layoutSeals()
     this.scene.tweens.add({ targets: icon, scale: { from: 1.4, to: 0.5 }, duration: 350, ease: 'Back.easeOut' })

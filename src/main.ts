@@ -32,8 +32,14 @@ const game = new Phaser.Game({
   height: 1080,
   fps: params.get('testloop') === '1' ? { forceSetTimeOut: true, target: 60 } : undefined,
   backgroundColor: '#06090f',
-  pixelArt: true,
-  roundPixels: true,
+  // Vektorgrafik statt Bitmap-Skalierung: Gelände, Hintergrund und HUD werden
+  // als Formen gezeichnet und deshalb pro Frame in die Kameramatrix gerechnet —
+  // bei Zoom 3 gibt es keine Klötze, weil es keine Quellpixel gibt.
+  // Die verbliebenen Pixel-Art-Texturen holen sich ihren NEAREST-Filter
+  // gezielt in der TextureFactory zurück.
+  antialias: true,
+  antialiasGL: true,
+  roundPixels: false,
   physics: {
     default: 'arcade',
     arcade: {
@@ -48,16 +54,13 @@ const game = new Phaser.Game({
   scene: [BootScene, PreloadScene, AttractScene, CityScene, GameScene, UIScene, RewardScene],
 })
 
-// Lesbare Schrift in JEDER Fenstergröße: pixelArt:true setzt image-rendering:
-// pixelated als Inline-Stil auf das Canvas (Phaser, CreateRenderer) — der
-// überstimmt jede CSS-Regel. Bei ganzzahliger Skalierung (Messe-TV 1080p = 3x)
-// ist Nearest-Neighbor perfekt; bei krummen Faktoren (Browserfenster) zerlegt
-// er 11-px-Schrift in ungleiche Blöcke. Deshalb dynamisch: ganzzahlig → knackig
-// pixelig, sonst → Browser-Glättung (weich, aber lesbar).
+// Früher musste hier je nach Skalierungsfaktor zwischen „pixelated" und „auto"
+// umgeschaltet werden, weil pixelArt:true image-rendering:pixelated als
+// Inline-Stil erzwang und 11-px-Schrift bei krummen Faktoren zerlegte.
+// Mit Vektorgrafik entfällt das Problem: Glättung ist in JEDER Fenstergröße
+// richtig — am Messe-TV (1080p, 1:1) ändert sie ohnehin nichts.
 const applyCanvasSmoothing = (): void => {
-  const zoom = game.scale.displaySize.width / game.scale.gameSize.width
-  const nearInteger = zoom >= 1 && Math.abs(zoom - Math.round(zoom)) < 0.02
-  game.canvas.style.imageRendering = nearInteger ? 'pixelated' : 'auto'
+  game.canvas.style.imageRendering = 'auto'
 }
 game.events.once(Phaser.Core.Events.READY, applyCanvasSmoothing)
 game.scale.on(Phaser.Scale.Events.RESIZE, applyCanvasSmoothing)

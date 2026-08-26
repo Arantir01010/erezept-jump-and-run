@@ -9,6 +9,7 @@ import { gameState } from '../state/GameState'
 import { drawBackdrop } from '../gfx/backdrop'
 import { drawTerrain } from '../gfx/TerrainRenderer'
 import { applyAtmosphere, attachLantern } from '../gfx/atmos'
+import { lichtwisch } from '../gfx/licht'
 import { silhouettePaul } from '../gfx/PaulSilhouette'
 import { addSpeedStreaks, collectSparkle } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
@@ -20,6 +21,7 @@ import { protokoll } from '../state/Protokoll'
 import { telemetry } from '../telemetry/Telemetry'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { setzeZeichenTheme } from '../gfx/vektor'
 
 /** Kein Streckenfortschritt trotz Eingaben → genereller REZI-Schubs. */
 const STUCK_AFTER_MS = 18_000
@@ -75,6 +77,8 @@ export class GameScene extends Phaser.Scene {
     telemetry.setLevel(this.level.id)
     telemetry.note('level-start', this.time.now)
     const theme = configService.theme(this.level.theme)
+    // Ab hier zeichnen alle Vektor-Objekte in dieser Farbwelt
+    setzeZeichenTheme(theme)
     // 3x-Zoom zuerst: drawBackdrop & Co. lesen displayWidth/worldView der Kamera
     this.cameras.main.setZoom(VIEW_ZOOM)
 
@@ -106,24 +110,19 @@ export class GameScene extends Phaser.Scene {
         const body = bit.body as Phaser.Physics.Arcade.Body
         body.setBounce(0.45, 0.45)
         body.setDrag(60, 0)
-        // Nach oben auffaechern wie der alte Effekt — nur echt
         body.setVelocity((Math.random() - 0.5) * 160, -120 - Math.random() * 80)
         this.physics.add.collider(bit, terrain)
-        // Kurze Karenz, damit der Knockback sie nicht sofort wieder einsaugt
-        // (und der Verlust ueberhaupt als Verlust lesbar ist)
         let sammelbar = false
         this.time.delayedCall(700, () => {
           sammelbar = true
-          // Dezentes Blinken: "die kannst du wiederhaben"
           this.tweens.add({ targets: bit, alpha: { from: 1, to: 0.55 }, duration: 500, yoyo: true, repeat: -1 })
         })
         const overlap = this.physics.add.overlap(this.player, bit, () => {
           if (!sammelbar) return
           overlap.destroy()
           bit.destroy()
-          // Bewusst OHNE Punkte (gameState.addBits gaebe Score): sonst waere
-          // absichtliches Getroffenwerden eine Punkte-Schleife. Der Spieler
-          // bekommt seine Bits zurueck, nicht mehr.
+          // Bewusst OHNE Punkte (sonst wäre absichtliches Getroffenwerden
+          // eine Punkteschleife) — nur die Bits kommen zurück.
           gameState.bits += 1
           collectSparkle(this, bit.x, bit.y)
           this.game.events.emit('hud:update')
@@ -209,8 +208,13 @@ export class GameScene extends Phaser.Scene {
         console.warn(`[camera] Modus "${this.level.cameraMode}" ist Ausbaustufe — fallback auf horizontal`)
       }
       cam.startFollow(this.player, true, 0.15, 0.15)
+      // Vorausschauen: Die Kamera schiebt sich in Laufrichtung. Das gibt beim
+      // Rennen mehr Sicht nach vorn — der häufigste Grund für unfaire Treffer
+      // ist eine Kamera, die den Spieler mittig festhält.
+      cam.setFollowOffset(0, 0)
     }
     cam.fadeIn(350)
+    lichtwisch(this, 0xbfe9ff, 560, 1)
 
     // Leuchten, Randabdunklung, leichte Entsättigung — hält die Palette eng
     // und lässt Kantenlicht und Datenfunken glühen. Nur WebGL.
@@ -274,6 +278,12 @@ export class GameScene extends Phaser.Scene {
   // ------------------------------------------------------------- Update
 
   update(time: number, delta: number): void {
+    // Kamera-Vorlauf sanft nachziehen (nur im Follow-Modus)
+    if (this.level.cameraMode !== 'tube' && !this.completed) {
+      const cam0 = this.cameras.main
+      const ziel = Phaser.Math.Clamp(this.player.body.velocity.x / 130, -1, 1) * -34
+      cam0.followOffset.x += (ziel - cam0.followOffset.x) * Math.min(1, (delta / 1000) * 2.2)
+    }
     // Hülle vor der Spielerlogik: Sitzungsablauf soll im gleichen Frame wirken
     if (this.player.huelleEnabled && !this.completed) {
       this.player.tickHuelle(delta)

@@ -4,6 +4,7 @@ import { registerMechanic } from './registry'
 import { showDenyStamp } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * Gegner-Framework, Ausprägung „Skimming-Kralle": will Daten abgreifen,
@@ -33,6 +34,7 @@ export class DenyEnemy extends Mechanic {
     this.grabsBeforeBlock = this.param<number>('grabsBeforeBlock', 2)
 
     this.claw = this.host.scene.physics.add.image(x, y, 'kralle-open')
+    this.host.scene.time.delayedCall(0, () => veredele(this.host.scene, this.claw))
     const body = this.claw.body as Phaser.Physics.Arcade.Body
     body.setAllowGravity(false)
     body.setImmovable(true)

@@ -8,6 +8,7 @@ import { GameAction } from '../input/actions'
 import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * Signatur-Stempel-Setpiece (Levelausgang Kartenterminal):
@@ -36,6 +37,7 @@ export class StampExit extends Mechanic {
     this.topY = y - (h || 48) / 2 - 10
     this.bottomY = y + (h || 48) / 2 - 12
     this.stamp = this.host.scene.add.image(x, this.topY, 'stempel').setDepth(6)
+    veredele(this.host.scene, this.stamp)
     // Goldenes Glimmen an der Warteposition: „hier passiert der Signatur-Moment"
     addGlow(this.host.scene, x, this.topY, 0xffd75e, 15, { alpha: 0.22, depth: 5 })
     this.startCycle()

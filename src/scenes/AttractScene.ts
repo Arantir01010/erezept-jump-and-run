@@ -13,6 +13,10 @@ import { addText } from '../gfx/text'
 import { addGlow, addVignette } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
+import { silhouettePaul } from '../gfx/PaulSilhouette'
+import { zeichneReziKoerper } from '../gfx/ReziBody'
+import { verlaufBand } from '../gfx/material'
+import { zeichneKrankenhaus } from '../gfx/krankenhaus'
 
 /**
  * Attract-Mode / Startbildschirm: zieht Besucher an, erklärt in einer Zeile
@@ -33,31 +37,77 @@ export class AttractScene extends Phaser.Scene {
   create(): void {
     const cfg = configService.gameConfig
     const { W, H } = setupDesignCamera(this)
-    drawBackdrop(this, configService.theme('city'), W, H)
+    const theme = configService.theme('city')
+    // Statt der Hochhaus-Silhouetten: das lebende Klinikum als Hauptmotiv.
+    // Die fernste Skyline bleibt als Tiefenebene dahinter stehen.
+    drawBackdrop(this, theme, W, H, { nurFerneSilhouette: true })
+    zeichneKrankenhaus(this, theme, W, H)
 
     // Titel-Aura + sanftes Bühnenlicht auf Paul & REZI
     addGlow(this, W / 2, 78, 0x2f6fd0, 120, { alpha: 0.3 })
     addGlow(this, W / 2, 185, 0xcfe0ff, 65, { alpha: 0.12 })
 
-    addText(this, W / 2, 76, t(cfg.titleScreen.headline), 34, {
-      stroke: '#2f6fd0',
-      strokeThickness: 4,
+    // Kein dicker Konturrahmen mehr: Eine 4-px-Kontur um eine Groteske sieht
+    // nach Vereinsplakat aus. Die Lesbarkeit trägt jetzt die Aura darunter
+    // plus eine hauchdünne dunkle Kontur gegen helle Fassaden.
+    addText(this, W / 2, 76, t(cfg.titleScreen.headline), 36, {
+      stroke: '#0a1730',
+      strokeThickness: 1.2,
+      spacing: 0.5,
     }).setOrigin(0.5)
 
-    addText(this, W / 2, 110, t(cfg.titleScreen.subline), 12, { color: '#cfe0ff' }).setOrigin(0.5)
+    addText(this, W / 2, 112, t(cfg.titleScreen.subline), 11.5, {
+      color: '#cfe0ff',
+      bold: false,
+    }).setOrigin(0.5)
 
     // Paul + REZI als Blickfang
     const paul = this.add.sprite(W / 2 - 20, 188, 'player-idle0').setScale(2)
     paul.play('player-idle')
-    const rezi = this.add.sprite(W / 2 + 24, 174, 'rezi-0').setScale(2)
-    rezi.play('rezi-float')
-    this.tweens.add({ targets: rezi, y: 168, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    silhouettePaul(this, paul, configService.theme('city'), { lightSide: 1 })
+    // Dieselbe REZI wie im Spiel (Vektorkarte), nur doppelt so groß
+    const rezi = this.add.container(W / 2 + 24, 174, [zeichneReziKoerper(this)]).setScale(2)
+    const reziGlow = this.add
+      .image(W / 2 + 24, 174, 'fx-glow')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(0x8fffe4)
+      .setAlpha(0.3)
+    reziGlow.setDisplaySize(90, 90)
+    this.tweens.add({
+      targets: [rezi, reziGlow],
+      y: 168,
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
 
-    this.pressText = addText(this, W / 2, 238, '', 17, { color: '#ff5050' }).setOrigin(0.5)
+    // Aufforderung: warmes Gold statt Signalrot. Rot heißt in diesem Spiel
+    // „Gefahr/offen" (siehe material.ts) — an der Einladung zum Spielen wäre
+    // das die falsche Aussage.
+    this.pressText = addText(this, W / 2, 240, '', 16, {
+      color: '#ffd591',
+      spacing: 0.6,
+    }).setOrigin(0.5)
     // Blinken deutlich unter 3 Hz (Barrierefreiheit)
-    this.tweens.add({ targets: this.pressText, alpha: 0.15, duration: 650, yoyo: true, repeat: -1 })
+    this.tweens.add({
+      targets: this.pressText,
+      alpha: 0.35,
+      duration: 750,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
 
-    this.legendText = addText(this, W / 2, 268, '', 11, { color: '#aab6d4' }).setOrigin(0.5)
+    // Schleier hinter dem Fußbereich: Der Rechtshinweis stand bisher direkt
+    // auf den Fassaden und war kaum lesbar.
+    const fuss = this.add.graphics()
+    verlaufBand(this, fuss, 0, H - 60, W, 60, 0x04090f, 0, 0.72)
+
+    this.legendText = addText(this, W / 2, 268, '', 10.5, {
+      color: '#b8c6e0',
+      bold: false,
+    }).setOrigin(0.5)
 
     // Steuerungsanzeige folgt der angeschlossenen Hardware — auch live beim Ein-/Ausstecken
     this.gamepadMode = !inputManager.hasGamepad()

@@ -4,6 +4,7 @@ import { registerMechanic } from './registry'
 import { addGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * ANDOCK-PLATTFORM (KAPSEL Level 2, Beat „Ten" bei 1:30).
@@ -27,6 +28,7 @@ export class AndockPlattform extends Mechanic {
     const { x, y, w } = objCenter(this.obj)
     const breite = Math.max(w, 24)
     this.sprite = this.host.scene.physics.add.staticImage(x, y, 'podest')
+    this.host.scene.time.delayedCall(0, () => veredele(this.host.scene, this.sprite))
     this.sprite.setDisplaySize(breite, 6)
     ;(this.sprite.body as Phaser.Physics.Arcade.StaticBody).setSize(breite, 6)
     this.sprite.setDepth(4)

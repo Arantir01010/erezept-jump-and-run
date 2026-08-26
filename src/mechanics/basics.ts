@@ -6,6 +6,7 @@ import { telemetry } from '../telemetry/Telemetry'
 import { collectSparkle, addGlow, destroyGlow } from '../gfx/effects'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
+import { veredele } from '../gfx/vektor'
 
 /**
  * Basisbausteine des Baukastens. Jeder Baustein liest seine Parameter aus
@@ -38,6 +39,7 @@ export class Gate extends Mechanic {
     this.sprite.setDisplaySize(8, h || 48)
     this.sprite.refreshBody()
     this.sprite.setDepth(5)
+    veredele(this.host.scene, this.sprite)
     this.host.addSolid(this.sprite, () => this.onBump())
     // Status-Licht: rot = gesperrt, grün beim Öffnen (liest sich ohne Worte)
     this.lockLight = addGlow(this.host.scene, x, y - (h || 48) / 2 + 3, 0xff5050, 7, { alpha: 0.5, depth: 6 })
@@ -112,6 +114,7 @@ export class Collectible extends Mechanic {
     const { x, y } = objCenter(this.obj)
     const sprite = this.host.scene.physics.add.staticImage(x, y, 'datenbit') as unknown as Phaser.Physics.Arcade.Image
     sprite.setDepth(4)
+    veredele(this.host.scene, sprite)
     // Cyan-Schimmer macht Sammelbits aus dem Augenwinkel sichtbar
     const glow = addGlow(this.host.scene, x, y, 0x4de3ff, 9, { alpha: 0.28, depth: 3 })
     this.host.scene.tweens.add({
@@ -145,6 +148,7 @@ export class Checkpoint extends Mechanic {
     const sprite = this.host.scene.physics.add.staticImage(x, y, 'checkpoint') as unknown as Phaser.Physics.Arcade.Image
     sprite.setDepth(3)
     sprite.setAlpha(0.6)
+    veredele(this.host.scene, sprite)
     this.host.addSensor(sprite, (player) => {
       if (this.active) return
       this.active = true
@@ -197,6 +201,7 @@ export class DoorExit extends Mechanic {
     const { x, y } = objCenter(this.obj)
     this.door = this.host.scene.physics.add.staticImage(x, y, 'door') as unknown as Phaser.Physics.Arcade.Image
     this.door.setDepth(3)
+    veredele(this.host.scene, this.door)
     // Gedimmt solange verschlossen — leuchtet auf, sobald genug Bits gesammelt sind
     this.doorGlow = addGlow(this.host.scene, x, y, 0xffd75e, 16, { alpha: 0.1, depth: 2, pulse: false })
     this.host.addSensor(this.door, () => this.tryEnter())
@@ -249,6 +254,7 @@ export class MovingPlatform extends Mechanic {
     this.maxX = x + range
     this.sprite = this.host.scene.physics.add.image(x, y, 'podest')
     this.sprite.setDisplaySize(Math.max(w, 24), 6)
+    veredele(this.host.scene, this.sprite)
     const body = this.sprite.body as Phaser.Physics.Arcade.Body
     body.setAllowGravity(false)
     body.setImmovable(true)
@@ -295,6 +301,7 @@ export class Deco extends Mechanic {
     const anim = this.param<string>('anim', '')
     const sprite = this.host.scene.add.sprite(x, y, texture).setDepth(2)
     if (anim && this.host.scene.anims.exists(anim)) sprite.play(anim)
+    veredele(this.host.scene, sprite)
     const drift = this.param<number>('drift', 6)
     if (drift > 0) {
       this.host.scene.tweens.add({
