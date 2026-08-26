@@ -9,7 +9,7 @@ import { addVignette } from '../gfx/effects'
 import { Huelle } from '../state/HuelleState'
 import { badgeSpec, badgeColorCss, badgePoints, toggleHinweis } from '../gfx/huelleBadge'
 import { telemetry } from '../telemetry/Telemetry'
-import { exportiereDatei, ladeSitzungen } from '../telemetry/speicher'
+import { exportiereDatei, ladeSitzungen, speichereSitzung } from '../telemetry/speicher'
 import { sitzungKennzahlen, benchmark } from '../telemetry/kennzahlen'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
@@ -223,6 +223,15 @@ export class UIScene extends Phaser.Scene {
    * Rohdaten als Datei ab — ohne Personenbezug (siehe telemetry/events.ts).
    */
   private zeigeAuswertung(): void {
+    // Den laufenden Durchlauf ZUERST sichern, sonst zeigt der Bildschirm ihn an,
+    // die exportierte Datei enthält ihn aber nicht — und `npm run playtest:report`
+    // rechnet hinterher mit einer anderen Zahl als der Auswerter gesehen hat.
+    // Gesichert wird sonst erst am Reward-Screen bzw. beim Idle-Reset; wer
+    // mittendrin aufhört (im Playtest der Normalfall), fiele genau durch dieses
+    // Loch. speichereSitzung() ersetzt gleichnamige Einträge, ist also gefahrlos
+    // mehrfach aufrufbar.
+    speichereSitzung(telemetry.toJSON())
+
     // Den laufenden Durchlauf mitzählen, damit die Anzeige nicht hinterherhängt
     const gespeichert = ladeSitzungen().filter((s) => s.sitzung !== telemetry.sitzung)
     const alle = [...gespeichert, telemetry.toJSON()].filter((s) => s.events.length > 0)

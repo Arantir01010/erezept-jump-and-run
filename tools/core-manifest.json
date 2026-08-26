@@ -64,7 +64,7 @@
     "src/scenes/GameScene.ts": "e69b2cdaf78960344a347ed424277a4284b42fee1f87543f99ade890c036867a",
     "src/scenes/PreloadScene.ts": "92a1e3aa622fcf0d076201de6578ef48be4f401474d2d340dfa519ec1ab51364",
     "src/scenes/RewardScene.ts": "98b8f9cc10702575733e840fd856053d3bc4280670a11f2f99b69745bbe04863",
-    "src/scenes/UIScene.ts": "ac17d638def1b5e16f2c308422384b279c70103aad55f04624ad1c3c04f7225f",
+    "src/scenes/UIScene.ts": "374a9a0350810298b01dd10a7efc96518bb8e6dc77481c471c65cc5d2de6d2b0",
     "src/state/Assist.ts": "1d7ea959a8e3bfe73f5990d7e667379bd98843d904b7efa5fccbe3b4bb59f03e",
     "src/state/GameState.ts": "2aec8dead2de0e2bb9fb343ae48e7a78fb6d303be3b1698eceab341d733e39af",
     "src/state/Highscore.ts": "658303d475cc0d4b8eb43d0a1385c83ea534e844c767fb5a73acd669be26cd8b",
