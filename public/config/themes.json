@@ -13,7 +13,18 @@
     "ground": "#24402a",
     "groundTop": "#3a6644",
     "accent": "#ffd75e",
-    "detail": "#c9a53a"
+    "detail": "#c9a53a",
+    "motiv": "praxis",
+    "zone": {
+      "name": {
+        "de": "Dezentrale Zone",
+        "en": "Decentralised zone"
+      },
+      "fakt": {
+        "de": "Karte und PIN: Besitz und Wissen. Erst beides zusammen öffnet.",
+        "en": "Card and PIN: possession and knowledge. Only both together open."
+      }
+    }
   },
   "kov-gateway": {
     "skyTop": "#060a1e",
@@ -21,7 +32,18 @@
     "ground": "#16255c",
     "groundTop": "#2c47a8",
     "accent": "#4de3ff",
-    "detail": "#7a5cff"
+    "detail": "#7a5cff",
+    "motiv": "netz",
+    "zone": {
+      "name": {
+        "de": "Zugangszone",
+        "en": "Access zone"
+      },
+      "fakt": {
+        "de": "Der verschlüsselte Weg vom Konnektor ins zentrale Netz.",
+        "en": "The encrypted path from the connector into the central network."
+      }
+    }
   },
   "stammdaten": {
     "skyTop": "#0a1a2f",
@@ -29,7 +51,18 @@
     "ground": "#1f5148",
     "groundTop": "#2f7a6b",
     "accent": "#ffd75e",
-    "detail": "#79c9b7"
+    "detail": "#79c9b7",
+    "motiv": "praxis",
+    "zone": {
+      "name": {
+        "de": "Dezentrale Zone",
+        "en": "Decentralised zone"
+      },
+      "fakt": {
+        "de": "Praxis, Kartenterminal, Konnektor: Die TI beginnt in der Einrichtung.",
+        "en": "Practice, card terminal, connector: the TI starts inside the institution."
+      }
+    }
   },
   "praxis": {
     "skyTop": "#1d1410",
@@ -37,7 +70,18 @@
     "ground": "#4a3524",
     "groundTop": "#7a5836",
     "accent": "#ffd75e",
-    "detail": "#c99a5a"
+    "detail": "#c99a5a",
+    "motiv": "praxis",
+    "zone": {
+      "name": {
+        "de": "Dezentrale Zone",
+        "en": "Decentralised zone"
+      },
+      "fakt": {
+        "de": "Alles, was in der Einrichtung steht, wird dort geschützt.",
+        "en": "Everything inside the institution is protected there."
+      }
+    }
   },
   "zugang": {
     "skyTop": "#08131f",
@@ -45,7 +89,18 @@
     "ground": "#173a4e",
     "groundTop": "#2a6a86",
     "accent": "#4de3ff",
-    "detail": "#6fb3c9"
+    "detail": "#6fb3c9",
+    "motiv": "netz",
+    "zone": {
+      "name": {
+        "de": "Zugangszone",
+        "en": "Access zone"
+      },
+      "fakt": {
+        "de": "Kein Weg hinein ohne geprüfte Identität.",
+        "en": "No way in without a checked identity."
+      }
+    }
   },
   "zentrale-zone": {
     "skyTop": "#101a2e",
@@ -53,7 +108,18 @@
     "ground": "#2f3f66",
     "groundTop": "#5f7bbd",
     "accent": "#9fd8ff",
-    "detail": "#b9c9ee"
+    "detail": "#b9c9ee",
+    "motiv": "rechenzentrum",
+    "zone": {
+      "name": {
+        "de": "Zentrale Zone",
+        "en": "Central zone"
+      },
+      "fakt": {
+        "de": "Fachdienste in geprüften Rechenzentren, verbunden über ein eigenes Netz.",
+        "en": "Services in certified data centres, connected via a dedicated network."
+      }
+    }
   },
   "baustelle": {
     "skyTop": "#1a1408",
@@ -61,7 +127,18 @@
     "ground": "#3f3a2a",
     "groundTop": "#7a6a2c",
     "accent": "#ffb64a",
-    "detail": "#b9a35a"
+    "detail": "#b9a35a",
+    "motiv": "rechenzentrum",
+    "zone": {
+      "name": {
+        "de": "Umbau: TI 2.0",
+        "en": "Rebuild: TI 2.0"
+      },
+      "fakt": {
+        "de": "Die Konnektor-Funktion wandert ins Rechenzentrum. Die Prüfung bleibt.",
+        "en": "The connector function moves into the data centre. The check remains."
+      }
+    }
   },
   "akte": {
     "skyTop": "#241a2e",
@@ -69,6 +146,17 @@
     "ground": "#4e3f5e",
     "groundTop": "#8a6f9e",
     "accent": "#ffd08a",
-    "detail": "#d0b0e0"
+    "detail": "#d0b0e0",
+    "motiv": "archiv",
+    "zone": {
+      "name": {
+        "de": "Das Aktensystem",
+        "en": "The record system"
+      },
+      "fakt": {
+        "de": "Verschlüsselt gespeichert. Jeder Zugriff wird protokolliert.",
+        "en": "Stored encrypted. Every access is logged."
+      }
+    }
   }
 }

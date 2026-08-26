@@ -83,6 +83,16 @@ export const GameConfigSchema = z.object({
   softAutopilotSeconds: z.number().positive().default(240),
 })
 
+/**
+ * TI-Zone einer Farbwelt — erscheint als Umgebungstext im Hintergrund.
+ * Wissensvermittlung im Vorbeigehen (KAPSEL 2.6): Der Spieler liest die echte
+ * Zonen-Gliederung der TI aus der Kulisse, nicht aus einer Textwand.
+ */
+export const ZoneSchema = z.object({
+  name: LTextSchema,
+  fakt: LTextSchema.optional(),
+})
+
 export const ThemeSchema = z.object({
   skyTop: z.string(),
   skyBottom: z.string(),
@@ -90,6 +100,13 @@ export const ThemeSchema = z.object({
   groundTop: z.string(),
   accent: z.string(),
   detail: z.string(),
+  /**
+   * Silhouetten-Motiv des Hintergrunds (Default: stadt). Die Kulisse erzählt
+   * die echte TI-Reise: Praxis → Netz → Rechenzentrum → Aktenarchiv.
+   */
+  motiv: z.enum(['stadt', 'praxis', 'netz', 'rechenzentrum', 'archiv']).optional(),
+  /** Echte TI-Zone dieser Farbwelt (siehe ZoneSchema). */
+  zone: ZoneSchema.optional(),
 })
 
 export const ThemesSchema = z.record(ThemeSchema)

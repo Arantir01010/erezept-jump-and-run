@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
 import { depthMix, fogColor } from './atmos'
+import { addText } from './text'
+import { t } from '../i18n'
 
 export interface BackdropOpts {
   /** Weiche Lichtschächte von oben (digitale Level) — Stadt/Attract lassen das aus. */
@@ -135,6 +137,7 @@ export function drawBackdrop(
     const roof = depthMix(theme.detail, fog, Math.max(0, dist - 0.18))
     const lamp = depthMix(theme.accent, fog, dist * 0.55)
     const dark = depthMix(theme.skyTop, fog, dist)
+    void dark
     let x = -30
     let i = seed
     while (x < span) {
@@ -148,19 +151,156 @@ export function drawBackdrop(
       layer.fillStyle(roof, alpha * 0.85)
       layer.fillRect(x - 3, ty, w + 6, 1.5)
       if (windows) {
-        const cw = Math.max(2, Math.round(w * 0.13))
-        for (let cy = ty + 14; cy < worldHeight - 46; cy += 15) {
+        // Sparsam: ein paar bewohnte Fenster erzählen mehr als ein volles
+        // Raster. Zu viele Lichter machen die Ferne heller als das Spielfeld —
+        // dann kippt die Tiefenwirkung.
+        const cw = Math.max(2, Math.round(w * 0.09))
+        for (let cy = ty + 22; cy < worldHeight - 56; cy += 26) {
           for (let k = 0; k < 2; k++) {
-            const cx = Math.round(x + w * (0.28 + k * 0.44) - cw / 2)
-            const lit = (i * 7 + cy * 3 + k) % 5 < 2
-            layer.fillStyle(lit ? lamp : dark, lit ? alpha : alpha * 0.7)
-            layer.fillRect(cx, cy + 2, cw, 5)
-            layer.fillTriangle(cx, cy + 2, cx + cw, cy + 2, cx + cw / 2, cy - 1)
+            const lit = (i * 7 + cy * 3 + k) % 5 < 1
+            if (!lit) continue
+            const cx = Math.round(x + w * (0.3 + k * 0.4) - cw / 2)
+            layer.fillStyle(lamp, alpha * 0.8)
+            layer.fillRect(cx, cy + 2, cw, 4)
+            layer.fillTriangle(cx, cy + 2, cx + cw, cy + 2, cx + cw / 2, cy - 0.5)
           }
         }
       }
       x += w + gap + ((i * 17) % 11)
       i += 1
+    }
+    return layer
+  }
+
+  /**
+   * Motiv-Silhouetten (KAPSEL 2.6, Environmental Storytelling): Die Kulisse
+   * erzählt die echte TI-Reise — Praxisgebäude, Netz-Masten, Rechenzentrums-
+   * Racks, Aktenschränke. Gleiche Tiefenlogik wie towerLayer: `dist` zieht
+   * Richtung Dunst. Bewusst generisch gehalten (KAPSEL 4.5): keine Logos,
+   * keine Markenfarben — die FORM trägt die Aussage.
+   */
+  const motivLayer = (
+    motiv: string,
+    dist: number,
+    alpha: number,
+    seed: number,
+    span: number,
+  ): Phaser.GameObjects.Graphics => {
+    const layer = scene.add.graphics().setDepth(0)
+    const body = depthMix(theme.skyTop, fog, dist)
+    const edge = depthMix(theme.detail, fog, Math.max(0, dist - 0.18))
+    const lamp = depthMix(theme.accent, fog, dist * 0.5)
+    const baseY = worldHeight - 40
+    let x = -30
+    let i = seed
+
+    if (motiv === 'praxis') {
+      // Flachbauten mit Fensterband und Vordach — und eine EKG-Linie über
+      // allem: Gesundheitswesen, ohne ein geschütztes Symbol zu benutzen.
+      while (x < span) {
+        const w = 46 + ((i * 23) % 34)
+        const h = 64 + ((i * 31) % 56)
+        const ty = baseY - h
+        layer.fillStyle(body, alpha)
+        layer.fillRect(x, ty, w, h + 40)
+        layer.fillStyle(edge, alpha * 0.85)
+        layer.fillRect(x - 2, ty, w + 4, 1.5)
+        layer.fillStyle(lamp, alpha * 0.4)
+        for (let wx2 = x + 5; wx2 < x + w - 6; wx2 += 11) layer.fillRect(wx2, ty + 10, 6, 3)
+        layer.fillStyle(edge, alpha * 0.7)
+        layer.fillRect(x + w * 0.28, baseY - 13, w * 0.44, 1.5)
+        x += w + 24 + ((i * 17) % 13)
+        i += 1
+      }
+      const py = baseY - Math.min(110, worldHeight * 0.32)
+      layer.lineStyle(1.5, lamp, alpha * 0.55)
+      layer.beginPath()
+      layer.moveTo(-30, py)
+      let px = -30
+      while (px < span) {
+        px += 30
+        layer.lineTo(px, py)
+        layer.lineTo(px + 5, py - 12)
+        layer.lineTo(px + 10, py + 8)
+        layer.lineTo(px + 14, py)
+        px += 14
+      }
+      layer.strokePath()
+    } else if (motiv === 'netz') {
+      // Masten mit durchhängenden Leitungen und leuchtenden Knoten — die
+      // Zugangszone als Infrastruktur zwischen Praxis und Rechenzentrum.
+      const tops: { x: number; y: number }[] = []
+      while (x < span) {
+        const h = 110 + ((i * 37) % 60)
+        const ty = baseY - h
+        layer.fillStyle(body, alpha)
+        layer.fillTriangle(x, baseY + 40, x + 14, baseY + 40, x + 7, ty)
+        layer.fillStyle(edge, alpha * 0.8)
+        layer.fillRect(x - 4, ty + 10, 22, 1.5)
+        layer.fillRect(x - 2, ty + 22, 18, 1.5)
+        tops.push({ x: x + 7, y: ty })
+        x += 84 + ((i * 19) % 36)
+        i += 1
+      }
+      layer.lineStyle(1, edge, alpha * 0.75)
+      for (let k = 0; k + 1 < tops.length; k++) {
+        const a = tops[k]
+        const b = tops[k + 1]
+        layer.beginPath()
+        layer.moveTo(a.x, a.y)
+        const STEP = 8
+        for (let sN = 1; sN <= STEP; sN++) {
+          const u = sN / STEP
+          const sag = Math.sin(u * Math.PI) * 16
+          layer.lineTo(a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u + sag)
+        }
+        layer.strokePath()
+      }
+      layer.fillStyle(lamp, alpha)
+      for (const tp of tops) layer.fillCircle(tp.x, tp.y, 2)
+    } else if (motiv === 'rechenzentrum') {
+      // Rack-Reihen mit LED-Spalten auf einem Doppelboden — die zentrale
+      // Zone: Fachdienste stehen in Rechenzentren, nicht in Wolken.
+      while (x < span) {
+        const w = 30 + ((i * 13) % 16)
+        const h = 100 + ((i * 29) % 70)
+        const ty = baseY - h
+        layer.fillStyle(body, alpha)
+        layer.fillRect(x, ty, w, h + 40)
+        layer.fillStyle(edge, alpha * 0.85)
+        layer.fillRect(x - 2, ty, w + 4, 1.5)
+        for (let cy = ty + 8; cy < baseY - 8; cy += 7) {
+          for (let k = 0; k < 3; k++) {
+            const lit = (i * 11 + cy * 5 + k * 3) % 6 < 1
+            layer.fillStyle(lit ? lamp : edge, alpha * (lit ? 0.9 : 0.3))
+            layer.fillRect(x + 5 + k * 8, cy, 2, 2)
+          }
+        }
+        x += w + 9 + ((i * 7) % 8)
+        i += 1
+      }
+      layer.fillStyle(edge, alpha * 0.5)
+      layer.fillRect(-30, baseY - 2, span + 60, 1)
+    } else {
+      // Motiv "archiv": Aktenschränke mit Schubladen und Griffen — die ePA
+      // als geordneter, verschlossener Speicher.
+      while (x < span) {
+        const w = 38 + ((i * 17) % 24)
+        const h = 84 + ((i * 23) % 60)
+        const ty = baseY - h
+        layer.fillStyle(body, alpha)
+        layer.fillRect(x, ty, w, h + 40)
+        layer.fillStyle(edge, alpha * 0.85)
+        layer.fillRect(x - 2, ty, w + 4, 1.5)
+        for (let cy = ty + 12; cy < baseY - 6; cy += 13) {
+          layer.fillStyle(edge, alpha * 0.5)
+          layer.fillRect(x + 2, cy, w - 4, 1)
+          layer.fillStyle(lamp, alpha * 0.7)
+          layer.fillRect(x + w / 2 - 3, cy + 5, 6, 2)
+        }
+        x += w + 13 + ((i * 11) % 9)
+        i += 1
+      }
     }
     return layer
   }
@@ -183,12 +323,66 @@ export function drawBackdrop(
     return band
   }
 
-  // --- Drei Turm-Ebenen mit Nebel dazwischen ---
-  const farSil = towerLayer(0.72, theme.skyBottom, 0.55, 22, 40, 90, 170, 12, 2, false, worldWidth * 0.15 + viewW + 80)
+  // --- Drei Ebenen mit Nebel dazwischen — das Motiv erzählt die TI-Zone ---
+  // Die Ferne bleibt immer Stadt-Skyline (dort spielt die Rahmenhandlung),
+  // Mittel- und Nahebene tragen das Zonen-Motiv aus themes.json.
+  const motiv = theme.motiv ?? 'stadt'
+  const farSil = towerLayer(0.75, theme.skyBottom, 0.5, 22, 40, 90, 170, 12, 2, false, worldWidth * 0.15 + viewW + 80)
   const fog1 = fogBand(worldHeight * 0.24, worldHeight * 0.62, 0.42)
-  const midSil = towerLayer(0.45, theme.skyTop, 0.75, 32, 56, 110, 200, 16, 7, true, worldWidth * 0.25 + viewW + 80)
+  const midSil =
+    motiv === 'stadt'
+      ? towerLayer(0.4, theme.skyTop, 0.8, 32, 56, 110, 200, 16, 7, true, worldWidth * 0.25 + viewW + 80)
+      : motivLayer(motiv, 0.45, 0.8, 7, worldWidth * 0.25 + viewW + 80)
   const fog2 = fogBand(worldHeight * 0.42, worldHeight * 0.55, 0.3)
-  const sil = towerLayer(0.18, theme.skyTop, 0.9, 42, 72, 130, 230, 20, 3, true, worldWidth * 0.3 + viewW + 80)
+  const sil =
+    motiv === 'stadt'
+      ? towerLayer(0.18, theme.skyTop, 1, 42, 72, 130, 230, 20, 3, true, worldWidth * 0.3 + viewW + 80)
+      : motivLayer(motiv, 0.18, 1, 3, worldWidth * 0.3 + viewW + 80)
+
+  // --- Zonen-Schriftzug: Wissensvermittlung im Vorbeigehen (KAPSEL 2.6) ---
+  // Der echte Zonen-Name der TI steht groß und blass HINTER dem Geschehen,
+  // darunter ein Ein-Satz-Fakt. Kein Overlay, keine Textwand: Wer spielt,
+  // liest ihn nebenbei — wie eine Bahnhofsbeschriftung.
+  const zoneLayer = scene.add.container(0, 0).setDepth(0)
+  if (theme.zone) {
+    const zSpan = worldWidth * 0.2 + viewW
+    const step = Math.max(viewW * 0.95, 560)
+    for (let zx = viewW * 0.5; zx < zSpan; zx += step) {
+      const name = addText(scene, zx, 44, t(theme.zone.name).toUpperCase(), 26, {
+        color: theme.detail,
+      })
+        .setOrigin(0.5, 0)
+        .setAlpha(0.14)
+      zoneLayer.add(name)
+      if (theme.zone.fakt) {
+        const fakt = addText(scene, zx, 80, t(theme.zone.fakt), 9, {
+          color: theme.detail,
+          align: 'center',
+          wrapWidth: 320,
+        })
+          .setOrigin(0.5, 0)
+          .setAlpha(0.5)
+        zoneLayer.add(fakt)
+      }
+    }
+  }
+
+  // --- Horizontglühen: warmes Licht knapp über der Spielebene. Es hebt die
+  //     Silhouetten voneinander ab und gibt dem Bild einen Fluchtpunkt. ---
+  const horizon = scene.add.container(0, 0).setDepth(0)
+  {
+    const count = Math.max(2, Math.round((worldWidth * 0.5 + viewW) / 260))
+    for (let i = 0; i < count; i++) {
+      const hx = (i + 0.5) * ((worldWidth * 0.5 + viewW) / count)
+      const beam = scene.add
+        .image(hx, worldHeight - 52, 'fx-glow')
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(accent)
+        .setAlpha(0.1)
+      beam.setDisplaySize(340, 130)
+      horizon.add(beam)
+    }
+  }
 
   // --- Lichtschächte (optional, Faktor 0,66): weiche Beams, langsam atmend ---
   const shafts = scene.add.container(0, 0).setDepth(0)
@@ -280,7 +474,9 @@ export function drawBackdrop(
     midSil.x = wx * 0.72
     fog2.x = wx * 0.6
     shafts.x = wx * 0.66
+    horizon.x = wx * 0.5
     sil.x = wx * 0.5
+    zoneLayer.x = wx * 0.8
     midMotes.x = wx * 0.6
     nearMotes.x = wx * 0.35
     frontBokeh.x = wx * -0.18
