@@ -1,0 +1,75 @@
+{
+  "_generiert": "AUS design/levels/05-identitaet/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "05-identitaet",
+  "station": {
+    "name": {
+      "de": "Die Identität",
+      "en": "Identity"
+    },
+    "portalText": {
+      "de": "Station: Die Identität — hier zählt nicht, was du hast, sondern wer du bist.",
+      "en": "Station: identity — what counts here is not what you carry, but who you are."
+    },
+    "reziText": {
+      "de": "Deine Karte hat mich ausgewiesen — nicht mich gespeichert!",
+      "en": "Your card identified me — it did not store me!"
+    },
+    "stampText": {
+      "de": "✓ Identität geprüft — jede Karte für ihre eigene Tür.",
+      "en": "✓ Identity checked — every card for its own door."
+    },
+    "badge": "eGK · SMC-B"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Anmeldung",
+      "en": "Reception"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "kartenterminal",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/05-identitaet.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 9,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden und schnell sein!",
+        "en": "This platform only carries plain text — become visible briefly and be quick!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 90,
+  "stuckHint": {
+    "de": "Immer nach rechts! TI-Aktion steckt die Karte, Shift wechselt die Hülle.",
+    "en": "Keep heading right! TI action inserts the card, Shift switches your shell."
+  }
+}

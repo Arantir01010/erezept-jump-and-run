@@ -315,6 +315,12 @@ function checkStructure(
       )
       continue
     }
+    // Nur ein Leser MIT Tor kann den Weg versperren. Ein Leser ohne Tor
+    // blockiert nichts — er ist ein Lehr-Terminal, das den Spieler gefahrlos
+    // abweisen DARF („ZUGRIFF VERWEIGERT" zeigen, bevor es ernst wird; KAPSEL
+    // 2.2: neue Bedrohung erst gefahrlos vorführen, dann fordern).
+    if (typeof l.props['gate'] !== 'string') continue
+
     // Die passende Karte muss VOR dem Leser liegen (in Laufrichtung links).
     const davor = kartenFunde.filter(
       (k) => erlaubt.includes(parseKarten(k.props['karte'])[0]) && k.tx < l.tx,

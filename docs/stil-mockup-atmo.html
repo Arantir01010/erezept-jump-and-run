@@ -1,0 +1,178 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,">
+<style>html,body{margin:0;overflow:hidden;background:#050b12}canvas{display:block}</style>
+<script src="../node_modules/phaser/dist/phaser.min.js"></script></head><body>
+<script>
+const W=640,H=360,Z=3,GY=306;
+const hx=c=>Phaser.Display.Color.HexStringToColor(c).color;
+// Atmosphaerische Perspektive: jede Ebene weiter weg -> naeher an der Dunstfarbe
+const FOG=Phaser.Display.Color.HexStringToColor('#4d8ba6');
+function depth(hex,t){const c=Phaser.Display.Color.HexStringToColor(hex);
+ const r=Phaser.Display.Color.Interpolate.ColorWithColor(c,FOG,100,Math.round(t*100));
+ return Phaser.Display.Color.GetColor(r.r,r.g,r.b);}
+function radial(sc,k,size,soft){if(sc.textures.exists(k))return;
+ const c=sc.textures.createCanvas(k,size,size),x=c.context;
+ const g=x.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+ g.addColorStop(0,'rgba(255,255,255,'+(soft?0.5:0.95)+')');
+ g.addColorStop(0.4,'rgba(255,255,255,'+(soft?0.16:0.3)+')');
+ g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,size,size);c.refresh();}
+
+class Sc extends Phaser.Scene{
+ create(){
+  const cam=this.cameras.main;cam.setZoom(Z);cam.centerOn(W/2,H/2);
+  radial(this,'glow',256);radial(this,'soft',256,true);
+
+  // --- Himmel: tiefer, kalter Verlauf ---
+  const sky=this.add.graphics().setDepth(0);
+  sky.fillGradientStyle(hx('#14344c'),hx('#14344c'),hx('#4d8ba6'),hx('#4d8ba6'),1);
+  sky.fillRect(0,0,W,H);
+  // ferner Lichtkern
+  this.add.image(W*0.62,H*0.34,'soft').setBlendMode(Phaser.BlendModes.ADD)
+   .setTint(hx('#cfeeff')).setAlpha(0.55).setDepth(0).setDisplaySize(600,600);
+
+  // --- Turm-Ebene: parametrisch, je Ebene tiefer & kontrastaermer ---
+  const towers=(dep,base,tint,minH,maxH,minW,maxW,step,seed,det)=>{
+   const g=this.add.graphics().setDepth(dep);
+   const col=depth(tint,1-base);
+   let x=-30,i=seed;
+   while(x<W+50){
+    const w=minW+((i*23)%(maxW-minW)),h=minH+((i*41)%(maxH-minH));
+    const ty=H-40-h;
+    g.fillStyle(col,base);
+    // Turm mit Sockel und Spitze (gotisch statt Klotz)
+    g.fillRect(x,ty+10,w,h+40);
+    g.fillTriangle(x-2,ty+10,x+w+2,ty+10,x+w/2,ty-12-((i*13)%18));
+    g.fillRect(x-3,ty+10,w+6,3);
+    // Bogenfenster
+    if(det){for(let cy=ty+26;cy<H-52;cy+=17){
+      const lit=((i*7+cy)%4)<1;
+      g.fillStyle(lit?depth('#ffc98a',(1-base)*0.55):depth('#071522',1-base),lit?base*1.0:base*0.85);
+      const cw=Math.max(2,w*0.14);
+      for(let k=0;k<2;k++){const cx=x+w*(0.28+k*0.44)-cw/2;
+        g.fillRect(cx,cy+2,cw,5);g.fillTriangle(cx,cy+2,cx+cw,cy+2,cx+cw/2,cy-1.5);}
+      g.fillStyle(col,base);}}
+    x+=w+step+((i*17)%9);i++;}
+   return g;};
+  towers(1,0.30,'#1d4a68',110,190,26,44,14,2,false);
+  towers(2,0.46,'#163b56',130,215,34,58,18,7,true);
+  // Nebelband zwischen den Ebenen
+  const fog1=this.add.graphics().setDepth(3);
+  fog1.fillGradientStyle(hx('#4d8ba6'),hx('#4d8ba6'),hx('#4d8ba6'),hx('#4d8ba6'),0,0,0.45,0.45);
+  fog1.fillRect(0,H*0.35,W,H*0.5);
+  towers(4,0.72,'#0d2942',160,250,44,72,22,3,true);
+  const fog2=this.add.graphics().setDepth(5);
+  fog2.fillGradientStyle(hx('#3f7794'),hx('#3f7794'),hx('#3f7794'),hx('#3f7794'),0,0,0.34,0.34);
+  fog2.fillRect(0,H*0.5,W,H*0.5);
+
+  // --- Lichtschaefte ---
+  const rays=this.add.graphics().setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+  for(let r=0;r<6;r++){const bx=60+r*105+((r*37)%40);
+   rays.fillStyle(hx('#dff4ff'),0.045);
+   rays.fillTriangle(bx,-10,bx-16-r*2,H,bx+30+r*3,H);}
+
+  // --- Vordergrund-Architektur (dunkel, rahmt das Bild) ---
+  const fg=this.add.graphics().setDepth(20);
+  fg.fillStyle(hx('#08192a'),0.92);
+  fg.fillRect(0,0,30,H); fg.fillTriangle(30,0,30,90,54,0);
+  fg.fillRect(W-24,0,24,H); fg.fillTriangle(W-24,0,W-24,110,W-50,0);
+  fg.fillRect(0,0,W,14); fg.fillTriangle(0,14,80,14,0,42); fg.fillTriangle(W,14,W-96,14,W,48);
+
+  // --- Boden: organische Kante statt Kachelkante ---
+  const gr=this.add.graphics().setDepth(9);
+  gr.fillStyle(hx('#0e2a3f'),1);
+  gr.beginPath(); gr.moveTo(-10,H+10);
+  for(let px=-10;px<=W+10;px+=14){
+   const y=GY+Math.sin(px*0.055)*2.2+Math.sin(px*0.19)*1.1;
+   gr.lineTo(px,y);}
+  gr.lineTo(W+10,H+10); gr.closePath(); gr.fillPath();
+  // Moos-/Datenkante mit Eigenleuchten
+  gr.lineStyle(1.8,hx('#7fe8d0'),0.8); gr.beginPath();
+  for(let px=-10;px<=W+10;px+=14){
+   const y=GY+Math.sin(px*0.055)*2.2+Math.sin(px*0.19)*1.1;
+   px===-10?gr.moveTo(px,y):gr.lineTo(px,y);}
+  gr.strokePath();
+  this.add.image(W/2,GY+4,'soft').setBlendMode(Phaser.BlendModes.ADD)
+   .setTint(hx('#3fd0b8')).setAlpha(0.18).setDepth(10).setDisplaySize(W*1.4,80);
+
+  // --- Simse: Silhouette + Kantenlicht oben ---
+  const ledge=(px,py,pw,ph)=>{
+   const g=this.add.graphics().setDepth(11);
+   g.fillStyle(hx('#12354d'),1);
+   g.fillRoundedRect(px,py,pw,ph,{tl:5,tr:5,bl:2,br:2});
+   g.fillRoundedRect(px-3,py+ph*0.45,pw+6,ph*0.55,{tl:0,tr:0,bl:4,br:4});
+   g.lineStyle(1.5,hx('#9fffe8'),0.8);
+   g.beginPath();g.moveTo(px+3,py+0.6);g.lineTo(px+pw-3,py+0.6);g.strokePath();
+   const gl=this.add.image(px+pw/2,py,'soft').setBlendMode(Phaser.BlendModes.ADD)
+    .setTint(hx('#3fd0b8')).setAlpha(0.3).setDepth(10);gl.setDisplaySize(pw*2.0,32);};
+  ledge(176,268,58,18); ledge(266,238,64,50); ledge(392,250,54,14); ledge(474,224,50,14);
+
+  // --- Schwebende Datenfunken (die Sammelobjekte) ---
+  const spark=(bx,by)=>{
+   const h=this.add.image(bx,by,'glow').setBlendMode(Phaser.BlendModes.ADD)
+    .setTint(hx('#a8f0ff')).setAlpha(0.75).setDepth(13);h.setDisplaySize(26,26);
+   const g=this.add.graphics().setDepth(14);
+   g.fillStyle(0xffffff,1);g.fillCircle(bx,by,1.5);
+   this.tweens.add({targets:[h,g],y:'-=4',duration:1600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});};
+  spark(300,206);spark(418,214);spark(438,208);spark(508,190);
+
+  // --- Staub / Sporen mit Tiefenstaffelung ---
+  for(let k=0;k<70;k++){
+   const s=0.5+Math.random()*2.2;
+   const m=this.add.image(Math.random()*W,60+Math.random()*(H-90),'glow')
+    .setBlendMode(Phaser.BlendModes.ADD).setTint(hx(Math.random()<0.2?'#ffd0a0':'#cfeeff'))
+    .setAlpha(0.10+Math.random()*0.35).setDepth(Math.random()<0.4?7:15)
+    .setDisplaySize(s,s);
+   this.tweens.add({targets:m,y:m.y-(10+Math.random()*30),x:m.x+(Math.random()*14-7),
+    alpha:0.04,duration:4000+Math.random()*5000,repeat:-1,delay:Math.random()*3000,ease:'Sine.easeInOut'});}
+
+  // --- Paul als Silhouette mit Randlicht, REZI ist die Lichtquelle ---
+  const ox=112,oy=GY-1;
+  const lamp=this.add.image(ox+22,oy-26,'glow').setBlendMode(Phaser.BlendModes.ADD)
+   .setTint(hx('#7fffe0')).setAlpha(0.85).setDepth(15);lamp.setDisplaySize(150,150);
+  this.tweens.add({targets:lamp,alpha:0.6,displayWidth:172,displayHeight:172,
+   duration:2600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+  const pg=this.add.graphics().setDepth(16);
+  pg.fillStyle(hx('#03090f'),0.55);pg.fillEllipse(ox,oy+1,22,4);
+  const S='#0a1f30';
+  pg.fillStyle(hx(S),1);
+  pg.fillRoundedRect(ox-6.5,oy-15,5.5,15,2.4);pg.fillRoundedRect(ox+1,oy-15,5.5,15,2.4);
+  pg.fillRoundedRect(ox-7.5,oy-4,7,4,1.8);pg.fillRoundedRect(ox+0.5,oy-4,7,4,1.8);
+  pg.fillRoundedRect(ox-8,oy-29,16,15,4.5);
+  pg.fillRoundedRect(ox-10.5,oy-28,3.6,12,1.8);pg.fillRoundedRect(ox+6.9,oy-28,3.6,12,1.8);
+  pg.fillRoundedRect(ox-6.8,oy-42,13.6,15,5.4);
+  // Randlicht von rechts (REZI) — schmale helle Kante
+  const rim=this.add.graphics().setDepth(17);
+  rim.fillStyle(hx('#b8fff0'),1);
+  rim.fillRoundedRect(ox+5.8,oy-42,1.5,15,0.8);
+  rim.fillRoundedRect(ox+8.6,oy-28,1.4,12,0.7);
+  rim.fillRoundedRect(ox+6.4,oy-29,1.5,15,0.8);
+  rim.fillRoundedRect(ox+5.2,oy-15,1.3,15,0.6);
+  // Augen als zwei kalte Punkte
+  rim.fillStyle(hx('#cfeeff'),0.9);rim.fillCircle(ox-2.6,oy-34.5,0.85);rim.fillCircle(ox+2.6,oy-34.5,0.85);
+
+  // REZI: leuchtende Kapsel
+  const rx=ox+22,ry=oy-26,rg=this.add.graphics().setDepth(16);
+  rg.fillStyle(hx('#0a2e28'),1);rg.fillRoundedRect(rx-9,ry-9,18,18,6);
+  rg.lineStyle(1.3,hx('#8fffe4'),0.95);rg.strokeRoundedRect(rx-9,ry-9,18,18,6);
+  rg.fillStyle(hx('#8fffe4'),0.9);rg.fillRoundedRect(rx-1.2,ry-4,2.4,8,1);
+  rg.fillRoundedRect(rx-4,ry-1.2,8,2.4,1);
+  this.tweens.add({targets:[rg,lamp],y:'-=4',duration:2200,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+
+  // --- HUD: minimal, wie in Hollow Knight ---
+  const D=30;
+  const t=this.add.text(44,26,'Versichertenstammdaten',
+   {fontFamily:'Georgia, "Iowan Old Style", serif',fontSize:'11px',color:'#bfe6f5'});
+  t.setResolution(4);t.setAlpha(0.95);t.setDepth(D);
+  const hud=this.add.graphics().setDepth(D);
+  for(let k=0;k<3;k++){const bx=46+k*13,by=44;
+   hud.lineStyle(1.1,hx('#8fffe4'),k<2?0.95:0.35);hud.strokeCircle(bx,by,4);
+   if(k<2){hud.fillStyle(hx('#8fffe4'),0.9);hud.fillCircle(bx,by,2);}}
+
+  cam.postFX.addBloom(0xffffff,1,1,1,0.7,4);
+  cam.postFX.addVignette(0.5,0.52,0.88,0.30);
+  cam.postFX.addColorMatrix().saturate(-0.10);
+ }
+}
+new Phaser.Game({type:Phaser.WEBGL,width:1920,height:1080,parent:document.body,
+ backgroundColor:'#050b12',antialias:true,antialiasGL:true,roundPixels:false,
+ scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[Sc]});
+</script></body></html>

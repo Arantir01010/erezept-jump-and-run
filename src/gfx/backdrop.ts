@@ -1,17 +1,23 @@
 import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
+import { depthMix, fogColor } from './atmos'
 
 export interface BackdropOpts {
-  /** Weiche Lichtkegel von oben (digitale Level) — Stadt/Attract lassen das aus. */
+  /** Weiche Lichtschächte von oben (digitale Level) — Stadt/Attract lassen das aus. */
   lightShafts?: boolean
-  /** Schwebende Datenpartikel in Spielfeldnähe + Vordergrund-Bokeh (Default: an). */
+  /** Schwebende Datenpartikel + Vordergrund-Bokeh (Default: an). */
   ambient?: boolean
 }
 
 /**
- * Hintergrund pro Level: Farbverlauf + zwei Silhouetten-Ebenen + Sterne/
- * Datenfunken + optionale Lichtkegel. Alles prozedural aus dem Theme —
- * Custom-Art ersetzt das später 1:1.
+ * Hintergrund pro Level — atmosphärisch gestaffelt.
+ *
+ * Aufbau von hinten nach vorn: Farbverlauf, fernes Himmelslicht, drei
+ * Silhouetten-Ebenen mit Türmen, zwei Nebelbänder dazwischen, Lichtschächte,
+ * Schwebepartikel. Der eigentliche Effekt sind nicht die Türme, sondern die
+ * NEBELBÄNDER und die Farbstaffelung: Jede Ebene weiter hinten wird per
+ * `depthMix` in Richtung Horizontfarbe gezogen und verliert Kontrast.
+ * Deshalb wirkt das Bild tief, obwohl jede Form eine simple Fläche ist.
  *
  * Zoom-fest umgesetzt: Der Verlauf ist ein Weltobjekt in voller Weltbreite,
  * die Parallax-Ebenen folgen der Kamera per Update-Hook (Faktor f bedeutet:
@@ -29,6 +35,7 @@ export function drawBackdrop(
   const viewW = cam.displayWidth
   const viewH = cam.displayHeight
   const accent = Phaser.Display.Color.HexStringToColor(theme.accent).color
+  const fog = fogColor(theme)
 
   // --- Farbverlauf (horizontal uniform → braucht kein Parallax) ---
   const g = scene.add.graphics().setDepth(0)
@@ -53,31 +60,31 @@ export function drawBackdrop(
   // --- „Daten-Kern": großes, ruhig atmendes Himmelslicht (Faktor 0,92) ---
   const core = scene.add.container(0, 0).setDepth(0)
   {
-    const cx = viewW * 0.68
-    const cy = viewH * 0.2
+    const cx = viewW * 0.66
+    const cy = viewH * 0.28
     const halo = scene.add
       .image(cx, cy, 'fx-glow')
       .setBlendMode(Phaser.BlendModes.ADD)
       .setTint(accent)
-      .setAlpha(0.16)
-    halo.setDisplaySize(viewH * 0.9, viewH * 0.9)
+      .setAlpha(0.14)
+    halo.setDisplaySize(viewH * 1.4, viewH * 1.4)
     const heart = scene.add
       .image(cx, cy, 'fx-glow')
       .setBlendMode(Phaser.BlendModes.ADD)
       .setTint(0xffffff)
-      .setAlpha(0.12)
-    heart.setDisplaySize(viewH * 0.28, viewH * 0.28)
+      .setAlpha(0.16)
+    heart.setDisplaySize(viewH * 0.55, viewH * 0.55)
     scene.tweens.add({
       targets: halo,
-      alpha: 0.09,
-      displayWidth: viewH * 1.0,
-      displayHeight: viewH * 1.0,
+      alpha: 0.08,
+      displayWidth: viewH * 1.55,
+      displayHeight: viewH * 1.55,
       duration: 5200,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
     })
-    scene.tweens.add({ targets: heart, alpha: 0.06, duration: 3600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    scene.tweens.add({ targets: heart, alpha: 0.09, duration: 3600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
     core.add([halo, heart])
   }
 
@@ -104,70 +111,99 @@ export function drawBackdrop(
     stars.add(star)
   }
 
-  // --- Ferne Silhouetten-Ebene (Faktor 0,85 — klein, dunstig) ---
-  const farSil = scene.add.graphics().setDepth(0)
-  const farColor = Phaser.Display.Color.HexStringToColor(theme.skyBottom).color
-  const farSpan = worldWidth * 0.15 + viewW + 80
-  {
-    let x = -20
-    let i = 0
-    while (x < farSpan) {
-      const w = 18 + ((i * 29) % 26)
-      const h = 34 + ((i * 41) % 64)
-      farSil.fillStyle(farColor, 0.4)
-      farSil.fillRect(x, worldHeight - h - 40, w, h + 40)
-      // Antennenlicht auf jedem 3. Turm
-      if (i % 3 === 0) {
-        farSil.fillStyle(accent, 0.35)
-        farSil.fillRect(x + Math.floor(w / 2), worldHeight - h - 43, 1, 3)
-      }
-      x += w + 10 + ((i * 13) % 16)
-      i += 1
-    }
-  }
-
-  // --- Nahe Silhouetten-Ebene (Faktor 0,75 — die bisherigen Blöcke) ---
-  const sil = scene.add.graphics().setDepth(0)
-  const color = Phaser.Display.Color.HexStringToColor(theme.skyBottom).color
-  const detail = Phaser.Display.Color.HexStringToColor(theme.detail).color
-  const span = Math.max(worldWidth * 0.3 + viewW, viewW * 2)
-  {
-    let x = 0
-    let i = 0
+  /**
+   * Eine Turm-Ebene. `dist` (0…1) ist die gefühlte Entfernung: Sie bestimmt
+   * Farbe (Richtung Dunst), Deckkraft und ob überhaupt noch Fenster zu sehen
+   * sind. Türme bekommen eine Spitze — eine Silhouette mit Dachkante liest
+   * sich als Architektur, ein nacktes Rechteck als Klotz.
+   */
+  const towerLayer = (
+    dist: number,
+    baseHex: string,
+    alpha: number,
+    minW: number,
+    maxW: number,
+    minH: number,
+    maxH: number,
+    gap: number,
+    seed: number,
+    windows: boolean,
+    span: number,
+  ): Phaser.GameObjects.Graphics => {
+    const layer = scene.add.graphics().setDepth(0)
+    const body = depthMix(baseHex, fog, dist)
+    const roof = depthMix(theme.detail, fog, Math.max(0, dist - 0.18))
+    const lamp = depthMix(theme.accent, fog, dist * 0.55)
+    const dark = depthMix(theme.skyTop, fog, dist)
+    let x = -30
+    let i = seed
     while (x < span) {
-      const w = 30 + ((i * 37) % 50)
-      const h = 60 + ((i * 53) % 120)
-      sil.fillStyle(color, 0.55)
-      sil.fillRect(x, worldHeight - h - 40, w, h + 40)
-      sil.fillStyle(detail, 0.25)
-      for (let wy = 0; wy < 3; wy++) {
-        sil.fillRect(x + 6, worldHeight - h - 30 + wy * 24, 4, 4)
-        sil.fillRect(x + w - 10, worldHeight - h - 18 + wy * 24, 4, 4)
+      const w = minW + ((i * 23) % Math.max(1, maxW - minW))
+      const h = minH + ((i * 41) % Math.max(1, maxH - minH))
+      const ty = worldHeight - 40 - h
+      const spire = 8 + ((i * 13) % 16)
+      layer.fillStyle(body, alpha)
+      layer.fillRect(x, ty, w, h + 40)
+      layer.fillTriangle(x - 2, ty + 1, x + w + 2, ty + 1, x + w / 2, ty - spire)
+      layer.fillStyle(roof, alpha * 0.85)
+      layer.fillRect(x - 3, ty, w + 6, 1.5)
+      if (windows) {
+        const cw = Math.max(2, Math.round(w * 0.13))
+        for (let cy = ty + 14; cy < worldHeight - 46; cy += 15) {
+          for (let k = 0; k < 2; k++) {
+            const cx = Math.round(x + w * (0.28 + k * 0.44) - cw / 2)
+            const lit = (i * 7 + cy * 3 + k) % 5 < 2
+            layer.fillStyle(lit ? lamp : dark, lit ? alpha : alpha * 0.7)
+            layer.fillRect(cx, cy + 2, cw, 5)
+            layer.fillTriangle(cx, cy + 2, cx + cw, cy + 2, cx + cw / 2, cy - 1)
+          }
+        }
       }
-      // vereinzelt „bewohnte" Fenster (Akzentlicht statt grauem Punkt)
-      if (i % 4 === 1) {
-        sil.fillStyle(accent, 0.5)
-        sil.fillRect(x + 6, worldHeight - h - 6, 4, 4)
-      }
-      x += w + 14 + ((i * 17) % 22)
+      x += w + gap + ((i * 17) % 11)
       i += 1
     }
+    return layer
   }
 
-  // --- Lichtkegel (optional, Faktor 0,8): weiche Beams, langsam atmend ---
+  /** Nebelband: nimmt einer Ebene den Kontrast und trennt sie von der nächsten. */
+  const fogBand = (yTop: number, height: number, strength: number): Phaser.GameObjects.Graphics => {
+    const band = scene.add.graphics().setDepth(0)
+    const c = fog.color
+    const width = Math.max(worldWidth, viewW) + viewW
+    if (scene.game.renderer.type === Phaser.WEBGL) {
+      band.fillGradientStyle(c, c, c, c, 0, 0, strength, strength)
+      band.fillRect(-viewW / 2, yTop, width, height)
+    } else {
+      const STEPS = 10
+      for (let s = 0; s < STEPS; s++) {
+        band.fillStyle(c, (strength * s) / (STEPS - 1))
+        band.fillRect(-viewW / 2, yTop + (height / STEPS) * s, width, height / STEPS + 1)
+      }
+    }
+    return band
+  }
+
+  // --- Drei Turm-Ebenen mit Nebel dazwischen ---
+  const farSil = towerLayer(0.72, theme.skyBottom, 0.55, 22, 40, 90, 170, 12, 2, false, worldWidth * 0.15 + viewW + 80)
+  const fog1 = fogBand(worldHeight * 0.24, worldHeight * 0.62, 0.42)
+  const midSil = towerLayer(0.45, theme.skyTop, 0.75, 32, 56, 110, 200, 16, 7, true, worldWidth * 0.25 + viewW + 80)
+  const fog2 = fogBand(worldHeight * 0.42, worldHeight * 0.55, 0.3)
+  const sil = towerLayer(0.18, theme.skyTop, 0.9, 42, 72, 130, 230, 20, 3, true, worldWidth * 0.3 + viewW + 80)
+
+  // --- Lichtschächte (optional, Faktor 0,66): weiche Beams, langsam atmend ---
   const shafts = scene.add.container(0, 0).setDepth(0)
   if (opts.lightShafts) {
-    const shaftSpan = worldWidth * 0.2 + viewW
-    const count = Math.max(3, Math.round(shaftSpan / 220))
+    const shaftSpan = worldWidth * 0.34 + viewW
+    const count = Math.max(4, Math.round(shaftSpan / 190))
     for (let i = 0; i < count; i++) {
       const sx = (shaftSpan / count) * i + 60 + ((i * 71) % 90)
       const beam = scene.add
-        .image(sx, viewH * 0.34, 'fx-glow')
+        .image(sx, viewH * 0.3, 'fx-glow')
         .setBlendMode(Phaser.BlendModes.ADD)
-        .setTint(accent)
-        .setAlpha(0.05 + (i % 3) * 0.015)
+        .setTint(0xffffff)
+        .setAlpha(0.05 + (i % 3) * 0.012)
         .setAngle(i % 2 === 0 ? 9 : -7)
-      beam.setDisplaySize(46 + ((i * 23) % 30), viewH * 1.5)
+      beam.setDisplaySize(52 + ((i * 23) % 34), viewH * 1.7)
       scene.tweens.add({
         targets: beam,
         alpha: 0.02,
@@ -183,8 +219,7 @@ export function drawBackdrop(
 
   // --- Ambiente Datenpartikel: zwei Schwebe-Ebenen im Mittelgrund +
   //     wenige große Bokeh-Punkte VOR dem Spielfeld (Faktor negativ = näher
-  //     als die Kamera-Ebene). Alles driftet langsam und schimmert asynchron —
-  //     die Welt wirkt „bewohnt", ohne vom Spiel abzulenken. ---
+  //     als die Kamera-Ebene). Alles driftet langsam und schimmert asynchron. ---
   const midMotes = scene.add.container(0, 0).setDepth(2)
   const nearMotes = scene.add.container(0, 0).setDepth(2)
   const frontBokeh = scene.add.container(0, 0).setDepth(30)
@@ -229,8 +264,8 @@ export function drawBackdrop(
         container.add(mote)
       }
     }
-    spawnMotes(midMotes, 0.6, Math.round(10 + worldWidth / 90), 0.22, 0.45, 0.5)
-    spawnMotes(nearMotes, 0.35, Math.round(8 + worldWidth / 110), 0.35, 0.7, 0.4)
+    spawnMotes(midMotes, 0.6, Math.round(12 + worldWidth / 80), 0.22, 0.45, 0.55)
+    spawnMotes(nearMotes, 0.35, Math.round(10 + worldWidth / 100), 0.35, 0.7, 0.45)
     // Vordergrund-Bokeh: groß, extrem transparent, zieht schneller vorbei
     spawnMotes(frontBokeh, -0.18, Math.max(4, Math.round(worldWidth / 260)), 1.6, 2.8, 0.09)
   }
@@ -241,8 +276,11 @@ export function drawBackdrop(
     core.x = wx * 0.92
     stars.x = wx * 0.9
     farSil.x = wx * 0.85
-    shafts.x = wx * 0.8
-    sil.x = wx * 0.75
+    fog1.x = wx * 0.82
+    midSil.x = wx * 0.72
+    fog2.x = wx * 0.6
+    shafts.x = wx * 0.66
+    sil.x = wx * 0.5
     midMotes.x = wx * 0.6
     nearMotes.x = wx * 0.35
     frontBokeh.x = wx * -0.18

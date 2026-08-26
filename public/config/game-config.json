@@ -23,7 +23,8 @@
     "01-stammdaten",
     "02-kartenterminal",
     "03-kov-gateway",
-    "04-die-huelle"
+    "04-die-huelle",
+    "05-identitaet"
   ],
   "ending": {
     "type": "static",

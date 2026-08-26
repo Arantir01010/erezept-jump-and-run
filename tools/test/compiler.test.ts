@@ -474,23 +474,27 @@ export function run(): void {
       assertEqual(r.errors.length, 0, r.errors.join(' | '))
     })
 
-    test('Leser OHNE passende Karte im Level ist ein FEHLER', () => {
-      const r = compile(L({ objects: [leser()] }))
+    /** Ein Tor macht den Leser zum Wegversperrer — nur dort ist es ein Softlock. */
+    const tor = (name = 'tor-x', tx = 45) => ({ type: 'gate', name, tx, ty: 14, th: 6 })
+    const torLeser = (over: Record<string, unknown> = {}) => leser({ gate: 'tor-x', ...over })
+
+    test('Leser MIT Tor, aber OHNE passende Karte im Level ist ein FEHLER', () => {
+      const r = compile(L({ objects: [torLeser(), tor()] }))
       assertSome(r.errors, /keine solche Karte/)
     })
 
     test('die Meldung schlägt das fehlende Karten-Objekt konkret vor', () => {
-      const r = compile(L({ objects: [leser()] }))
+      const r = compile(L({ objects: [torLeser(), tor()] }))
       assertSome(r.errors, /"type": "karte", "karte": "egk"/)
     })
 
     test('falsche Kartenart zählt nicht als Öffner', () => {
-      const r = compile(L({ objects: [karte({ karte: 'hba' }), leser({ karten: ['egk'] })] }))
+      const r = compile(L({ objects: [karte({ karte: 'hba' }), torLeser({ karten: ['egk'] }), tor()] }))
       assertSome(r.errors, /keine solche Karte/)
     })
 
     test('Karte HINTER dem Leser ist ein FEHLER mit eigener Begründung', () => {
-      const r = compile(L({ objects: [karte({ tx: 40 }), leser({ tx: 30 })] }))
+      const r = compile(L({ objects: [karte({ tx: 40 }), torLeser({ tx: 30 }), tor()] }))
       assertSome(r.errors, /liegt erst HINTER ihm/)
     })
 
@@ -508,6 +512,25 @@ export function run(): void {
       const r = compile(L({ objects: [karte(), karte({ karte: 'hba', tx: 16 }), leser()] }))
       assertEqual(r.errors.length, 0, r.errors.join(' | '))
       assertSome(r.warnings, /wirkungslos/)
+    })
+
+    test('Leser OHNE Tor darf abweisen — er blockiert nichts (Lehr-Terminal)', () => {
+      // Das ist der „Introduce"-Moment: ZUGRIFF VERWEIGERT gefahrlos zeigen,
+      // bevor dieselbe Regel an einem echten Tor zählt.
+      const r = compile(L({ objects: [leser({ karten: ['smcb'] })] }))
+      assertEqual(r.errors.length, 0, r.errors.join(' | '))
+    })
+
+    test('Leser MIT Tor bleibt streng — dort wäre es ein Softlock', () => {
+      const r = compile(
+        L({
+          objects: [
+            leser({ karten: ['smcb'], gate: 'tor-x' }),
+            { type: 'gate', name: 'tor-x', tx: 40, ty: 14, th: 6 },
+          ],
+        }),
+      )
+      assertSome(r.errors, /keine solche Karte/)
     })
 
     test('unbekannte Kartenart wird schon vom Schema abgelehnt', () => {
