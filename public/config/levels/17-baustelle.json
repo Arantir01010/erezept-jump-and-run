@@ -1,0 +1,71 @@
+{
+  "_generiert": "AUS design/levels/17-baustelle/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "17-baustelle",
+  "station": {
+    "name": {
+      "de": "Die Baustelle",
+      "en": "The construction site"
+    },
+    "portalText": {
+      "de": "Station: Umbau - die Hardware wandert ins Rechenzentrum.",
+      "en": "Station: rebuild - the hardware moves into the data centre."
+    },
+    "reziText": {
+      "de": "Der Kasten verschwindet, die Pruefung bleibt. Nur woanders.",
+      "en": "The box disappears, the check remains. Just somewhere else."
+    },
+    "stampText": {
+      "de": "Umbau ueberstanden - die Funktion bleibt, das Geraet nicht.",
+      "en": "Rebuild survived - the function stays, the device does not."
+    },
+    "badge": "TI 2.0 Umbau"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Umbau",
+      "en": "Rebuild"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "baustelle",
+  "enemySkin": "manipulator-bot",
+  "tilemap": "assets/tilemaps/17-baustelle.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform traegt nur Klartext - kurz sichtbar werden!",
+        "en": "This platform only carries plain text - become visible briefly!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 90
+}

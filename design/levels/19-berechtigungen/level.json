@@ -1,0 +1,155 @@
+{
+  "station": {
+    "name": {
+      "de": "Die Berechtigungen",
+      "en": "The permissions"
+    },
+    "portalText": {
+      "de": "Station: Berechtigungen - du entscheidest, wer hereinkommt.",
+      "en": "Station: permissions - you decide who gets in."
+    },
+    "reziText": {
+      "de": "Diese Tueren gehen nur mit deiner Karte auf. Mit keiner anderen.",
+      "en": "These doors only open with your card. With no other."
+    },
+    "stampText": {
+      "de": "Rechte vergeben - drei Tueren, eine Entscheidung: deine.",
+      "en": "Permissions granted - three doors, one decision: yours."
+    },
+    "badge": "Berechtigungen"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Rechte",
+      "en": "Permissions"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "akte",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    }
+  },
+  "parTimeSeconds": 90,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 6,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Drei Tueren. Alle drei oeffnen nur mit DEINER Karte - keine Praxiskarte hilft hier.",
+      "textEn": "Three doors. All three open only with YOUR card - no practice card helps here."
+    },
+    {
+      "type": "karte",
+      "tx": 16,
+      "ty": 18.2,
+      "karte": "egk"
+    },
+    {
+      "type": "kartenleser",
+      "tx": 32,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-eins",
+      "gateHint": {
+        "de": "Nur die Versicherte oeffnet - die SMC-B hilft hier nicht.",
+        "en": "Only the insured person opens - the SMC-B does not help here."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 38,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-eins"
+    },
+    {
+      "type": "lauscher",
+      "tx": 48,
+      "ty": 18,
+      "patrol": 34,
+      "speed": 24,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "kartenleser",
+      "tx": 64,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-zwei"
+    },
+    {
+      "type": "gate",
+      "tx": 72,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-zwei"
+    },
+    {
+      "type": "kartenleser",
+      "tx": 76,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-drei"
+    },
+    {
+      "type": "gate",
+      "tx": 90,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-drei"
+    },
+    {
+      "type": "info-sign",
+      "tx": 108,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Und du kannst sie wieder zumachen. Das ist der Unterschied.",
+      "textEn": "And you can close them again. That is the difference."
+    }
+  ]
+}

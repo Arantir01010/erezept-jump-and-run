@@ -1,0 +1,65 @@
+{
+  "_generiert": "AUS design/levels/07-der-konnektor/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "07-der-konnektor",
+  "station": {
+    "name": {
+      "de": "Der Konnektor",
+      "en": "The connector"
+    },
+    "portalText": {
+      "de": "Station: Der Konnektor — der Türsteher zwischen Praxis und Netz.",
+      "en": "Station: the connector — the gatekeeper between practice and network."
+    },
+    "reziText": {
+      "de": "Der Konnektor prüft, WER anklopft — nicht was ich enthalte.",
+      "en": "The connector checks WHO knocks — not what I contain."
+    },
+    "stampText": {
+      "de": "✓ Zugang aufgebaut — nur geprüfte Einrichtungen kommen durch.",
+      "en": "✓ Access established — only checked institutions get through."
+    },
+    "badge": "Konnektor"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Konnektor",
+      "en": "Connector"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zugang",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/07-der-konnektor.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 80
+}

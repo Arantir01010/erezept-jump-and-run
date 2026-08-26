@@ -1,0 +1,147 @@
+{
+  "station": {
+    "name": {
+      "de": "Der Kontextschluessel",
+      "en": "The context key"
+    },
+    "portalText": {
+      "de": "Station: Die Sitzung - Schutz gilt nicht ewig.",
+      "en": "Station: the session - protection does not last forever."
+    },
+    "reziText": {
+      "de": "Laeuft die Sitzung ab, falle ich in den Klartext zurueck.",
+      "en": "When the session expires, I fall back into plain text."
+    },
+    "stampText": {
+      "de": "Sitzung gehalten - abgelaufener Schutz schuetzt nicht.",
+      "en": "Session kept alive - expired protection protects nothing."
+    },
+    "badge": "Kontextschluessel"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Sitzung",
+      "en": "Session"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text - and still nobody sees you!"
+      }
+    },
+    "kontext-anker": {
+      "hint": {
+        "de": "Sitzung aufgefrischt - der Kontextschluessel gilt wieder!",
+        "en": "Session refreshed - the context key is valid again!"
+      }
+    }
+  },
+  "parTimeSeconds": 95,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 6,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Der Kontextschluessel gilt nur eine Weile. Danach bist du wieder sichtbar.",
+      "textEn": "The context key is valid for a while only. After that you are visible again."
+    },
+    {
+      "type": "lauscher",
+      "tx": 26,
+      "ty": 18,
+      "patrol": 36,
+      "speed": 24,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "vau-feld",
+      "tx": 40,
+      "ty": 15,
+      "tw": 7,
+      "th": 5,
+      "ttlMs": 5000
+    },
+    {
+      "type": "kontext-anker",
+      "tx": 43,
+      "ty": 18
+    },
+    {
+      "type": "lauscher",
+      "tx": 52,
+      "ty": 18,
+      "patrol": 34,
+      "speed": 26,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "vau-feld",
+      "tx": 66,
+      "ty": 15,
+      "tw": 7,
+      "th": 5,
+      "ttlMs": 4500
+    },
+    {
+      "type": "kontext-anker",
+      "tx": 69,
+      "ty": 18
+    },
+    {
+      "type": "lauscher",
+      "tx": 96,
+      "ty": 18,
+      "patrol": -34,
+      "speed": 28,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "info-sign",
+      "tx": 106,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Eine abgelaufene Sitzung schuetzt nicht - sie faellt in den Klartext.",
+      "textEn": "An expired session does not protect - it falls back into plain text."
+    }
+  ]
+}

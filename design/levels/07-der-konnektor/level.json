@@ -1,0 +1,124 @@
+{
+  "station": {
+    "name": {
+      "de": "Der Konnektor",
+      "en": "The connector"
+    },
+    "portalText": {
+      "de": "Station: Der Konnektor — der Türsteher zwischen Praxis und Netz.",
+      "en": "Station: the connector — the gatekeeper between practice and network."
+    },
+    "reziText": {
+      "de": "Der Konnektor prüft, WER anklopft — nicht was ich enthalte.",
+      "en": "The connector checks WHO knocks — not what I contain."
+    },
+    "stampText": {
+      "de": "✓ Zugang aufgebaut — nur geprüfte Einrichtungen kommen durch.",
+      "en": "✓ Access established — only checked institutions get through."
+    },
+    "badge": "Konnektor"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Konnektor",
+      "en": "Connector"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zugang",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    }
+  },
+  "parTimeSeconds": 80,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 7,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Der Konnektor lässt nur Einrichtungen ins Netz. Such den Praxisausweis.",
+      "textEn": "The connector only lets institutions in. Find the practice card."
+    },
+    {
+      "type": "karte",
+      "tx": 20,
+      "ty": 18.2,
+      "karte": "smcb"
+    },
+    {
+      "type": "kartenleser",
+      "tx": 30,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "smcb"
+      ],
+      "gate": "tor-konnektor"
+    },
+    {
+      "type": "gate",
+      "tx": 42,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-konnektor"
+    },
+    {
+      "type": "lauscher",
+      "tx": 62,
+      "ty": 18,
+      "patrol": 44,
+      "speed": 24,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 84,
+      "ty": 18,
+      "patrol": -40,
+      "speed": 26,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 103,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Hinter dem Konnektor beginnt der geschützte Tunnel.",
+      "textEn": "Behind the connector the protected tunnel begins."
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "station": {
+    "name": {
+      "de": "Die Institutionskarte",
+      "en": "The institution card"
+    },
+    "portalText": {
+      "de": "Station: SMC-B — die Einrichtung weist sich aus, nicht der Mensch.",
+      "en": "Station: SMC-B — the institution identifies itself, not the person."
+    },
+    "reziText": {
+      "de": "Zwei Rollen, zwei Karten — keine ersetzt die andere.",
+      "en": "Two roles, two cards — neither replaces the other."
+    },
+    "stampText": {
+      "de": "✓ Einrichtung authentisiert — die Praxis ist im Netz.",
+      "en": "✓ Institution authenticated — the practice is on the network."
+    },
+    "badge": "SMC-B"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Praxisausweis",
+      "en": "Practice card"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zugang",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    }
+  },
+  "parTimeSeconds": 80,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 6,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Hier zählt die Einrichtung, nicht die Person. Zwei Karten liegen bereit.",
+      "textEn": "Here the institution counts, not the person. Two cards are waiting."
+    },
+    {
+      "type": "karte",
+      "tx": 16,
+      "ty": 18.2,
+      "karte": "egk"
+    },
+    {
+      "type": "karte",
+      "tx": 28,
+      "ty": 18.2,
+      "karte": "smcb"
+    },
+    {
+      "type": "kartenleser",
+      "tx": 38,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "smcb"
+      ],
+      "gate": "tor-einrichtung",
+      "gateHint": {
+        "de": "Dieses Tor prüft die EINRICHTUNG — die SMC-B, nicht die eGK.",
+        "en": "This gate checks the INSTITUTION — the SMC-B, not the eGK."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 50,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-einrichtung"
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 60,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 66,
+      "ty": 18,
+      "patrol": 40,
+      "speed": 26,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "kartenleser",
+      "tx": 76,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-versicherte",
+      "gateHint": {
+        "de": "Und dieses will die VERSICHERTE sehen — jetzt die eGK.",
+        "en": "And this one wants to see the INSURED person — now the eGK."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 92,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-versicherte"
+    },
+    {
+      "type": "info-sign",
+      "tx": 108,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Jede Tür ihre Karte. Deshalb gibt es mehr als eine.",
+      "textEn": "Every door its own card. That is why there is more than one."
+    }
+  ]
+}

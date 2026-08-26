@@ -1,0 +1,71 @@
+{
+  "_generiert": "AUS design/levels/14-die-vau/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "14-die-vau",
+  "station": {
+    "name": {
+      "de": "Die VAU",
+      "en": "The VAU"
+    },
+    "portalText": {
+      "de": "Station: Die VAU - ein Raum, kein Tunnel.",
+      "en": "Station: the VAU - a room, not a tunnel."
+    },
+    "reziText": {
+      "de": "Hier arbeite ich im Klartext - und der Betreiber sieht trotzdem nichts.",
+      "en": "Here I work in plain text - and the operator still sees nothing."
+    },
+    "stampText": {
+      "de": "Vertraulich verarbeitet - Klartext, ohne Mitleser.",
+      "en": "Processed confidentially - plain text, without onlookers."
+    },
+    "badge": "VAU"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Vertrauensraum",
+      "en": "Trusted space"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/14-die-vau.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text - and still nobody sees you!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 90
+}

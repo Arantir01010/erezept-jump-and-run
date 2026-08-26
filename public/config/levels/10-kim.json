@@ -1,0 +1,77 @@
+{
+  "_generiert": "AUS design/levels/10-kim/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "10-kim",
+  "station": {
+    "name": {
+      "de": "KIM - sichere Nachricht",
+      "en": "KIM - secure message"
+    },
+    "portalText": {
+      "de": "Station: KIM - jede Nachricht verschluesselt UND signiert.",
+      "en": "Station: KIM - every message encrypted AND signed."
+    },
+    "reziText": {
+      "de": "Verschluesselt heisst: keiner liest mit. Signiert heisst: keiner faelscht.",
+      "en": "Encrypted means nobody reads along. Signed means nobody forges."
+    },
+    "stampText": {
+      "de": "Verschluesselt und signiert - zwei Schutzarten, zwei Aktionen.",
+      "en": "Encrypted and signed - two kinds of protection, two actions."
+    },
+    "badge": "KIM"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Nachricht",
+      "en": "Message"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zugang",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/10-kim.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform traegt nur Klartext - kurz sichtbar werden!",
+        "en": "This platform only carries plain text - become visible briefly!"
+      }
+    },
+    "stamp-exit": {
+      "hint": {
+        "de": "Der Stempel macht die Nachricht ECHT - das ist nicht dasselbe wie verschluesseln.",
+        "en": "The stamp makes the message GENUINE - not the same as encrypting."
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 85
+}

@@ -30,5 +30,45 @@
     "groundTop": "#2f7a6b",
     "accent": "#ffd75e",
     "detail": "#79c9b7"
+  },
+  "praxis": {
+    "skyTop": "#1d1410",
+    "skyBottom": "#3d2a1c",
+    "ground": "#4a3524",
+    "groundTop": "#7a5836",
+    "accent": "#ffd75e",
+    "detail": "#c99a5a"
+  },
+  "zugang": {
+    "skyTop": "#08131f",
+    "skyBottom": "#123049",
+    "ground": "#173a4e",
+    "groundTop": "#2a6a86",
+    "accent": "#4de3ff",
+    "detail": "#6fb3c9"
+  },
+  "zentrale-zone": {
+    "skyTop": "#101a2e",
+    "skyBottom": "#2b4470",
+    "ground": "#2f3f66",
+    "groundTop": "#5f7bbd",
+    "accent": "#9fd8ff",
+    "detail": "#b9c9ee"
+  },
+  "baustelle": {
+    "skyTop": "#1a1408",
+    "skyBottom": "#3a2e10",
+    "ground": "#3f3a2a",
+    "groundTop": "#7a6a2c",
+    "accent": "#ffb64a",
+    "detail": "#b9a35a"
+  },
+  "akte": {
+    "skyTop": "#241a2e",
+    "skyBottom": "#4a3a58",
+    "ground": "#4e3f5e",
+    "groundTop": "#8a6f9e",
+    "accent": "#ffd08a",
+    "detail": "#d0b0e0"
   }
 }

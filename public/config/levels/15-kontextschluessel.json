@@ -1,0 +1,77 @@
+{
+  "_generiert": "AUS design/levels/15-kontextschluessel/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "15-kontextschluessel",
+  "station": {
+    "name": {
+      "de": "Der Kontextschluessel",
+      "en": "The context key"
+    },
+    "portalText": {
+      "de": "Station: Die Sitzung - Schutz gilt nicht ewig.",
+      "en": "Station: the session - protection does not last forever."
+    },
+    "reziText": {
+      "de": "Laeuft die Sitzung ab, falle ich in den Klartext zurueck.",
+      "en": "When the session expires, I fall back into plain text."
+    },
+    "stampText": {
+      "de": "Sitzung gehalten - abgelaufener Schutz schuetzt nicht.",
+      "en": "Session kept alive - expired protection protects nothing."
+    },
+    "badge": "Kontextschluessel"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Sitzung",
+      "en": "Session"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/15-kontextschluessel.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text - and still nobody sees you!"
+      }
+    },
+    "kontext-anker": {
+      "hint": {
+        "de": "Sitzung aufgefrischt - der Kontextschluessel gilt wieder!",
+        "en": "Session refreshed - the context key is valid again!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 95
+}

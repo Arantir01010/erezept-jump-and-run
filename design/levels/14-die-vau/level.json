@@ -1,0 +1,138 @@
+{
+  "station": {
+    "name": {
+      "de": "Die VAU",
+      "en": "The VAU"
+    },
+    "portalText": {
+      "de": "Station: Die VAU - ein Raum, kein Tunnel.",
+      "en": "Station: the VAU - a room, not a tunnel."
+    },
+    "reziText": {
+      "de": "Hier arbeite ich im Klartext - und der Betreiber sieht trotzdem nichts.",
+      "en": "Here I work in plain text - and the operator still sees nothing."
+    },
+    "stampText": {
+      "de": "Vertraulich verarbeitet - Klartext, ohne Mitleser.",
+      "en": "Processed confidentially - plain text, without onlookers."
+    },
+    "badge": "VAU"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Vertrauensraum",
+      "en": "Trusted space"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text - and still nobody sees you!"
+      }
+    }
+  },
+  "parTimeSeconds": 90,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 6,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die VAU ist kein Tunnel, sondern ein Raum: drinnen wird im Klartext gearbeitet.",
+      "textEn": "The VAU is not a tunnel but a room: inside, work happens in plain text."
+    },
+    {
+      "type": "lauscher",
+      "tx": 24,
+      "ty": 18,
+      "patrol": 36,
+      "speed": 24,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "vau-feld",
+      "tx": 38,
+      "ty": 15,
+      "tw": 8,
+      "th": 5
+    },
+    {
+      "type": "lauscher",
+      "tx": 58,
+      "ty": 18,
+      "patrol": 40,
+      "speed": 26,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "info-sign",
+      "tx": 64,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Zwischen den Feldern zaehlt wieder deine eigene Huelle.",
+      "textEn": "Between the fields your own shell counts again."
+    },
+    {
+      "type": "vau-feld",
+      "tx": 78,
+      "ty": 15,
+      "tw": 8,
+      "th": 5
+    },
+    {
+      "type": "lauscher",
+      "tx": 98,
+      "ty": 18,
+      "patrol": -34,
+      "speed": 26,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 104,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Drinnen schnell UND unsichtbar. Das kann sonst nichts.",
+      "textEn": "Inside fast AND invisible. Nothing else can do that."
+    }
+  ]
+}

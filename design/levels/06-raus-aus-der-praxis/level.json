@@ -1,0 +1,155 @@
+{
+  "station": {
+    "name": {
+      "de": "Raus aus der Praxis",
+      "en": "Leaving the practice"
+    },
+    "portalText": {
+      "de": "Station: Der Weg nach draußen — alles, was du kannst, auf einmal.",
+      "en": "Station: the way out — everything you learned, at once."
+    },
+    "reziText": {
+      "de": "Ausweis geprüft, Hülle zu — so verlasse ich die Praxis!",
+      "en": "Card checked, shell closed — this is how I leave the practice!"
+    },
+    "stampText": {
+      "de": "✓ Bereit für die Zugangszone.",
+      "en": "✓ Ready for the access zone."
+    },
+    "badge": "Welt 1 · Abschluss"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Ausgang",
+      "en": "Exit"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "praxis",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    }
+  },
+  "parTimeSeconds": 80,
+  "stuckHint": {
+    "de": "Immer nach rechts! Shift wechselt die Hülle, E steckt die Karte.",
+    "en": "Keep heading right! Shift switches the shell, E inserts the card."
+  },
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 7,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Letzte Station in der Praxis. Alles, was du kannst, brauchst du jetzt.",
+      "textEn": "Last stop in the practice. You will need everything you learned."
+    },
+    {
+      "type": "karte",
+      "tx": 17,
+      "ty": 18.2,
+      "karte": "egk"
+    },
+    {
+      "type": "lauscher",
+      "tx": 28,
+      "ty": 18,
+      "patrol": 48,
+      "speed": 26,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 40,
+      "ty": 18,
+      "patrol": -36,
+      "speed": 22,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 46,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "kartenleser",
+      "tx": 56,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-ausgang"
+    },
+    {
+      "type": "gate",
+      "tx": 71,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-ausgang"
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 76,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 94,
+      "ty": 18,
+      "patrol": 40,
+      "speed": 28,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 103,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die Praxis liegt hinter dir. Ab jetzt bist du im Netz.",
+      "textEn": "The practice is behind you. From here on you are in the network."
+    }
+  ]
+}

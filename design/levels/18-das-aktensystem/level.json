@@ -1,0 +1,155 @@
+{
+  "station": {
+    "name": {
+      "de": "Das Aktensystem",
+      "en": "The record system"
+    },
+    "portalText": {
+      "de": "Station: Die Akte - verschluesselt gespeichert, in der VAU verarbeitet.",
+      "en": "Station: the record - stored encrypted, processed in the VAU."
+    },
+    "reziText": {
+      "de": "Gespeichert bin ich verschluesselt. Gearbeitet wird in der VAU.",
+      "en": "I am stored encrypted. The work happens in the VAU."
+    },
+    "stampText": {
+      "de": "Akte erreicht - geschuetzt gespeichert, geschuetzt verarbeitet.",
+      "en": "Record reached - stored protected, processed protected."
+    },
+    "badge": "ePA"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Aktensystem",
+      "en": "Record system"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "akte",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 9,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform traegt nur Klartext - kurz sichtbar werden!",
+        "en": "This platform only carries plain text - become visible briefly!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext - und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text - and still nobody sees you!"
+      }
+    }
+  },
+  "parTimeSeconds": 95,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 6,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die Akte liegt verschluesselt. Gearbeitet wird nur in der VAU.",
+      "textEn": "The record is stored encrypted. Work happens only in the VAU."
+    },
+    {
+      "type": "karte",
+      "tx": 20,
+      "ty": 18.2,
+      "karte": "egk"
+    },
+    {
+      "type": "lauscher",
+      "tx": 36,
+      "ty": 18,
+      "patrol": 38,
+      "speed": 26,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 44,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "vau-feld",
+      "tx": 54,
+      "ty": 15,
+      "tw": 7,
+      "th": 5
+    },
+    {
+      "type": "kartenleser",
+      "tx": 70,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-akte"
+    },
+    {
+      "type": "gate",
+      "tx": 80,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-akte"
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 84,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 104,
+      "ty": 18,
+      "patrol": -36,
+      "speed": 26,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 112,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Niemand hat Vollzugriff auf alle Akten. Auch der Betreiber nicht.",
+      "textEn": "Nobody has full access to all records. Not even the operator."
+    }
+  ]
+}

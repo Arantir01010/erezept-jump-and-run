@@ -1,0 +1,72 @@
+{
+  "_generiert": "AUS design/levels/08-vpn-tunnel/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "08-vpn-tunnel",
+  "station": {
+    "name": {
+      "de": "Der VPN-Tunnel",
+      "en": "The VPN tunnel"
+    },
+    "portalText": {
+      "de": "Station: Der Tunnel — abgeschirmt vom offenen Internet.",
+      "en": "Station: the tunnel — shielded from the open internet."
+    },
+    "reziText": {
+      "de": "Im Tunnel kommt niemand an mich heran — aber sichtbar bin ich trotzdem.",
+      "en": "Nobody can reach me in the tunnel — but I am still visible."
+    },
+    "stampText": {
+      "de": "✓ Transport gesichert — der Tunnel trägt, die Hülle schützt.",
+      "en": "✓ Transport secured — the tunnel carries, the shell protects."
+    },
+    "badge": "VPN · Transport"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "VPN-Zugang",
+      "en": "VPN access"
+    }
+  },
+  "cameraMode": "tube",
+  "theme": "zugang",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/08-vpn-tunnel.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "tube-scroll": {
+      "speed": 58
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 90,
+  "stuckHint": {
+    "de": "Der Tunnel schiebt dich — Shift wechselt die Hülle.",
+    "en": "The tunnel pushes you — Shift switches the shell."
+  }
+}

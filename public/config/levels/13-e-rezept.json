@@ -1,0 +1,71 @@
+{
+  "_generiert": "AUS design/levels/13-e-rezept/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "13-e-rezept",
+  "station": {
+    "name": {
+      "de": "Das E-Rezept",
+      "en": "The e-prescription"
+    },
+    "portalText": {
+      "de": "Station: Die Apotheke - deine Karte gibt den Zugriff frei.",
+      "en": "Station: the pharmacy - your card releases the access."
+    },
+    "reziText": {
+      "de": "Auf der Karte steht nichts. Sie oeffnet nur - wie ein Schluessel.",
+      "en": "Nothing is stored on the card. It only opens - like a key."
+    },
+    "stampText": {
+      "de": "Eingeloest - die Karte war der Schluessel, nicht der Speicher.",
+      "en": "Redeemed - the card was the key, not the storage."
+    },
+    "badge": "E-Rezept"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "apotheke",
+    "label": {
+      "de": "Apotheke",
+      "en": "Pharmacy"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/13-e-rezept.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform traegt nur Klartext - kurz sichtbar werden!",
+        "en": "This platform only carries plain text - become visible briefly!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 85
+}

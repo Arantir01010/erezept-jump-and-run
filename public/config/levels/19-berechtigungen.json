@@ -1,0 +1,65 @@
+{
+  "_generiert": "AUS design/levels/19-berechtigungen/ ERZEUGT — nicht von Hand editieren, sondern dort ändern und \"npm run build:levels\" ausführen.",
+  "id": "19-berechtigungen",
+  "station": {
+    "name": {
+      "de": "Die Berechtigungen",
+      "en": "The permissions"
+    },
+    "portalText": {
+      "de": "Station: Berechtigungen - du entscheidest, wer hereinkommt.",
+      "en": "Station: permissions - you decide who gets in."
+    },
+    "reziText": {
+      "de": "Diese Tueren gehen nur mit deiner Karte auf. Mit keiner anderen.",
+      "en": "These doors only open with your card. With no other."
+    },
+    "stampText": {
+      "de": "Rechte vergeben - drei Tueren, eine Entscheidung: deine.",
+      "en": "Permissions granted - three doors, one decision: yours."
+    },
+    "badge": "Berechtigungen"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Rechte",
+      "en": "Permissions"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "akte",
+  "enemySkin": "lauscher-auge",
+  "tilemap": "assets/tilemaps/19-berechtigungen.tmj",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Pruefsummen",
+      "en": "checksums"
+    }
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschluesselt liest er alles mit - schalte die Huelle um!",
+        "en": "Unencrypted he reads everything - switch your shell!"
+      }
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "parTimeSeconds": 90
+}
