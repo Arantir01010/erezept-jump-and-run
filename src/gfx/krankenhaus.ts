@@ -599,10 +599,10 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
       g.fillStyle(farben[(r + c) % 3], 0.8)
       g.fillRect(427.5 + c * 3, 292 + r * 5, 2, 3)
     }
-  g.fillStyle(0x0e1a2c, 0.92) // Plakat 116117 (Text kommt unten dazu)
-  g.fillRect(394, 270, 24, 13)
+  g.fillStyle(0x0e1a2c, 0.92) // Plakat 116117 (Text kommt unten dazu) —
+  g.fillRect(394, 276, 24, 13) // unterhalb der Steuerungslegende (y≈262–274)
   g.lineStyle(0.6, detail, 0.7)
-  g.strokeRect(394, 270, 24, 13)
+  g.strokeRect(394, 276, 24, 13)
   g.fillStyle(0x3a6a55, 1) // Pflanze am Übergang
   g.fillRect(338, 308, 5, 8)
   g.fillStyle(0x7fd07f, 0.8)
@@ -765,8 +765,8 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
     repeatDelay: 2600,
   })
   addText(scene, 121, 259, 'NOTAUFNAHME', 4.6, { color: '#ffb367', spacing: 0.7 }).setOrigin(0.5)
-  addText(scene, 406, 274.5, 'Kein Notfall?', 3.6, { color: '#b8c6e0', bold: false }).setOrigin(0.5)
-  addText(scene, 406, 279.5, '116 117', 4.6, { color: '#ffd75e' }).setOrigin(0.5)
+  addText(scene, 406, 280.5, 'Kein Notfall?', 3.6, { color: '#b8c6e0', bold: false }).setOrigin(0.5)
+  addText(scene, 406, 285.5, '116 117', 4.6, { color: '#ffd75e' }).setOrigin(0.5)
   // Unter dem QR-Plakat, nicht darüber: auf Höhe 262 läuft die Steuerungs-
   // legende der AttractScene durchs Bild.
   addText(scene, 237, 288, 'E-REZEPT', 3.8, { color: '#4de3ff', bold: false }).setOrigin(0.5)
@@ -898,14 +898,15 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
       l.fillStyle(0x8fd6c8, wer > 0 ? 0.2 : 0.85)
       l.fillRoundedRect(428, 231.5, 8, 5, 1.5)
     }
-    // Wanduhr im Flur: echte Minuten, die Stunde steht
+    // Wanduhr im Flur: echte Minuten, die Stunde steht. Links über der
+    // Rolltrage — die Bildmitte gehört dem „Drück LEERTASTE!"-Text.
     l.lineStyle(0.7, 0xd8e0f0, 0.9)
-    l.strokeCircle(375, 228, 3)
+    l.strokeCircle(107, 228, 3)
     l.beginPath()
-    l.moveTo(375, 228)
-    l.lineTo(375 + Math.sin(t * 0.105) * 2.4, 228 - Math.cos(t * 0.105) * 2.4)
-    l.moveTo(375, 228)
-    l.lineTo(376.6, 227)
+    l.moveTo(107, 228)
+    l.lineTo(107 + Math.sin(t * 0.105) * 2.4, 228 - Math.cos(t * 0.105) * 2.4)
+    l.moveTo(107, 228)
+    l.lineTo(108.6, 227)
     l.strokePath()
 
     // ---- 1. OG: Betten atmen, Monitore laufen, Visite, TV flimmert ----
