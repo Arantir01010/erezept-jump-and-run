@@ -11,6 +11,7 @@ import { addSpeedStreaks } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
 import { VIEW_ZOOM } from '../gfx/view'
+import { naechsterTubeScroll } from '../gfx/tubeKamera'
 import { Huelle } from '../state/HuelleState'
 import { protokoll } from '../state/Protokoll'
 import { telemetry } from '../telemetry/Telemetry'
@@ -233,10 +234,19 @@ export class GameScene extends Phaser.Scene {
   private updateTubeCamera(delta: number): void {
     const cam = this.cameras.main
     const viewW = cam.displayWidth // sichtbare Breite im Design-Raum (Zoom-fest)
-    const held = this.scrollLocks.some((lock) => lock())
-    if (!held) {
-      this.tubeScrollX = Math.min(this.tubeScrollX + (this.tubeSpeed * delta) / 1000, this.mapWidth - viewW)
-    }
+    // Wohin der Tunnel rückt, entscheidet gfx/tubeKamera.ts (Phaser-frei, getestet).
+    // Wichtig: Der Auto-Scroll ist die UNTERGRENZE des Tempos. Läuft Paul
+    // schneller als der Tunnel — er läuft 130 px/s, der Tunnel 55 —, zieht er
+    // die Kamera mit, statt an der Bildkante auf sie zu warten.
+    this.tubeScrollX = naechsterTubeScroll({
+      scrollX: this.tubeScrollX,
+      speed: this.tubeSpeed,
+      deltaMs: delta,
+      playerX: this.player.x,
+      viewW,
+      mapWidth: this.mapWidth,
+      held: this.scrollLocks.some((lock) => lock()),
+    })
     // centerOn statt scrollX: rechnet den Kamera-Zoom automatisch heraus
     cam.centerOn(this.tubeScrollX + viewW / 2, cam.displayHeight / 2)
     // Der Tunnel nimmt Paul mit: linke Bildkante schiebt sanft (kein Schaden — im

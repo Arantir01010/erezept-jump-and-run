@@ -5,6 +5,15 @@ import { addText } from '../gfx/text'
  * Sprechblase im Spielraum (pausiert das Spiel nie).
  * Max. 1 Satz — Textmenge wird durch die Level-JSONs diszipliniert.
  */
+
+/**
+ * Abstand der Blasen-Oberkante zur oberen Bildkante.
+ *
+ * Das HUD (UIScene) belegt die obersten ~25 px des Design-Raums: Stationsname,
+ * Streckenkarte, Prüfsummen-Zähler, Hülle-Anzeige. Darunter beginnt das
+ * Hinweis-Band.
+ */
+const BAND_OBEN = 30
 export class SpeechBubble extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics
   private label: Phaser.GameObjects.Text
@@ -43,11 +52,26 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
     })
   }
 
-  /** Blase über einem Punkt positionieren, im Kamerabild halten. */
-  pointAt(x: number, y: number): void {
+  /**
+   * Blase im Kamerabild platzieren.
+   *
+   * Sie folgt REZI WAAGERECHT, sitzt senkrecht aber immer im festen Band
+   * knapp unter dem HUD.
+   *
+   * Vorher hing sie an REZIs Höhe, also rund 52 px über dem Spieler — und
+   * damit genau dort, wo das Spiel stattfindet: über Lauschern, deren
+   * Sichtkegeln, über Plattformen und Toren. Ein Hinweis, der verdeckt,
+   * worüber er spricht, ist keiner. Ein fester Platz hat zusätzlich den
+   * Vorteil, dass der Blick ihn nach dem ersten Mal von selbst findet.
+   *
+   * Der Zipfel unten zeigt weiterhin nach unten ins Geschehen, damit die
+   * Blase erkennbar zu REZI gehört und nicht zum HUD.
+   */
+  pointAt(x: number): void {
     const cam = this.scene.cameras.main
     const halfW = Math.min(172, this.label.width + 14) / 2
     const clampedX = Phaser.Math.Clamp(x, cam.worldView.x + halfW + 2, cam.worldView.right - halfW - 2)
-    this.setPosition(clampedX, y)
+    const halfH = (this.label.height + 10) / 2
+    this.setPosition(clampedX, cam.worldView.y + BAND_OBEN + halfH)
   }
 }

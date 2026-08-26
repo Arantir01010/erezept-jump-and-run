@@ -100,7 +100,8 @@ export class Rezi extends Phaser.GameObjects.Container {
         })
       }
     }
-    this.bubble.pointAt(this.x, this.y - 26)
+    // Nur waagerecht — die Höhe bestimmt die Blase selbst (festes Band unter dem HUD)
+    this.bubble.pointAt(this.x)
   }
 
   private trailCooldown = 0
