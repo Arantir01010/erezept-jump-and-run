@@ -141,11 +141,11 @@ export class UIScene extends Phaser.Scene {
       this.fpsText = addText(this, 6, H - 14, '', 9, { color: '#7fd07f', font: 'mono' })
     }
 
-    // Touch-Steuerung (Steuerkreuz links, Buttons rechts) belegt die unteren
-    // Ecken — die beiden Badges weichen dann unter die Kopfleiste aus.
+    // Die Touch-Steuerung (Steuerkreuz) belegt die linke untere Ecke — das
+    // Hülle-Badge weicht dann unter die Kopfleiste aus. Rechts unten bleibt
+    // frei (Sprung/Aktion sind Tipp-Gesten, keine Buttons).
     const layoutFuerTouch = (touchAktiv: boolean): void => {
       this.huelleBadge?.setPosition(8, touchAktiv ? 44 : H - 30)
-      this.kartenBadge?.setPosition(W - 8, touchAktiv ? 58 : H - 18)
     }
     layoutFuerTouch(istTouchUiAktiv())
 

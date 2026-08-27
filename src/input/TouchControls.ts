@@ -7,26 +7,31 @@ import { inputManager } from './InputManager'
  *
  * Bewusst als DOM-Overlay statt Phaser-Objekte: Pointer-Events liefern auf
  * Windows-Touchscreens verlässliches Multi-Touch (laufen + gleichzeitig
- * springen), die Elemente liegen über dem letterboxten Canvas und skalieren
- * per CSS (vmin/clamp) auf jede Bildschirmgröße — unabhängig von Kamera und
- * Design-Raum. Die Spiellogik bleibt unberührt: Alles mündet als dritte
- * Quelle im InputManager (setTouchHeld/pulseTouch → resolve.ts).
+ * springen), das Element liegt über dem letterboxten Canvas und skaliert
+ * per CSS (vmin/clamp) — unabhängig von Kamera und Design-Raum. Die
+ * Spiellogik bleibt unberührt: Alles mündet als dritte Quelle im
+ * InputManager (setTouchHeld/pulseTouch → resolve.ts).
  *
- * Layout — spiegelt die Messe-Hardware:
- *   links  Steuerkreuz mit Knüppel (8 Richtungen; der Knüppel folgt dem
- *          Finger und quittiert jede neu gedrückte Richtung sichtbar und —
- *          wo die Hardware es kann — per Vibration)
- *   rechts ROT = springen, BLAU = TI-Aktion (dieselbe Sprache wie am Stand)
- *   Tipp direkt aufs Spielfeld = Sprung (wirkt überall: startet den
- *   Attract-Screen und blättert Info-Screens weiter)
+ * Bedienkonzept — bewusst EIN einziges sichtbares Element:
+ *   links   Steuerkreuz mit Knüppel (8 Richtungen; HOCH schaltet die Hülle
+ *           wie am Arcade-Joystick). Gehalten leuchtet es auf, in Ruhe ist
+ *           es halb durchsichtig und verdeckt kaum Bild.
+ *   überall Tipp aufs Spielfeld = Sprung, DOPPELTIPP = TI-Aktion — keine
+ *           eigenen Buttons, die die Kulisse verstellen. (Der erste Tipp
+ *           eines Doppeltipps springt mit — ein Sprung auf der Stelle ist
+ *           harmlos, Sprung-Latenz dagegen tödlich fürs Spielgefühl.)
+ *
+ * Optik: die Glas-Sprache des HUD (dunkles Glas, feine weiße Kante,
+ * gedämpfte Pfeile) — Akzentfarbe erst bei aktiver Richtung.
  *
  * Sichtbarkeit — zwei Bedingungen müssen zusammenkommen:
  *   1. Touch erkannt (erste echte Berührung; ?touch=1 erzwingt, ?touch=0
- *      schaltet komplett ab) — Maus-/Tastatur-Rechner sehen nie Buttons.
+ *      schaltet komplett ab) — Maus-/Tastatur-Rechner sehen nie Steuerung.
  *   2. Ein Level läuft (game.events 'level:start' … 'level:ende') — auf
- *      Attract-, Intro-, City- und Reward-Screens bleibt das Bild frei.
+ *      Attract-, Intro-, City- und Reward-Screens bleibt das Bild frei;
+ *      Tipp-zum-Starten/Weiterblättern wirkt dort trotzdem.
  * Beim Ausblenden werden gehaltene Aktionen gelöst (kein Geister-Lauf).
- * UIScene lauscht auf 'touchui:aktiv' und räumt ihre unteren HUD-Ecken frei.
+ * UIScene lauscht auf 'touchui:aktiv' und räumt die linke untere Ecke frei.
  */
 
 let aktiv = false
@@ -36,6 +41,9 @@ export function istTouchUiAktiv(): boolean {
   return aktiv
 }
 
+/** Zwei Tipps innerhalb dieses Fensters = Doppeltipp (TI-Aktion). */
+const DOPPELTIPP_MS = 300
+
 const STYLE = `
 #touch-ui {
   position: fixed;
@@ -43,90 +51,61 @@ const STYLE = `
   pointer-events: none;
   z-index: 10;
   display: none;
-  --tc-dpad: clamp(104px, 21vmin, 164px);
-  --tc-btn: clamp(56px, 12vmin, 88px);
-  --tc-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  font-family: system-ui, 'Segoe UI', sans-serif;
+  --tc-dpad: clamp(84px, 16vmin, 124px);
   -webkit-user-select: none;
   user-select: none;
 }
 #touch-ui.sichtbar { display: block; }
-#touch-ui > div {
+#touch-dpad {
   pointer-events: auto;
   touch-action: none;
   position: absolute;
   -webkit-tap-highlight-color: transparent;
-}
-#touch-dpad {
-  left: calc(18px + env(safe-area-inset-left, 0px));
-  bottom: var(--tc-bottom);
+  left: calc(16px + env(safe-area-inset-left, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   width: var(--tc-dpad);
   height: var(--tc-dpad);
   border-radius: 50%;
-  background: rgba(10, 20, 34, 0.55);
-  border: 1.5px solid rgba(127, 232, 255, 0.35);
-  box-shadow: 0 0 24px rgba(77, 227, 255, 0.12) inset;
+  background: rgba(4, 9, 15, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  opacity: 0.55;
+  transition: opacity 150ms ease-out;
 }
+#touch-dpad.griff { opacity: 0.95; }
 #touch-knueppel {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 42%;
-  height: 42%;
+  width: 44%;
+  height: 44%;
   border-radius: 50%;
-  background: rgba(127, 232, 255, 0.16);
-  border: 1.5px solid rgba(127, 232, 255, 0.5);
+  background: rgba(159, 179, 200, 0.14);
+  border: 1px solid rgba(159, 179, 200, 0.45);
   transform: translate(-50%, -50%);
   transition: transform 110ms ease-out;
   pointer-events: none;
 }
 #touch-knueppel.folgt { transition: none; }
 #touch-knueppel.an {
-  background: rgba(127, 232, 255, 0.3);
-  border-color: rgba(127, 232, 255, 0.95);
-  box-shadow: 0 0 14px rgba(77, 227, 255, 0.45);
+  background: rgba(127, 232, 255, 0.22);
+  border-color: rgba(127, 232, 255, 0.85);
+  box-shadow: 0 0 10px rgba(77, 227, 255, 0.35);
 }
 .tc-pfeil {
   position: absolute;
   width: 0; height: 0;
-  border: calc(var(--tc-dpad) * 0.075) solid transparent;
-  opacity: 0.5;
+  border: calc(var(--tc-dpad) * 0.065) solid transparent;
+  opacity: 0.4;
 }
-.tc-pfeil.an { opacity: 1; filter: drop-shadow(0 0 6px rgba(127, 232, 255, 0.9)); }
-.tc-oben   { top: 6%;   left: 50%; transform: translateX(-50%); border-bottom-color: #7fe8ff; border-top-width: 0; }
-.tc-unten  { bottom: 6%; left: 50%; transform: translateX(-50%); border-top-color: #7fe8ff; border-bottom-width: 0; }
-.tc-links  { left: 6%;  top: 50%;  transform: translateY(-50%); border-right-color: #7fe8ff; border-left-width: 0; }
-.tc-rechts { right: 6%; top: 50%;  transform: translateY(-50%); border-left-color: #7fe8ff; border-right-width: 0; }
-.tc-btn {
-  width: var(--tc-btn);
-  height: var(--tc-btn);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: calc(var(--tc-btn) * 0.18);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.tc-btn.an { transform: scale(0.93); }
-#touch-jump {
-  right: calc(20px + env(safe-area-inset-right, 0px));
-  bottom: var(--tc-bottom);
-  background: rgba(201, 59, 59, 0.55);
-  border: 1.5px solid rgba(255, 128, 128, 0.75);
-  box-shadow: 0 0 18px rgba(255, 80, 80, 0.25);
-}
-#touch-jump.an { background: rgba(201, 59, 59, 0.85); }
-#touch-action {
-  right: calc(20px + env(safe-area-inset-right, 0px) + var(--tc-btn) * 1.12);
-  bottom: calc(var(--tc-bottom) + var(--tc-btn) * 0.62);
-  background: rgba(43, 98, 201, 0.55);
-  border: 1.5px solid rgba(127, 178, 255, 0.75);
-  box-shadow: 0 0 18px rgba(77, 141, 255, 0.25);
-}
-#touch-action.an { background: rgba(43, 98, 201, 0.85); }
+.tc-pfeil.an { opacity: 1; filter: drop-shadow(0 0 5px rgba(127, 232, 255, 0.9)); }
+.tc-oben   { top: 5%;   left: 50%; transform: translateX(-50%); border-bottom-color: #9fb3c8; border-top-width: 0; }
+.tc-unten  { bottom: 5%; left: 50%; transform: translateX(-50%); border-top-color: #9fb3c8; border-bottom-width: 0; }
+.tc-links  { left: 5%;  top: 50%;  transform: translateY(-50%); border-right-color: #9fb3c8; border-left-width: 0; }
+.tc-rechts { right: 5%; top: 50%;  transform: translateY(-50%); border-left-color: #9fb3c8; border-right-width: 0; }
+.tc-pfeil.an.tc-oben { border-bottom-color: #7fe8ff; }
+.tc-pfeil.an.tc-unten { border-top-color: #7fe8ff; }
+.tc-pfeil.an.tc-links { border-right-color: #7fe8ff; }
+.tc-pfeil.an.tc-rechts { border-left-color: #7fe8ff; }
 `
 
 /**
@@ -182,6 +161,7 @@ function verdrahteSteuerkreuz(dpad: HTMLElement): () => void {
     setze(GameAction.Up, false, pfeile['oben'])
     setze(GameAction.Down, false, pfeile['unten'])
     letzteKombi = ''
+    dpad.classList.remove('griff')
     knueppel.classList.remove('an', 'folgt')
     knueppel.style.transform = 'translate(-50%, -50%)'
   }
@@ -202,7 +182,7 @@ function verdrahteSteuerkreuz(dpad: HTMLElement): () => void {
     setze(GameAction.Down, unten, pfeile['unten'])
 
     // Knüppel nachführen (auf den Kreisrand begrenzt)
-    const max = r.width * 0.3
+    const max = r.width * 0.28
     const laenge = Math.hypot(dx, dy)
     if (laenge > max) {
       dx = (dx / laenge) * max
@@ -222,6 +202,7 @@ function verdrahteSteuerkreuz(dpad: HTMLElement): () => void {
     pointerId = e.pointerId
     fange(dpad, e.pointerId)
     e.preventDefault() // keine Maus-Emulation obendrauf
+    dpad.classList.add('griff')
     knueppel.classList.add('folgt') // 1:1 folgen, ohne Feder-Animation
     aktualisiere(e)
   })
@@ -239,35 +220,6 @@ function verdrahteSteuerkreuz(dpad: HTMLElement): () => void {
   return () => {
     pointerId = null
     neutral()
-  }
-}
-
-/**
- * Runder Halte-Button (mehrere Finger erlaubt — held, solange einer drückt).
- * Gibt eine Loslass-Funktion zurück (fürs Ausblenden mitten im Griff).
- */
-function verdrahteButton(el: HTMLElement, action: GameAction): () => void {
-  const finger = new Set<number>()
-  const melde = (): void => {
-    inputManager.setTouchHeld(action, finger.size > 0)
-    el.classList.toggle('an', finger.size > 0)
-  }
-  el.addEventListener('pointerdown', (e) => {
-    fange(el, e.pointerId)
-    e.preventDefault()
-    finger.add(e.pointerId)
-    melde()
-  })
-  const runter = (e: PointerEvent): void => {
-    finger.delete(e.pointerId)
-    melde()
-  }
-  el.addEventListener('pointerup', runter)
-  el.addEventListener('pointercancel', runter)
-
-  return () => {
-    finger.clear()
-    melde()
   }
 }
 
@@ -290,25 +242,12 @@ export function installTouchControls(game: Phaser.Game): void {
   dpad.id = 'touch-dpad'
   const dpadLoslassen = verdrahteSteuerkreuz(dpad)
 
-  const jump = document.createElement('div')
-  jump.id = 'touch-jump'
-  jump.className = 'tc-btn'
-  jump.textContent = 'Sprung'
-  const jumpLoslassen = verdrahteButton(jump, GameAction.Jump)
-
-  const action = document.createElement('div')
-  action.id = 'touch-action'
-  action.className = 'tc-btn'
-  action.textContent = 'Aktion'
-  const actionLoslassen = verdrahteButton(action, GameAction.Action)
-
-  root.append(dpad, jump, action)
+  root.append(dpad)
   document.body.appendChild(root)
 
   // --- Sichtbarkeit: Touch erkannt UND ein Level läuft ---
   let beruehrt = param === '1'
   let imLevel = false
-  const alleLoslassen = [dpadLoslassen, jumpLoslassen, actionLoslassen]
 
   const aktualisiereSichtbarkeit = (): void => {
     const soll = beruehrt && imLevel
@@ -317,7 +256,7 @@ export function installTouchControls(game: Phaser.Game): void {
     root.classList.toggle('sichtbar', aktiv)
     // Verschwindet die Steuerung mitten im Griff (Levelende), dürfen keine
     // gehaltenen Aktionen zurückbleiben — sonst läuft Paul im nächsten Level los.
-    if (!aktiv) for (const l of alleLoslassen) l()
+    if (!aktiv) dpadLoslassen()
     game.events.emit('touchui:aktiv', aktiv)
   }
 
@@ -330,12 +269,20 @@ export function installTouchControls(game: Phaser.Game): void {
     aktualisiereSichtbarkeit()
   })
 
-  // Tipp direkt aufs Spielfeld = Sprung (nur echte Berührung — Mausklicks
-  // von Laptop-Spielern dürfen Paul nicht springen lassen). Wirkt auf allen
-  // Screens: startet Attract und blättert Info-Screens weiter.
+  // Tipp aufs Spielfeld = Sprung, Doppeltipp = TI-Aktion (nur echte Berührung —
+  // Mausklicks von Laptop-Spielern dürfen Paul nicht springen lassen).
+  // Wirkt auf allen Screens: startet Attract und blättert Info-Screens weiter.
+  let letzterTippMs = -Infinity
   game.canvas.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'touch') return
-    inputManager.pulseTouch(GameAction.Jump)
+    const jetzt = performance.now()
+    if (jetzt - letzterTippMs < DOPPELTIPP_MS) {
+      inputManager.pulseTouch(GameAction.Action)
+      letzterTippMs = -Infinity // Dreifach-Tipp beginnt neu (Sprung)
+    } else {
+      inputManager.pulseTouch(GameAction.Jump)
+      letzterTippMs = jetzt
+    }
   })
 
   // Erste echte Berührung merken — egal wo (macht das Gerät als Touch kenntlich)

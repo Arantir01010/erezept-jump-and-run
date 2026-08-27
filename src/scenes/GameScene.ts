@@ -13,6 +13,7 @@ import { lichtwisch } from '../gfx/licht'
 import { silhouettePaul } from '../gfx/PaulSilhouette'
 import { addSpeedStreaks, collectSparkle } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
+import { istTouchUiAktiv } from '../input/TouchControls'
 import { GameAction } from '../input/actions'
 import { VIEW_ZOOM } from '../gfx/view'
 import { naechsterTubeScroll } from '../gfx/tubeKamera'
@@ -349,9 +350,11 @@ export class GameScene extends Phaser.Scene {
     }
     if (time - this.lastProgressMs >= STUCK_AFTER_MS && time - this.lastStuckTipMs >= STUCK_REPEAT_MS) {
       this.lastStuckTipMs = time
-      const fallback: LText = inputManager.hasGamepad()
-        ? { de: 'Weiter nach rechts! ROT = springen · BLAU = TI-Aktion', en: 'Keep heading right! RED = jump · BLUE = TI action' }
-        : { de: 'Weiter nach rechts! LEERTASTE = springen · E = TI-Aktion', en: 'Keep heading right! SPACE = jump · E = TI action' }
+      const fallback: LText = istTouchUiAktiv()
+        ? { de: 'Weiter nach rechts! Tippen = springen · Doppeltipp = TI-Aktion', en: 'Keep heading right! Tap = jump · double-tap = TI action' }
+        : inputManager.hasGamepad()
+          ? { de: 'Weiter nach rechts! ROT = springen · BLAU = TI-Aktion', en: 'Keep heading right! RED = jump · BLUE = TI action' }
+          : { de: 'Weiter nach rechts! LEERTASTE = springen · E = TI-Aktion', en: 'Keep heading right! SPACE = jump · E = TI action' }
       this.rezi.say(t(this.level.stuckHint ?? fallback))
     }
   }
