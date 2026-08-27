@@ -221,6 +221,9 @@ export class GameScene extends Phaser.Scene {
     applyAtmosphere(this)
 
     this.game.events.emit('level:start', { level: this.level, index: this.levelIndex })
+    // Gegenstück zu level:start — Overlays (Touch-Steuerung) räumen die Bühne,
+    // sobald das Level endet (City-Übergang, Reward, Idle-Reset).
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.emit('level:ende'))
   }
 
   // ------------------------------------------------------------- MechanicHost
