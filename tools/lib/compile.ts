@@ -77,6 +77,13 @@ export const MAX_RISE_TILES = Math.floor(V ** 2 / (2 * G) / TILE)
  * Maximale horizontale Distanz (Kachelmitte → Kachelmitte) je Steighöhe.
  * Aus der Flugbahn hergeleitet (inkl. Coyote-Time und Kantentoleranz),
  * bewusst eine Spur strenger als das physikalische Maximum.
+ *
+ * Seit der asymmetrischen Sprungkurve (fallGravityFactor in PlayerConfig,
+ * src/player/sprungphysik.ts) fällt Paul schneller als er steigt — die realen
+ * Weiten sind kürzer als früher, decken diese Konstanten aber weiterhin
+ * (knappster Fall: Absprung mit 3 Kacheln Steigung und der 1-Kachel-Drop).
+ * tools/test/sprungfeel.test.ts rechnet die Deckung bei jedem Testlauf nach:
+ * Wer fallGravityFactor erhöht oder hier Werte anhebt, bekommt Rot.
  */
 export const MAX_DX_FOR_RISE: Record<number, number> = { 0: 6, 1: 5, 2: 5, 3: 5 }
 export const MAX_DX_DROP = 7

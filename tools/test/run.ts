@@ -20,6 +20,7 @@ import { run as lauscher } from './lauscher.test'
 import { run as podest } from './podest.test'
 import { run as tubekamera } from './tubekamera.test'
 import { run as input } from './input.test'
+import { run as sprungfeel } from './sprungfeel.test'
 import { run as katalog } from './katalog.test'
 import { run as compiler } from './compiler.test'
 import { run as levels } from './levels.test'
@@ -42,6 +43,7 @@ const SUITES: [string, () => void][] = [
   ['Podest-Fortschritt', podest],
   ['Tube-Kamera', tubekamera],
   ['Eingabe (Toggle-Belegung)', input],
+  ['Sprungkurve & Kanten-Korrektur', sprungfeel],
   ['Objektkatalog', katalog],
   ['Level-Compiler', compiler],
   ['Baustein-Registry', registry],

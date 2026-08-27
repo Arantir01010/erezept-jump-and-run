@@ -195,3 +195,18 @@ export function collectSparkle(scene: Phaser.Scene, x: number, y: number): void 
     onComplete: () => spark.destroy(),
   })
 }
+
+/**
+ * Hitstop: die Physik friert für einen Wimpernschlag ein — verkauft Wucht
+ * (Treffer, Signatur-Stempel), ohne das Bild zu rütteln. Passt zur
+ * dokumentierten Anti-Shake-Entscheidung (Playtest: „rüttelt, mega nervig").
+ * Tweens und Szenen-Timer laufen weiter — nur Körper stehen still.
+ */
+export function hitstop(scene: Phaser.Scene, dauerMs: number): void {
+  const welt = scene.physics.world
+  if (welt.isPaused) return // laufender Hitstop wird nicht verlängert
+  welt.pause()
+  scene.time.delayedCall(dauerMs, () => {
+    if (welt.isPaused) welt.resume()
+  })
+}

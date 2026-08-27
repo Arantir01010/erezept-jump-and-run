@@ -3,6 +3,7 @@ import { configService } from '../level/ConfigService'
 import { inputManager } from '../input/InputManager'
 import { installTouchControls } from '../input/TouchControls'
 import { registerPwa } from '../kiosk/pwa'
+import { klang } from '../audio/klang'
 import { idleWatchdog } from '../kiosk/IdleWatchdog'
 import { telemetry } from '../telemetry/Telemetry'
 import { addText } from '../gfx/text'
@@ -31,6 +32,8 @@ export class BootScene extends Phaser.Scene {
         registerPwa()
         // Telemetrie folgt der Config (KAPSEL 4.4) — im Messebetrieb abschaltbar
         telemetry.aktiv = configService.gameConfig.telemetrie
+        // Klang ebenso: laute Messestände können das Spiel stummschalten
+        klang.aktiv = configService.gameConfig.audio
         idleWatchdog.init(this.game, configService.gameConfig.idleResetSeconds)
         this.scene.start('Preload')
       })

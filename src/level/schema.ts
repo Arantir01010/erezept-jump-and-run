@@ -79,6 +79,8 @@ export const GameConfigSchema = z.object({
   }),
   /** Telemetrie (KAPSEL 4.4): im Playtest an, im reinen Messebetrieb abschaltbar. */
   telemetrie: z.boolean().default(true),
+  /** Synthetisierte Spielklänge (src/audio/klang.ts) — laute Messestände: false. */
+  audio: z.boolean().default(true),
   idleResetSeconds: z.number().positive().default(60),
   softAutopilotSeconds: z.number().positive().default(240),
 })

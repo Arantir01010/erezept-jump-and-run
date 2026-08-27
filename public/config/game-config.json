@@ -42,6 +42,7 @@
     "en": "Unofficial educational game — not a gematik product. For knowledge transfer only."
   },
   "telemetrie": true,
+  "audio": true,
   "idleResetSeconds": 60,
   "softAutopilotSeconds": 240
 }

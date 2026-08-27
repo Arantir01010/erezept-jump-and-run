@@ -5,7 +5,9 @@ import { assist } from '../state/Assist'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
 import { GameAction } from '../input/actions'
-import { addGlow } from '../gfx/effects'
+import { addGlow, hitstop } from '../gfx/effects'
+import { klang } from '../audio/klang'
+import { PLAYER_TUNING } from '../player/PlayerConfig'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 import { veredele } from '../gfx/vektor'
@@ -107,6 +109,9 @@ export class StampExit extends Mechanic {
       ease: 'Cubic.easeIn',
       onComplete: () => {
         this.host.scene.cameras.main.shake(120, 0.004)
+        // Der große Moment des Levels: Standbild + Stempel-Klang
+        hitstop(this.host.scene, PLAYER_TUNING.hitstopMs)
+        klang.siegel()
         if (assist.wasClean(`stamp-${this.obj.id}`)) gameState.addSecurityBonus()
         this.host.rezi.say(t(this.host.level.station.reziText))
         this.host.scene.tweens.add({ targets: this.stamp, y: this.topY, duration: 400, delay: 250 })

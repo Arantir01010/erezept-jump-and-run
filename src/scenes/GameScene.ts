@@ -2,6 +2,9 @@ import Phaser from 'phaser'
 import { configService } from '../level/ConfigService'
 import type { LevelConfig } from '../level/schema'
 import { Player } from '../player/Player'
+import { PLAYER_TUNING } from '../player/PlayerConfig'
+import { eckKorrektur } from '../player/sprungphysik'
+import { klang } from '../audio/klang'
 import { Rezi } from '../actors/Rezi'
 import { spawnMechanic, type MechanicHost, Gate } from '../mechanics'
 import type { Mechanic } from '../mechanics'
@@ -44,6 +47,8 @@ export class GameScene extends Phaser.Scene {
 
   private levelIndex = 0
   private mechanics: Mechanic[] = []
+  /** Kollisionsgitter — die Kanten-Korrektur fragt Kacheln über dem Kopf ab. */
+  private terrain!: Phaser.Tilemaps.TilemapLayer
   private scrollLocks: (() => boolean)[] = []
   private completed = false
   private tubeSpeed = 0
@@ -93,6 +98,7 @@ export class GameScene extends Phaser.Scene {
 
     const terrain = map.createLayer('terrain', tileset, 0, 0)
     if (!terrain) throw new Error(`Layer "terrain" fehlt in ${this.level.tilemap}`)
+    this.terrain = terrain
     terrain.setDepth(1)
     // GID 8 = Deko-Strebe (nicht solide); alles andere kollidiert
     terrain.setCollisionByExclusion([-1, 0, 8])
@@ -126,6 +132,7 @@ export class GameScene extends Phaser.Scene {
           // eine Punkteschleife) — nur die Bits kommen zurück.
           gameState.bits += 1
           collectSparkle(this, bit.x, bit.y)
+          klang.sammeln()
           this.game.events.emit('hud:update')
         })
       }
@@ -262,6 +269,7 @@ export class GameScene extends Phaser.Scene {
     telemetry.note('level-ende', this.time.now)
     gameState.addSeal(this.level.siegelIcon, this.level.id)
     this.rezi.addSealIcon(this.level.siegelIcon)
+    klang.siegel()
     this.game.events.emit('hud:update')
     this.player.controlsLocked = true
     this.player.setAccelerationX(0)
@@ -294,9 +302,32 @@ export class GameScene extends Phaser.Scene {
       if (inputManager.justPressed(GameAction.Toggle)) this.player.tryToggleHuelle()
     }
     this.player.update()
+    this.pruefeEckKorrektur()
     for (const mechanic of this.mechanics) mechanic.update(time, delta)
     if (this.level.cameraMode === 'tube' && !this.completed) this.updateTubeCamera(delta)
     if (!this.completed) this.checkStuckTip(time)
+  }
+
+  /**
+   * Kanten-Korrektur (Celeste-Schule): Bonkt der Kopf im Steigen knapp neben
+   * einer Kachelkante an, wird Paul seitlich vorbeigeschoben und der Sprung
+   * fortgesetzt, statt ihn zu töten. Die Geometrie-Logik ist Phaser-frei
+   * (sprungphysik.ts, getestet) — hier nur die Kachel-Abfrage.
+   */
+  private pruefeEckKorrektur(): void {
+    const b = this.player.body
+    if (!b.blocked.up || this.player.letztesVy > -20) return
+    const kopfY = b.top - 1
+    const solideLinks = this.terrain.getTileAtWorldXY(b.left + 0.5, kopfY)?.collides === true
+    const solideRechts = this.terrain.getTileAtWorldXY(b.right - 0.5, kopfY)?.collides === true
+    const schub = eckKorrektur(
+      b.left, b.right, this.terrain.tilemap.tileWidth,
+      solideLinks, solideRechts, PLAYER_TUNING.cornerCorrectionPx,
+    )
+    if (schub !== 0) {
+      this.player.x += schub
+      this.player.setVelocityY(this.player.letztesVy) // Sprung läuft weiter
+    }
   }
 
   private updateTubeCamera(delta: number): void {

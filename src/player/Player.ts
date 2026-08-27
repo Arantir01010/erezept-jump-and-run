@@ -2,8 +2,10 @@ import Phaser from 'phaser'
 import { GameAction } from '../input/actions'
 import { inputManager } from '../input/InputManager'
 import { gameState } from '../state/GameState'
-import { dustPuff } from '../gfx/effects'
+import { dustPuff, hitstop } from '../gfx/effects'
+import { klang } from '../audio/klang'
 import { PLAYER_TUNING as T } from './PlayerConfig'
+import { gravitationsFaktor } from './sprungphysik'
 import { HuelleState, Huelle } from '../state/HuelleState'
 
 export type PlayerState = 'idle' | 'run' | 'jump' | 'fall' | 'duck' | 'hurt'
@@ -31,6 +33,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private invulnUntilMs = 0
   private wasOnFloor = false
   private lastRunDustMs = 0
+  /** vy des Vorframes — die Physik nullt vy beim Kopf-Bonk, die
+   *  Kanten-Korrektur der GameScene braucht aber den Wert davor. */
+  letztesVy = 0
   /** Squash & Stretch (rein visuell — die Physik-Hitbox bleibt unberührt). */
   private squashTween?: Phaser.Tweens.Tween
 
@@ -87,6 +92,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (onFloor && !this.wasOnFloor) {
       dustPuff(this.scene, this.x, this.body.bottom, 4)
       this.squashStretch(1.22, 0.82) // Lande-Squash
+      klang.landung()
       // BEWUSST KEIN Kamera-Shake beim Aufsetzen: Er feuert bei jedem Sprung —
       // in einem Jump'n'Run also im Sekundentakt — und wackelt damit das ganze
       // Bild durch (Playtest-Rückmeldung: „rüttelt, mega nervig"). Gewicht
@@ -139,7 +145,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpBufferedMs = -Infinity
       this.lastGroundedMs = -Infinity
       this.squashStretch(0.84, 1.18) // Absprung-Stretch
+      klang.sprung()
     }
+
+    // --- Sprungkurve (sprungphysik.ts, getestet) ---
+    // Variable Höhe (Loslassen kürzt), Scheitel-Schweben (Halten), schwereres
+    // Fallen — als Zusatz-Gravitation auf dem Körper. Faktor 1 = nur die
+    // Welt-Gravitation, also Zusatz 0.
+    const sprungGehalten = !locked && inputManager.isDown(GameAction.Jump)
+    const faktor = gravitationsFaktor(this.body.velocity.y, sprungGehalten, onFloor, T)
+    this.body.setGravityY((faktor - 1) * T.gravityY)
 
     // --- Zustand bestimmen ---
     if (this.state === 'hurt' && now < this.invulnUntilMs - T.hurtInvulnMs + 350) {
@@ -161,6 +176,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setPosition(this.respawnPoint.x, this.respawnPoint.y)
       this.setVelocity(0, 0)
     }
+
+    this.letztesVy = this.body.velocity.y
   }
 
   private playAnimForState(): void {
@@ -204,6 +221,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.state = 'hurt'
     const dir = this.x < fromX ? -1 : 1
     this.setVelocity(dir * T.hurtKnockback, -140)
+    // Wucht ohne Wackeln: kurzes Standbild + ZUGRIFF-VERWEIGERT-Brumm
+    klang.treffer()
+    hitstop(this.scene, T.hitstopMs)
     this.scene.tweens.add({
       targets: this,
       alpha: { from: 0.25, to: 1 },

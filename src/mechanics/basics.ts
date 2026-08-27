@@ -4,6 +4,7 @@ import { registerMechanic } from './registry'
 import { gameState } from '../state/GameState'
 import { telemetry } from '../telemetry/Telemetry'
 import { collectSparkle, addGlow, destroyGlow } from '../gfx/effects'
+import { klang } from '../audio/klang'
 import { t } from '../i18n'
 import type { LText } from '../i18n'
 import { veredele } from '../gfx/vektor'
@@ -71,6 +72,7 @@ export class Gate extends Mechanic {
   open(): void {
     if (this.isOpen) return
     this.isOpen = true
+    klang.tor()
     const body = this.sprite.body as Phaser.Physics.Arcade.StaticBody
     body.enable = false
     this.host.scene.tweens.add({
@@ -132,6 +134,7 @@ export class Collectible extends Mechanic {
       gameState.addBits(1)
       telemetry.note('gesammelt', this.host.scene.time.now)
       collectSparkle(this.host.scene, x, y)
+      klang.sammeln()
       this.host.scene.game.events.emit('hud:update')
     })
   }
