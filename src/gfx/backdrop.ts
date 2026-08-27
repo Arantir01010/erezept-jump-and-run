@@ -226,23 +226,26 @@ export function drawBackdrop(
   }
 
   // --- Lichtschächte (optional, Faktor 0,66) ---
-  // Jetzt echte Volumen: gestaffelte Keile mit weicher Kante und Staub, der
-  // IM Schacht driftet. Ein einzelnes Dreieck sieht aus wie Pappe.
+  // Echte Volumen: gestaffelte Keile mit weicher Kante und Staub im Schacht.
+  // Bewusst SPARSAM: wenige, schmale, leise Schächte in der Akzentfarbe der
+  // Welt. Reines Weiß in Bühnenscheinwerfer-Dichte hat das ganze Bild
+  // milchig überstrahlt — Atmosphäre entsteht aus Andeutung, nicht Menge.
   const shafts = scene.add.container(0, 0).setDepth(0)
   if (opts.lightShafts) {
+    const schachtFarbe = depthMix(theme.accent, fog, 0.35)
     const shaftSpan = worldWidth * 0.34 + viewW
-    const count = Math.max(4, Math.round(shaftSpan / 190))
+    const count = Math.max(2, Math.round(shaftSpan / 380))
     for (let i = 0; i < count; i++) {
-      const sx = (shaftSpan / count) * i + 60 + ((i * 71) % 90)
+      const sx = (shaftSpan / count) * i + 90 + ((i * 71) % 150)
       shafts.add(
         lichtschacht(
           scene,
           sx,
           worldHeight,
-          26 + ((i * 17) % 18),
-          70 + ((i * 29) % 46),
-          0xffffff,
-          0.1 + (i % 3) * 0.028,
+          18 + ((i * 17) % 12),
+          48 + ((i * 29) % 26),
+          schachtFarbe,
+          0.045 + (i % 3) * 0.012,
           0,
         ),
       )

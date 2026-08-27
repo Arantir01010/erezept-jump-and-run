@@ -2,7 +2,6 @@ import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
 import { darken, depthMixN, fogColor } from './atmos'
 import { addGlow } from './effects'
-import { licht } from './licht'
 import { addText } from './text'
 import { KUEHL_GESCHUETZT } from './material'
 import { silhouettePaul, FY } from './PaulSilhouette'
@@ -94,8 +93,13 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
     g.fillRect(lx - 1, 277.4, 3.6, 1)
     g.fillStyle(0xffd9a0, 0.95)
     g.fillRect(lx - 1.4, 274, 4.4, 3.6)
-    addGlow(scene, lx + 1, 276, 0xffd9a0, 14, { alpha: 0.18 })
-    licht(scene, { x: lx + 1, y: 312, farbe: 0xffd9a0, radius: 26, staerke: 0.24, depth: 0 })
+    addGlow(scene, lx + 1, 276, 0xffd9a0, 12, { alpha: 0.14 })
+    // Flacher Lichtschein am Boden — gezeichnet statt schwebendem Glow-Ball
+    // (licht() braucht den Bodenfinder der Level, den es hier nicht gibt)
+    g.fillStyle(0xffd9a0, 0.055)
+    g.fillEllipse(lx + 1, 317, 58, 6)
+    g.fillStyle(0xffd9a0, 0.09)
+    g.fillEllipse(lx + 1, 317, 34, 4)
   }
 
   // ---- Titel & Weiter-Zeile ----

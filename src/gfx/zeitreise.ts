@@ -2,7 +2,6 @@ import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
 import { darken, depthMix, depthMixN, mischFarben, fogColor } from './atmos'
 import { addGlow } from './effects'
-import { licht } from './licht'
 import { addText } from './text'
 import { KUEHL_GESCHUETZT, WARM_OFFEN } from './material'
 import {
@@ -144,6 +143,19 @@ export function zeichneZeitreise(
   const statik = scene.add.graphics().setDepth(0)
   const g = statik
 
+  /**
+   * Flacher Lichtschein am Boden — GEZEICHNET statt additivem Glow-Bild.
+   * licht() ohne Bodenfinder (den es nur in Leveln gibt) würde hier nur
+   * einen schwebenden Leuchtball produzieren; zwei gestufte Ellipsen lesen
+   * sich dagegen wirklich als „die Lampe beleuchtet den Gehweg".
+   */
+  const bodenschein = (x: number, y: number, breite: number, alpha = 0.09): void => {
+    g.fillStyle(0xffd9a0, alpha * 0.6)
+    g.fillEllipse(x, y, breite * 1.7, breite * 0.16)
+    g.fillStyle(0xffd9a0, alpha)
+    g.fillEllipse(x, y, breite, breite * 0.11)
+  }
+
   // ---- Mittelgrund: eine nähere Häuserzeile zwischen Fern-Silhouette und
   // Bühne — sie füllt die leere Bildmitte und gibt der Straße Tiefe ----
   const mittelgrund = depthMixN(darken(theme.skyTop, 0.18), fog, 0.45)
@@ -223,7 +235,6 @@ export function zeichneZeitreise(
         g.fillRect(fx + 3.6, fy, 0.8, 10) // Fensterkreuz
         g.fillStyle(0xd9e2f2, 0.25)
         g.fillRect(fx - 1.4, fy + 10.8, 10.8, 0.9) // Sims
-        if (an) licht(scene, { x: fx + 4, y: fy + 5, farbe: 0xffd9a0, radius: 14, staerke: 0.2, depth: 0, pfuetze: false })
       }
     }
     // Tür mit Vordach und warmem Hauslicht
@@ -239,7 +250,7 @@ export function zeichneZeitreise(
     g.fillRect(tuerMitte - tuerBreite / 2 - 4, BODEN - 29, tuerBreite + 8, 2.6) // Vordach
     g.fillStyle(detail, 0.5)
     g.fillRect(tuerMitte - tuerBreite / 2 - 4, BODEN - 29, tuerBreite + 8, 0.8)
-    licht(scene, { x: tuerMitte, y: BODEN - 14, farbe: 0xffd9a0, radius: 22, staerke: 0.34, depth: 0 })
+    bodenschein(tuerMitte, BODEN + 1, tuerBreite + 16, 0.1)
   }
 
   const schild = (mitte: number, y: number, text: string, farbe: string): void => {
@@ -301,7 +312,7 @@ export function zeichneZeitreise(
   g.fillStyle(0x8a6a12, 1)
   g.fillRect(159.8, 291, 1.2, 22)
   addText(scene, 160.5, 288.4, 'TEL', 3.2, { color: '#3a2f08', spacing: 0.5 }).setOrigin(0.5)
-  licht(scene, { x: 160.5, y: 302, farbe: 0xffe9b0, radius: 18, staerke: 0.22, depth: 0 })
+  bodenschein(160.5, BODEN + 1, 24, 0.08)
   g.fillStyle(0xc99a1a, 1)
   g.fillRect(484, 302, 10, 12)
   g.fillStyle(0x8a6a12, 1)
@@ -346,7 +357,7 @@ export function zeichneZeitreise(
       g.fillRect(A.tuer + 17 + i * 3.5, BODEN - 23.4 + reihe * 5.4, 2.2, 2.6)
     }
   }
-  licht(scene, { x: A.tuer + 27, y: BODEN - 14, farbe: 0xffd9a0, radius: 24, staerke: 0.3, depth: 0 })
+  bodenschein(A.tuer + 27, BODEN + 1, 34, 0.1)
   // Praxis: das Faxgerät im Erdgeschossfenster — DAS Gerät der Papierzeit.
   // Nur FRÜHER: In der HEUTE-Phase steht an derselben Stelle das
   // Sprechzimmer mit Konnektor — das Fax ist dann schlicht weg.
@@ -387,8 +398,8 @@ export function zeichneZeitreise(
     g.fillRect(lx - 1, 281.4, 3.6, 1)
     g.fillStyle(0xffd9a0, 0.95)
     g.fillRect(lx - 1.4, 278, 4.4, 3.6)
-    addGlow(scene, lx + 1, 280, 0xffd9a0, 14, { alpha: 0.18 })
-    licht(scene, { x: lx + 1, y: 316, farbe: 0xffd9a0, radius: 26, staerke: 0.24, depth: 0 })
+    addGlow(scene, lx + 1, 280, 0xffd9a0, 12, { alpha: 0.14 })
+    bodenschein(lx + 1, BODEN + 1, 34, 0.09)
   }
 
   // ---- Phasen-Stimmung: warmer bzw. kühler Schleier + Titel ----

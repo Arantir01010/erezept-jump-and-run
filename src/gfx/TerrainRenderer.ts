@@ -185,9 +185,9 @@ export function drawTerrain(
       .image(r.x * T + w / 2, r.y * T + h / 2, 'fx-glow')
       .setBlendMode(Phaser.BlendModes.ADD)
       .setTint(kanteHell)
-      .setAlpha(0.16)
+      .setAlpha(0.1)
       .setDepth(1)
-    glow.setDisplaySize(w * 1.2, h * 1.4)
+    glow.setDisplaySize(w * 1.1, h * 1.2)
   }
 
   // --- Gold-Pads: Kontaktflächen bleiben warm und deutlich sichtbar ---
@@ -200,9 +200,9 @@ export function drawTerrain(
       .image(r.x * T + (r.w * T) / 2, r.y * T, 'fx-glow')
       .setBlendMode(Phaser.BlendModes.ADD)
       .setTint(accent)
-      .setAlpha(0.35)
+      .setAlpha(0.2)
       .setDepth(1)
-    glow.setDisplaySize(r.w * T * 1.9, 38)
+    glow.setDisplaySize(r.w * T * 1.4, 22)
   }
 
   // --- Streben: reine Deko, bleiben zart ---
@@ -254,14 +254,17 @@ export function drawTerrain(
     const SEG = 110
     const stuecke = Math.max(1, Math.round(e.w / SEG))
     const breite = e.w / stuecke
+    // Leise gestellt: Der 58-px-Halo in alter Stärke hat über jedem Boden
+    // einen Leuchtnebel gelegt — die 2-px-Linie trägt die Information,
+    // der Glow gibt ihr nur noch einen schmalen Saum.
     for (let s = 0; s < stuecke; s++) {
       const glow = scene.add
         .image(e.x + breite * (s + 0.5), e.y, 'fx-glow')
         .setBlendMode(Phaser.BlendModes.ADD)
         .setTint(kanteHell)
-        .setAlpha(0.42)
+        .setAlpha(0.2)
         .setDepth(1)
-      glow.setDisplaySize(breite * 1.6, 58)
+      glow.setDisplaySize(breite * 1.35, 24)
     }
   }
 }
