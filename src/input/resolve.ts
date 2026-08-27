@@ -55,9 +55,14 @@ export function resolveKeyboard(
   return actions
 }
 
+/** Leere Touch-Menge als Default — hält alte Aufrufer und Tests unverändert. */
+const KEIN_TOUCH: ReadonlySet<GameAction> = new Set()
+
 /**
- * Gamepad und Tastatur zusammenführen (logisches ODER) und die
- * 2-Button-Sonderregel anwenden: Joystick HOCH schaltet zusätzlich die Hülle.
+ * Gamepad, Tastatur und Touch (On-Screen-Steuerkreuz/Buttons) zusammenführen
+ * (logisches ODER) und die 2-Button-Sonderregel anwenden: Joystick HOCH
+ * schaltet zusätzlich die Hülle. Touch wird VOR der Regel gemischt — damit
+ * gilt „Steuerkreuz hoch = Hülle" genauso wie am Arcade-Stick.
  *
  * `Up` bleibt dabei absichtlich erhalten — Menüs und die Avatarwahl brauchen es
  * weiterhin als eigene Richtung.
@@ -67,9 +72,11 @@ export function resolveAll(
   pressedCodes: ReadonlySet<string>,
   keyboardMap: Record<GameAction, string[]>,
   bindings: Bindings,
+  touch: ReadonlySet<GameAction> = KEIN_TOUCH,
 ): Set<GameAction> {
   const actions = resolveGamepad(pads, bindings)
   for (const a of resolveKeyboard(pressedCodes, keyboardMap)) actions.add(a)
+  for (const a of touch) actions.add(a)
   if (bindings.gamepad.toggleOnUp && actions.has(GameAction.Up)) actions.add(GameAction.Toggle)
   return actions
 }

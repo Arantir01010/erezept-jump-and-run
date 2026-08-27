@@ -167,6 +167,35 @@ export function run(): void {
     })
   })
 
+  suite('Touch als dritte Quelle (On-Screen-Steuerung)', () => {
+    test('Touch-Aktionen fließen ins logische ODER ein', () => {
+      const a = resolveAll([], new Set(), keymap(), B, new Set([GameAction.Right, GameAction.Jump]))
+      assertTrue(a.has(GameAction.Right) && a.has(GameAction.Jump))
+    })
+
+    test('Steuerkreuz HOCH schaltet die Hülle (gleiche Regel wie am Joystick)', () => {
+      const a = resolveAll([], new Set(), keymap(), B, new Set([GameAction.Up]))
+      assertTrue(a.has(GameAction.Toggle), 'Touch-Spieler bekommen dieselbe Mechanik')
+      assertTrue(a.has(GameAction.Up), 'Up bleibt erhalten (Menüs/Avatarwahl)')
+    })
+
+    test('toggleOnUp=false gilt auch für Touch', () => {
+      const off = { ...B, gamepad: { ...B.gamepad, toggleOnUp: false } }
+      assertFalse(resolveAll([], new Set(), keymap(), off, new Set([GameAction.Up])).has(GameAction.Toggle))
+    })
+
+    test('Touch mischt sich mit Tastatur und Gamepad', () => {
+      const a = resolveAll([pad({ axes: [0.9, 0] })], new Set(['Space']), keymap(), B, new Set([GameAction.Action]))
+      assertTrue(a.has(GameAction.Right) && a.has(GameAction.Jump) && a.has(GameAction.Action))
+    })
+
+    test('ohne Touch-Parameter bleibt alles beim Alten (alte Aufrufer)', () => {
+      const a = resolveAll([], new Set(['Space']), keymap(), B)
+      assertTrue(a.has(GameAction.Jump))
+      assertEqual(a.size, 1)
+    })
+  })
+
   suite('Tastatur + Zusammenführung', () => {
     test('WASD und Pfeile laufen parallel', () => {
       assertTrue(resolveKeyboard(new Set(['KeyA']), keymap()).has(GameAction.Left))

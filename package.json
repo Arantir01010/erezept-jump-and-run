@@ -12,6 +12,7 @@
     "lint": "eslint",
     "playtest:report": "tsx tools/playtest-report.ts",
     "build:levels": "tsx tools/build-levels.ts",
+    "icons": "tsx tools/make-pwa-icons.ts",
     "neues-level": "tsx tools/new-level.ts",
     "validate": "tsx tools/validate-levels.ts",
     "guard": "tsx tools/check-core.ts",

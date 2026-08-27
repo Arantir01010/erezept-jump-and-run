@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import { configService } from '../level/ConfigService'
 import { inputManager } from '../input/InputManager'
+import { installTouchControls } from '../input/TouchControls'
+import { registerPwa } from '../kiosk/pwa'
 import { idleWatchdog } from '../kiosk/IdleWatchdog'
 import { telemetry } from '../telemetry/Telemetry'
 import { addText } from '../gfx/text'
@@ -24,6 +26,9 @@ export class BootScene extends Phaser.Scene {
       .load()
       .then(() => {
         inputManager.init(this.game, configService.bindings)
+        // Touch als dritte Eingabequelle (Windows-Touchscreens, Tablets, PWA)
+        installTouchControls(this.game)
+        registerPwa()
         // Telemetrie folgt der Config (KAPSEL 4.4) — im Messebetrieb abschaltbar
         telemetry.aktiv = configService.gameConfig.telemetrie
         idleWatchdog.init(this.game, configService.gameConfig.idleResetSeconds)

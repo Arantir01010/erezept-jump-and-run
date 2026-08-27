@@ -18,6 +18,11 @@ class InputManagerImpl {
   private prev = new Set<GameAction>()
   private curr = new Set<GameAction>()
 
+  /** Von der On-Screen-Steuerung GEHALTENE Aktionen (Steuerkreuz, Buttons). */
+  private touchHeld = new Set<GameAction>()
+  /** Ein-Frame-Impulse (Tipp aufs Spielfeld = Sprung) — nach einem Update verbraucht. */
+  private touchPulse = new Set<GameAction>()
+
   /** Zeitstempel der letzten echten Eingabe — Futter für den IdleWatchdog. */
   lastInputMs = performance.now()
 
@@ -43,7 +48,13 @@ class InputManagerImpl {
       }
     })
     window.addEventListener('keyup', (e) => this.pressedCodes.delete(e.code))
-    window.addEventListener('blur', () => this.pressedCodes.clear())
+    window.addEventListener('blur', () => {
+      this.pressedCodes.clear()
+      // Touch-Zustände mit verwerfen: Ein pointerup, das im Hintergrund verloren
+      // ging, darf keinen Dauerlauf hinterlassen (Kiosk-Anforderung).
+      this.touchHeld.clear()
+      this.touchPulse.clear()
+    })
 
     game.events.on(Phaser.Core.Events.PRE_STEP, () => this.update())
   }
@@ -66,13 +77,36 @@ class InputManagerImpl {
     return out
   }
 
+  // ------------------------------------------------- Touch (TouchControls)
+
+  /**
+   * On-Screen-Steuerung meldet Halten/Loslassen einer Aktion
+   * (src/input/TouchControls.ts — Steuerkreuz und die zwei Buttons).
+   */
+  setTouchHeld(action: GameAction, down: boolean): void {
+    if (down) this.touchHeld.add(action)
+    else this.touchHeld.delete(action)
+    this.lastInputMs = performance.now()
+  }
+
+  /**
+   * Ein-Frame-Impuls: Ein Tipp direkt aufs Spielfeld lässt Paul springen —
+   * wirkt beim nächsten Update genau einmal als „frisch gedrückt".
+   */
+  pulseTouch(action: GameAction): void {
+    this.touchPulse.add(action)
+    this.lastInputMs = performance.now()
+  }
+
   /**
    * Einmal pro Frame: Rohzustände einsammeln und von src/input/resolve.ts in
    * Aktionen übersetzen (dort liegt die getestete Logik inkl. Toggle-auf-Hoch).
    */
   private update(): void {
     this.prev = this.curr
-    this.curr = resolveAll(this.padSnapshots(), this.pressedCodes, this.keyboardMap, this.bindings)
+    const touch = this.touchPulse.size > 0 ? new Set([...this.touchHeld, ...this.touchPulse]) : this.touchHeld
+    this.touchPulse = new Set() // Impulse sind jetzt verbraucht
+    this.curr = resolveAll(this.padSnapshots(), this.pressedCodes, this.keyboardMap, this.bindings, touch)
     if (this.curr.size > 0) this.lastInputMs = performance.now()
   }
 

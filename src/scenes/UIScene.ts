@@ -4,6 +4,7 @@ import type { GameScene } from './GameScene'
 import type { LevelConfig } from '../level/schema'
 import { gameState } from '../state/GameState'
 import { inputManager } from '../input/InputManager'
+import { istTouchUiAktiv } from '../input/TouchControls'
 import { addText } from '../gfx/text'
 import { addVignette } from '../gfx/effects'
 import { pille, verlaufBand, LICHT } from '../gfx/material'
@@ -41,7 +42,8 @@ export class UIScene extends Phaser.Scene {
   private huelleGezeigt: Huelle | null = null
   /** F9-Auswertung (Playtest) — nur für das Standpersonal. */
   private auswertungText?: Phaser.GameObjects.Text
-  private huellePadGezeigt: boolean | null = null
+  /** Zuletzt gesetzter Umschalt-Hinweis (Tastatur/Joystick/Touch) — Cache. */
+  private huelleHinweisGezeigt: string | null = null
   /** Kartenanzeige unten rechts: gefundene Ausweise, gesteckter hervorgehoben. */
   private kartenBadge?: Phaser.GameObjects.Container
   /** Was zuletzt gezeichnet wurde — verhindert Neuaufbau pro Frame. */
@@ -139,9 +141,18 @@ export class UIScene extends Phaser.Scene {
       this.fpsText = addText(this, 6, H - 14, '', 9, { color: '#7fd07f', font: 'mono' })
     }
 
+    // Touch-Steuerung (Steuerkreuz links, Buttons rechts) belegt die unteren
+    // Ecken — die beiden Badges weichen dann unter die Kopfleiste aus.
+    const layoutFuerTouch = (touchAktiv: boolean): void => {
+      this.huelleBadge?.setPosition(8, touchAktiv ? 44 : H - 30)
+      this.kartenBadge?.setPosition(W - 8, touchAktiv ? 58 : H - 18)
+    }
+    layoutFuerTouch(istTouchUiAktiv())
+
     // --- globale Events ---
     const events = this.game.events
     const onHud = () => this.refresh()
+    const onTouchUi = (an: boolean) => layoutFuerTouch(an)
     const onLevelStart = (payload: { level: LevelConfig }) => {
       this.refresh()
       this.stationText.setText(t(payload.level.station.name))
@@ -163,10 +174,12 @@ export class UIScene extends Phaser.Scene {
     events.on('hud:update', onHud)
     events.on('level:start', onLevelStart)
     events.on('idle:warn', onIdleWarn)
+    events.on('touchui:aktiv', onTouchUi)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       events.off('hud:update', onHud)
       events.off('level:start', onLevelStart)
       events.off('idle:warn', onIdleWarn)
+      events.off('touchui:aktiv', onTouchUi)
     })
 
     this.refresh()
@@ -226,11 +239,12 @@ export class UIScene extends Phaser.Scene {
     }
     this.huelleBadge.setVisible(true)
 
-    // Hinweistext folgt der Hardware (am Stand gibt es keinen dritten Knopf)
-    const hasPad = inputManager.hasGamepad()
-    if (hasPad !== this.huellePadGezeigt) {
-      this.huellePadGezeigt = hasPad
-      this.huelleHint.setText(toggleHinweis(hasPad))
+    // Hinweistext folgt der Hardware (am Stand gibt es keinen dritten Knopf;
+    // auf Touchscreens übernimmt das Steuerkreuz die Rolle des Joysticks)
+    const hinweis = toggleHinweis(inputManager.hasGamepad(), istTouchUiAktiv())
+    if (hinweis !== this.huelleHinweisGezeigt) {
+      this.huelleHinweisGezeigt = hinweis
+      this.huelleHint.setText(hinweis)
     }
 
     const state = player.huelleZustand

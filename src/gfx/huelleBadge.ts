@@ -66,8 +66,11 @@ export function badgePoints(form: BadgeForm, size = 12): { x: number; y: number 
 /**
  * Zusatzhinweis fürs HUD: Wie schaltet man um? Hängt an der Hardware, damit
  * niemand nach einem dritten Knopf sucht, den es am Stand nicht gibt.
+ * Touch gewinnt vor Gamepad: Wer die On-Screen-Steuerung nutzt, soll nicht
+ * nach Shift-Tasten suchen.
  */
-export function toggleHinweis(hasGamepad: boolean): string {
+export function toggleHinweis(hasGamepad: boolean, touchUi = false): string {
+  if (touchUi) return 'STEUERKREUZ HOCH: Hülle wechseln'
   return hasGamepad ? 'JOYSTICK HOCH: Hülle wechseln' : 'SHIFT / Pfeil hoch: Hülle wechseln'
 }
 
