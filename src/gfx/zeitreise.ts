@@ -1,7 +1,8 @@
 import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
-import { darken, depthMix, fogColor } from './atmos'
+import { darken, depthMix, depthMixN, mischFarben, fogColor } from './atmos'
 import { addGlow } from './effects'
+import { licht } from './licht'
 import { addText } from './text'
 import { KUEHL_GESCHUETZT, WARM_OFFEN } from './material'
 import {
@@ -66,10 +67,10 @@ const FRUEHER_ZEILEN = [
 
 /** Die vier Häuser: Außenkanten, Dachlinie und Türmitte. */
 const HAEUSER = {
-  praxis: { x0: 36, x1: 146, dach: 232, tuer: 92 },
-  facharzt: { x0: 176, x1: 286, dach: 224, tuer: 232 },
-  klinik: { x0: 316, x1: 466, dach: 176, tuer: 392 },
-  apotheke: { x0: 496, x1: 606, dach: 240, tuer: 571 },
+  praxis: { x0: 36, x1: 146, dach: 214, tuer: 92 },
+  facharzt: { x0: 176, x1: 286, dach: 192, tuer: 232 },
+  klinik: { x0: 316, x1: 466, dach: 138, tuer: 392 },
+  apotheke: { x0: 496, x1: 606, dach: 226, tuer: 571 },
 } as const
 
 // Zwei zusätzliche Gesichter, die es nur in der Zeitreise gibt
@@ -143,6 +144,28 @@ export function zeichneZeitreise(
   const statik = scene.add.graphics().setDepth(0)
   const g = statik
 
+  // ---- Mittelgrund: eine nähere Häuserzeile zwischen Fern-Silhouette und
+  // Bühne — sie füllt die leere Bildmitte und gibt der Straße Tiefe ----
+  const mittelgrund = depthMixN(darken(theme.skyTop, 0.18), fog, 0.45)
+  const mittelFenster = depthMixN(fensterWarm, fog, 0.62)
+  for (const [mx0, mb, mdach] of [
+    [0, 52, 176], [88, 40, 200], [150, 58, 168], [268, 46, 190],
+    [402, 54, 172], [472, 40, 198], [558, 46, 182], [616, 30, 204],
+  ] as const) {
+    g.fillStyle(mittelgrund, 1)
+    g.fillRect(mx0, mdach, mb, BODEN - 2 - mdach)
+    g.fillStyle(mittelgrund, 1)
+    g.fillRect(mx0 + 4, mdach - 7, 8, 7) // Dachaufbau als Silhouette
+    for (let fy = mdach + 10; fy < BODEN - 20; fy += 20) {
+      for (let fx = mx0 + 6; fx < mx0 + mb - 8; fx += 13) {
+        if ((Math.round(fx * 5 + fy * 11) % 7) < 2) {
+          g.fillStyle(mittelFenster, 0.5)
+          g.fillRect(fx, fy, 4.5, 6)
+        }
+      }
+    }
+  }
+
   // ---- Straße ----
   g.fillStyle(gehweg, 1)
   g.fillRect(0, BODEN - 2, W, 8)
@@ -154,31 +177,69 @@ export function zeichneZeitreise(
     g.fillStyle(detail, 0.35)
     g.fillRect(x, 339, 7, 1.2)
   }
+  // Zebrastreifen vor der Klinik (nur auf der Fahrbahn) + zwei Gullideckel
+  for (let i = 0; i < 5; i++) {
+    g.fillStyle(0xd8e0f0, 0.22)
+    g.fillRect(374 + i * 8, 328, 5, 30)
+  }
+  for (const gx of [140, 530]) {
+    g.fillStyle(darken(theme.ground, 0.6), 1)
+    g.fillCircle(gx, 330, 3.4)
+    g.lineStyle(0.5, 0xffffff, 0.12)
+    g.strokeCircle(gx, 330, 3.4)
+  }
 
   // ---- Häuser: gemeinsamer Rumpf, dann Eigenheiten ----
-  const rumpf = (x0: number, x1: number, dachY: number, tuerMitte: number, tuerBreite: number): void => {
-    g.fillStyle(wand, 1)
+  // Baumassen wie am Hauptmenü: Sockelgeschoss, Attika mit Kantenlicht,
+  // Vordach mit warmem Türlicht — und Fenster, die wirklich leuchten.
+  const rumpf = (x0: number, x1: number, dachY: number, tuerMitte: number, tuerBreite: number, tonung = 0): void => {
+    const wandTon = tonung === 0 ? wand : mischFarben(wand, tonung > 0 ? 0x2c3850 : 0x101825, Math.abs(tonung))
+    const sockel = darken(theme.skyTop, 0.58)
+    g.fillStyle(wandTon, 1)
     g.fillRect(x0, dachY, x1 - x0, BODEN - dachY)
-    g.fillStyle(detail, 0.85)
-    g.fillRect(x0 - 2, dachY - 2, x1 - x0 + 4, 2.5)
-    // Fensterraster (spart die Türspalte aus)
-    for (let fy = dachY + 12; fy < BODEN - 26; fy += 22) {
+    // Sockelgeschoss: leicht ausgestellt, dunkler — trägt das Haus optisch
+    g.fillStyle(sockel, 1)
+    g.fillRect(x0 - 3, BODEN - 30, x1 - x0 + 6, 30)
+    g.fillStyle(detail, 0.3)
+    g.fillRect(x0 - 3, BODEN - 30, x1 - x0 + 6, 1)
+    // Attika mit Kantenlicht
+    g.fillStyle(darken(theme.skyTop, 0.6), 1)
+    g.fillRect(x0 - 2, dachY - 3, x1 - x0 + 4, 3.5)
+    g.fillStyle(detail, 0.75)
+    g.fillRect(x0 - 2, dachY - 3, x1 - x0 + 4, 1)
+    // Fensterraster (spart Türspalte und Sockel aus): Sims, Sturz, Kreuz —
+    // warme Fenster bekommen ein echtes Licht in den Raum dahinter
+    for (let fy = dachY + 11; fy < BODEN - 40; fy += 22) {
       for (let fx = x0 + 10; fx < x1 - 12; fx += 16) {
         if (Math.abs(fx + 4 - tuerMitte) < tuerBreite) continue
         const an = (Math.round(fx * 7 + fy * 13) % 5) < 2
-        g.fillStyle(an ? fensterWarm : fensterKalt, an ? 0.55 : 0.5)
+        g.fillStyle(darken(theme.skyTop, 0.62), 1)
+        g.fillRect(fx - 0.8, fy - 0.8, 9.6, 11.6) // Laibung
+        g.fillStyle(an ? fensterWarm : fensterKalt, an ? 0.85 : 0.5)
         g.fillRect(fx, fy, 8, 10)
-        g.fillStyle(0xffffff, 0.1)
-        g.fillRect(fx, fy, 8, 0.8)
+        g.fillStyle(an ? 0xfff3da : 0xffffff, an ? 0.5 : 0.12)
+        g.fillRect(fx, fy, 8, 1)
+        g.fillStyle(darken(theme.skyTop, 0.5), an ? 0.55 : 0.8)
+        g.fillRect(fx + 3.6, fy, 0.8, 10) // Fensterkreuz
+        g.fillStyle(0xd9e2f2, 0.25)
+        g.fillRect(fx - 1.4, fy + 10.8, 10.8, 0.9) // Sims
+        if (an) licht(scene, { x: fx + 4, y: fy + 5, farbe: 0xffd9a0, radius: 14, staerke: 0.2, depth: 0, pfuetze: false })
       }
     }
-    // Tür
+    // Tür mit Vordach und warmem Hauslicht
     g.fillStyle(0x0d1a2c, 1)
     g.fillRect(tuerMitte - tuerBreite / 2, BODEN - 26, tuerBreite, 26)
     g.lineStyle(0.8, detail, 0.8)
     g.strokeRect(tuerMitte - tuerBreite / 2, BODEN - 26, tuerBreite, 26)
-    g.fillStyle(accent, 0.55)
+    g.fillStyle(0xffd9a0, 0.5)
+    g.fillRect(tuerMitte - tuerBreite / 2 + 1.5, BODEN - 24.5, tuerBreite - 3, 1) // Oberlicht
+    g.fillStyle(accent, 0.7)
     g.fillCircle(tuerMitte + tuerBreite / 2 - 3, BODEN - 13, 0.8)
+    g.fillStyle(darken(theme.skyTop, 0.65), 1)
+    g.fillRect(tuerMitte - tuerBreite / 2 - 4, BODEN - 29, tuerBreite + 8, 2.6) // Vordach
+    g.fillStyle(detail, 0.5)
+    g.fillRect(tuerMitte - tuerBreite / 2 - 4, BODEN - 29, tuerBreite + 8, 0.8)
+    licht(scene, { x: tuerMitte, y: BODEN - 14, farbe: 0xffd9a0, radius: 22, staerke: 0.34, depth: 0 })
   }
 
   const schild = (mitte: number, y: number, text: string, farbe: string): void => {
@@ -194,14 +255,58 @@ export function zeichneZeitreise(
   const KL = HAEUSER.klinik
   const A = HAEUSER.apotheke
 
-  rumpf(P.x0, P.x1, P.dach, P.tuer, 20)
+  rumpf(P.x0, P.x1, P.dach, P.tuer, 20, 0.3)
   schild((P.x0 + P.x1) / 2, P.dach + 5, 'HAUSARZT', '#dfe6f0')
-  rumpf(F.x0, F.x1, F.dach, F.tuer, 20)
+  rumpf(F.x0, F.x1, F.dach, F.tuer, 20, -0.25)
   schild((F.x0 + F.x1) / 2, F.dach + 5, 'FACHARZT', '#dfe6f0')
   rumpf(KL.x0, KL.x1, KL.dach, KL.tuer, 28)
   schild((KL.x0 + KL.x1) / 2, KL.dach + 5, 'KLINIKUM', '#dfe6f0')
-  rumpf(A.x0, A.x1, A.dach, A.tuer, 20)
+  rumpf(A.x0, A.x1, A.dach, A.tuer, 20, 0.22)
   schild((A.x0 + A.x1) / 2, A.dach + 5, 'APOTHEKE', '#ffd75e')
+
+  // ---- Dachzone: jede Silhouette bekommt ihr eigenes Profil ----
+  // Praxis: Schornstein · Facharzt: Antenne mit Querstreben · Klinik:
+  // Technikaufbau + Funkmast mit rotem Warnlicht · Apotheke: Lüfterkasten
+  g.fillStyle(darken(theme.skyTop, 0.55), 1)
+  g.fillRect(P.x0 + 18, P.dach - 14, 7, 12)
+  g.fillStyle(detail, 0.4)
+  g.fillRect(P.x0 + 18, P.dach - 14, 7, 1)
+  g.fillStyle(0x39445e, 1)
+  g.fillRect(F.x1 - 26, F.dach - 22, 1.6, 20)
+  g.fillRect(F.x1 - 30, F.dach - 18, 9.6, 1)
+  g.fillRect(F.x1 - 28.5, F.dach - 13, 6.6, 1)
+  g.fillStyle(darken(theme.skyTop, 0.52), 1)
+  g.fillRect(KL.tuer - 34, KL.dach - 10, 34, 8) // Technikaufbau
+  g.fillStyle(detail, 0.45)
+  g.fillRect(KL.tuer - 34, KL.dach - 10, 34, 1)
+  g.fillStyle(0x39445e, 1)
+  g.fillRect(KL.x1 - 24, KL.dach - 30, 1.8, 28) // Funkmast
+  g.fillRect(KL.x1 - 28, KL.dach - 24, 10, 1)
+  g.fillStyle(0xff5050, 0.95)
+  g.fillCircle(KL.x1 - 23.1, KL.dach - 31, 1.3)
+  addGlow(scene, KL.x1 - 23.1, KL.dach - 31, 0xff5050, 7, { alpha: 0.25 })
+  g.fillStyle(darken(theme.skyTop, 0.55), 1)
+  g.fillRect(A.x0 + 14, A.dach - 8, 16, 6)
+  g.fillStyle(0x39445e, 1)
+  for (let i = 0; i < 3; i++) g.fillRect(A.x0 + 16 + i * 5, A.dach - 7, 2.6, 4)
+
+  // ---- Straßenmöbel der Papier-Ära: Telefonzelle und Briefkasten ----
+  // Beide stehen auch HEUTE noch da — dieselbe Straße, nur die Wege ändern sich.
+  g.fillStyle(0x8a6a12, 1)
+  g.fillRect(154, 286, 13, 34)
+  g.fillStyle(0xffd75e, 0.9)
+  g.fillRect(155.2, 287.2, 10.6, 2.2)
+  g.fillStyle(0xfff2c8, 0.55)
+  g.fillRect(156.4, 291, 8.2, 22)
+  g.fillStyle(0x8a6a12, 1)
+  g.fillRect(159.8, 291, 1.2, 22)
+  addText(scene, 160.5, 288.4, 'TEL', 3.2, { color: '#3a2f08', spacing: 0.5 }).setOrigin(0.5)
+  licht(scene, { x: 160.5, y: 302, farbe: 0xffe9b0, radius: 18, staerke: 0.22, depth: 0 })
+  g.fillStyle(0xc99a1a, 1)
+  g.fillRect(484, 302, 10, 12)
+  g.fillStyle(0x8a6a12, 1)
+  g.fillRect(485, 305, 8, 1.2)
+  g.fillRect(487.6, 314, 2.8, 6)
 
   // Klinik: weißes H auf Blau neben der Tür + EKG-Linie darüber
   g.fillStyle(0x1d4f9c, 1)
@@ -210,7 +315,8 @@ export function zeichneZeitreise(
   g.fillRect(364.5, 294, 2.2, 7)
   g.fillRect(371.3, 294, 2.2, 7)
   g.fillRect(364.5, 296.6, 9, 1.8)
-  malEkg(g, 380, 290, 24, 2, 0.35, 0)
+  addGlow(scene, 369, 297.5, 0x4d8dff, 10, { alpha: 0.18 })
+  malEkg(g, 380, 290, 60, 2.4, 0.35, 0)
   // Apotheken-„A" am Ausleger
   g.fillStyle(0x39445e, 1)
   g.fillRect(A.x0, 258, 5, 1.6)
@@ -224,14 +330,47 @@ export function zeichneZeitreise(
   g.moveTo(A.x0 - 2.4, 266)
   g.lineTo(A.x0 + 1.4, 266)
   g.strokePath()
-  // Praxis: das Faxgerät im Fenster — DAS Gerät der Papierzeit
-  g.fillStyle(wandDunkel, 1)
-  g.fillRect(50, 252, 18, 12)
-  g.fillStyle(0x39445e, 1)
-  g.fillRect(53, 255, 12, 6)
-  g.fillStyle(0x7fd07f, 0.9)
-  g.fillRect(54.2, 256.2, 1.2, 1.2)
-  addText(scene, 59, 250, 'FAX', 4, { color: '#9fb0cc', bold: false }).setOrigin(0.5)
+  addGlow(scene, A.x0 - 0.5, 265, accent, 11, { alpha: 0.25 })
+  // Schaufenster der Apotheke: warmes Licht, Regalreihen voller Präparate —
+  // dieselbe Sprache wie das Apotheken-Fenster am Hauptmenü
+  g.fillStyle(darken(theme.skyTop, 0.62), 1)
+  g.fillRect(A.tuer + 14, BODEN - 26, 26, 22)
+  g.fillStyle(0xffd9a0, 0.28)
+  g.fillRect(A.tuer + 15, BODEN - 25, 24, 20)
+  for (let reihe = 0; reihe < 3; reihe++) {
+    g.fillStyle(0x39445e, 1)
+    g.fillRect(A.tuer + 16, BODEN - 20.5 + reihe * 5.4, 22, 0.8)
+    for (let i = 0; i < 6; i++) {
+      const farben = [0x7fd07f, 0x4de3ff, 0xffd75e, 0xb9a6ff, 0xff8f8d]
+      g.fillStyle(farben[(reihe * 5 + i * 3) % farben.length], 0.9)
+      g.fillRect(A.tuer + 17 + i * 3.5, BODEN - 23.4 + reihe * 5.4, 2.2, 2.6)
+    }
+  }
+  licht(scene, { x: A.tuer + 27, y: BODEN - 14, farbe: 0xffd9a0, radius: 24, staerke: 0.3, depth: 0 })
+  // Praxis: das Faxgerät im Erdgeschossfenster — DAS Gerät der Papierzeit.
+  // Nur FRÜHER: In der HEUTE-Phase steht an derselben Stelle das
+  // Sprechzimmer mit Konnektor — das Fax ist dann schlicht weg.
+  if (phase === 1) {
+    g.fillStyle(wandDunkel, 1)
+    g.fillRect(46, 296, 20, 16)
+    g.fillStyle(0xffd9a0, 0.16)
+    g.fillRect(47, 297, 18, 14)
+    g.fillStyle(0x39445e, 1)
+    g.fillRect(50, 303, 12, 6)
+    g.fillStyle(0x7fd07f, 0.9)
+    g.fillRect(51.2, 304.2, 1.2, 1.2)
+    addText(scene, 56, 300, 'FAX', 4, { color: '#9fb0cc', bold: false }).setOrigin(0.5)
+  }
+  // Klinik: Treppenhaus-Fensterband in der Türachse — die Achse gehört
+  // der Erschließung, kein totes Stück Fassade
+  for (let fy = KL.dach + 16; fy < BODEN - 48; fy += 22) {
+    g.fillStyle(darken(theme.skyTop, 0.62), 1)
+    g.fillRect(KL.tuer - 3.8, fy - 0.8, 7.6, 15.6)
+    g.fillStyle(fensterKalt, 0.6)
+    g.fillRect(KL.tuer - 3, fy, 6, 14)
+    g.fillStyle(0xffffff, 0.12)
+    g.fillRect(KL.tuer - 3, fy, 6, 0.9)
+  }
 
   // Straßenuhr in der Mitte — ihr Tempo erzählt die halbe Geschichte
   g.fillStyle(0x39445e, 1)
@@ -241,13 +380,15 @@ export function zeichneZeitreise(
   g.lineStyle(1, detail, 0.9)
   g.strokeCircle(305, 258, 9)
 
-  // Laternen an beiden Rändern
-  for (const lx of [16, 628]) {
+  // Laternen an beiden Rändern und vor der Klinik — mit echten Lichtpfützen
+  for (const lx of [16, 356, 628]) {
     g.fillStyle(0x39445e, 1)
     g.fillRect(lx, 282, 1.6, 38)
+    g.fillRect(lx - 1, 281.4, 3.6, 1)
     g.fillStyle(0xffd9a0, 0.95)
-    g.fillRect(lx - 1.4, 279, 4.4, 3.4)
-    addGlow(scene, lx + 1, 281, 0xffd9a0, 13, { alpha: 0.15 })
+    g.fillRect(lx - 1.4, 278, 4.4, 3.6)
+    addGlow(scene, lx + 1, 280, 0xffd9a0, 14, { alpha: 0.18 })
+    licht(scene, { x: lx + 1, y: 316, farbe: 0xffd9a0, radius: 26, staerke: 0.24, depth: 0 })
   }
 
   // ---- Phasen-Stimmung: warmer bzw. kühler Schleier + Titel ----
@@ -477,6 +618,23 @@ export function zeichneZeitreise(
     l.moveTo(305, 258)
     l.lineTo(305 + Math.sin(mA / 12 + 0.8) * 4, 258 - Math.cos(mA / 12 + 0.8) * 4)
     l.strokePath()
+
+    // Vögel ziehen ruhig durch die leere Himmelszone — manches bleibt gleich,
+    // egal welche Zeit. (Flügelschlag unter 3 Hz, Barrierefreiheit.)
+    for (const [vo, vy] of [
+      [0, 126],
+      [2.6, 140],
+      [5.4, 114],
+    ]) {
+      const vx = ((t * 9 + vo * 95) % (W + 60)) - 30
+      const schlag = Math.sin(t * 2.4 + vo * 3) * 1.5
+      l.lineStyle(0.8, 0x9fb3c8, 0.45)
+      l.beginPath()
+      l.moveTo(vx - 2.8, vy - schlag)
+      l.lineTo(vx, vy + 1)
+      l.lineTo(vx + 2.8, vy - schlag)
+      l.strokePath()
+    }
 
     if (phase === 1) {
       // Story-Zeilen im Takt durchwechseln (weiche Blenden)

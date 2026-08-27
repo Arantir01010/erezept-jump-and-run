@@ -1,10 +1,12 @@
 import Phaser from 'phaser'
 import type { Theme } from '../level/schema'
-import { darken } from './atmos'
+import { darken, depthMixN, fogColor } from './atmos'
 import { addGlow } from './effects'
+import { licht } from './licht'
 import { addText } from './text'
 import { KUEHL_GESCHUETZT } from './material'
 import { silhouettePaul, FY } from './PaulSilhouette'
+import { Rezi } from '../actors/Rezi'
 
 /**
  * PROBELAUF — der dritte Intro-Screen vor dem Spielstart.
@@ -40,20 +42,61 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
   const detail = Phaser.Display.Color.HexStringToColor(theme.detail).color
   const fels = darken(theme.skyTop, 0.5)
 
-  // ---- Bühne: zwei Podeste mit Lücke, wie im Spiel ----
+  // ---- Bühne: ein Stück Level statt schwebender Klötze ----
   const g = scene.add.graphics().setDepth(0)
-  const podest = (x0: number, x1: number): void => {
-    g.fillStyle(fels, 1)
-    g.fillRoundedRect(x0, 290, x1 - x0, 26, 3)
-    g.fillStyle(detail, 1)
-    g.fillRect(x0 + 1, 290, x1 - x0 - 2, 1.4)
-    g.fillStyle(0xffffff, 0.5)
-    g.fillRect(x0 + 1, 290, x1 - x0 - 2, 0.5)
+  const fog = fogColor(theme)
+
+  // Silhouetten-Häuserzeile hinter der Bühne — dieselbe Nachtstadt wie überall
+  const silhouette = depthMixN(darken(theme.skyTop, 0.2), fog, 0.5)
+  const silhouetteFenster = depthMixN(0xffd9a0, fog, 0.65)
+  for (const [sx, sb, sdach] of [
+    [24, 66, 196], [118, 48, 222], [400, 56, 210], [488, 70, 188], [586, 44, 216],
+  ] as const) {
+    g.fillStyle(silhouette, 1)
+    g.fillRect(sx, sdach, sb, 316 - sdach)
+    g.fillRect(sx + 6, sdach - 7, 9, 7)
+    for (let fy = sdach + 10; fy < 300; fy += 20) {
+      for (let fx = sx + 7; fx < sx + sb - 8; fx += 14) {
+        if ((Math.round(fx * 5 + fy * 11) % 7) < 2) {
+          g.fillStyle(silhouetteFenster, 0.45)
+          g.fillRect(fx, fy, 4.5, 6)
+        }
+      }
+    }
   }
-  podest(140, 350)
-  podest(390, 520)
+
+  // Boden mit Grube: Die Podeste stehen auf echtem Grund, die Lücke ist ein
+  // Abgrund — genau das Bild, das gleich im Spiel wiederkehrt.
+  const boden = (x0: number, x1: number, oben: number): void => {
+    g.fillStyle(fels, 1)
+    g.fillRect(x0, oben, x1 - x0, 360 - oben)
+    g.fillStyle(detail, 1)
+    g.fillRect(x0 + 1, oben, x1 - x0 - 2, 1.4)
+    g.fillStyle(0xffffff, 0.5)
+    g.fillRect(x0 + 1, oben, x1 - x0 - 2, 0.5)
+    g.fillStyle(darken(theme.skyTop, 0.62), 1)
+    for (let kx = x0 + 6; kx < x1 - 8; kx += 26) g.fillRect(kx, oben + 8, 10, 1) // Fugen
+  }
+  boden(0, 350, 316)
+  boden(390, W, 316)
+  boden(140, 350, 290)
+  boden(390, 520, 290)
+  // Grubenränder abdunkeln
+  g.fillStyle(0x040810, 0.9)
+  g.fillRect(350, 316, 40, 44)
   addGlow(scene, 245, 290, detail, 30, { alpha: 0.06 })
   addGlow(scene, 455, 290, detail, 26, { alpha: 0.06 })
+
+  // Zwei Laternen rahmen die Bühne — Licht wie auf der Zeitreise-Straße
+  for (const lx of [96, 560]) {
+    g.fillStyle(0x39445e, 1)
+    g.fillRect(lx, 278, 1.6, 38)
+    g.fillRect(lx - 1, 277.4, 3.6, 1)
+    g.fillStyle(0xffd9a0, 0.95)
+    g.fillRect(lx - 1.4, 274, 4.4, 3.6)
+    addGlow(scene, lx + 1, 276, 0xffd9a0, 14, { alpha: 0.18 })
+    licht(scene, { x: lx + 1, y: 312, farbe: 0xffd9a0, radius: 26, staerke: 0.24, depth: 0 })
+  }
 
   // ---- Titel & Weiter-Zeile ----
   addText(scene, W / 2, 44, 'SO SPIELST DU', 26, {
@@ -136,10 +179,15 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
   // Dieselbe Vektor-Silhouette wie im echten Spiel (PaulSilhouette.ts) —
   // kein eigens gezeichneter Ersatz, damit hier wirklich UNSER Paul steht
   // und nicht irgendeine andere Figur.
-  const fussY = 290 // Oberkante der Podeste, siehe podest()
+  const fussY = 290 // Oberkante der Podeste, siehe boden()
   const paul = scene.add.sprite(160, fussY - FY * PAUL_SCALE, 'player-idle0').setScale(PAUL_SCALE).setDepth(2)
   paul.play('player-idle')
   silhouettePaul(scene, paul, theme, { lightSide: 1 })
+  // REZI schwebt neben Paul — wie im echten Spiel (dieselbe Klasse, dieselbe
+  // Vektorform). Sie folgt der Choreografie von selbst.
+  const rezi = new Rezi(scene, 160 - 20, fussY - FY * PAUL_SCALE - 30)
+  rezi.follow(paul)
+  rezi.setScale(1.4)
 
   const leben = scene.add.graphics().setDepth(1)
   // game.loop.time statt scene.time.now: Der Scene-Clock ist in create()

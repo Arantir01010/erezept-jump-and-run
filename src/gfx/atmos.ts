@@ -44,6 +44,22 @@ export function depthMix(hex: string, fog: Phaser.Display.Color, t: number): num
   return Phaser.Display.Color.GetColor(m.r, m.g, m.b)
 }
 
+/** Wie depthMix, aber für bereits aufgelöste Integer-Farben (z. B. aus darken). */
+export function depthMixN(farbe: number, fog: Phaser.Display.Color, t: number): number {
+  const c = Phaser.Display.Color.IntegerToColor(farbe)
+  const k = Math.round(Phaser.Math.Clamp(t, 0, 1) * 100)
+  const m = Phaser.Display.Color.Interpolate.ColorWithColor(c, fog, 100, k)
+  return Phaser.Display.Color.GetColor(m.r, m.g, m.b)
+}
+
+/** Zwei Integer-Farben mischen: t = 0 → a, t = 1 → b (Fassaden-Tonungen). */
+export function mischFarben(a: number, b: number, t: number): number {
+  const ca = Phaser.Display.Color.IntegerToColor(a)
+  const cb = Phaser.Display.Color.IntegerToColor(b)
+  const m = Phaser.Display.Color.Interpolate.ColorWithColor(ca, cb, 100, Math.round(Phaser.Math.Clamp(t, 0, 1) * 100))
+  return Phaser.Display.Color.GetColor(m.r, m.g, m.b)
+}
+
 /** Wie depthMix, aber Richtung Schwarz — für Silhouetten im Vordergrund. */
 export function darken(hex: string, t: number): number {
   const c = Phaser.Display.Color.HexStringToColor(hex)
