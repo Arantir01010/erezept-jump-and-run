@@ -35,10 +35,20 @@ import { inputManager } from './InputManager'
  */
 
 let aktiv = false
+let beruehrt = false
 
 /** Liegt die On-Screen-Steuerung sichtbar über dem Spiel? (HUD-Layout) */
 export function istTouchUiAktiv(): boolean {
   return aktiv
+}
+
+/**
+ * Spielt hier jemand per Touch? (Erste echte Berührung erkannt bzw. ?touch=1.)
+ * Anders als istTouchUiAktiv auch AUSSERHALB eines Levels wahr — für
+ * Hinweistexte auf City-/Info-Screens („Doppeltipp: Abtauchen!").
+ */
+export function istTouchBedienung(): boolean {
+  return beruehrt
 }
 
 /** Zwei Tipps innerhalb dieses Fensters = Doppeltipp (TI-Aktion). */
@@ -246,7 +256,7 @@ export function installTouchControls(game: Phaser.Game): void {
   document.body.appendChild(root)
 
   // --- Sichtbarkeit: Touch erkannt UND ein Level läuft ---
-  let beruehrt = param === '1'
+  beruehrt = param === '1'
   let imLevel = false
 
   const aktualisiereSichtbarkeit = (): void => {

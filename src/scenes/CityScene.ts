@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { configService } from '../level/ConfigService'
 import { Rezi } from '../actors/Rezi'
 import { inputManager } from '../input/InputManager'
+import { istTouchBedienung } from '../input/TouchControls'
 import { GameAction } from '../input/actions'
 import { gameState } from '../state/GameState'
 import { sealTextureKey } from '../gfx/TextureFactory'
@@ -125,7 +126,8 @@ export class CityScene extends Phaser.Scene {
     if (this.phase === 'dive') return
     this.phase = 'portal'
     this.paul.play('player-idle')
-    const actionLabel = inputManager.hasGamepad() ? 'Blauer Knopf' : 'Taste E'
+    // Touch-Spieler kennen weder Knopf noch Taste — für sie heißt Blau: Doppeltipp
+    const actionLabel = istTouchBedienung() ? 'Doppeltipp' : inputManager.hasGamepad() ? 'Blauer Knopf' : 'Taste E'
     this.rezi.say(t(configService.level(this.toLevelIndex).cityAnchor.label) + ` — ${actionLabel}: Abtauchen!`)
     this.tweens.add({ targets: this.portal, scale: { from: 1, to: 1.15 }, duration: 500, yoyo: true, repeat: -1 })
   }
