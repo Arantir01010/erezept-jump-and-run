@@ -47,6 +47,23 @@ import {
 
 const BODEN = 320
 
+/**
+ * Mindest-Anzeigedauer pro Phase in Sekunden: Die Zeitreise ist das
+ * Herzstück der Botschaft — sie lässt sich bewusst NICHT sofort
+ * überspringen. Erst wenn die Story einmal durchgelaufen ist, erscheint
+ * die LEERTASTE-Zeile (die IntroScene sperrt die Eingabe genauso lange).
+ */
+export const ZEITREISE_SPERRE: Record<1 | 2, number> = { 1: 7.5, 2: 10.5 }
+
+/** Story-Takt der FRÜHER-Phase: vier Zeilen à 3,75 s. */
+const FRUEHER_TAKT = 3.75
+const FRUEHER_ZEILEN = [
+  'Ein Rezept? Gibt es in der Praxis — auf Papier, versteht sich.',
+  'Befunde reisen per Bote, per Fax, per Fußweg.',
+  'Der nächste Arzt? Fängt ohne deine Unterlagen von vorn an.',
+  'Zettel gehen verloren — und mit ihnen Zeit.',
+]
+
 /** Die vier Häuser: Außenkanten, Dachlinie und Türmitte. */
 const HAEUSER = {
   praxis: { x0: 36, x1: 146, dach: 232, tuer: 92 },
@@ -252,21 +269,36 @@ export function zeichneZeitreise(
     10.5,
     { color: '#cfe0ff', bold: false, stroke: '#0a1730', strokeThickness: 1 },
   ).setOrigin(0.5)
-  const weiter = addText(scene, W - 12, 340, phase === 1 ? 'LEERTASTE: Und heute?' : 'LEERTASTE: Spiel starten!', 12, {
+  // Die Weiter-Zeile erscheint erst nach Ablauf der Mindest-Anzeigedauer;
+  // bis dahin zeigt ein schmaler Balken, dass die Geschichte noch läuft
+  // (Alpha-Steuerung in malLeben, deshalb kein Tween).
+  const weiter = addText(scene, W - 12, 340, phase === 1 ? 'LEERTASTE: Und heute?' : 'LEERTASTE: Zum Probelauf!', 12, {
     color: '#ffd591',
     spacing: 0.5,
   })
     .setOrigin(1, 0.5)
     .setDepth(3)
-  scene.tweens.add({ targets: weiter, alpha: 0.35, duration: 750, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
-  // Fortschrittspunkte: wo bin ich in der Sequenz?
+    .setAlpha(0)
+  // Fortschrittspunkte: wo bin ich in der Sequenz? (3. Punkt = Probelauf)
   const punkte = scene.add.graphics().setDepth(3)
   punkte.fillStyle(0xffd591, phase === 1 ? 0.9 : 0.3)
-  punkte.fillCircle(W - 30, 352, 2)
+  punkte.fillCircle(W - 40, 352, 2)
   punkte.fillStyle(0xffd591, phase === 2 ? 0.9 : 0.3)
+  punkte.fillCircle(W - 30, 352, 2)
+  punkte.fillStyle(0xffd591, 0.3)
   punkte.fillCircle(W - 20, 352, 2)
 
-  // ---- Phase 1: liegengebliebene Blätter als stiller Vorwurf ----
+  // ---- Phase 1: Story-Zeilen + liegengebliebene Blätter ----
+  let storyZeilen: Phaser.GameObjects.Text[] = []
+  if (phase === 1) {
+    // Vier Erzähl-Zeilen laufen im Takt durch (Steuerung in malLeben) —
+    // die Geschichte trägt die Phase, nicht nur das Gewusel.
+    storyZeilen = FRUEHER_ZEILEN.map((s) =>
+      addText(scene, W / 2, 92, s, 9.5, { color: '#ffc98a', bold: false, stroke: '#0a1730', strokeThickness: 1 })
+        .setOrigin(0.5)
+        .setAlpha(0),
+    )
+  }
   if (phase === 1) {
     const muell: [number, number, number][] = [
       [122, 323, 0.3],
@@ -413,9 +445,28 @@ export function zeichneZeitreise(
     { a: F.tuer, b: A.tuer, tempo: 15, off: 7, p: P_PFLEGE, stapel: 3 },
   ]
 
+  // Zyklen zählen ab Szenenstart: Die Geschichte beginnt IMMER bei Zeile 1
+  // bzw. Schritt 1 — nicht irgendwo mitten im globalen Takt.
+  // WICHTIG: game.loop.time, nicht scene.time.now — der Scene-Clock wird
+  // nur während Updates gestellt und ist in create() noch veraltet.
+  const t0 = scene.game.loop.time / 1000
+
   const malLeben = (t: number): void => {
     const l = leben
     l.clear()
+    const tz = t - t0
+
+    // Weiter-Zeile erst nach der Mindestdauer; vorher ein feiner Zeitbalken
+    const frei = ZEITREISE_SPERRE[phase]
+    if (tz < frei) {
+      weiter.setAlpha(0)
+      l.fillStyle(0xffd591, 0.2)
+      l.fillRect(W - 72, 339, 60, 1.6)
+      l.fillStyle(0xffd591, 0.6)
+      l.fillRect(W - 72, 339, (60 * tz) / frei, 1.6)
+    } else {
+      weiter.setAlpha(0.65 + 0.35 * Math.sin(tz * 4))
+    }
 
     // Uhr: FRÜHER rast der Minutenzeiger, HEUTE tickt er gemütlich
     const mA = t * (phase === 1 ? 2.4 : 0.06)
@@ -428,6 +479,13 @@ export function zeichneZeitreise(
     l.strokePath()
 
     if (phase === 1) {
+      // Story-Zeilen im Takt durchwechseln (weiche Blenden)
+      const us = tz % (FRUEHER_TAKT * FRUEHER_ZEILEN.length)
+      for (let i = 0; i < storyZeilen.length; i++) {
+        const von = i * FRUEHER_TAKT + (i === 0 ? 0.2 : 0)
+        const bis = (i + 1) * FRUEHER_TAKT
+        storyZeilen[i].setAlpha(Phaser.Math.Clamp(Math.min((us - von) / 0.45, (bis - us) / 0.45, 1), 0, 1))
+      }
       // Pendler mit Aktenstapeln
       for (const b of BOTEN) {
         const xa = Math.min(b.a, b.b)
@@ -474,9 +532,10 @@ export function zeichneZeitreise(
       l.fillRect(56, 261, 2.8, fax)
     } else {
       // HEUTE als Lehrstück: Ein Eintrag entsteht im Sprechzimmer und reist
-      // durch die echte TI. Alles ist eine reine Funktion von u (Zykluszeit).
+      // durch die echte TI. Alles ist eine reine Funktion von u (Zykluszeit
+      // ab Szenenstart — der Besucher sieht Schritt 1 zuerst).
       const Z = 30
-      const u = t % Z
+      const u = tz % Z
 
       // Schritt-Zeilen weich ein- und ausblenden
       const FENSTER: [number, number][] = [
@@ -706,5 +765,5 @@ export function zeichneZeitreise(
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
     scene.events.off(Phaser.Scenes.Events.UPDATE, onUpdate)
   })
-  malLeben(scene.time.now / 1000)
+  malLeben(scene.game.loop.time / 1000)
 }

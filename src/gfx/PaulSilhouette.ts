@@ -31,7 +31,10 @@ import { darken } from './atmos'
  */
 
 /** Maße in Design-Pixeln, ausgerichtet an PLAYER_TUNING (Körper 10 × 21). */
-const FY = 11 // Fußlinie, relativ zum Sprite-Mittelpunkt
+// Exportiert: Wer Paul außerhalb der Physik positioniert (z. B. der
+// Probelauf-Screen), braucht den Fußlinien-Versatz, um ihn sauber auf
+// einem Podest stehen zu lassen — sonst nur per Augenmaß zu treffen.
+export const FY = 11 // Fußlinie, relativ zum Sprite-Mittelpunkt
 const TORSO_W = 7.4
 const HEAD_W = 7
 const HUEFTE_Y = FY - 9

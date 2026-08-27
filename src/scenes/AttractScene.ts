@@ -13,21 +13,18 @@ import { addText } from '../gfx/text'
 import { addGlow, addVignette } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
-import { silhouettePaul } from '../gfx/PaulSilhouette'
 import { verlaufBand } from '../gfx/material'
 import { zeichneKrankenhaus } from '../gfx/krankenhaus'
 
 /**
- * Attract-Mode / Startbildschirm: zieht Besucher an, erklärt auf einer Tafel
- * am linken Rand die Steuerung und startet auf jeden Knopfdruck.
+ * Attract-Mode / Startbildschirm: zieht Besucher an und startet auf jeden
+ * Knopfdruck in die Intro-Strecke. Die Steuerung wird dort im Probelauf-
+ * Screen (gfx/tutorial.ts) vorgeführt — hier steht deshalb kein Paul und
+ * keine Steuerungstafel mehr, nur die lebende Klinik-Kulisse.
  * (Auto-Play-Demo: Ausbaustufe.)
  */
-const LEGEND_ARCADE = 'Joystick\n  laufen & ducken\nROT\n  springen\nBLAU\n  TI-Aktion'
-const LEGEND_KEYBOARD = 'Pfeile/WASD\n  laufen & ducken\nLEERTASTE\n  springen\nE\n  TI-Aktion'
-
 export class AttractScene extends Phaser.Scene {
   private pressText!: Phaser.GameObjects.Text
-  private legendText!: Phaser.GameObjects.Text
   private gamepadMode = false
 
   constructor() {
@@ -43,9 +40,8 @@ export class AttractScene extends Phaser.Scene {
     drawBackdrop(this, theme, W, H, { nurFerneSilhouette: true })
     zeichneKrankenhaus(this, theme, W, H)
 
-    // Titel-Aura + sanftes Bühnenlicht auf Paul (rechts auf dem Apothekendach)
+    // Titel-Aura
     addGlow(this, W / 2, 78, 0x2f6fd0, 120, { alpha: 0.3 })
-    addGlow(this, 604, 238, 0xcfe0ff, 45, { alpha: 0.12 })
 
     // Kein dicker Konturrahmen mehr: Eine 4-px-Kontur um eine Groteske sieht
     // nach Vereinsplakat aus. Die Lesbarkeit trägt jetzt die Aura darunter
@@ -64,12 +60,6 @@ export class AttractScene extends Phaser.Scene {
       stroke: '#0a1730',
       strokeThickness: 1,
     }).setOrigin(0.5)
-
-    // Paul als Blickfang — rechts am Bildrand auf dem Apothekendach: Die
-    // Bildmitte gehört ganz der Klinik-Kulisse. Licht kommt von links (Titel).
-    const paul = this.add.sprite(604, 238, 'player-idle0').setScale(2)
-    paul.play('player-idle')
-    silhouettePaul(this, paul, configService.theme('city'), { lightSide: -1 })
 
     // Aufforderung: warmes Gold statt Signalrot. Rot heißt in diesem Spiel
     // „Gefahr/offen" (siehe material.ts) — an der Einladung zum Spielen wäre
@@ -96,26 +86,12 @@ export class AttractScene extends Phaser.Scene {
     const fuss = this.add.graphics()
     verlaufBand(this, fuss, 0, H - 60, W, 60, 0x04090f, 0, 0.72)
 
-    // Steuerungstafel am linken Bildschirmrand — Glas-Optik wie die
-    // HUD-Pillen (material.ts). Als schmale Spalte statt langer Mittelzeile:
-    // Die Mitte gehört der Kulisse und dem „Drück …!"-Aufruf.
+    // Info-Tafel am linken Bildschirmrand — Glas-Optik wie die HUD-Pillen
+    // (material.ts): Veranstaltungszeile + Rechtshinweis (KAPSEL 4.5 —
+    // klein, aber immer sichtbar; Inhalte kommen aus der Config und werden
+    // von tools/test/recht.test.ts geprüft). Die Steuerung selbst zeigt
+    // jetzt der Probelauf-Screen — hier steht nur noch diese eine Tafel.
     const tafel = this.add.graphics()
-    tafel.fillStyle(0x060d16, 0.6)
-    tafel.fillRoundedRect(4, 170, 82, 106, 5)
-    tafel.lineStyle(0.7, 0xffffff, 0.14)
-    tafel.strokeRoundedRect(4, 170, 82, 106, 5)
-    tafel.fillStyle(0xffffff, 0.18)
-    tafel.fillRoundedRect(8, 170.4, 74, 0.6, 0.3)
-    addText(this, 12, 177, 'STEUERUNG', 8, { color: '#ffd75e', spacing: 1.2 }).setOrigin(0, 0)
-    this.legendText = addText(this, 12, 191, '', 8.5, {
-      color: '#b8c6e0',
-      bold: false,
-    }).setOrigin(0, 0)
-    this.legendText.setLineSpacing(1.5)
-
-    // Info-Tafel darunter: Veranstaltungszeile + Rechtshinweis (KAPSEL 4.5 —
-    // klein, aber immer sichtbar; Inhalte kommen weiter aus der Config und
-    // werden von tools/test/recht.test.ts geprüft).
     tafel.fillStyle(0x060d16, 0.6)
     tafel.fillRoundedRect(4, 282, 82, 74, 5)
     tafel.lineStyle(0.7, 0xffffff, 0.14)
@@ -156,7 +132,6 @@ export class AttractScene extends Phaser.Scene {
     this.gamepadMode = hasPad
     const cfg = configService.gameConfig
     this.pressText.setText(t(hasPad ? cfg.titleScreen.pressStart : cfg.titleScreen.pressStartKeyboard))
-    this.legendText.setText(hasPad ? LEGEND_ARCADE : LEGEND_KEYBOARD)
   }
 
   update(): void {
