@@ -3,8 +3,11 @@
 # und beendet das "LF will be replaced by CRLF"-Rauschen unter Windows).
 * text=auto
 
-# Windows-Batchdateien brauchen CRLF im Arbeitsverzeichnis (cmd.exe-Sprungmarken).
-*.bat text eol=crlf
+# Batchdateien sind in diesem Repo seit jeher reines LF (Arbeitskopie wie Blob)
+# und laufen so am Messe-PC. WICHTIG: eol=lf statt eol=crlf, denn der
+# Kern-Guard (tools/check-core.ts) hasht Datei-Bytes — jede Plattform muss
+# exakt dieselben Bytes auschecken, sonst schlägt npm run validate in der CI an.
+*.bat text eol=lf
 
 # Binärdateien nie anfassen
 *.png binary
