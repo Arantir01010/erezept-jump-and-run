@@ -39,9 +39,11 @@ const KELLER = { links: 96, rechts: 472, oben: 324, unten: 352 }
 const FUSS = { f3: 176, f2: 214, f1: 252, eg: 316, keller: 348, strasse: 320 }
 
 // ---------------------------------------------------------------- Menschen
-const HAUT = [0xeec39a, 0xc98850, 0x8a5a3b]
+// Figuren, Paletten und Bewegungs-Helfer sind exportiert: Die Zeitreise-
+// Kulisse (gfx/zeitreise.ts) erzählt mit demselben Personal weiter.
+export const HAUT = [0xeec39a, 0xc98850, 0x8a5a3b]
 
-interface Person {
+export interface Person {
   haut: number
   oben: number
   unten: number
@@ -50,19 +52,19 @@ interface Person {
   kittel?: boolean
 }
 
-const P_ARZT: Person = { haut: HAUT[0], oben: 0x5c7ba8, unten: 0x33405c, haar: 0x2b2530, kittel: true }
-const P_AERZTIN: Person = { haut: HAUT[2], oben: 0x8a5f9e, unten: 0x33405c, haar: 0x14101a, kittel: true }
-const P_PFLEGE: Person = { haut: HAUT[1], oben: 0x5fc4b8, unten: 0x3d5a74, haar: 0x6b4326 }
+export const P_ARZT: Person = { haut: HAUT[0], oben: 0x5c7ba8, unten: 0x33405c, haar: 0x2b2530, kittel: true }
+export const P_AERZTIN: Person = { haut: HAUT[2], oben: 0x8a5f9e, unten: 0x33405c, haar: 0x14101a, kittel: true }
+export const P_PFLEGE: Person = { haut: HAUT[1], oben: 0x5fc4b8, unten: 0x3d5a74, haar: 0x6b4326 }
 const P_OP: Person = { haut: HAUT[0], oben: 0x69b894, unten: 0x4d8a70, haar: 0x69b894 } // Haube
-const P_PATIENT: Person = { haut: HAUT[1], oben: 0xa9b9d6, unten: 0xa9b9d6, haar: 0xcfd4de }
-const P_BESUCH: Person = { haut: HAUT[0], oben: 0xc07a4f, unten: 0x2e3a50, haar: 0x8a5a33 }
-const P_TECHNIK: Person = { haut: HAUT[2], oben: 0x4d6a8f, unten: 0x2e3a50, haar: 0x2b2530 }
+export const P_PATIENT: Person = { haut: HAUT[1], oben: 0xa9b9d6, unten: 0xa9b9d6, haar: 0xcfd4de }
+export const P_BESUCH: Person = { haut: HAUT[0], oben: 0xc07a4f, unten: 0x2e3a50, haar: 0x8a5a33 }
+export const P_TECHNIK: Person = { haut: HAUT[2], oben: 0x4d6a8f, unten: 0x2e3a50, haar: 0x2b2530 }
 
 /**
  * Pixel-Figur, ~13 px hoch, Füße auf (x, yFuss). `schritt` ist der
  * Laufzyklus (0 = stehen), `dir` die Blickrichtung (nur fürs Haar).
  */
-function malFigur(
+export function malFigur(
   g: Phaser.GameObjects.Graphics,
   x: number,
   yFuss: number,
@@ -97,7 +99,7 @@ function malFigur(
 }
 
 /** Sitzende Figur auf Sitzhöhe `ySitz`; `beinSchwung` lässt Beine baumeln. */
-function malSitzend(g: Phaser.GameObjects.Graphics, x: number, ySitz: number, p: Person, beinSchwung = 0): void {
+export function malSitzend(g: Phaser.GameObjects.Graphics, x: number, ySitz: number, p: Person, beinSchwung = 0): void {
   g.fillStyle(p.unten, 1)
   g.fillRect(x - 2.4, ySitz - 1.6, 4.6, 1.6)
   g.fillRect(x + 1 + beinSchwung, ySitz, 1.6, 3.4)
@@ -147,7 +149,7 @@ function ekgPuls(u: number): number {
   return 0
 }
 
-function malEkg(
+export function malEkg(
   g: Phaser.GameObjects.Graphics,
   x: number,
   yMitte: number,
@@ -181,7 +183,7 @@ function malMonitor(g: Phaser.GameObjects.Graphics, x: number, yBoden: number, t
 }
 
 /** Hin- und herlaufende Figur zwischen xa und xb (Dreieckswelle über t). */
-function pendel(t: number, xa: number, xb: number, tempo: number, versatz: number): { x: number; dir: 1 | -1 } {
+export function pendel(t: number, xa: number, xb: number, tempo: number, versatz: number): { x: number; dir: 1 | -1 } {
   const dauer = (xb - xa) / tempo
   const u = ((t + versatz) / dauer) % 2
   return u < 1 ? { x: xa + (xb - xa) * u, dir: 1 } : { x: xb - (xb - xa) * (u - 1), dir: -1 }
@@ -260,7 +262,9 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   g.lineStyle(0.5, detail, 0.4)
   g.strokeEllipse(368, 333, 7, 2.6)
 
-  // ---- Kleiner Park links: Bäume, Bank mit Leser, Laterne ----
+  // ---- Kleiner Park zwischen Klinik und Apotheke: Baum, Bank mit Leser ----
+  // Der linke Bildschirmrand gehört jetzt den Tafeln der AttractScene
+  // (Steuerung + Rechtshinweis) — deshalb wohnt der Park in der Lücke rechts.
   const laub = depthMix('#3a6a55', fog, 0.25)
   const treeAt = (tx: number, s: number): void => {
     g.fillStyle(0x3a2f28, 1)
@@ -271,23 +275,17 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
     g.fillStyle(0xffffff, 0.06)
     g.fillRect(tx - 6 * s, BODEN - 20 * s, 12 * s, 1)
   }
-  treeAt(20, 1.1)
-  treeAt(38, 0.8)
+  treeAt(491, 0.9)
   // Bank
   g.fillStyle(0x3a4358, 1)
-  g.fillRect(46, 312, 1.6, 8)
-  g.fillRect(64, 312, 1.6, 8)
+  g.fillRect(502, 312, 1.6, 8)
+  g.fillRect(517, 312, 1.6, 8)
   g.fillStyle(0x6b5a3f, 1)
-  g.fillRect(44, 311, 24, 1.8)
-  g.fillRect(44, 305, 24, 1.4)
-  malSitzend(g, 54, 310, P_BESUCH)
+  g.fillRect(500, 311, 21, 1.8)
+  g.fillRect(500, 305, 21, 1.4)
+  malSitzend(g, 509, 310, P_BESUCH)
   g.fillStyle(0xe9eef8, 0.9) // Zeitung
-  g.fillRect(56.5, 302, 4, 3)
-  // Laterne
-  g.fillStyle(0x39445e, 1)
-  g.fillRect(75, 282, 1.6, 38)
-  g.fillStyle(0xffd9a0, 0.95)
-  g.fillRect(73.6, 279, 4.4, 3.4)
+  g.fillRect(511.5, 302, 4, 3)
 
   // ---- Hauptgebäude: Hülle, Geschossdecken, Aufzugsschacht ----
   g.fillStyle(wand, 1)
@@ -733,23 +731,14 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   g.moveTo(522.6, 282)
   g.lineTo(526.4, 282)
   g.strokePath()
-  // Katze auf dem Apotheken-Dach (Schwanz wedelt dynamisch)
+  // Katze am linken Dachende der Apotheke (rechts steht jetzt Paul)
   g.fillStyle(0x1c2536, 1)
-  g.fillRect(596, 256.5, 6, 3.5)
-  g.fillRect(600.5, 254.5, 3, 3)
-  g.fillTriangle(600.5, 255, 601.5, 253, 602, 255)
-  g.fillTriangle(602.2, 255, 603.2, 253, 603.6, 255)
+  g.fillRect(532, 256.5, 6, 3.5)
+  g.fillRect(536.5, 254.5, 3, 3)
+  g.fillTriangle(536.5, 255, 537.5, 253, 538, 255)
+  g.fillTriangle(538.2, 255, 539.2, 253, 539.6, 255)
 
-  // Geparktes Auto + zweite Laterne rechts
-  g.fillStyle(0x2e4a6a, 1)
-  g.fillRect(492, 310, 24, 6)
-  g.fillRect(496, 306, 14, 5)
-  g.fillStyle(0x0d1a2c, 0.9)
-  g.fillRect(498, 307, 4.6, 3.4)
-  g.fillRect(504, 307, 4.6, 3.4)
-  g.fillStyle(0x11182a, 1)
-  g.fillCircle(497, 316.5, 2.4)
-  g.fillCircle(511, 316.5, 2.4)
+  // Laterne rechts (das geparkte Auto ist dem Park gewichen)
   g.fillStyle(0x39445e, 1)
   g.fillRect(628, 282, 1.6, 38)
   g.fillStyle(0xffd9a0, 0.95)
@@ -798,7 +787,6 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
   addGlow(scene, 335, 338, K, 12, { alpha: 0.07 })
   addGlow(scene, 570, 270, accent, 16, { alpha: 0.09 })
   addGlow(scene, 564, 304, K, 11, { alpha: 0.1 })
-  addGlow(scene, 76, 281, 0xffd9a0, 13, { alpha: 0.15 })
   addGlow(scene, 629, 281, 0xffd9a0, 13, { alpha: 0.15 })
   addGlow(scene, 138, 152, 0xffffff, 13, { alpha: 0.08 })
 
@@ -1034,7 +1022,8 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
       const P = 14
       const u = (t % P)
       if (u < 4.4) {
-        const x = 30 + (204 - 30) * (u / 4.4)
+        // Start erst bei x=96: Links davor liegen die Tafeln der AttractScene
+        const x = 96 + (204 - 96) * (u / 4.4)
         malFigur(l, x, FUSS.strasse, P_BESUCH, t * 2.2 * 0.5, 1)
         tuerAuf = Math.max(tuerAuf, Phaser.Math.Clamp((32 - Math.abs(x - 204)) / 32, 0, 1))
       } else if (u < 5) {
@@ -1074,9 +1063,10 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
     }
     // Zwei Passanten auf dem Gehweg
     {
-      const a = pendel(t, 12, 620, 15, 40)
+      // Wendepunkte ab x=94: Links davor liegen die Tafeln der AttractScene
+      const a = pendel(t, 94, 620, 15, 40)
       malFigur(l, a.x, FUSS.strasse, { haut: HAUT[1], oben: 0x6a8f4d, unten: 0x2e3a50, haar: 0x2b2530 }, t * 2.1 * 0.5, a.dir)
-      const b = pendel(t, 30, 600, 19, 140)
+      const b = pendel(t, 96, 604, 19, 140)
       malFigur(l, b.x, FUSS.strasse, { haut: HAUT[2], oben: 0xd0a04a, unten: 0x33405c, haar: 0x14101a }, t * 2.4 * 0.5, b.dir)
     }
 
@@ -1157,75 +1147,24 @@ export function zeichneKrankenhaus(scene: Phaser.Scene, theme: Theme, W: number,
     // Katzenschwanz auf dem Apotheken-Dach
     l.lineStyle(0.9, 0x1c2536, 1)
     l.beginPath()
-    l.moveTo(596.4, 258)
-    l.lineTo(593.4, 256.6 + Math.sin(t * 1.4) * 1.4)
+    l.moveTo(532.4, 258)
+    l.lineTo(529.4, 256.6 + Math.sin(t * 1.4) * 1.4)
     l.strokePath()
-    // Hund am Park schaut zu, Schwanz wedelt
+    // Hund an der rechten Laterne schaut zu, Schwanz wedelt
     l.fillStyle(0x6b4326, 1)
-    l.fillRect(66, 315.4, 5, 2.6)
-    l.fillRect(70.4, 313.6, 2.6, 2.6)
-    l.fillRect(66.6, 318, 1, 2)
-    l.fillRect(69.6, 318, 1, 2)
+    l.fillRect(614, 315.4, 5, 2.6)
+    l.fillRect(618.4, 313.6, 2.6, 2.6)
+    l.fillRect(614.6, 318, 1, 2)
+    l.fillRect(617.6, 318, 1, 2)
     l.lineStyle(0.8, 0x6b4326, 1)
     l.beginPath()
-    l.moveTo(66, 316)
-    l.lineTo(63.8, 314.4 + Math.sin(t * 6) * 1)
+    l.moveTo(614, 316)
+    l.lineTo(611.8, 314.4 + Math.sin(t * 6) * 1)
     l.strokePath()
 
-    // ---- Rettungswagen: kommt, hält an der Notaufnahme, fährt weiter ----
-    {
-      // Haltepunkt x=185 (vor Zebrastreifen/Eingang): Weiter rechts stünde
-      // der Wagen genau vor dem VAU-Schild im Keller-Schnitt.
-      const P = 18
-      const u = ((t + 6) % P)
-      let x = -999
-      let fahrend = false
-      if (u < 3.2) {
-        x = 700 - (700 - 185) * (u / 3.2)
-        fahrend = true
-      } else if (u < 8) {
-        x = 185
-      } else if (u < 11) {
-        x = 185 - (185 + 90) * ((u - 8) / 3)
-        fahrend = true
-      }
-      if (x > -900) {
-        const y = 326
-        l.fillStyle(0xdfe6f0, 1)
-        l.fillRect(x - 20, y, 40, 12)
-        l.fillStyle(0xdfe6f0, 1)
-        l.fillRect(x - 27, y + 3, 8, 9)
-        l.fillStyle(0x0d1a2c, 0.9)
-        l.fillRect(x - 25.6, y + 4, 5, 3.6)
-        l.fillStyle(WARM_OFFEN, 0.9)
-        l.fillRect(x - 20, y + 7.6, 40, 2.2)
-        malEkg(l, x - 12, y + 4, 22, 1.6, 0.35, 0.3)
-        l.fillStyle(0x11182a, 1)
-        l.fillCircle(x - 20, y + 13, 2.6)
-        l.fillCircle(x + 12, y + 13, 2.6)
-        l.fillStyle(0x39445e, 1)
-        l.fillCircle(x - 20, y + 13, 1)
-        l.fillCircle(x + 12, y + 13, 1)
-        // Blaulicht: zwei Leuchten im Wechsel (2,5 Hz)
-        const blau = Math.sin(t * Math.PI * 2 * 1.25) > 0
-        l.fillStyle(0x66aaff, blau ? 0.95 : 0.2)
-        l.fillRect(x - 24, y - 2, 3, 2)
-        l.fillStyle(0x66aaff, blau ? 0.2 : 0.95)
-        l.fillRect(x + 14, y - 2, 3, 2)
-        l.fillStyle(0x66aaff, 0.12)
-        l.fillCircle(x - 22.5, y - 1, blau ? 5 : 2)
-        l.fillCircle(x + 15.5, y - 1, blau ? 2 : 5)
-        if (fahrend) {
-          l.fillStyle(0xfff2c8, 0.1)
-          l.fillTriangle(x - 27, y + 6, x - 44, y + 3, x - 44, y + 11)
-        }
-        // Beim Halt: Sanitäter läuft zur Notaufnahme
-        if (u >= 4 && u < 7.2) {
-          const k = (u - 4) / 3.2
-          malFigur(l, 176 - k * 56, FUSS.strasse, P_PFLEGE, t * 2.6 * 0.5, -1)
-        }
-      }
-    }
+    // (Der Rettungswagen ist bewusst gestrichen: Die Straße kreuzt im
+    // Puppenhaus-Schnitt den Keller — ein querfahrendes Fahrzeug las sich,
+    // als führe es durch die VAU. Die Rettung kommt jetzt nur per Heli.)
 
     // ---- Hubschrauber: Anflug, Landung, Trage zur Dachtür, Abflug ----
     {

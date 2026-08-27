@@ -14,16 +14,16 @@ import { addGlow, addVignette } from '../gfx/effects'
 import { setupDesignCamera } from '../gfx/view'
 import { t } from '../i18n'
 import { silhouettePaul } from '../gfx/PaulSilhouette'
-import { zeichneReziKoerper } from '../gfx/ReziBody'
 import { verlaufBand } from '../gfx/material'
 import { zeichneKrankenhaus } from '../gfx/krankenhaus'
 
 /**
- * Attract-Mode / Startbildschirm: zieht Besucher an, erklärt in einer Zeile
- * die Steuerung und startet auf jeden Knopfdruck. (Auto-Play-Demo: Ausbaustufe.)
+ * Attract-Mode / Startbildschirm: zieht Besucher an, erklärt auf einer Tafel
+ * am linken Rand die Steuerung und startet auf jeden Knopfdruck.
+ * (Auto-Play-Demo: Ausbaustufe.)
  */
-const LEGEND_ARCADE = 'Joystick: laufen & ducken  ·  ROT: springen  ·  BLAU: TI-Aktion'
-const LEGEND_KEYBOARD = 'Pfeile/WASD: laufen & ducken  ·  LEERTASTE: springen  ·  E: TI-Aktion'
+const LEGEND_ARCADE = 'Joystick\n  laufen & ducken\nROT\n  springen\nBLAU\n  TI-Aktion'
+const LEGEND_KEYBOARD = 'Pfeile/WASD\n  laufen & ducken\nLEERTASTE\n  springen\nE\n  TI-Aktion'
 
 export class AttractScene extends Phaser.Scene {
   private pressText!: Phaser.GameObjects.Text
@@ -43,9 +43,9 @@ export class AttractScene extends Phaser.Scene {
     drawBackdrop(this, theme, W, H, { nurFerneSilhouette: true })
     zeichneKrankenhaus(this, theme, W, H)
 
-    // Titel-Aura + sanftes Bühnenlicht auf Paul & REZI
+    // Titel-Aura + sanftes Bühnenlicht auf Paul (rechts auf dem Apothekendach)
     addGlow(this, W / 2, 78, 0x2f6fd0, 120, { alpha: 0.3 })
-    addGlow(this, W / 2, 185, 0xcfe0ff, 65, { alpha: 0.12 })
+    addGlow(this, 604, 238, 0xcfe0ff, 45, { alpha: 0.12 })
 
     // Kein dicker Konturrahmen mehr: Eine 4-px-Kontur um eine Groteske sieht
     // nach Vereinsplakat aus. Die Lesbarkeit trägt jetzt die Aura darunter
@@ -65,34 +65,22 @@ export class AttractScene extends Phaser.Scene {
       strokeThickness: 1,
     }).setOrigin(0.5)
 
-    // Paul + REZI als Blickfang
-    const paul = this.add.sprite(W / 2 - 20, 188, 'player-idle0').setScale(2)
+    // Paul als Blickfang — rechts am Bildrand auf dem Apothekendach: Die
+    // Bildmitte gehört ganz der Klinik-Kulisse. Licht kommt von links (Titel).
+    const paul = this.add.sprite(604, 238, 'player-idle0').setScale(2)
     paul.play('player-idle')
-    silhouettePaul(this, paul, configService.theme('city'), { lightSide: 1 })
-    // Dieselbe REZI wie im Spiel (Vektorkarte), nur doppelt so groß
-    const rezi = this.add.container(W / 2 + 24, 174, [zeichneReziKoerper(this)]).setScale(2)
-    const reziGlow = this.add
-      .image(W / 2 + 24, 174, 'fx-glow')
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setTint(0x8fffe4)
-      .setAlpha(0.3)
-    reziGlow.setDisplaySize(90, 90)
-    this.tweens.add({
-      targets: [rezi, reziGlow],
-      y: 168,
-      duration: 1200,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    })
+    silhouettePaul(this, paul, configService.theme('city'), { lightSide: -1 })
 
     // Aufforderung: warmes Gold statt Signalrot. Rot heißt in diesem Spiel
     // „Gefahr/offen" (siehe material.ts) — an der Einladung zum Spielen wäre
-    // das die falsche Aussage.
-    this.pressText = addText(this, W / 2, 240, '', 16, {
+    // das die falsche Aussage. Unten rechts in der Ecke, über dem Fußschleier
+    // (deshalb depth 3) — die Bildmitte bleibt der Kulisse.
+    this.pressText = addText(this, W - 12, 340, '', 16, {
       color: '#ffd591',
       spacing: 0.6,
-    }).setOrigin(0.5)
+    })
+      .setOrigin(1, 0.5)
+      .setDepth(3)
     // Blinken deutlich unter 3 Hz (Barrierefreiheit)
     this.tweens.add({
       targets: this.pressText,
@@ -108,10 +96,42 @@ export class AttractScene extends Phaser.Scene {
     const fuss = this.add.graphics()
     verlaufBand(this, fuss, 0, H - 60, W, 60, 0x04090f, 0, 0.72)
 
-    this.legendText = addText(this, W / 2, 268, '', 10.5, {
+    // Steuerungstafel am linken Bildschirmrand — Glas-Optik wie die
+    // HUD-Pillen (material.ts). Als schmale Spalte statt langer Mittelzeile:
+    // Die Mitte gehört der Kulisse und dem „Drück …!"-Aufruf.
+    const tafel = this.add.graphics()
+    tafel.fillStyle(0x060d16, 0.6)
+    tafel.fillRoundedRect(4, 170, 82, 106, 5)
+    tafel.lineStyle(0.7, 0xffffff, 0.14)
+    tafel.strokeRoundedRect(4, 170, 82, 106, 5)
+    tafel.fillStyle(0xffffff, 0.18)
+    tafel.fillRoundedRect(8, 170.4, 74, 0.6, 0.3)
+    addText(this, 12, 177, 'STEUERUNG', 8, { color: '#ffd75e', spacing: 1.2 }).setOrigin(0, 0)
+    this.legendText = addText(this, 12, 191, '', 8.5, {
       color: '#b8c6e0',
       bold: false,
-    }).setOrigin(0.5)
+    }).setOrigin(0, 0)
+    this.legendText.setLineSpacing(1.5)
+
+    // Info-Tafel darunter: Veranstaltungszeile + Rechtshinweis (KAPSEL 4.5 —
+    // klein, aber immer sichtbar; Inhalte kommen weiter aus der Config und
+    // werden von tools/test/recht.test.ts geprüft).
+    tafel.fillStyle(0x060d16, 0.6)
+    tafel.fillRoundedRect(4, 282, 82, 74, 5)
+    tafel.lineStyle(0.7, 0xffffff, 0.14)
+    tafel.strokeRoundedRect(4, 282, 82, 74, 5)
+    tafel.fillStyle(0xffffff, 0.18)
+    tafel.fillRoundedRect(8, 282.4, 74, 0.6, 0.3)
+    addText(this, 12, 289, cfg.event + ' — Einfach. Sicher. Digital.', 6.5, {
+      color: '#7c88a6',
+      bold: false,
+      wrapWidth: 68,
+    }).setOrigin(0, 0)
+    addText(this, 12, 321, t(cfg.disclaimer), 6, {
+      color: '#5f6a85',
+      bold: false,
+      wrapWidth: 68,
+    }).setOrigin(0, 0)
 
     // Steuerungsanzeige folgt der angeschlossenen Hardware — auch live beim Ein-/Ausstecken
     this.gamepadMode = !inputManager.hasGamepad()
@@ -126,12 +146,6 @@ export class AttractScene extends Phaser.Scene {
         addText(this, W - 92, 162 + i * 19, String(entry.score).padStart(6, ' '), 10)
       })
     }
-
-    addText(this, W / 2, H - 22, cfg.event + ' — Einfach. Sicher. Digital.', 9, { color: '#7c88a6' }).setOrigin(0.5)
-
-    // Rechtlicher Hinweis (KAPSEL 4.5): klein am Rand, aber immer sichtbar.
-    // Inhalt kommt aus der Config und wird von tools/test/recht.test.ts geprüft.
-    addText(this, W / 2, H - 10, t(cfg.disclaimer), 8, { color: '#5f6a85' }).setOrigin(0.5)
 
     addVignette(this, W, H)
   }
@@ -158,8 +172,12 @@ export class AttractScene extends Phaser.Scene {
       // Ausweise gehören dem Besucher, nicht dem Automaten — jeder Durchlauf
       // fängt ohne Karten an (sonst erbt der Nächste fremde Identitäten).
       kartenState.reset()
-      if (!this.scene.isActive('UI')) this.scene.launch('UI')
-      this.scene.start('City', { toLevelIndex: 0 })
+      // Erst die Zeitreise (Früher/Heute) — die IntroScene startet danach
+      // UI + City. Die Resets oben bleiben hier: Sie gehören zum Run-Beginn.
+      // Phase IMMER explizit mitgeben: Ohne Daten recycelt Phaser die
+      // settings.data des letzten Starts — der nächste Besucher begänne
+      // sonst mitten in Phase 2.
+      this.scene.start('Intro', { phase: 1 })
     }
   }
 }

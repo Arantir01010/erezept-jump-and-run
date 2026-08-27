@@ -4,7 +4,7 @@ import { telemetry } from '../telemetry/Telemetry'
 import { speichereSitzung } from '../telemetry/speicher'
 
 /** Szenen, in denen Inaktivität zum Reset in den Attract-Mode führt. */
-const GAMEPLAY_SCENES = ['City', 'Game', 'Reward', 'UI']
+const GAMEPLAY_SCENES = ['Intro', 'City', 'Game', 'Reward', 'UI']
 const WARN_WINDOW_MS = 8000
 
 /**

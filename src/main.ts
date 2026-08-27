@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { BootScene } from './scenes/BootScene'
 import { PreloadScene } from './scenes/PreloadScene'
 import { AttractScene } from './scenes/AttractScene'
+import { IntroScene } from './scenes/IntroScene'
 import { CityScene } from './scenes/CityScene'
 import { GameScene } from './scenes/GameScene'
 import { UIScene } from './scenes/UIScene'
@@ -51,7 +52,7 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, PreloadScene, AttractScene, CityScene, GameScene, UIScene, RewardScene],
+  scene: [BootScene, PreloadScene, AttractScene, IntroScene, CityScene, GameScene, UIScene, RewardScene],
 })
 
 // Früher musste hier je nach Skalierungsfaktor zwischen „pixelated" und „auto"
