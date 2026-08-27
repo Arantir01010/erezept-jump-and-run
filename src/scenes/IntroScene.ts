@@ -26,7 +26,11 @@ import { zeichneTutorial, TUTORIAL_SPERRE } from '../gfx/tutorial'
  */
 export class IntroScene extends Phaser.Scene {
   private phase: 1 | 2 | 3 = 1
-  private sperre = 0
+  /** Sperrdauer in ms; Ablauf wird im ersten update auf der SZENEN-Uhr
+   *  geankert — ein Mix aus game.loop.time und scene.time.now driftet
+   *  nach Drosselung/Standby auseinander. */
+  private sperrDauer = 0
+  private sperrBis = -1
 
   constructor() {
     super('Intro')
@@ -48,13 +52,14 @@ export class IntroScene extends Phaser.Scene {
     addVignette(this, W, H)
     this.cameras.main.fadeIn(280, 4, 7, 12)
     // Mindest-Anzeigedauer: verschluckt auch den Druck, der hierher führte.
-    // game.loop.time statt this.time.now: Der Scene-Clock ist in create()
-    // noch veraltet — damit wäre die Sperre sofort abgelaufen.
-    this.sperre = this.game.loop.time + dauer * 1000
+    this.sperrDauer = dauer * 1000
+    this.sperrBis = -1
   }
 
   update(): void {
-    if (this.time.now < this.sperre) return
+    // Anker im ersten Update: Der Scene-Clock ist in create() noch veraltet.
+    if (this.sperrBis < 0) this.sperrBis = this.time.now + this.sperrDauer
+    if (this.time.now < this.sperrBis) return
     if (!inputManager.anyButtonJustPressed()) return
     if (this.phase < 3) {
       this.scene.restart({ phase: this.phase + 1 })

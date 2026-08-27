@@ -17,6 +17,7 @@ import { silhouettePaul } from '../gfx/PaulSilhouette'
 import { addSpeedStreaks, collectSparkle } from '../gfx/effects'
 import { inputManager } from '../input/InputManager'
 import { istTouchUiAktiv } from '../input/TouchControls'
+import { WISSEN_VOR_LEVEL } from '../gfx/wissen'
 import { GameAction } from '../input/actions'
 import { VIEW_ZOOM } from '../gfx/view'
 import { naechsterTubeScroll } from '../gfx/tubeKamera'
@@ -279,7 +280,11 @@ export class GameScene extends Phaser.Scene {
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         const next = this.levelIndex + 1
         if (next < configService.levels.length) {
-          this.scene.start('City', { toLevelIndex: next })
+          // ePA-Stationen bekommen statt des City-Laufs eine Lehrsequenz:
+          // erst verstehen, dann spielen (src/gfx/wissen.ts).
+          const wissen = WISSEN_VOR_LEVEL[configService.levels[next].id]
+          if (wissen) this.scene.start('Wissen', { id: wissen, toLevelIndex: next })
+          else this.scene.start('City', { toLevelIndex: next })
         } else {
           this.scene.start('Reward')
         }

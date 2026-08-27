@@ -599,14 +599,15 @@ export function zeichneZeitreise(
 
   // Zyklen zählen ab Szenenstart: Die Geschichte beginnt IMMER bei Zeile 1
   // bzw. Schritt 1 — nicht irgendwo mitten im globalen Takt.
-  // WICHTIG: game.loop.time, nicht scene.time.now — der Scene-Clock wird
-  // nur während Updates gestellt und ist in create() noch veraltet.
-  const t0 = scene.game.loop.time / 1000
+  // Der Anker wird erst im ersten Update gesetzt — nur EINE Uhr (Szenen-Uhr);
+  // ein Mix mit game.loop.time driftet nach Drosselung/Standby auseinander.
+  let t0 = -1
 
   const malLeben = (t: number): void => {
+    if (t0 < 0) t0 = t
     const l = leben
     l.clear()
-    const tz = t - t0
+    const tz = Math.max(0, t - t0)
 
     // Weiter-Zeile erst nach der Mindestdauer; vorher ein feiner Zeitbalken
     const frei = ZEITREISE_SPERRE[phase]
@@ -934,5 +935,6 @@ export function zeichneZeitreise(
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
     scene.events.off(Phaser.Scenes.Events.UPDATE, onUpdate)
   })
-  malLeben(scene.game.loop.time / 1000)
+  // Kein Initial-Render: Der würde t0 auf einer anderen Uhr ankern —
+  // der erste UPDATE kommt einen Frame später, das fadeIn deckt ihn.
 }

@@ -194,9 +194,9 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
   rezi.setScale(1.4)
 
   const leben = scene.add.graphics().setDepth(1)
-  // game.loop.time statt scene.time.now: Der Scene-Clock ist in create()
-  // noch veraltet (er wird nur während Updates gestellt).
-  const t0 = scene.game.loop.time / 1000
+  // Anker erst im ersten Update — nur EINE Uhr (Szenen-Uhr); ein Mix mit
+  // game.loop.time driftet nach Drosselung/Standby auseinander.
+  let t0 = -1
 
   /**
    * Choreografie: Position, Sprunghöhe, Animation, Blickrichtung.
@@ -228,7 +228,8 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
   }
 
   const malLeben = (t: number): void => {
-    const tz = t - t0
+    if (t0 < 0) t0 = t
+    const tz = Math.max(0, t - t0)
     const td = tz % RUNDE
     const l = leben
     l.clear()
@@ -298,5 +299,6 @@ export function zeichneTutorial(scene: Phaser.Scene, theme: Theme, W: number, H:
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
     scene.events.off(Phaser.Scenes.Events.UPDATE, onUpdate)
   })
-  malLeben(scene.game.loop.time / 1000)
+  // Kein Initial-Render: Der würde t0 auf einer anderen Uhr ankern —
+  // der erste UPDATE kommt einen Frame später, das fadeIn deckt ihn.
 }
