@@ -168,6 +168,16 @@ ist jetzt elastisch (Level._update_tube): sie fährt von selbst, wartet aber, so
 150 px vom linken Rand steht (Prüf-Podest, Krypto-Dusche), und eilt ihm nie davon; der
 rechte Rand bleibt eine weiche Grenze. Prüflauf-Bild 07z-tunnel-wartet.png.
 
+## Runde 6 (04.09.2026): Musik
+
+Die synthetischen Musikschleifen aus gen_assets.py sind durch vier lizenzfreie Stücke
+von Pixabay ersetzt (Pixabay Content License, Nachweise in `assets/audio/CREDITS.md`):
+Chiptune-Loop fürs Menü, Chiptune-Loop für die Stationen 01–05, Synthwave-Loop für
+Rechenzentrum und Archiv, ein Arcade-Stück mit eigenem Schluss für den Reward-Screen.
+Auswahl nach Loop-Tauglichkeit (keine Stille an den Enden), Lautheit auf −16 LUFS
+angeglichen (ffmpeg loudnorm), MP3 128 kbit/s; `Sfx._stream()` lädt MP3 vor WAV.
+The Sounds Resource bleibt außen vor (Spielrips ohne Nutzungsrecht).
+
 ## 5. Nicht tun
 
 Neon auf Kanten, Glühen für alles, mehr Sättigung, dunklere Paletten, KI-generierte Assets

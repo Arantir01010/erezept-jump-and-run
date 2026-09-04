@@ -189,7 +189,7 @@ empfohlen.
 |---|---|
 | `python godot/tools/sync_levels.py` | Level + Konfiguration aus `design/` und `public/config/` nach `godot/levels/_import/` und `godot/config/` kopieren |
 | `python godot/tools/build_levels.py` | **alle zehn Level** aus dem Generator bauen (Geometrie + Objekte) und die Erreichbarkeit prüfen (Sprung 3 hoch / ~6 weit, Bonus per REZI-Schub, Sprungfedern) |
-| `python godot/tools/gen_assets.py` | Klänge, Musik und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow` |
+| `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als MP3 von Pixabay, siehe `assets/audio/CREDITS.md` |
 | `powershell -ExecutionPolicy Bypass -File godot\tools\build.ps1` | Auslieferungspaket in `build/` (PCK + signierte Laufzeit + Verknüpfungen + EXE) |
 | `Godot … --headless --import` | Projekt-Cache aufbauen, Skriptfehler sehen (`SCRIPT ERROR`) |
 | `Godot … --headless --export-release "Windows" build/PaulUndRezi.exe` | Windows-Build (Preset in `export_presets.cfg`) |

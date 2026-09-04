@@ -291,7 +291,7 @@ func show_reward() -> void:
 	r.done.connect(show_title)
 	overlay.add_child(r)
 	_current = r
-	Sfx.music("music_title")
+	Sfx.music("music_reward", 0.8, false)   # einmalig, mit eigenem Schluss
 	_fade_in()
 
 

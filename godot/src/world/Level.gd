@@ -145,7 +145,8 @@ func setup(level_data: LevelData) -> void:
 		weather.build(pal, sun)
 	_max_progress = player.global_position.x
 	_started = true
-	Sfx.music("music_level")
+	# Zwei Level-Stücke: Chiptune in Praxis/Zugang, Synthwave im Rechenzentrum und Archiv
+	Sfx.music("music_level2" if data.theme_name in ["zentrale-zone", "akte"] else "music_level")
 
 
 ## Wievielte Station dieser Welt ist das aktuelle Level (0 = erste)? Zählt in der

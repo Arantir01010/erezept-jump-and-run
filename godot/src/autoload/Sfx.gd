@@ -11,6 +11,7 @@ var enabled := true        # Gesamtschalter aus der Konfiguration (audio)
 var music_on := true       # Nutzerwahl: Musik (Hauptmenü / Pause, gespeichert)
 var sound_on := true       # Nutzerwahl: Töne
 var _wanted := ""          # zuletzt gewünschte Musik — läuft an, sobald Musik wieder an ist
+var _wanted_loop := true
 var _streams := {}
 var _pool: Array[AudioStreamPlayer] = []
 var _music: AudioStreamPlayer
@@ -32,21 +33,38 @@ func _ready() -> void:
 	add_child(_music)
 
 
-func _stream(name: String, loop := false) -> AudioStreamWAV:
+## Klang oder Musik laden: MP3 (Musik aus lizenzfreien Quellen, siehe assets/audio/
+## CREDITS.md) hat Vorrang, sonst WAV (erzeugte Klänge aus gen_assets.py).
+func _stream(name: String, loop := false) -> AudioStream:
 	if _streams.has(name):
 		return _streams[name]
-	var path := DIR + name + ".wav"
-	var s: AudioStreamWAV = null
-	# Exportierter Build: Godot packt die importierte Ressource, nicht die Rohdatei
-	if ResourceLoader.exists(path):
-		s = load(path) as AudioStreamWAV
-		if s and loop:
-			s = s.duplicate()
-			s.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			s.loop_begin = 0
-			s.loop_end = s.data.size() / (2 * (2 if s.stereo else 1))
+	var s: AudioStream = null
+	var mp3 := DIR + name + ".mp3"
+	if ResourceLoader.exists(mp3):
+		var m := load(mp3) as AudioStreamMP3
+		if m:
+			m = m.duplicate()
+			m.loop = loop
+			s = m
+	elif FileAccess.file_exists(mp3):
+		var m2 := AudioStreamMP3.new()
+		m2.data = FileAccess.get_file_as_bytes(mp3)
+		m2.loop = loop
+		s = m2
 	if s == null:
-		s = _load_wav(path, loop)
+		var path := DIR + name + ".wav"
+		var w: AudioStreamWAV = null
+		# Exportierter Build: Godot packt die importierte Ressource, nicht die Rohdatei
+		if ResourceLoader.exists(path):
+			w = load(path) as AudioStreamWAV
+			if w and loop:
+				w = w.duplicate()
+				w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+				w.loop_begin = 0
+				w.loop_end = w.data.size() / (2 * (2 if w.stereo else 1))
+		if w == null:
+			w = _load_wav(path, loop)
+		s = w
 	_streams[name] = s
 	return s
 
@@ -114,7 +132,7 @@ func set_music(on: bool) -> void:
 		var w := _wanted
 		_music_name = ""
 		if w != "":
-			music(w)
+			music(w, 0.8, _wanted_loop)
 	else:
 		music_stop(0.4)
 		_wanted = _wanted   # bleibt gemerkt
@@ -157,12 +175,14 @@ func play(name: String, pitch := 1.0, vol_db := 0.0) -> void:
 	p.play()
 
 
-func music(name: String, fade := 0.8) -> void:
+## Musik wechseln (Überblendung). loop=false für einmalige Stücke (Reward).
+func music(name: String, fade := 0.8, loop := true) -> void:
 	_wanted = name
+	_wanted_loop = loop
 	if not enabled or not music_on or _music_name == name:
 		return
 	_music_name = name
-	var s := _stream(name, true)
+	var s := _stream(name, loop)
 	if s == null:
 		return
 	if _music_tween:
@@ -178,7 +198,7 @@ func music(name: String, fade := 0.8) -> void:
 	_music_tween.tween_property(_music, "volume_db", -14.0, fade)
 
 
-func _swap_music(s: AudioStreamWAV) -> void:
+func _swap_music(s: AudioStream) -> void:
 	_music.stream = s
 	_music.play()
 
