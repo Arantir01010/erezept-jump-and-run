@@ -66,7 +66,7 @@ def run(*cmd: str, cwd: Path | None = None, check: bool = True, capture: bool = 
 def export() -> None:
     if not GODOT.exists():
         raise SystemExit(f"Godot fehlt: {GODOT}")
-    print("== Web-Export (Preset „Web")")
+    print("== Web-Export (Preset Web)")
     run(str(GODOT), "--headless", "--path", "godot", "--export-release", "Web", "build-web/index.html")
 
 
