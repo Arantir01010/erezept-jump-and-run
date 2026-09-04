@@ -18,6 +18,10 @@ run/low_processor_mode=false
 boot_splash/show_image=false
 boot_splash/bg_color=Color(0.03, 0.05, 0.09, 1)
 
+[internationalization]
+
+locale/fallback="de"
+
 [autoload]
 
 Game="*res://src/autoload/Game.gd"

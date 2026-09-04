@@ -4,7 +4,10 @@ extends CanvasLayer
 ## Hülle-Anzeige (Farbe UND Form UND Text — Barrierefreiheit), Karten,
 ## Titel-Einblendung beim Levelstart, Kombo-Anzeige.
 
+signal pause_requested
+
 var level: Level
+var pause_btn: _PauseButton
 var station: Label
 var route: _Route
 var bits_label: Label
@@ -53,6 +56,11 @@ func _ready() -> void:
 	score_label.custom_minimum_size = Vector2(150, 0)
 	time_label = _pill(root, Vector2(1560, 78), 20)
 	time_label.custom_minimum_size = Vector2(330, 0)
+	# Pause-Knopf (Maus und Finger) zwischen Streckenkarte und Zählern
+	pause_btn = _PauseButton.new()
+	pause_btn.position = Vector2(1478, 18)
+	pause_btn.pressed.connect(func(): pause_requested.emit())
+	root.add_child(pause_btn)
 
 	# Hülle-Anzeige unten links
 	huelle_box = PanelContainer.new()
@@ -357,6 +365,29 @@ class _Cards extends Control:
 			draw_set_transform(center, 0.0, Vector2(s, s))
 			KartenFx.draw_card(self, Rect2(-ICON / 2.0, ICON), card, mode)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## Runder Pause-Knopf: zwei Balken, Pille im PwC-Look. Finger kommt als Maus an
+## (emulate_mouse_from_touch), deshalb nur Mausereignisse — sonst zweimal.
+class _PauseButton extends Control:
+	signal pressed
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		custom_minimum_size = Vector2(56, 56)
+		size = Vector2(56, 56)
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			accept_event()
+			pressed.emit()
+
+	func _draw() -> void:
+		var c := size / 2.0
+		draw_circle(c, 27.0, Brand.UI_PANEL)
+		draw_arc(c, 27.0, 0.0, TAU, 48, Brand.UI_BORDER, 1.5, true)
+		draw_rect(Rect2(c + Vector2(-10, -11), Vector2(7, 22)), Palette.WHITE)
+		draw_rect(Rect2(c + Vector2(3, -11), Vector2(7, 22)), Palette.WHITE)
 
 
 class _Route extends Control:

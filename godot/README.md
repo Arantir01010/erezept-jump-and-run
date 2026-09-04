@@ -37,7 +37,17 @@ steuert Bildschirm-Knüppel, Knopfnamen und Hinweistexte im ganzen Durchlauf; na
 Idle-Reset zeigt das Menü die zuletzt gewählte Bedienung vor, sonst Touch auf Touchscreens.
 
 Tasten: Pfeile/WASD laufen & ducken · LEERTASTE springen (in der Luft nochmal = REZI-Schub) ·
-E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln · F11 Vollbild · F12 Screenshot.
+E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln · ESC/P Pause · F2 Sprache · F3 Musik ·
+F4 Töne · F11 Vollbild · F12 Screenshot.
+
+**Pause und Klang:** ESC, P, der START-Knopf am Gamepad oder der runde Pause-Knopf oben im
+HUD (Finger/Maus) halten das Level an. Das Pausenmenü (`src/ui/PauseMenu.gd`) bietet
+Weiter, Musik an/aus, Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion,
+Tipp oder Klick. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
+(zwei Pillen, F3/F4); die Wahl liegt in `user://einstellungen.cfg` und überlebt Neustart
+und Idle-Reset. In der Pause läuft der Idle-Reset weiter (Messe: wer weggeht, landet
+wieder im Hauptmenü). `--test-eingabe=-,-,-,-,ESC,-,F12,DOWN,DOWN,SPACE,-,F12,ESC` prüft
+den Weg Taste → Pause → Menü.
 Arcade-Encoder: Belegung aus `config/input-bindings.json` (identisch zur Phaser-Fassung).
 
 ## Sprachen
@@ -73,6 +83,7 @@ Hauptmenü (Klinikum, Bedienungswahl)  →  FRÜHER  →  HEUTE  →  SO SPIELST
 
 | Screen | Datei | Inhalt |
 |---|---|---|
+| Pause | `src/ui/PauseMenu.gd` | Overlay über dem Level (Baum angehalten): Weiter, Musik an/aus, Töne an/aus, Zum Hauptmenü; Idle-Reset läuft weiter. |
 | Stations-Briefing | `src/ui/Briefing.gd` + `src/ui/BriefingDaten.gd` | Vor jeder der zehn Stationen: was in der Wirklichkeit passiert, 4–5 laienverständliche Zeilen im Takt, animierte Mini-Szene der Mechanik, „Das tust du" mit den Knopfnamen der gewählten Bedienung, Leiste aller Bausteine des Levels (aus `level.json` + `layout.txt`). Oben die Reiseroute der zehn Stationen (Haken für geschaffte, die aktuelle pulsiert), Bühnenlicht auf der Szene, die Bausteine treten nacheinander hervor. Inhalte in `BriefingDaten.STATIONEN`; Prüfschalter `--shots=<dir> --shots-briefings` fotografiert alle zehn. |
 
 **Erzählband:** Alle Erzählzeilen (FRÜHER, HEUTE, ePA-Wissen, Briefings) stehen in einem

@@ -16,6 +16,7 @@ var touch: TouchControls
 var fade: ColorRect
 var _wipe: ShaderMaterial
 var level: Level
+var pause_menu: PauseMenu
 var _current: Node
 var _level_index := 0
 
@@ -61,6 +62,7 @@ func _ready() -> void:
 	hud.layer = 20
 	add_child(hud)
 	hud.visible = false
+	hud.pause_requested.connect(toggle_pause)
 
 	touch = TouchControls.new()
 	add_child(touch)
@@ -98,7 +100,43 @@ func _process(_delta: float) -> void:
 		show_title()
 
 
+## Pause (ESC, P, START, HUD-Knopf) — nur im Level; das Menü übernimmt Fortsetzen.
+func _unhandled_input(event: InputEvent) -> void:
+	if screen == Screen.LEVEL and pause_menu == null and event.is_action_pressed("pause"):
+		get_viewport().set_input_as_handled()
+		toggle_pause()
+
+
+func toggle_pause() -> void:
+	if pause_menu != null:
+		_resume()
+		return
+	if screen != Screen.LEVEL or not is_instance_valid(level):
+		return
+	pause_menu = PauseMenu.new()
+	pause_menu.station_name = level.data.name_text()
+	pause_menu.resumed.connect(_resume)
+	pause_menu.quit_to_title.connect(func():
+		_resume()
+		show_title())
+	add_child(pause_menu)
+	get_tree().paused = true
+	Sfx.play("ui")
+	Sfx.music_pause(true)
+
+
+func _resume() -> void:
+	if pause_menu == null:
+		return
+	pause_menu.queue_free()
+	pause_menu = null
+	get_tree().paused = false
+	Sfx.music_pause(false)
+
+
 func _set_screen(s: Screen) -> void:
+	if pause_menu != null:
+		_resume()
 	screen = s
 	hud.visible = s == Screen.LEVEL
 	touch.set_active(s == Screen.LEVEL)

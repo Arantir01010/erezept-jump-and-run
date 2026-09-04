@@ -180,7 +180,7 @@ func _unhandled_input(event: InputEvent) -> void:
 static func is_press(event: InputEvent) -> bool:
 	if event is InputEventKey:
 		var k := event as InputEventKey
-		if not k.pressed or k.echo:
+		if not k.pressed or k.echo or k.keycode == KEY_ESCAPE:
 			return false
 		return k.keycode < KEY_F1 or k.keycode > KEY_F12
 	if event is InputEventJoypadButton:

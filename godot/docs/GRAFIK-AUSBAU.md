@@ -154,6 +154,14 @@ Mechanik (TranslationServer, auto_translate der Labels, `tr()` für formatierte 
 Schrift-Fallback, erzeugt aus den Übersetzungen (`tools/gen_i18n_fonts.py`). Geprüft mit
 Prüfläufen in zh, hi und fr über den ganzen Ablauf und einem F2-Tastentest.
 
+## Runde 5 (04.09.2026): Pause, Musik und Töne
+
+Pause im Level (ESC/P, START am Gamepad, Pause-Knopf im HUD für Finger und Maus) mit
+Menü Weiter / Musik / Töne / Hauptmenü (`src/ui/PauseMenu.gd`, Baum angehalten, Musik
+geduckt, Idle-Reset läuft weiter). Musik und Töne getrennt schaltbar, auch oben links im
+Hauptmenü (F3/F4), gespeichert in `user://einstellungen.cfg` (`Sfx.set_music/set_sound`).
+Geprüft mit Tastentests (F3/F4 im Menü; ESC → Menü → Töne aus → ESC im Level).
+
 ## 5. Nicht tun
 
 Neon auf Kanten, Glühen für alles, mehr Sättigung, dunklere Paletten, KI-generierte Assets

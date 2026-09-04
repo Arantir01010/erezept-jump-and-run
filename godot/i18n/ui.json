@@ -128,5 +128,16 @@
   "%s: Weiter!": {"en": "%s: Next!", "fr": "%s : Suite !", "es": "%s: ¡Siguiente!", "zh": "%s：继续！", "hi": "%s: आगे!"},
   "%s: Los geht's!": {"en": "%s: Let's go!", "fr": "%s : C'est parti !", "es": "%s: ¡Vamos!", "zh": "%s：出发！", "hi": "%s: चलो!"},
   "%s: Und heute?": {"en": "%s: And today?", "fr": "%s : Et aujourd'hui ?", "es": "%s: ¿Y hoy?", "zh": "%s：那么今天呢？", "hi": "%s: और आज?"},
-  "%s: Zum Probelauf!": {"en": "%s: To the trial run!", "fr": "%s : Vers l'essai !", "es": "%s: ¡A la prueba!", "zh": "%s：去试玩！", "hi": "%s: ट्रायल रन की ओर!"}
+  "%s: Zum Probelauf!": {"en": "%s: To the trial run!", "fr": "%s : Vers l'essai !", "es": "%s: ¡A la prueba!", "zh": "%s：去试玩！", "hi": "%s: ट्रायल रन की ओर!"},
+
+  "PAUSE": {"en": "PAUSE", "fr": "PAUSE", "es": "PAUSA", "zh": "暂停", "hi": "विराम"},
+  "Weiter": {"en": "Continue", "fr": "Continuer", "es": "Continuar", "zh": "继续", "hi": "जारी रखो"},
+  "Musik: an": {"en": "Music: on", "fr": "Musique : oui", "es": "Música: sí", "zh": "音乐：开", "hi": "संगीत: चालू"},
+  "Musik: aus": {"en": "Music: off", "fr": "Musique : non", "es": "Música: no", "zh": "音乐：关", "hi": "संगीत: बंद"},
+  "Töne: an": {"en": "Sounds: on", "fr": "Sons : oui", "es": "Sonidos: sí", "zh": "音效：开", "hi": "ध्वनि: चालू"},
+  "Töne: aus": {"en": "Sounds: off", "fr": "Sons : non", "es": "Sonidos: no", "zh": "音效：关", "hi": "ध्वनि: बंद"},
+  "Zum Hauptmenü": {"en": "To the main menu", "fr": "Vers le menu principal", "es": "Al menú principal", "zh": "返回主菜单", "hi": "मुख्य मेनू पर"},
+  "MUSIK": {"en": "MUSIC", "fr": "MUSIQUE", "es": "MÚSICA", "zh": "音乐", "hi": "संगीत"},
+  "TÖNE": {"en": "SOUNDS", "fr": "SONS", "es": "SONIDOS", "zh": "音效", "hi": "ध्वनि"},
+  "%s: wählen · %s: bestätigen · ESC: weiter": {"en": "%s: choose · %s: confirm · ESC: resume", "fr": "%s : choisir · %s : valider · ÉCHAP : reprendre", "es": "%s: elegir · %s: confirmar · ESC: seguir", "zh": "%s：选择 · %s：确认 · ESC：继续", "hi": "%s: चुनो · %s: पुष्टि · ESC: जारी रखो"}
 }

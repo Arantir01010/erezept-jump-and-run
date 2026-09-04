@@ -106,8 +106,6 @@ func _load_translations() -> void:
 		return
 	var by_lang := {}
 	for lc in LANGS:
-		if lc == "de":
-			continue
 		var tl := Translation.new()
 		tl.locale = lc
 		by_lang[lc] = tl
@@ -122,6 +120,9 @@ func _load_translations() -> void:
 						continue
 					var row = d[key]
 					if row is Dictionary:
+						# Deutsch = der Schlüssel selbst; ohne diesen Eintrag griffe Godots
+						# Fallback-Sprache (en) und Deutsch erschiene englisch.
+						(by_lang["de"] as Translation).add_message(str(key), str(key))
 						for lc in row:
 							if by_lang.has(lc) and str(row[lc]) != "":
 								(by_lang[lc] as Translation).add_message(str(key), str(row[lc]))

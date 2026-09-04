@@ -30,6 +30,7 @@ var _grip := 0.0
 
 func _ready() -> void:
 	layer = 30
+	process_mode = Node.PROCESS_MODE_ALWAYS   # Testeinspielung läuft auch in der Pause
 	buttons = [
 		{"action": "jump", "label": "SPRUNG", "pos": Vector2(1700, 860), "r": 96.0, "color": Color(0.98, 0.36, 0.32), "finger": -1},
 		{"action": "action", "label": "AKTION", "pos": Vector2(1470, 920), "r": 66.0, "color": Color(0.36, 0.64, 0.98), "finger": -1},
@@ -67,6 +68,8 @@ func _release_all() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if get_tree().paused:
+		return   # in der Pause gehören Tipps dem Pausenmenü
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		if event.device == InputEvent.DEVICE_ID_EMULATION:
 			return

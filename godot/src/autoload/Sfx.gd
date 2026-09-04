@@ -5,8 +5,12 @@ extends Node
 
 const DIR := "res://assets/audio/"
 const POOL_SIZE := 10
+const SETTINGS := "user://einstellungen.cfg"
 
-var enabled := true
+var enabled := true        # Gesamtschalter aus der Konfiguration (audio)
+var music_on := true       # Nutzerwahl: Musik (Hauptmenü / Pause, gespeichert)
+var sound_on := true       # Nutzerwahl: Töne
+var _wanted := ""          # zuletzt gewünschte Musik — läuft an, sobald Musik wieder an ist
 var _streams := {}
 var _pool: Array[AudioStreamPlayer] = []
 var _music: AudioStreamPlayer
@@ -15,7 +19,9 @@ var _music_tween: Tween
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS   # Klänge und Musik auch in der Pause
 	enabled = bool(Game.config.get("audio", true))
+	_load_settings()
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
 		p.bus = "Master"
@@ -85,9 +91,53 @@ static func _load_wav(path: String, loop: bool) -> AudioStreamWAV:
 	return s
 
 
+## Nutzerwahl Musik/Töne aus user://einstellungen.cfg (überlebt Neustart und Idle-Reset).
+func _load_settings() -> void:
+	var cf := ConfigFile.new()
+	if cf.load(SETTINGS) == OK:
+		music_on = bool(cf.get_value("audio", "musik", true))
+		sound_on = bool(cf.get_value("audio", "toene", true))
+
+
+func _save_settings() -> void:
+	var cf := ConfigFile.new()
+	cf.set_value("audio", "musik", music_on)
+	cf.set_value("audio", "toene", sound_on)
+	cf.save(SETTINGS)
+
+
+## Musik an/aus: aus blendet die laufende Musik weg, an startet die zuletzt gewünschte.
+func set_music(on: bool) -> void:
+	music_on = on
+	_save_settings()
+	if on:
+		var w := _wanted
+		_music_name = ""
+		if w != "":
+			music(w)
+	else:
+		music_stop(0.4)
+		_wanted = _wanted   # bleibt gemerkt
+
+
+func set_sound(on: bool) -> void:
+	sound_on = on
+	_save_settings()
+
+
+## Pause: Musik leiser (bleibt hörbar), Fortsetzen holt sie zurück.
+func music_pause(on: bool) -> void:
+	if not _music.playing:
+		return
+	if _music_tween:
+		_music_tween.kill()
+	_music_tween = create_tween()
+	_music_tween.tween_property(_music, "volume_db", -26.0 if on else -14.0, 0.3)
+
+
 ## Einen Klang abspielen. pitch 1.0 = original, vol in dB relativ.
 func play(name: String, pitch := 1.0, vol_db := 0.0) -> void:
-	if not enabled:
+	if not enabled or not sound_on:
 		return
 	var s := _stream(name)
 	if s == null:
@@ -108,7 +158,8 @@ func play(name: String, pitch := 1.0, vol_db := 0.0) -> void:
 
 
 func music(name: String, fade := 0.8) -> void:
-	if not enabled or _music_name == name:
+	_wanted = name
+	if not enabled or not music_on or _music_name == name:
 		return
 	_music_name = name
 	var s := _stream(name, true)
@@ -134,6 +185,8 @@ func _swap_music(s: AudioStreamWAV) -> void:
 
 func music_stop(fade := 0.6) -> void:
 	_music_name = ""
+	if not _music.playing:
+		return
 	if _music_tween:
 		_music_tween.kill()
 	_music_tween = create_tween()

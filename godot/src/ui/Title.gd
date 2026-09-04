@@ -21,6 +21,12 @@ const FLAG_H := 9.5
 const FLAG_Y := 8.0
 const FLAG_X0 := 524.0
 const FLAG_STEP := 18.0
+## Musik/Töne-Schalter oben links (F3 / F4)
+const SND_X0 := 12.0
+const SND_Y := 8.0
+const SND_W := 30.0
+const SND_H := 10.0
+const SND_STEP := 34.0
 
 const BODEN := 320.0
 const HAUS := {"links": 84.0, "rechts": 484.0, "dach": 138.0}
@@ -49,6 +55,7 @@ var mode := "keyboard"
 var _pills: Array = []
 var _legend: Array = []
 var _lang_label: Label
+var _snd_labels: Array = []
 const PILL_KEYBOARD := Rect2(452, 316, 104, 14)
 const PILL_TOUCH := Rect2(562, 316, 66, 14)
 
@@ -103,6 +110,10 @@ func _build() -> void:
 	mode = Kiosk.suggested_input_mode()
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
 		{"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(1, 0.5)})
+	_snd_labels = [
+		label(SND_X0 + 13.0, SND_Y + SND_H / 2, "MUSIK", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+		label(SND_X0 + SND_STEP + 13.0, SND_Y + SND_H / 2, "TÖNE", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+	]
 
 	# ---- Tafel links: Veranstaltung, Steuerung, Rechtshinweis ----
 	label(9, 290, str(Game.config.get("event", "Messe-Prototyp")), 4.4, {"color": Pen.hex(0xffd75e), "spacing": 0.4, "origin": Vector2(0, 0.5)})
@@ -215,11 +226,20 @@ func _pill_at(screen_pos: Vector2) -> String:
 func _unhandled_input(event: InputEvent) -> void:
 	if _done:
 		return
-	# F2 blättert durch die Sprachen (Tastatur/Arcade ohne Maus)
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F2:
-		_cycle_lang()
-		get_viewport().set_input_as_handled()
-		return
+	# F2 blättert durch die Sprachen, F3 Musik, F4 Töne (Tastatur/Arcade ohne Maus)
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_F2:
+			_cycle_lang()
+			get_viewport().set_input_as_handled()
+			return
+		if event.physical_keycode == KEY_F3:
+			_toggle_sound("musik")
+			get_viewport().set_input_as_handled()
+			return
+		if event.physical_keycode == KEY_F4:
+			_toggle_sound("toene")
+			get_viewport().set_input_as_handled()
+			return
 	# Links = Tastatur/Arcade (linkes Feld), Rechts = Touch (rechtes Feld); kein Umschalt-Flackern bei Analog-Stick
 	if event.is_action_pressed("move_left"):
 		_select("keyboard")
@@ -236,6 +256,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if flag != "":
 			_choose_lang(flag)
 			return
+		var snd := _snd_at(event.position)
+		if snd != "":
+			_toggle_sound(snd)
+			return
 		var hit := _pill_at(event.position)
 		_start_with(hit if hit != "" else "touch")
 		return
@@ -244,6 +268,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if flag_m != "":
 			_choose_lang(flag_m)
 			return
+		var snd_m := _snd_at(event.position)
+		if snd_m != "":
+			_toggle_sound(snd_m)
+			return
 		var hit := _pill_at(event.position)
 		if hit != "":
 			_start_with(hit)
@@ -251,6 +279,61 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not is_press(event) or tz < sperre:
 		return
 	_start_with(mode)
+
+
+# ------------------------------------------------------------- Musik & Töne
+
+func _snd_rect(i: int) -> Rect2:
+	return Rect2(SND_X0 + i * SND_STEP, SND_Y, SND_W, SND_H)
+
+
+func _snd_at(screen_pos: Vector2) -> String:
+	var d := screen_pos / S
+	if _snd_rect(0).grow(3.0).has_point(d):
+		return "musik"
+	if _snd_rect(1).grow(3.0).has_point(d):
+		return "toene"
+	return ""
+
+
+func _toggle_sound(which: String) -> void:
+	if which == "musik":
+		Sfx.set_music(not Sfx.music_on)
+	else:
+		Sfx.set_sound(not Sfx.sound_on)
+	Sfx.play("tick")
+	_sync_sound_labels()
+
+
+func _sync_sound_labels() -> void:
+	if _snd_labels.size() == 2:
+		(_snd_labels[0] as Label).modulate.a = 1.0 if Sfx.music_on else 0.45
+		(_snd_labels[1] as Label).modulate.a = 1.0 if Sfx.sound_on else 0.45
+
+
+## Zwei Pillen: Note (Musik) und Lautsprecher (Töne); aus = matt mit rotem Strich.
+func _draw_sound(c: CanvasItem) -> void:
+	_sync_sound_labels()
+	for i in 2:
+		var r := _snd_rect(i)
+		var an: bool = Sfx.music_on if i == 0 else Sfx.sound_on
+		Pen.rrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Color(0.176, 0.176, 0.176, 0.9 if an else 0.65))
+		Pen.srrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Brand.UI_ACCENT if an else Color(1, 1, 1, 0.18), 1.0 if an else 0.7)
+		var ix := r.position.x + 6.5
+		var iy := r.position.y + r.size.y / 2
+		var ic := Brand.UI_ACCENT if an else Pen.hex(0xdfe6f0, 0.6)
+		if i == 0:
+			Pen.circle(c, ix - 1.2, iy + 2.0, 1.5, ic)
+			Pen.rect(c, ix + 0.1, iy - 3.4, 0.8, 5.4, ic)
+			Pen.tri(c, ix + 0.1, iy - 3.4, ix + 3.2, iy - 2.2, ix + 0.1, iy - 1.6, ic)
+		else:
+			Pen.rect(c, ix - 3.2, iy - 1.3, 2.0, 2.6, ic)
+			Pen.tri(c, ix - 1.2, iy - 1.3, ix + 1.0, iy - 3.2, ix + 1.0, iy + 3.2, ic)
+			Pen.tri(c, ix - 1.2, iy + 1.3, ix + 1.0, iy + 3.2, ix - 1.2, iy - 1.3, ic)
+			Pen.arc(c, ix + 1.0, iy, 2.6, -0.9, 0.9, ic, 0.6)
+			Pen.arc(c, ix + 1.0, iy, 4.0, -0.8, 0.8, Pen.alpha(ic, 0.7), 0.6)
+		if not an:
+			Pen.line(c, ix - 4.0, iy + 4.0, ix + 5.0, iy - 4.0, Pen.DENY_COL, 1.0)
 
 
 # ------------------------------------------------------------------ Sprachen
@@ -936,6 +1019,7 @@ func _draw_life(c: CanvasItem) -> void:
 	# ---- Bedienungswahl (über dem Band, unter den Schriften) ----
 	_draw_pills(c)
 	_draw_flags(c)
+	_draw_sound(c)
 
 
 func _bett(c: CanvasItem, x: float, y_boden: float, decke: Color, haut: Color, phase: float) -> void:

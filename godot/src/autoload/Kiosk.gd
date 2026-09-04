@@ -20,7 +20,7 @@ const KEY_NAMES := {
 	"A": KEY_A, "B": KEY_B, "C": KEY_C, "D": KEY_D, "E": KEY_E, "F": KEY_F, "G": KEY_G,
 	"H": KEY_H, "I": KEY_I, "J": KEY_J, "K": KEY_K, "L": KEY_L, "M": KEY_M, "N": KEY_N,
 	"O": KEY_O, "P": KEY_P, "Q": KEY_Q, "R": KEY_R, "S": KEY_S, "T": KEY_T, "U": KEY_U,
-	"V": KEY_V, "W": KEY_W, "X": KEY_X, "Y": KEY_Y, "Z": KEY_Z, "CTRL": KEY_CTRL, "F2": KEY_F2,
+	"V": KEY_V, "W": KEY_W, "X": KEY_X, "Y": KEY_Y, "Z": KEY_Z, "CTRL": KEY_CTRL, "F2": KEY_F2, "F3": KEY_F3, "F4": KEY_F4,
 }
 
 var kiosk_mode := false
@@ -148,6 +148,17 @@ func _build_input_map() -> void:
 		InputMap.action_add_event("confirm", ev)
 	for ev in InputMap.action_get_events("action"):
 		InputMap.action_add_event("confirm", ev)
+	# Pause im Level: ESC, P, Gamepad START/BACK
+	if not InputMap.has_action("pause"):
+		InputMap.add_action("pause")
+	var esc := InputEventKey.new()
+	esc.physical_keycode = KEY_ESCAPE
+	InputMap.action_add_event("pause", esc)
+	var pk := InputEventKey.new()
+	pk.physical_keycode = KEY_P
+	InputMap.action_add_event("pause", pk)
+	_add_joy_button("pause", JOY_BUTTON_START)
+	_add_joy_button("pause", JOY_BUTTON_BACK)
 
 
 static func _add_joy_button(action: String, button: int) -> void:
