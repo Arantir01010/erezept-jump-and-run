@@ -80,6 +80,7 @@ func _ready() -> void:
 	bubble_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	bubble_label.custom_minimum_size = Vector2(300, 0)
 	bubble_label.add_theme_font_size_override("font_size", 22)
+	bubble_label.add_theme_font_override("font", Brand.sans("medium"))   # Markenschrift mit CJK/Devanagari-Fallback
 	bubble_label.add_theme_color_override("font_color", Palette.WHITE)
 	bubble.add_child(bubble_label)
 	bubble.visible = false

@@ -29,8 +29,8 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 | `--lang=<code>` | Sprache de / en / fr / es / zh / hi (im Browser `?lang=fr`) |
 | `--test-eingabe=F12,RIGHT,SPACE,-,F12` | echte Tastenereignisse alle 0,7 s einspielen (`-` = Pause, `F12` = Screenshot nach `user://`), danach Ende — prüft Menü und Bedienungswahl ohne Hand am Gerät |
 
-**Bedienungswahl im Hauptmenü:** Zwei Felder über der Start-Zeile, „TASTATUR · ARCADE" und
-„TOUCH". Links/Rechts (Pfeile, WASD, Joystick) wechseln, Leertaste/roter Knopf startet mit
+**Bedienungswahl im Hauptmenü:** Ein Segment-Schalter oben mittig, „TASTATUR · ARCADE" und
+„TOUCH" (Feldbreiten folgen dem übersetzten Text). Links/Rechts (Pfeile, WASD, Joystick) wechseln, Leertaste/roter Knopf startet mit
 der markierten Bedienung; ein Fingertipp auf ein Feld startet direkt damit, ein Tipp
 irgendwo sonst startet mit Touch, ein Mausklick nur auf ein Feld. Die Wahl (`Kiosk.input_mode`)
 steuert Bildschirm-Knüppel, Knopfnamen und Hinweistexte im ganzen Durchlauf; nach dem

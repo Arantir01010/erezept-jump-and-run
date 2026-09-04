@@ -21,12 +21,11 @@ const FLAG_H := 9.5
 const FLAG_Y := 8.0
 const FLAG_X0 := 524.0
 const FLAG_STEP := 18.0
-## Musik/Töne-Schalter oben links (F3 / F4)
+## Musik/Töne-Schalter oben links (F3 / F4); Breite folgt dem übersetzten Text
 const SND_X0 := 12.0
 const SND_Y := 8.0
-const SND_W := 30.0
 const SND_H := 10.0
-const SND_STEP := 34.0
+var _snd_rects: Array = []
 
 const BODEN := 320.0
 const HAUS := {"links": 84.0, "rechts": 484.0, "dach": 138.0}
@@ -56,9 +55,10 @@ var _pills: Array = []
 var _legend: Array = []
 var _lang_label: Label
 var _snd_labels: Array = []
-const PILL_KEYBOARD := Rect2(452, 316, 104, 14)
-const PILL_TOUCH := Rect2(556, 316, 72, 14)
-const PILL_BOX := Rect2(452, 316, 176, 14)   # Segment-Schalter: beide Felder in einem Rahmen
+## Bedienungswahl: Segment-Schalter oben mittig, Feldbreiten folgen dem übersetzten Text
+const PILL_Y := 8.0
+const PILL_H := 14.0
+var _pill_box := Rect2()
 var _seg := 0.0                                # 0 = Tastatur, 1 = Touch (gleitet beim Wechsel)
 
 
@@ -105,19 +105,36 @@ func _build() -> void:
 	press = label(W - 12, 340, "", 12, {"color": Pen.hex(0xffd591), "spacing": 0.5, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 
 	# ---- Bedienungswahl: zwei Felder über der Start-Zeile ----
+	# Felder so breit wie ihr (übersetzter) Text + Symbol, der Rahmen mittig am oberen Rand
+	var lk := label(0, PILL_Y + PILL_H / 2, "TASTATUR · ARCADE", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
+	var lt := label(0, PILL_Y + PILL_H / 2, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
+	var wk := 19.0 + lk.size.x / S + 8.0
+	var wt := 19.0 + lt.size.x / S + 8.0
+	var x0 := roundf(320.0 - (wk + wt) / 2.0)
+	_pill_box = Rect2(x0, PILL_Y, wk + wt, PILL_H)
 	_pills = [
-		{"mode": "keyboard", "rect": PILL_KEYBOARD, "label": label(PILL_KEYBOARD.position.x + 19, 323, "TASTATUR · ARCADE", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
-		{"mode": "touch", "rect": PILL_TOUCH, "label": label(PILL_TOUCH.position.x + 19, 323, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
+		{"mode": "keyboard", "rect": Rect2(x0, PILL_Y, wk, PILL_H), "label": lk},
+		{"mode": "touch", "rect": Rect2(x0 + wk, PILL_Y, wt, PILL_H), "label": lt},
 	]
-	label(PILL_BOX.end.x, 309.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Pen.hex(0xffd591), "spacing": 1.2, "origin": Vector2(1, 0.5)})
+	for p in _pills:
+		var r: Rect2 = p["rect"]
+		_place(p["label"], r.position.x + 19.0, PILL_Y + PILL_H / 2)
+	label(320, PILL_Y + PILL_H + 5.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Pen.hex(0xffd591), "spacing": 1.2})
 	mode = Kiosk.suggested_input_mode()
 	_seg = 1.0 if mode == "touch" else 0.0
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
 		{"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(1, 0.5)})
 	_snd_labels = [
-		label(SND_X0 + 13.0, SND_Y + SND_H / 2, "MUSIK", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
-		label(SND_X0 + SND_STEP + 13.0, SND_Y + SND_H / 2, "TÖNE", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+		label(0, SND_Y + SND_H / 2, "MUSIK", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+		label(0, SND_Y + SND_H / 2, "TÖNE", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
 	]
+	_snd_rects = []
+	var sx := SND_X0
+	for l in _snd_labels:
+		var w: float = 15.0 + (l as Label).size.x / S + 5.0
+		_snd_rects.append(Rect2(sx, SND_Y, w, SND_H))
+		_place(l, sx + 15.0, SND_Y + SND_H / 2)
+		sx += w + 4.0
 
 	# ---- Tafel links: Veranstaltung, Steuerung, Rechtshinweis ----
 	label(9, 290, str(Game.config.get("event", "Messe-Prototyp")), 4.4, {"color": Pen.hex(0xffd75e), "spacing": 0.4, "origin": Vector2(0, 0.5)})
@@ -190,6 +207,11 @@ func _apply_mode() -> void:
 	for p in _pills:
 		var l: Label = p["label"]
 		l.modulate.a = 1.0 if p["mode"] == mode else 0.62
+
+
+## Label links-mittig an (x, y) im Design-Raum setzen.
+func _place(l: Label, x: float, y: float) -> void:
+	l.position = (Vector2(x, y) * S - Vector2(0, l.size.y * 0.5)).round()
 
 
 ## Label-Text ändern und die Ausrichtung im Design-Raum erhalten.
@@ -288,7 +310,9 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------- Musik & Töne
 
 func _snd_rect(i: int) -> Rect2:
-	return Rect2(SND_X0 + i * SND_STEP, SND_Y, SND_W, SND_H)
+	if i < _snd_rects.size():
+		return _snd_rects[i]
+	return Rect2(SND_X0 + i * 34.0, SND_Y, 30.0, SND_H)
 
 
 func _snd_at(screen_pos: Vector2) -> String:
@@ -436,18 +460,22 @@ static func _star(c: CanvasItem, cx: float, cy: float, r: float, col: Color) -> 
 ## sich orange (PwC-Akzent) mit weißer Schrift und gleitet beim Wechsel; Symbole:
 ## Tastenreihe mit Leertaste, Fingertipp mit Wellen.
 func _draw_pills(c: CanvasItem) -> void:
-	var b := PILL_BOX
+	if _pills.size() < 2:
+		return
+	var b := _pill_box
+	var rk: Rect2 = _pills[0]["rect"]
+	var rt: Rect2 = _pills[1]["rect"]
 	Pen.rrect(c, b.position.x + 0.6, b.position.y + 1.0, b.size.x, b.size.y, 4, Color(0, 0, 0, 0.35))
 	Pen.rrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(0.05, 0.07, 0.12, 0.92))
 	Pen.srrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(1, 1, 1, 0.16), 0.7)
 	# gleitende Füllung
-	var sx := lerpf(PILL_KEYBOARD.position.x, PILL_TOUCH.position.x, _seg)
-	var sw := lerpf(PILL_KEYBOARD.size.x, PILL_TOUCH.size.x, _seg)
+	var sx := lerpf(rk.position.x, rt.position.x, _seg)
+	var sw := lerpf(rk.size.x, rt.size.x, _seg)
 	Pen.rrect(c, sx + 1.2, b.position.y + 1.2, sw - 2.4, b.size.y - 2.4, 3, Brand.UI_ACCENT)
 	Pen.rect(c, sx + 4, b.position.y + 1.9, sw - 8, 0.6, Color(1, 1, 1, 0.28))
 	Pen.rect(c, sx + 4, b.end.y - 2.3, sw - 8, 0.6, Color(0, 0, 0, 0.18))
 	# feine Trennlinie zwischen den Feldern (nur sichtbar, wo keine Füllung liegt)
-	Pen.rect(c, PILL_TOUCH.position.x - 0.3, b.position.y + 3, 0.6, b.size.y - 6, Color(1, 1, 1, 0.10))
+	Pen.rect(c, rt.position.x - 0.3, b.position.y + 3, 0.6, b.size.y - 6, Color(1, 1, 1, 0.10))
 	for p in _pills:
 		var r: Rect2 = p["rect"]
 		var an: bool = p["mode"] == mode
