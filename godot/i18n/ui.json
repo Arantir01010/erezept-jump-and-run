@@ -139,5 +139,6 @@
   "Zum Hauptmenü": {"en": "To the main menu", "fr": "Vers le menu principal", "es": "Al menú principal", "zh": "返回主菜单", "hi": "मुख्य मेनू पर"},
   "MUSIK": {"en": "MUSIC", "fr": "MUSIQUE", "es": "MÚSICA", "zh": "音乐", "hi": "संगीत"},
   "TÖNE": {"en": "SOUNDS", "fr": "SONS", "es": "SONIDOS", "zh": "音效", "hi": "ध्वनि"},
-  "%s: wählen · %s: bestätigen · ESC: weiter": {"en": "%s: choose · %s: confirm · ESC: resume", "fr": "%s : choisir · %s : valider · ÉCHAP : reprendre", "es": "%s: elegir · %s: confirmar · ESC: seguir", "zh": "%s：选择 · %s：确认 · ESC：继续", "hi": "%s: चुनो · %s: पुष्टि · ESC: जारी रखो"}
+  "%s: wählen · %s: bestätigen · ESC: weiter": {"en": "%s: choose · %s: confirm · ESC: resume", "fr": "%s : choisir · %s : valider · ÉCHAP : reprendre", "es": "%s: elegir · %s: confirmar · ESC: seguir", "zh": "%s：选择 · %s：确认 · ESC：继续", "hi": "%s: चुनो · %s: पुष्टि · ESC: जारी रखो"},
+  "BEDIENUNG · ◀ ▶ WECHSELN": {"en": "CONTROLS · ◀ ▶ SWITCH", "fr": "COMMANDES · ◀ ▶ CHANGER", "es": "CONTROLES · ◀ ▶ CAMBIAR", "zh": "操作方式 · ◀ ▶ 切换", "hi": "नियंत्रण · ◀ ▶ बदलो"}
 }

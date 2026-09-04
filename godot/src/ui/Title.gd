@@ -57,7 +57,9 @@ var _legend: Array = []
 var _lang_label: Label
 var _snd_labels: Array = []
 const PILL_KEYBOARD := Rect2(452, 316, 104, 14)
-const PILL_TOUCH := Rect2(562, 316, 66, 14)
+const PILL_TOUCH := Rect2(556, 316, 72, 14)
+const PILL_BOX := Rect2(452, 316, 176, 14)   # Segment-Schalter: beide Felder in einem Rahmen
+var _seg := 0.0                                # 0 = Tastatur, 1 = Touch (gleitet beim Wechsel)
 
 
 func _init() -> void:
@@ -104,10 +106,12 @@ func _build() -> void:
 
 	# ---- Bedienungswahl: zwei Felder über der Start-Zeile ----
 	_pills = [
-		{"mode": "keyboard", "rect": PILL_KEYBOARD, "label": label(PILL_KEYBOARD.position.x + 16, 323, "TASTATUR · ARCADE", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
-		{"mode": "touch", "rect": PILL_TOUCH, "label": label(PILL_TOUCH.position.x + 16, 323, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
+		{"mode": "keyboard", "rect": PILL_KEYBOARD, "label": label(PILL_KEYBOARD.position.x + 19, 323, "TASTATUR · ARCADE", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
+		{"mode": "touch", "rect": PILL_TOUCH, "label": label(PILL_TOUCH.position.x + 19, 323, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
 	]
+	label(PILL_BOX.end.x, 309.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Pen.hex(0xffd591), "spacing": 1.2, "origin": Vector2(1, 0.5)})
 	mode = Kiosk.suggested_input_mode()
+	_seg = 1.0 if mode == "touch" else 0.0
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
 		{"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(1, 0.5)})
 	_snd_labels = [
@@ -185,7 +189,7 @@ func _apply_mode() -> void:
 	_relabel(press, start, Vector2(1, 0.5), Vector2(W - 12, 340))
 	for p in _pills:
 		var l: Label = p["label"]
-		l.modulate.a = 1.0 if p["mode"] == mode else 0.55
+		l.modulate.a = 1.0 if p["mode"] == mode else 0.62
 
 
 ## Label-Text ändern und die Ausrichtung im Design-Raum erhalten.
@@ -428,27 +432,45 @@ static func _star(c: CanvasItem, cx: float, cy: float, r: float, col: Color) -> 
 	c.draw_colored_polygon(pts, col)
 
 
+## Segment-Schalter der Bedienungswahl: ein dunkler Rahmen, das gewählte Feld füllt
+## sich orange (PwC-Akzent) mit weißer Schrift und gleitet beim Wechsel; Symbole:
+## Tastenreihe mit Leertaste, Fingertipp mit Wellen.
 func _draw_pills(c: CanvasItem) -> void:
+	var b := PILL_BOX
+	Pen.rrect(c, b.position.x + 0.6, b.position.y + 1.0, b.size.x, b.size.y, 4, Color(0, 0, 0, 0.35))
+	Pen.rrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(0.05, 0.07, 0.12, 0.92))
+	Pen.srrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(1, 1, 1, 0.16), 0.7)
+	# gleitende Füllung
+	var sx := lerpf(PILL_KEYBOARD.position.x, PILL_TOUCH.position.x, _seg)
+	var sw := lerpf(PILL_KEYBOARD.size.x, PILL_TOUCH.size.x, _seg)
+	Pen.rrect(c, sx + 1.2, b.position.y + 1.2, sw - 2.4, b.size.y - 2.4, 3, Brand.UI_ACCENT)
+	Pen.rect(c, sx + 4, b.position.y + 1.9, sw - 8, 0.6, Color(1, 1, 1, 0.28))
+	Pen.rect(c, sx + 4, b.end.y - 2.3, sw - 8, 0.6, Color(0, 0, 0, 0.18))
+	# feine Trennlinie zwischen den Feldern (nur sichtbar, wo keine Füllung liegt)
+	Pen.rect(c, PILL_TOUCH.position.x - 0.3, b.position.y + 3, 0.6, b.size.y - 6, Color(1, 1, 1, 0.10))
 	for p in _pills:
 		var r: Rect2 = p["rect"]
 		var an: bool = p["mode"] == mode
-		Pen.rrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Color(0.176, 0.176, 0.176, 0.9 if an else 0.72))
-		Pen.srrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Brand.UI_ACCENT if an else Color(1, 1, 1, 0.18), 1.2 if an else 0.7)
-		var ix := r.position.x + 8.0
-		var iy := r.position.y + 7.0
-		var ic := Brand.UI_ACCENT if an else Pen.hex(0xdfe6f0, 0.6)
+		var ix := r.position.x + 10.0
+		var iy := r.position.y + r.size.y / 2
+		var ic := Color(1, 1, 1, 0.96) if an else Pen.hex(0xdfe6f0, 0.62)
 		if p["mode"] == "keyboard":
 			for k in 3:
-				Pen.rrect(c, ix - 5.5 + k * 3.8, iy - 3.2, 3.0, 3.0, 0.6, ic)
-			Pen.rrect(c, ix - 4.0, iy + 0.6, 8.0, 2.6, 0.6, ic)
+				Pen.rrect(c, ix - 5.4 + k * 3.6, iy - 3.6, 2.8, 2.6, 0.5, ic)
+			for k in 3:
+				Pen.rrect(c, ix - 4.6 + k * 3.6, iy - 0.6, 2.8, 2.0, 0.5, Pen.alpha(ic, 0.8))
+			Pen.rrect(c, ix - 4.2, iy + 1.9, 8.4, 1.6, 0.5, ic)
 		else:
-			Pen.scircle(c, ix, iy - 0.5, 4.2, Pen.alpha(ic, 0.6), 0.7)
-			Pen.circle(c, ix, iy - 0.5, 1.8, ic)
-		if an:
-			Pen.tri(c, r.position.x + r.size.x / 2 - 2.5, r.position.y - 2.2, r.position.x + r.size.x / 2 + 2.5, r.position.y - 2.2, r.position.x + r.size.x / 2, r.position.y + 0.6, Brand.UI_ACCENT)
+			# Fingerkuppe und Tipp-Wellen
+			Pen.rrect(c, ix - 1.4, iy - 1.2, 2.8, 5.6, 1.4, ic)
+			Pen.circle(c, ix, iy - 1.6, 1.5, ic)
+			Pen.arc(c, ix, iy - 1.6, 3.4, -2.5, -0.65, Pen.alpha(ic, 0.9), 0.6)
+			Pen.arc(c, ix, iy - 1.6, 5.0, -2.35, -0.8, Pen.alpha(ic, 0.55), 0.6)
 
 
-func _tick(_delta: float) -> void:
+func _tick(delta: float) -> void:
+	# Segment-Schalter gleitet zum gewählten Feld
+	_seg = lerpf(_seg, 1.0 if mode == "touch" else 0.0, 1.0 - exp(-14.0 * delta))
 	# Start-Zeile: 750-ms-Yoyo (deutlich unter 3 Hz)
 	press.modulate.a = 0.62 + 0.38 * sin(t * 4.19)
 	# Neon: das E-REZEPT der Apotheke atmet, das gematik-Schild zuckt selten
