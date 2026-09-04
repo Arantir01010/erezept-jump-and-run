@@ -162,6 +162,12 @@ geduckt, Idle-Reset läuft weiter). Musik und Töne getrennt schaltbar, auch obe
 Hauptmenü (F3/F4), gespeichert in `user://einstellungen.cfg` (`Sfx.set_music/set_sound`).
 Geprüft mit Tastentests (F3/F4 im Menü; ESC → Menü → Töne aus → ESC im Level).
 
+Dazu ein Fund aus dem Spieltest: Im Tunnel-Level (KOV Gateway) zog die Auto-Scroll-Kamera
+Paul am linken Rand per Teleport mit — mitten in Wände und aus dem Bild. Die Tunnel-Kamera
+ist jetzt elastisch (Level._update_tube): sie fährt von selbst, wartet aber, sobald Paul
+150 px vom linken Rand steht (Prüf-Podest, Krypto-Dusche), und eilt ihm nie davon; der
+rechte Rand bleibt eine weiche Grenze. Prüflauf-Bild 07z-tunnel-wartet.png.
+
 ## 5. Nicht tun
 
 Neon auf Kanten, Glühen für alles, mehr Sättigung, dunklere Paletten, KI-generierte Assets

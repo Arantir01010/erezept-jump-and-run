@@ -338,6 +338,10 @@ func run_shots(main) -> void:
 	Input.action_release("move_right")
 	await get_tree().create_timer(0.5).timeout
 	await save_screenshot(dir.path_join("07-stand.png"))
+	# Tunnel-Level: Paul bleibt stehen, die Kamera fährt weiter — sie muss an ihm warten
+	if main.get("level") != null and is_instance_valid(main.level) and main.level.data.camera_mode == "tube":
+		await get_tree().create_timer(5.0).timeout
+		await save_screenshot(dir.path_join("07z-tunnel-wartet.png"))
 	# Stationen weiter hinten im Level: Paul wird versetzt, Kamera zieht nach
 	if main.get("level") != null and is_instance_valid(main.level) and main.level.player:
 		var lvl = main.level

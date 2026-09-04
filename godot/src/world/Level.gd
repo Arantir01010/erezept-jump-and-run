@@ -305,6 +305,12 @@ func register_scroll_lock(c: Callable) -> void:
 	scroll_locks.append(c)
 
 
+## Tunnel-Kamera: fährt von selbst nach rechts, aber elastisch — sie lässt Paul nie
+## hinter dem linken Rand zurück (wartet, sobald er TUBE_RAND vom Rand steht, z. B.
+## auf dem Prüf-Podest) und eilt ihm nie davon. Früher wurde Paul am Rand per
+## Teleport mitgezogen — mitten in Wände und aus dem Bild hinaus.
+const TUBE_RAND := 150.0
+
 func _update_tube(delta: float) -> void:
 	var view_w := 1920.0
 	var held := false
@@ -313,19 +319,15 @@ func _update_tube(delta: float) -> void:
 			held = true
 	if not held:
 		_tube_x += tube_speed * delta
-	_tube_x = maxf(_tube_x, player.global_position.x - view_w * 0.55)
+	var px := player.global_position.x
+	_tube_x = minf(_tube_x, px - TUBE_RAND)            # wartet auf Paul
+	_tube_x = maxf(_tube_x, px - view_w * 0.55)          # eilt nicht davon
 	_tube_x = clampf(_tube_x, 0.0, data.world_width() - view_w)
 	camera.global_position = Vector2(_tube_x + view_w / 2.0, data.world_height() / 2.0)
-	var min_x := _tube_x + 40.0
+	# rechter Rand bleibt eine weiche Grenze (Physik, kein Teleport)
 	var max_x := _tube_x + view_w - 40.0
-	if player.global_position.x < min_x:
-		player.global_position.x = min_x
-		if player.velocity.x < 0:
-			player.velocity.x = 0
-	elif player.global_position.x > max_x:
-		player.global_position.x = max_x
-		if player.velocity.x > 0:
-			player.velocity.x = 0
+	if px > max_x and player.velocity.x > 0:
+		player.velocity.x = 0
 
 
 func _check_stuck(_delta: float) -> void:
