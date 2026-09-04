@@ -4,7 +4,7 @@ Dieser Branch ist die Auslieferung für GitHub Pages und wird von
 `godot/tools/deploy_web.py` erzeugt. Nichts hier von Hand ändern — der nächste
 Lauf des Skripts überschreibt alles. Quelltext: Branch `main`, Ordner `godot/`.
 
-Stand: 2026-09-04 13:03 · Quellstand main 737588b
+Stand: 2026-09-04 13:13 · Quellstand main 737588b
 Live: https://arantir01010.github.io/erezept-jump-and-run/
 
 Aufruf-Schalter: `?touch=1` (Bildschirm-Steuerung), `?level=<id>` (direkt ins Level),
