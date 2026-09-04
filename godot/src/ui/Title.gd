@@ -45,6 +45,7 @@ const PILL_TOUCH := Rect2(562, 316, 66, 14)
 func _init() -> void:
 	sperre = 0.6
 	weiter_text = ""
+	entrance = false     # das Menü hat seine eigene Choreografie, Kopfzeilen sofort da
 
 
 func _build() -> void:

@@ -55,6 +55,8 @@ var _story_band_a := 0.0
 var _story_h := 0.0
 var _story_last := -1
 var _story_reveal := 1.0
+var _entrance_items: Array = []     # [label, zielposition, zielalpha, verzögerung]
+var _entrance_active := false
 static var _fonts := {}
 
 
@@ -149,6 +151,7 @@ func _process(delta: float) -> void:
 	tz = maxf(0.0, t - _anchor)
 	if weiter:
 		weiter.modulate.a = 0.0 if tz < sperre else 0.65 + 0.35 * sin(tz * 4.0)
+	_entrance_tick()
 	_tick(delta)
 	_story_tick()
 	leben.queue_redraw()
@@ -363,7 +366,9 @@ func _draw_story_band(c: CanvasItem) -> void:
 
 ## Beim Öffnen: Schilder und Überschriften gleiten von oben ein (gestaffelt),
 ## Bühne, Leuchten und Leben blenden auf. Zeilen mit Alpha 0 (Rufe, Erzählband)
-## steuern die Unterklassen selbst — die bleiben unangetastet.
+## steuern die Unterklassen selbst — die bleiben unangetastet. Läuft nach der
+## Wanduhr (tz), nicht über Tweens: stockt die Bildschleife (Browser-Tab im
+## Hintergrund, Shader-Aufbau), springt alles einfach an seinen Platz.
 func _entrance() -> void:
 	var i := 0
 	for n in textlayer.get_children():
@@ -372,19 +377,37 @@ func _entrance() -> void:
 		var l := n as Label
 		if l == weiter or l.modulate.a <= 0.0:
 			continue
-		var ziel := l.position
-		var ta := l.modulate.a
-		l.position = ziel + Vector2(0, -5.0 * S)
+		_entrance_items.append([l, l.position, l.modulate.a, 0.10 + i * 0.045])
+		l.position += Vector2(0, -5.0 * S)
 		l.modulate.a = 0.0
-		var tw := create_tween()
-		tw.tween_interval(0.10 + i * 0.045)
-		tw.tween_property(l, "position", ziel, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(l, "modulate:a", ta, 0.35)
 		i += 1
 	for cv in [statik, glow, leben]:
 		cv.modulate.a = 0.0
-		var tw2 := create_tween()
-		tw2.tween_property(cv, "modulate:a", 1.0, 0.65).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_entrance_active = true
+
+
+func _entrance_tick() -> void:
+	if not _entrance_active:
+		return
+	var fertig := true
+	var ka := clampf(tz / 0.65, 0.0, 1.0)
+	for cv in [statik, glow, leben]:
+		cv.modulate.a = sin(ka * PI * 0.5)
+	if ka < 1.0:
+		fertig = false
+	for it in _entrance_items:
+		var l: Label = it[0]
+		if not is_instance_valid(l):
+			continue
+		var k := clampf((tz - float(it[3])) / 0.5, 0.0, 1.0)
+		var e := 1.0 - pow(1.0 - k, 3.0)
+		l.position = (it[1] as Vector2) + Vector2(0, -5.0 * S * (1.0 - e))
+		l.modulate.a = float(it[2]) * clampf(k * 1.4, 0.0, 1.0)
+		if k < 1.0:
+			fertig = false
+	if fertig:
+		_entrance_active = false
+		_entrance_items.clear()
 
 
 # ------------------------------------------------------------------ Kulisse
