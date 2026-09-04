@@ -117,7 +117,7 @@ static func draw_card(ci: CanvasItem, r: Rect2, card: String, mode := "voll", gl
 	if with_name:
 		var fn := maxi(6, int(h * 0.15))
 		var name_c := Palette.tint(c, 0.55)
-		ci.draw_string(Brand.sans("medium"), Vector2(r.position.x + w * 0.11, r.end.y - h * 0.26), str(inf["name"]),
+		ci.draw_string(Brand.sans("medium"), Vector2(r.position.x + w * 0.11, r.end.y - h * 0.26), str(TranslationServer.translate(str(inf["name"]))),
 			HORIZONTAL_ALIGNMENT_LEFT, w * 0.80, fn, Color(name_c.r, name_c.g, name_c.b, 0.95 * alpha))
 	# Glanzband: schräg, läuft einmal über die Karte, innerhalb der Kante
 	if peak > 0.0:

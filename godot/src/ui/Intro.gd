@@ -67,7 +67,7 @@ func _init(p := 1) -> void:
 	phase = p
 	sperre = TUTORIAL_SPERRE if p == 3 else float(ZEITREISE_SPERRE[p])
 	var kn := Kiosk.label_confirm()
-	weiter_text = ["%s: Und heute?", "%s: Zum Probelauf!", "%s: Los geht's!"][p - 1] % kn
+	weiter_text = tr(["%s: Und heute?", "%s: Zum Probelauf!", "%s: Los geht's!"][p - 1]) % kn
 	dots = [p == 1, p == 2, p == 3]
 
 

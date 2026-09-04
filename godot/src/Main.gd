@@ -94,6 +94,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Idle-Reset: niemand spielt → zurück zum Titel (Attract)
 	if screen != Screen.TITLE and Kiosk.shots_dir == "" and Kiosk.idle_seconds() > Kiosk.idle_reset_seconds:
+		Game.set_lang(Game.default_lang)   # nächster Besucher: wieder die Standardsprache
 		show_title()
 
 
@@ -138,6 +139,9 @@ func show_title() -> void:
 	Game.reset_run()
 	var title := Title.new()
 	title.start_requested.connect(func(): show_intro(1))
+	title.lang_requested.connect(func(code):
+		Game.set_lang(code)
+		show_title())
 	overlay.add_child(title)
 	_current = title
 	Sfx.music("music_title")

@@ -266,6 +266,7 @@ func header(titel: String, untertitel: String) -> void:
 ## `story_cycle`, sonst seit Anzeige). Mehrzeilig, Aufbau Zeichen für Zeichen.
 ## opts: size (Design-px, Standard 11), color, bold (Standard true)
 func story_line(text: String, von: float, bis: float, opts := {}) -> Label:
+	text = tr(text)
 	var l := Label.new()
 	l.text = text
 	var ls := LabelSettings.new()

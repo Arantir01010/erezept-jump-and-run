@@ -75,7 +75,7 @@ func _ready() -> void:
 	var medals := 0
 	for r in Game.level_results:
 		medals += int(r.get("medal_count", 0))
-	_label("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s" % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()], 30, Vector2(0, 680), Palette.WHITE)
+	_label(tr("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s") % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()], 30, Vector2(0, 680), Palette.WHITE)
 
 	# Highscore
 	var hs := Game.highscores()
@@ -98,7 +98,7 @@ func _ready() -> void:
 
 	if Game.qualifies(Game.score):
 		_picker = true
-		_label("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s" % Kiosk.label_action(), 24, Vector2(0, 760), Palette.GOLD)
+		_label(tr("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s") % Kiosk.label_action(), 24, Vector2(0, 760), Palette.GOLD)
 		avatar_label = _label(AVATARS[0], 64, Vector2(0, 800), Palette.WHITE)
 	hint = _label("", 22, Vector2(0, 1000), Color(0.7, 0.78, 0.9))
 	_label(Game.t(Game.config.get("disclaimer", {"de": ""})), 16, Vector2(0, 1040), Color(0.55, 0.6, 0.72))
@@ -139,13 +139,13 @@ func _process(delta: float) -> void:
 		elif Input.is_action_just_pressed("action"):
 			_saved = true
 			Game.add_highscore(_avatar, Game.score)
-			avatar_label.text = AVATARS[_avatar] + "  ✓ gespeichert"
+			avatar_label.text = AVATARS[_avatar] + tr("  ✓ gespeichert")
 			Sfx.play("medal")
 	var left := _min - _t
 	if left > 0.0:
-		hint.text = "QR-Code scannen … (%d s)" % ceili(left)
+		hint.text = tr("QR-Code scannen … (%d s)") % ceili(left)
 	else:
-		hint.text = "%s: Nächster Spieler" % Kiosk.label_jump()
+		hint.text = tr("%s: Nächster Spieler") % Kiosk.label_jump()
 		if Input.is_action_just_pressed("jump") or _t > _max:
 			_fired = true
 			done.emit()

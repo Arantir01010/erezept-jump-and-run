@@ -274,7 +274,7 @@ class Lauscher extends Mechanic:
 		var lost := player.hurt(global_position.x)
 		Game.mark_seen(data.id, ltext("akteur", {"de": "Lauscher", "en": "Eavesdropper"}))
 		Fx.deny_stamp(level, global_position + Vector2(0, -60), ltext("seenText", {"de": "MITGELESEN!", "en": "READ!"}))
-		Fx.float_text(level, player.global_position + Vector2(0, -90), "−%d Bits" % lost, Palette.DENY, 22)
+		Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
 		if lost <= 0:
 			return
 		_hits += 1
@@ -876,7 +876,7 @@ class KryptoDusche extends Mechanic:
 		level.register_scroll_lock(func(): return not done and player.global_position.x > global_position.x - 500.0)
 		var g = linked_gate()
 		if g:
-			g.open_hint = ltext("gateHint", {"de": "Erst verschlüsseln: In der Krypto-Dusche %s drücken." % Kiosk.label_action(),
+			g.open_hint = ltext("gateHint", {"de": tr("Erst verschlüsseln: In der Krypto-Dusche %s drücken.") % Kiosk.label_action(),
 				"en": "Encrypt first: press the action inside the crypto shower."})
 		_rain = CPUParticles2D.new()
 		_rain.amount = 40
@@ -1028,8 +1028,9 @@ class Karte extends Mechanic:
 		var inf := KartenFx.info(card)
 		var nc := Palette.tint(c, 0.45)
 		var y := bob + 34.0
-		draw_string_outline(Brand.sans("medium"), Vector2(-80, y), str(inf["name"]), HORIZONTAL_ALIGNMENT_CENTER, 160, 13, 4, Color(0.05, 0.06, 0.09, 0.85))
-		draw_string(Brand.sans("medium"), Vector2(-80, y), str(inf["name"]), HORIZONTAL_ALIGNMENT_CENTER, 160, 13, nc)
+		var kname := str(TranslationServer.translate(str(inf["name"])))
+		draw_string_outline(Brand.sans("medium"), Vector2(-80, y), kname, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, 4, Color(0.05, 0.06, 0.09, 0.85))
+		draw_string(Brand.sans("medium"), Vector2(-80, y), kname, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, nc)
 
 
 # ---------------------------------------------------------------- Kartenleser

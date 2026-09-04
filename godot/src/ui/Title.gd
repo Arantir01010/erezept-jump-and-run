@@ -12,6 +12,16 @@ extends Vignette
 
 signal start_requested
 
+signal lang_requested(code)
+
+## Sprachflaggen oben rechts (Design-Raum): sechs Felder DE EN FR ES ZH HI —
+## Klick oder Fingertipp wechselt die Sprache (F2 blättert), das Menü baut sich neu.
+const FLAG_W := 14.0
+const FLAG_H := 9.5
+const FLAG_Y := 8.0
+const FLAG_X0 := 524.0
+const FLAG_STEP := 18.0
+
 const BODEN := 320.0
 const HAUS := {"links": 84.0, "rechts": 484.0, "dach": 138.0}
 const DECKEN := [138.0, 176.0, 214.0, 252.0, 316.0]
@@ -38,6 +48,7 @@ var _next_spruch := 5.0
 var mode := "keyboard"
 var _pills: Array = []
 var _legend: Array = []
+var _lang_label: Label
 const PILL_KEYBOARD := Rect2(452, 316, 104, 14)
 const PILL_TOUCH := Rect2(562, 316, 66, 14)
 
@@ -90,6 +101,8 @@ func _build() -> void:
 		{"mode": "touch", "rect": PILL_TOUCH, "label": label(PILL_TOUCH.position.x + 16, 323, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})},
 	]
 	mode = Kiosk.suggested_input_mode()
+	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
+		{"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(1, 0.5)})
 
 	# ---- Tafel links: Veranstaltung, Steuerung, Rechtshinweis ----
 	label(9, 290, str(Game.config.get("event", "Messe-Prototyp")), 4.4, {"color": Pen.hex(0xffd75e), "spacing": 0.4, "origin": Vector2(0, 0.5)})
@@ -147,13 +160,13 @@ func _apply_mode() -> void:
 	var start := ""
 	var cfg: Dictionary = Game.config.get("titleScreen", {})
 	if mode == "touch":
-		zeilen = [["KNÜPPEL", "laufen & ducken"], ["SPRUNG", "springen · 2× REZI-Schub"], ["AKTION", "TI-Aktion"], ["HÜLLE", "Hülle an / aus"]]
-		start = "Tippe auf TOUCH zum Start!"
+		zeilen = [[tr("KNÜPPEL"), tr("laufen & ducken")], [tr("SPRUNG"), tr("springen · 2× REZI-Schub")], [tr("AKTION"), tr("TI-Aktion")], [tr("HÜLLE"), tr("Hülle an / aus")]]
+		start = tr("Tippe auf TOUCH zum Start!")
 	elif Kiosk.has_gamepad():
-		zeilen = [["JOYSTICK", "laufen & ducken"], ["ROT", "springen · 2× REZI-Schub"], ["BLAU", "TI-Aktion"], ["HOCH", "Hülle an / aus"]]
+		zeilen = [[tr("JOYSTICK"), tr("laufen & ducken")], [tr("ROT"), tr("springen · 2× REZI-Schub")], [tr("BLAU"), tr("TI-Aktion")], [tr("HOCH"), tr("Hülle an / aus")]]
 		start = Game.t(cfg.get("pressStart", {"de": "Drück den roten Knopf!"}))
 	else:
-		zeilen = [["PFEILE / WASD", "laufen & ducken"], ["LEERTASTE", "springen · 2× REZI-Schub"], ["E", "TI-Aktion"], ["SHIFT", "Hülle an / aus"]]
+		zeilen = [[tr("PFEILE / WASD"), tr("laufen & ducken")], [tr("LEERTASTE"), tr("springen · 2× REZI-Schub")], ["E", tr("TI-Aktion")], ["SHIFT", tr("Hülle an / aus")]]
 		start = Game.t(cfg.get("pressStartKeyboard", {"de": "Drück LEERTASTE!"}))
 	for i in _legend.size():
 		_relabel(_legend[i][0], str(zeilen[i][0]))
@@ -202,6 +215,11 @@ func _pill_at(screen_pos: Vector2) -> String:
 func _unhandled_input(event: InputEvent) -> void:
 	if _done:
 		return
+	# F2 blättert durch die Sprachen (Tastatur/Arcade ohne Maus)
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F2:
+		_cycle_lang()
+		get_viewport().set_input_as_handled()
+		return
 	# Links = Tastatur/Arcade (linkes Feld), Rechts = Touch (rechtes Feld); kein Umschalt-Flackern bei Analog-Stick
 	if event.is_action_pressed("move_left"):
 		_select("keyboard")
@@ -214,10 +232,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
 		return
 	if event is InputEventScreenTouch and event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION:
+		var flag := _flag_at(event.position)
+		if flag != "":
+			_choose_lang(flag)
+			return
 		var hit := _pill_at(event.position)
 		_start_with(hit if hit != "" else "touch")
 		return
 	if event is InputEventMouseButton and event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION:
+		var flag_m := _flag_at(event.position)
+		if flag_m != "":
+			_choose_lang(flag_m)
+			return
 		var hit := _pill_at(event.position)
 		if hit != "":
 			_start_with(hit)
@@ -225,6 +251,98 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not is_press(event) or tz < sperre:
 		return
 	_start_with(mode)
+
+
+# ------------------------------------------------------------------ Sprachen
+
+func _flag_rect(i: int) -> Rect2:
+	return Rect2(FLAG_X0 + i * FLAG_STEP, FLAG_Y, FLAG_W, FLAG_H)
+
+
+func _flag_at(screen_pos: Vector2) -> String:
+	var d := screen_pos / S
+	for i in Game.LANGS.size():
+		if _flag_rect(i).grow(3.0).has_point(d):
+			return str(Game.LANGS[i])
+	return ""
+
+
+func _choose_lang(code: String) -> void:
+	if code == Game.lang:
+		return
+	Sfx.play("tick")
+	lang_requested.emit(code)
+
+
+func _cycle_lang() -> void:
+	var i: int = Game.LANGS.find(Game.lang)
+	_choose_lang(str(Game.LANGS[(i + 1) % Game.LANGS.size()]))
+
+
+## Sechs Flaggen aus Grundformen; die gewählte hell mit Akzentrand und Marker.
+func _draw_flags(c: CanvasItem) -> void:
+	for i in Game.LANGS.size():
+		var code := str(Game.LANGS[i])
+		var r := _flag_rect(i)
+		var an := code == Game.lang
+		var a := 1.0 if an else 0.62
+		Pen.rect(c, r.position.x + 0.8, r.position.y + 1.2, r.size.x, r.size.y, Color(0, 0, 0, 0.35 * a))
+		_flag(c, code, r, a)
+		if an:
+			Pen.srect(c, r.position.x - 0.8, r.position.y - 0.8, r.size.x + 1.6, r.size.y + 1.6, Brand.UI_ACCENT, 1.0)
+			Pen.tri(c, r.position.x + r.size.x / 2 - 2.2, r.end.y + 4.4, r.position.x + r.size.x / 2 + 2.2, r.end.y + 4.4, r.position.x + r.size.x / 2, r.end.y + 1.8, Brand.UI_ACCENT)
+		else:
+			Pen.srect(c, r.position.x, r.position.y, r.size.x, r.size.y, Color(1, 1, 1, 0.25), 0.5)
+
+
+func _flag(c: CanvasItem, code: String, r: Rect2, a: float) -> void:
+	var x := r.position.x
+	var y := r.position.y
+	var w := r.size.x
+	var h := r.size.y
+	match code:
+		"de":
+			Pen.rect(c, x, y, w, h / 3, Color(0.05, 0.05, 0.05, a))
+			Pen.rect(c, x, y + h / 3, w, h / 3, Color(0.86, 0.09, 0.09, a))
+			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(1.0, 0.80, 0.0, a))
+		"en":
+			Pen.rect(c, x, y, w, h, Color(0.0, 0.14, 0.49, a))
+			Pen.line(c, x, y, x + w, y + h, Color(1, 1, 1, a), 1.8)
+			Pen.line(c, x + w, y, x, y + h, Color(1, 1, 1, a), 1.8)
+			Pen.line(c, x, y, x + w, y + h, Color(0.78, 0.06, 0.18, a), 0.7)
+			Pen.line(c, x + w, y, x, y + h, Color(0.78, 0.06, 0.18, a), 0.7)
+			Pen.rect(c, x + w / 2 - 1.5, y, 3.0, h, Color(1, 1, 1, a))
+			Pen.rect(c, x, y + h / 2 - 1.5, w, 3.0, Color(1, 1, 1, a))
+			Pen.rect(c, x + w / 2 - 0.9, y, 1.8, h, Color(0.78, 0.06, 0.18, a))
+			Pen.rect(c, x, y + h / 2 - 0.9, w, 1.8, Color(0.78, 0.06, 0.18, a))
+		"fr":
+			Pen.rect(c, x, y, w / 3, h, Color(0.0, 0.14, 0.58, a))
+			Pen.rect(c, x + w / 3, y, w / 3, h, Color(1, 1, 1, a))
+			Pen.rect(c, x + 2 * w / 3, y, w / 3, h, Color(0.93, 0.16, 0.22, a))
+		"es":
+			Pen.rect(c, x, y, w, h, Color(0.98, 0.76, 0.05, a))
+			Pen.rect(c, x, y, w, h / 4, Color(0.77, 0.07, 0.11, a))
+			Pen.rect(c, x, y + 3 * h / 4, w, h / 4, Color(0.77, 0.07, 0.11, a))
+		"zh":
+			Pen.rect(c, x, y, w, h, Color(0.87, 0.16, 0.06, a))
+			_star(c, x + 2.6, y + 2.7, 1.7, Color(1.0, 0.87, 0.0, a))
+			for p in [Vector2(5.4, 0.9), Vector2(6.4, 2.1), Vector2(6.4, 3.6), Vector2(5.4, 4.7)]:
+				_star(c, x + p.x, y + p.y, 0.55, Color(1.0, 0.87, 0.0, a))
+		"hi":
+			Pen.rect(c, x, y, w, h / 3, Color(1.0, 0.60, 0.20, a))
+			Pen.rect(c, x, y + h / 3, w, h / 3, Color(1, 1, 1, a))
+			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(0.07, 0.53, 0.03, a))
+			Pen.scircle(c, x + w / 2, y + h / 2, 1.35, Color(0.0, 0.2, 0.5, a), 0.5)
+			Pen.circle(c, x + w / 2, y + h / 2, 0.35, Color(0.0, 0.2, 0.5, a))
+
+
+static func _star(c: CanvasItem, cx: float, cy: float, r: float, col: Color) -> void:
+	var pts := PackedVector2Array()
+	for k in 10:
+		var ang := -PI / 2 + k * PI / 5.0
+		var rr := r if k % 2 == 0 else r * 0.42
+		pts.append(Vector2(cx + cos(ang) * rr, cy + sin(ang) * rr))
+	c.draw_colored_polygon(pts, col)
 
 
 func _draw_pills(c: CanvasItem) -> void:
@@ -257,7 +375,7 @@ func _tick(_delta: float) -> void:
 		player.facing = -player.facing
 		rezi.happy()
 	if tz > _next_spruch and rezi:
-		rezi.say(REZI_SPRUECHE[_spruch % REZI_SPRUECHE.size()], 3.2)
+		rezi.say(tr(REZI_SPRUECHE[_spruch % REZI_SPRUECHE.size()]), 3.2)
 		_spruch += 1
 		_next_spruch = tz + 9.0
 
@@ -817,6 +935,7 @@ func _draw_life(c: CanvasItem) -> void:
 	Pen.vgradient(c, 0, H - 60, W, 60, Pen.hex(0x04070c, 0.0), Pen.hex(0x04070c, 0.5))
 	# ---- Bedienungswahl (über dem Band, unter den Schriften) ----
 	_draw_pills(c)
+	_draw_flags(c)
 
 
 func _bett(c: CanvasItem, x: float, y_boden: float, decke: Color, haut: Color, phase: float) -> void:

@@ -13,3 +13,6 @@ Thumbs.db
 assets/fonts/
 assets/brand/
 brand/lizenz/
+
+# Python-Cache der Werkzeuge
+__pycache__/

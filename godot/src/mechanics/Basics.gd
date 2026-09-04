@@ -151,7 +151,7 @@ class DoorExit extends Mechanic:
 			if now - _hint_at > 3.0:
 				_hint_at = now
 				var need := data.count_required - Game.bits_this_level()
-				say("Noch %d %s sammeln!" % [need, Game.t(data.collect_label)])
+				say(tr("Noch %d %s sammeln!") % [need, Game.t(data.collect_label)])
 				Sfx.play("deny", 1.3, -6.0)
 
 	func tick(delta: float) -> void:

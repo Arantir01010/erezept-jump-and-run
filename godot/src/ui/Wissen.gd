@@ -64,14 +64,14 @@ var id := "epa-konto"
 func _init(wid := "epa-konto") -> void:
 	id = wid if DATEN.has(wid) else "epa-konto"
 	sperre = float(SPERRE[id])
-	weiter_text = "%s: Weiter!" % Kiosk.label_confirm()
+	weiter_text = tr("%s: Weiter!") % Kiosk.label_confirm()
 	dots = [false, false, false, false]
 	dots[int(TEIL[id]) - 1] = true
 
 
 func _build() -> void:
 	var v: Dictionary = DATEN[id]
-	label(W / 2, 22, "ePA-WISSEN · TEIL %d / 4" % int(TEIL[id]), 5.5,
+	label(W / 2, 22, tr("ePA-WISSEN · TEIL %d / 4") % int(TEIL[id]), 5.5,
 		{"color": Pen.hex(0xffd591), "spacing": 1.6, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 	header(str(v["titel"]), str(v["untertitel"]))
 	story_cycle = float(v["zyklus"])

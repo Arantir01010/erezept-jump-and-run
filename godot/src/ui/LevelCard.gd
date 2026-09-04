@@ -40,7 +40,7 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	col.add_theme_constant_override("separation", 22)
 	add_child(col)
 
-	_add(col, "STATION %d / %d" % [Game.level_index + 1, Game.playlist.size()], 24, Brand.UI_TEXT_DIM, false, Brand.spaced(Brand.sans("medium"), 4))
+	_add(col, tr("STATION %d / %d") % [Game.level_index + 1, Game.playlist.size()], 24, Brand.UI_TEXT_DIM, false, Brand.spaced(Brand.sans("medium"), 4))
 	var titel := _add(col, data.name_text(), 68, Palette.WHITE, true, Brand.headline())
 	titel.modulate.a = 0.0
 	_add(col, Game.t(data.station.get("stampText", "")), 34, Palette.OK, false, Brand.sans("medium"))
@@ -65,12 +65,12 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 40)
 	var medals: Dictionary = result.get("medals", {})
-	_medal(row, "ZEIT", "%.1f s / Ziel %.0f s" % [result.get("time", 0.0), result.get("par", 0.0)], medals.get("zeit", false))
+	_medal(row, "ZEIT", tr("%.1f s / Ziel %.0f s") % [result.get("time", 0.0), result.get("par", 0.0)], medals.get("zeit", false))
 	_medal(row, "PRÜFSUMMEN", "%d / %d" % [result.get("bits", 0), result.get("bits_total", 0)], medals.get("bits", false))
-	_medal(row, "LÜCKENLOS", "nie mitgelesen" if medals.get("lueckenlos", false) else "%d× gesehen" % int(result.get("seen", 0)), medals.get("lueckenlos", false))
+	_medal(row, "LÜCKENLOS", tr("nie mitgelesen") if medals.get("lueckenlos", false) else tr("%d× gesehen") % int(result.get("seen", 0)), medals.get("lueckenlos", false))
 	col.add_child(row)
-	_add(col, "%d Punkte" % Game.score, 30, Palette.WHITE, false, Brand.sans("medium"))
-	var next := "Weiter: %s" % Kiosk.label_jump() if has_next else "Zum e-Rezept: %s" % Kiosk.label_jump()
+	_add(col, tr("%d Punkte") % Game.score, 30, Palette.WHITE, false, Brand.sans("medium"))
+	var next := tr("Weiter: %s") % Kiosk.label_jump() if has_next else tr("Zum e-Rezept: %s") % Kiosk.label_jump()
 	_add(col, next, 22, Brand.UI_ACCENT, false, Brand.sans("medium"))
 
 	# Medaillen nacheinander einblenden

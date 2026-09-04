@@ -53,6 +53,33 @@ const PICTOGRAM_DIR := "res://assets/brand/pictograms/"
 
 static var _cache := {}
 static var _missing_reported := false
+const I18N_DIR := "res://assets/i18n/"
+static var _i18n: Array = []
+static var _i18n_loaded := false
+
+
+## Schrift-Fallbacks für Chinesisch und Hindi: Noto-Sans-Untermengen (OFL) aus
+## tools/gen_i18n_fonts.py. Fehlen sie, zeigen diese Sprachen Kästchen.
+static func i18n_fallbacks() -> Array:
+	if not _i18n_loaded:
+		_i18n_loaded = true
+		for name in ["NotoSansSC-subset.otf", "NotoSansDevanagari-subset.ttf"]:
+			var p: String = I18N_DIR + str(name)
+			if ResourceLoader.exists(p):
+				var f = load(p)
+				if f is Font:
+					_i18n.append(f)
+	return _i18n
+
+
+static func _with_fallbacks(f: Font) -> void:
+	var fb := i18n_fallbacks()
+	if fb.is_empty():
+		return
+	var arr: Array[Font] = []
+	for x in fb:
+		arr.append(x)
+	f.fallbacks = arr
 
 
 ## Sind die Markenschriften vorhanden?
@@ -67,6 +94,8 @@ static func _load(name: String, fallback_bold: bool) -> Font:
 	var f: Font = null
 	if ResourceLoader.exists(path):
 		f = load(path)
+		if f != null:
+			_with_fallbacks(f)
 	if f == null:
 		if not _missing_reported:
 			_missing_reported = true
@@ -75,6 +104,7 @@ static func _load(name: String, fallback_bold: bool) -> Font:
 		fv.base_font = ThemeDB.fallback_font
 		if fallback_bold:
 			fv.variation_embolden = 0.6
+		_with_fallbacks(fv)
 		f = fv
 	_cache[name] = f
 	return f

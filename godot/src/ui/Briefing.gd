@@ -50,7 +50,7 @@ func _init(idx := 0) -> void:
 	var n: int = (daten.get("zeilen", []) as Array).size()
 	text_zyklus = maxf(BriefingDaten.TAKT, n * BriefingDaten.TAKT)
 	sperre = 6.0
-	weiter_text = "%s: Los geht's!" % Kiosk.label_confirm()
+	weiter_text = tr("%s: Los geht's!") % Kiosk.label_confirm()
 	dots = []
 	titel = id.to_upper()
 	if id != "":
@@ -61,7 +61,7 @@ func _init(idx := 0) -> void:
 
 func _build() -> void:
 	var stroke := Pen.hex(0x0a1730)
-	label(W / 2, 22, "STATION %d / %d" % [index + 1, Game.playlist.size()], 5.5,
+	label(W / 2, 22, tr("STATION %d / %d") % [index + 1, Game.playlist.size()], 5.5,
 		{"color": Pen.hex(0xffd591), "spacing": 1.6, "stroke": stroke, "stroke_w": 1.0})
 	header(titel, str(daten.get("untertitel", "")))
 	story_cycle = text_zyklus

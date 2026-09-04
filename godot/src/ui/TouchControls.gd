@@ -274,4 +274,4 @@ class _Overlay extends Node2D:
 						var ang := -PI * 0.5 + i * TAU / 6.0
 						pts.append(bp + Vector2(cos(ang), sin(ang)) * br * 0.38)
 					draw_polyline(pts, ic, 4.0, true)
-			draw_string(font, bp + Vector2(-br * 1.5, br + 30), str(b["label"]), HORIZONTAL_ALIGNMENT_CENTER, br * 3, 20, Color(1, 1, 1, 0.8 if down else 0.55))
+			draw_string(font, bp + Vector2(-br * 1.5, br + 30), tr(str(b["label"])), HORIZONTAL_ALIGNMENT_CENTER, br * 3, 20, Color(1, 1, 1, 0.8 if down else 0.55))

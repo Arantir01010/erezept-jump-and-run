@@ -307,24 +307,28 @@ static func fuer(level_id: String) -> Dictionary:
 
 
 static func name_of(typ: String) -> String:
-	return str(BAUSTEINE.get(typ, typ))
+	return _tr(str(BAUSTEINE.get(typ, typ)))
+
+
+static func _tr(s: String) -> String:
+	return str(TranslationServer.translate(s))
 
 
 ## Knopfnamen je nach Hardware — Quelle sind die Kiosk-Beschriftungen.
 static func tokens() -> Dictionary:
 	if Kiosk.touch_seen or Kiosk.touch_forced:
-		return {"lauf": "Knüppel", "jump": "SPRUNG", "action": "AKTION", "toggle": "HÜLLE",
-			"duck": "Knüppel runter", "hoch": "Knüppel hoch/runter"}
+		return {"lauf": _tr("Knüppel"), "jump": _tr("SPRUNG"), "action": _tr("AKTION"), "toggle": _tr("HÜLLE"),
+			"duck": _tr("Knüppel runter"), "hoch": _tr("Knüppel hoch/runter")}
 	if Kiosk.has_gamepad():
-		return {"lauf": "Joystick", "jump": "Knopf %s" % Kiosk.label_jump(), "action": "Knopf %s" % Kiosk.label_action(),
-			"toggle": Kiosk.label_toggle(), "duck": "Joystick RUNTER", "hoch": "Joystick HOCH/RUNTER"}
-	return {"lauf": "Pfeiltasten", "jump": Kiosk.label_jump(), "action": "Taste %s" % Kiosk.label_action(),
-		"toggle": Kiosk.label_toggle(), "duck": "Pfeil RUNTER", "hoch": "Pfeil HOCH/RUNTER"}
+		return {"lauf": _tr("Joystick"), "jump": _tr("Knopf %s") % Kiosk.label_jump(), "action": _tr("Knopf %s") % Kiosk.label_action(),
+			"toggle": Kiosk.label_toggle(), "duck": _tr("Joystick RUNTER"), "hoch": _tr("Joystick HOCH/RUNTER")}
+	return {"lauf": _tr("Pfeiltasten"), "jump": Kiosk.label_jump(), "action": _tr("Taste %s") % Kiosk.label_action(),
+		"toggle": Kiosk.label_toggle(), "duck": _tr("Pfeil RUNTER"), "hoch": _tr("Pfeil HOCH/RUNTER")}
 
 
 static func text(s: String) -> String:
 	var tk := tokens()
-	var out := s
+	var out := _tr(s)
 	for k in tk:
 		out = out.replace("{%s}" % k, str(tk[k]))
 	return out

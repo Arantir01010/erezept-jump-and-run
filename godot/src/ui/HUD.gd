@@ -173,7 +173,7 @@ func bind(lvl: Level) -> void:
 	station.text = lvl.data.name_text()
 	huelle_box.visible = lvl.data.huelle_enabled
 	huelle_hint.visible = lvl.data.huelle_enabled
-	huelle_hint.text = "%s: Hülle wechseln" % Kiosk.label_toggle()
+	huelle_hint.text = tr("%s: Hülle wechseln") % Kiosk.label_toggle()
 	_last_huelle = ""
 	cards_view.reset()
 	refresh()
@@ -186,8 +186,8 @@ func bind(lvl: Level) -> void:
 	tw.tween_interval(2.4)
 	tw.tween_property(title_box, "modulate:a", 0.0, 0.6)
 	if Game.level_index == 0:
-		var lauf := "Knüppel" if (Kiosk.touch_seen or Kiosk.touch_forced) else ("Joystick" if Kiosk.has_gamepad() else "Pfeiltasten/WASD")
-		hint_label.text = "%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion" % [
+		var lauf := tr("Knüppel") if (Kiosk.touch_seen or Kiosk.touch_forced) else (tr("Joystick") if Kiosk.has_gamepad() else tr("Pfeiltasten/WASD"))
+		hint_label.text = tr("%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion") % [
 			lauf, Kiosk.label_jump(), Kiosk.label_action()]
 		var tw2 := create_tween()
 		tw2.tween_property(hint_row, "modulate:a", 1.0, 0.5)
@@ -269,7 +269,7 @@ func _process(_delta: float) -> void:
 	var t := level.level_time
 	var par := level.data.par_time
 	var c := Palette.OK if t <= par else Palette.WARM
-	time_label.text = "Zeit %5.1f s   ·   Ziel %.0f s" % [t, par]
+	time_label.text = tr("Zeit %5.1f s   ·   Ziel %.0f s") % [t, par]
 	time_label.add_theme_color_override("font_color", c)
 	if level.data.huelle_enabled and level.player and level.player.huelle.vau_expires:
 		refresh()
@@ -278,7 +278,7 @@ func _process(_delta: float) -> void:
 func _on_combo(combo: int) -> void:
 	if combo < 2:
 		return
-	combo_label.text = "Kombo ×%d" % combo
+	combo_label.text = tr("Kombo ×%d") % combo
 	combo_label.modulate.a = 1.0
 	combo_label.scale = Vector2(1.3, 1.3)
 	if _combo_tw:

@@ -26,6 +26,10 @@ var themes := {}
 var bindings := {}
 var playlist: Array = []
 var lang := "de"
+var default_lang := "de"
+const LANGS := ["de", "en", "fr", "es", "zh", "hi"]
+const LANG_NAMES := {"de": "Deutsch", "en": "English", "fr": "Français", "es": "Español", "zh": "中文", "hi": "हिन्दी"}
+signal lang_changed(code)
 
 # --- Durchlauf ---
 var level_index := 0
@@ -61,7 +65,9 @@ func load_config() -> void:
 	bindings = _read_json("res://config/input-bindings.json")
 	var pl = _read_json("res://config/playlist.json")
 	playlist = pl if pl is Array else []
-	lang = str(config.get("language", "de"))
+	default_lang = str(config.get("language", "de"))
+	_load_translations()
+	set_lang(default_lang)
 
 
 static func _read_json(path: String) -> Variant:
@@ -76,18 +82,63 @@ static func _read_json(path: String) -> Variant:
 	return parsed
 
 
-## Lokalisierter Text: {de, en} → String. Strings gehen unverändert durch.
+## Lokalisierter Text: {de, en} → String. Hat der Eintrag die Sprache nicht, wird der
+## deutsche Text über die Übersetzungstabelle (i18n/*.json) übersetzt; Strings ebenso.
 func t(ltext: Variant, fallback := "") -> String:
 	if ltext is String:
-		return ltext
+		return str(TranslationServer.translate(ltext))
 	if ltext is Dictionary:
 		if ltext.has(lang) and str(ltext[lang]) != "":
 			return str(ltext[lang])
-		if ltext.has("de"):
-			return str(ltext["de"])
+		if ltext.has("de") and str(ltext["de"]) != "":
+			return str(TranslationServer.translate(str(ltext["de"])))
 		for k in ltext:
 			return str(ltext[k])
 	return fallback
+
+
+## Übersetzungen aus i18n/*.json: {deutscher Text: {en: …, fr: …, es: …, zh: …, hi: …}}
+## → eine Translation je Sprache im TranslationServer. Deutsch ist der Schlüssel selbst.
+func _load_translations() -> void:
+	var dir := DirAccess.open("res://i18n")
+	if dir == null:
+		push_warning("i18n/ fehlt — nur Deutsch verfügbar")
+		return
+	var by_lang := {}
+	for lc in LANGS:
+		if lc == "de":
+			continue
+		var tl := Translation.new()
+		tl.locale = lc
+		by_lang[lc] = tl
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while fname != "":
+		if fname.ends_with(".json"):
+			var d = _read_json("res://i18n/" + fname)
+			if d is Dictionary:
+				for key in d:
+					if str(key).begins_with("_"):
+						continue
+					var row = d[key]
+					if row is Dictionary:
+						for lc in row:
+							if by_lang.has(lc) and str(row[lc]) != "":
+								(by_lang[lc] as Translation).add_message(str(key), str(row[lc]))
+		fname = dir.get_next()
+	dir.list_dir_end()
+	for lc in by_lang:
+		TranslationServer.add_translation(by_lang[lc])
+
+
+## Sprache umschalten: Labels übersetzen sich selbst (auto_translate), formatierte
+## Texte holen sich tr() beim nächsten Aufbau. Unbekannte Codes → Deutsch.
+func set_lang(code: String) -> void:
+	if not LANGS.has(code):
+		code = "de"
+	lang = code
+	TranslationServer.set_locale(code)
+	lang_changed.emit(code)
 
 
 func theme(name: String) -> Dictionary:

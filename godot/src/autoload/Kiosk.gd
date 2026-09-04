@@ -9,6 +9,7 @@ extends Node
 ##   --level=<id>       direkt in ein Level springen (Entwicklung)
 ##   --shots=<ordner>   Prüflauf: spielt automatisch, speichert PNGs, beendet sich
 ##   --shots-level=<id> Level für den Prüflauf (Standard: erstes Level der Playlist)
+##   --lang=<code>      Sprache de/en/fr/es/zh/hi (im Browser: ?lang=fr)
 
 signal any_input
 
@@ -19,7 +20,7 @@ const KEY_NAMES := {
 	"A": KEY_A, "B": KEY_B, "C": KEY_C, "D": KEY_D, "E": KEY_E, "F": KEY_F, "G": KEY_G,
 	"H": KEY_H, "I": KEY_I, "J": KEY_J, "K": KEY_K, "L": KEY_L, "M": KEY_M, "N": KEY_N,
 	"O": KEY_O, "P": KEY_P, "Q": KEY_Q, "R": KEY_R, "S": KEY_S, "T": KEY_T, "U": KEY_U,
-	"V": KEY_V, "W": KEY_W, "X": KEY_X, "Y": KEY_Y, "Z": KEY_Z, "CTRL": KEY_CTRL,
+	"V": KEY_V, "W": KEY_W, "X": KEY_X, "Y": KEY_Y, "Z": KEY_Z, "CTRL": KEY_CTRL, "F2": KEY_F2,
 }
 
 var kiosk_mode := false
@@ -87,6 +88,8 @@ func _parse_args() -> void:
 			shots_level = a.get_slice("=", 1)
 		elif a == "--debug":
 			debug = true
+		elif a.begins_with("--lang="):
+			Game.set_lang(a.get_slice("=", 1))
 		elif a == "--touch":
 			touch_forced = true
 			touch_seen = true
@@ -207,14 +210,14 @@ func suggested_input_mode() -> String:
 ## „Weiter"-Knopf je nach Bedienung: Tippen, roter Knopf oder Leertaste.
 func label_confirm() -> String:
 	if touch_seen or touch_forced:
-		return "TIPPEN"
-	return "ROT" if has_gamepad() else "LEERTASTE"
+		return tr("TIPPEN")
+	return tr("ROT") if has_gamepad() else tr("LEERTASTE")
 
 
 func label_press_start() -> String:
 	var cfg: Dictionary = Game.config.get("titleScreen", {})
 	if touch_seen or touch_forced:
-		return "Tippe zum Start!"
+		return tr("Tippe zum Start!")
 	if has_gamepad():
 		return Game.t(cfg.get("pressStart", {"de": "Drück den roten Knopf!"}))
 	return Game.t(cfg.get("pressStartKeyboard", {"de": "Drück LEERTASTE!"}))
@@ -227,20 +230,20 @@ func has_gamepad() -> bool:
 ## Beschriftung der Knöpfe je nach erkannter Hardware.
 func label_jump() -> String:
 	if touch_seen or touch_forced:
-		return "SPRUNG"
-	return "ROT" if has_gamepad() else "LEERTASTE"
+		return tr("SPRUNG")
+	return tr("ROT") if has_gamepad() else tr("LEERTASTE")
 
 
 func label_action() -> String:
 	if touch_seen or touch_forced:
-		return "AKTION"
-	return "BLAU" if has_gamepad() else "E"
+		return tr("AKTION")
+	return tr("BLAU") if has_gamepad() else "E"
 
 
 func label_toggle() -> String:
 	if touch_seen or touch_forced:
-		return "HÜLLE"
-	return "Joystick HOCH" if has_gamepad() else "SHIFT"
+		return tr("HÜLLE")
+	return tr("Joystick HOCH") if has_gamepad() else "SHIFT"
 
 
 func save_screenshot(path: String) -> void:

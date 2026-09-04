@@ -26,6 +26,7 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 | `--webfx` | Browser-Pfad am Desktop testen: Glüh-Sprites statt HDR-Glühen, CPU-Partikel |
 | `--blitz` | Gewitterblitz alle 4 s (Prüfen der Blitz-Optik in Regenwelten) |
 | `--start-at=<typ>` | Paul auf den ersten Baustein dieses Typs setzen, z. B. `--start-at=vau-feld` |
+| `--lang=<code>` | Sprache de / en / fr / es / zh / hi (im Browser `?lang=fr`) |
 | `--test-eingabe=F12,RIGHT,SPACE,-,F12` | echte Tastenereignisse alle 0,7 s einspielen (`-` = Pause, `F12` = Screenshot nach `user://`), danach Ende — prüft Menü und Bedienungswahl ohne Hand am Gerät |
 
 **Bedienungswahl im Hauptmenü:** Zwei Felder über der Start-Zeile, „TASTATUR · ARCADE" und
@@ -38,6 +39,30 @@ Idle-Reset zeigt das Menü die zuletzt gewählte Bedienung vor, sonst Touch auf 
 Tasten: Pfeile/WASD laufen & ducken · LEERTASTE springen (in der Luft nochmal = REZI-Schub) ·
 E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln · F11 Vollbild · F12 Screenshot.
 Arcade-Encoder: Belegung aus `config/input-bindings.json` (identisch zur Phaser-Fassung).
+
+## Sprachen
+
+Sechs Sprachen, umschaltbar über die Flaggen oben rechts im Hauptmenü (Klick oder
+Fingertipp; F2 blättert): Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Hindi.
+Das Menü baut sich mit der neuen Sprache neu auf, alles danach (Zeitreise, Probelauf,
+ePA-Wissen, Briefings, HUD, Hinweise im Level, Stationskarte, Reward) folgt ihr. Beim
+Idle-Reset gilt wieder die Standardsprache (`language` in `config/game-config.json`).
+
+- **Übersetzungen** liegen in `i18n/*.json` (`ui`, `intro`, `briefing`, `levels`): Schlüssel
+  ist der deutsche Text, genau wie er im Code oder in `levels/*/level.json` steht, Spalten
+  `en fr es zh hi`. `Game._load_translations()` lädt sie in den TranslationServer; Labels
+  übersetzen sich selbst (auto_translate), formatierte Texte holen `tr()`, Level-Texte
+  (`{de, en}`) fallen für die übrigen Sprachen über `Game.t()` auf die Tabelle zurück.
+  Neuer Text im Spiel = neue Zeile in der passenden Datei, sonst bleibt er deutsch.
+  Platzhalter (`%s`, `%d`, `{action}`) müssen in jeder Sprache erhalten bleiben.
+- **Schriften:** Helvetica Neue und Charter haben keine chinesischen und Devanagari-Glyphen.
+  `assets/i18n/` enthält Noto-Sans-Untermengen (SIL OFL, nur die tatsächlich verwendeten
+  Zeichen, zusammen unter 400 KB), die `Brand._with_fallbacks()` an alle Markenschriften
+  hängt. Nach Änderungen an zh/hi-Texten: `python godot/tools/gen_i18n_fonts.py`
+  (braucht `pip install fonttools` und die Quellschriften in `.tools/downloads/fonts/`,
+  Bezugsquellen im Docstring).
+- **Prüfen:** `--shots=<dir> --lang=zh` fotografiert den ganzen Ablauf in einer Sprache;
+  `--test-eingabe=-,-,F12,F2,-,-,-,F12` blättert per F2 und fotografiert das Menü.
 
 ## Ablauf und Screens
 
@@ -160,6 +185,7 @@ empfohlen.
 | `Godot … --quit-after 3600 -- --shots=<abs. Ordner>` | Screenshot-Prüflauf ohne Menschen am Rechner |
 | `Godot … --headless --export-release Web build-web/index.html` | Browser-Fassung nach `build-web/` (Preset „Web") |
 | `python godot/tools/serve_web.py [port]` | lokaler Server für die Browser-Fassung, öffnet den Browser |
+| `python godot/tools/gen_i18n_fonts.py` | Schrift-Untermengen für Chinesisch/Hindi aus den Übersetzungen neu bauen (`assets/i18n/`) |
 | `python godot/tools/deploy_web.py` | Web-Export neu bauen und als Branch `web` nach GitHub pushen — GitHub Pages veröffentlicht daraus: https://arantir01010.github.io/erezept-jump-and-run/ (`--no-export` nimmt `build-web/`, `--no-push` nur lokal) |
 
 Alle Grafiken sind prozedural (Vektorzeichnung zur Laufzeit), alle Klänge synthetisiert —
@@ -250,7 +276,8 @@ godot/
 ├── assets/        generiert (audio/, qr/) · fonts/ + brand/ (Marke, lizenziert, nicht im Repo)
 ├── brand/         Marken-README + Lizenzdokumente
 ├── docs/          Bewertung, Recherche, Konzept
-├── tools/         sync_levels.py, gen_assets.py, build_levels.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
+├── i18n/          Übersetzungen (ui, intro, briefing, levels) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
+├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
 ├── build/         Windows-Paket (generiert)      · build-web/  Browser-Fassung (generiert)
 └── shots/         Screenshot-Prüfläufe (generiert)
 ```

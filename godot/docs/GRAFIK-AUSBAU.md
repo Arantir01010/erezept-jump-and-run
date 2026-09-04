@@ -143,6 +143,17 @@ Bildern mitten in der Blende: `01a-blende-zu.png`, `01a2-blende-auf.png`), alle 
 Briefings (`--shots-briefings`), `npm run validate` grün, Browser-Fassung und Windows-PCK
 neu gebaut.
 
+## Runde 4 (04.09.2026): Sechs Sprachen
+
+Flaggen oben rechts im Hauptmenü (DE EN FR ES ZH HI, Klick/Tipp, F2 blättert), das Menü
+baut sich neu auf, die gesamte Oberfläche folgt: Zeitreise, Probelauf, ePA-Wissen, alle
+zehn Briefings, HUD, Hinweise und Schilder im Level, Stationskarte, Reward. 429
+Übersetzungsschlüssel in `i18n/*.json` (Schlüssel = deutscher Text), Godot-eigene
+Mechanik (TranslationServer, auto_translate der Labels, `tr()` für formatierte Texte,
+`Game.t()` für Level-Inhalte). Für Chinesisch und Hindi Noto-Sans-Untermengen (OFL) als
+Schrift-Fallback, erzeugt aus den Übersetzungen (`tools/gen_i18n_fonts.py`). Geprüft mit
+Prüfläufen in zh, hi und fr über den ganzen Ablauf und einem F2-Tastentest.
+
 ## 5. Nicht tun
 
 Neon auf Kanten, Glühen für alles, mehr Sättigung, dunklere Paletten, KI-generierte Assets

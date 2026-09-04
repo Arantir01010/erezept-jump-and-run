@@ -13,7 +13,7 @@ spielbar aber genauso am Laptop, im Browser und per Touch auf dem Tablet.
 | | **Godot-Fassung** (aktueller Stand) | **Phaser-Fassung** (Ursprung) |
 |---|---|---|
 | Ordner | [`godot/`](godot/) | Stammverzeichnis: `src/`, `design/`, `public/`, `tools/`, `docs/` |
-| Stand | Neuaufbau seit 02.09.2026: neue Bewegung (Celeste-Physik), fünf Farbwelten, zehn neu gebaute Level, Hauptmenü-Klinikum, Zeitreise, Probelauf, ePA-Wissen, Touch, Windows- **und** Browser-Build, PwC-Erscheinungsbild; **live auf GitHub Pages** (Branch `web`) | Fertig und **versiegelt** (SHA-256-Kern-Guard); Level-Baukasten in `design/`, Playtest-Werkzeuge; der GitHub-Actions-Deploy ist deaktiviert (die Workflow-Datei bleibt, sie steht im Kern-Manifest) |
+| Stand | Neuaufbau seit 02.09.2026: neue Bewegung (Celeste-Physik), fünf Farbwelten, zehn neu gebaute Level, Hauptmenü-Klinikum, Zeitreise, Probelauf, ePA-Wissen, Touch, Windows- **und** Browser-Build, PwC-Erscheinungsbild, sechs Sprachen (Flaggen im Hauptmenü); **live auf GitHub Pages** (Branch `web`) | Fertig und **versiegelt** (SHA-256-Kern-Guard); Level-Baukasten in `design/`, Playtest-Werkzeuge; der GitHub-Actions-Deploy ist deaktiviert (die Workflow-Datei bleibt, sie steht im Kern-Manifest) |
 | Weiterarbeiten | **hier** — Inhalte, Grafik, Wissensvermittlung | nur Level-Inhalte über `design/` (siehe `CLAUDE.md`) |
 | Start | `godot/build/Paul und REZI.lnk` · Browser: `godot/build-web/Start im Browser.bat` | `npm run dev` → http://localhost:5173 |
 | Doku | [`godot/README.md`](godot/README.md), [`godot/docs/ANALYSE-UND-KONZEPT.md`](godot/docs/ANALYSE-UND-KONZEPT.md) | [`docs/KONZEPT.md`](docs/KONZEPT.md), [`design/LEVELBAU.md`](design/LEVELBAU.md) |
