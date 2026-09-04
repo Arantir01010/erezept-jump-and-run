@@ -1,0 +1,217 @@
+{
+  "station": {
+    "name": {
+      "de": "Die VAU",
+      "en": "The VAU"
+    },
+    "portalText": {
+      "de": "Station: Die VAU — ein Raum, kein Tunnel.",
+      "en": "Station: the VAU — a room, not a tunnel."
+    },
+    "reziText": {
+      "de": "Hier arbeite ich im Klartext — und der Betreiber sieht trotzdem nichts.",
+      "en": "Here I work in plain text — and the operator still sees nothing."
+    },
+    "stampText": {
+      "de": "✓ Vertraulich verarbeitet — Klartext, ohne Mitleser.",
+      "en": "✓ Processed confidentially — plain text, without onlookers."
+    },
+    "badge": "VAU"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Vertrauensraum",
+      "en": "Trusted space"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 14,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    }
+  },
+  "parTimeSeconds": 65,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die VAU ist kein Tunnel, sondern ein Raum: drinnen wird im Klartext gearbeitet.",
+      "textEn": "The VAU is not a tunnel but a room: inside, work happens in plain text."
+    },
+    {
+      "type": "lauscher",
+      "tx": 18,
+      "ty": 18,
+      "patrol": 0,
+      "speed": 22,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "vau-feld",
+      "tx": 24,
+      "ty": 15,
+      "tw": 7,
+      "th": 5
+    },
+    {
+      "type": "vau-feld",
+      "tx": 37,
+      "ty": 12,
+      "tw": 8,
+      "th": 5,
+      "ttlMs": 6000
+    },
+    {
+      "type": "lauscher",
+      "tx": 47,
+      "ty": 15,
+      "patrol": 0,
+      "speed": 22,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 51,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Zwischen den Räumen zählt wieder deine eigene Hülle.",
+      "textEn": "Between the rooms your own shell counts again."
+    },
+    {
+      "type": "lauscher",
+      "tx": 53,
+      "ty": 18,
+      "patrol": 30,
+      "speed": 34,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 66,
+      "ty": 18,
+      "patrol": -26,
+      "speed": 29,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 79,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 90,
+      "ty": 18,
+      "patrol": 24,
+      "speed": 38,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "moving-platform",
+      "tx": 95,
+      "ty": 18,
+      "tw": 2,
+      "range": 48,
+      "speed": 58
+    },
+    {
+      "type": "vau-feld",
+      "tx": 107,
+      "ty": 9,
+      "tw": 6,
+      "th": 5,
+      "ttlMs": 4500
+    },
+    {
+      "type": "kontext-anker",
+      "tx": 109,
+      "ty": 12
+    },
+    {
+      "type": "lauscher",
+      "tx": 115,
+      "ty": 12,
+      "patrol": -20,
+      "speed": 29,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "lauscher",
+      "tx": 131,
+      "ty": 18,
+      "patrol": 24,
+      "speed": 38,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 153,
+      "ty": 18,
+      "patrol": -22,
+      "speed": 34,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 166,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Drinnen schnell UND unsichtbar. Das kann sonst nichts.",
+      "textEn": "Inside fast AND invisible. Nothing else can do that."
+    }
+  ]
+}

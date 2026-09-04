@@ -1,0 +1,133 @@
+{
+  "station": {
+    "name": {
+      "de": "Versichertenstammdaten",
+      "en": "Insured master data"
+    },
+    "portalText": {
+      "de": "Station 1: Versichertenstammdaten — deine Karte wird online geprüft.",
+      "en": "Station 1: insured master data — your card is checked online."
+    },
+    "reziText": {
+      "de": "Deine Daten stimmen — deshalb gibt es mich jetzt!",
+      "en": "Your data is correct — that's why I exist now!"
+    },
+    "stampText": {
+      "de": "✓ Daten vollständig & aktuell.",
+      "en": "✓ Data complete & up to date."
+    },
+    "badge": "VSDM"
+  },
+  "siegelIcon": "seal-vsdm",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Arztpraxis",
+      "en": "Doctor's office"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "stammdaten",
+  "enemySkin": "neugier-geist",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 13,
+    "label": {
+      "de": "Daten-Kacheln",
+      "en": "data tiles"
+    }
+  },
+  "mechanics": {
+    "timing-gate": {
+      "steps": 2,
+      "stepMs": 1100,
+      "hint": {
+        "de": "Aktualisierungs-Terminal: Blauer Knopf im Takt — die TI holt deine frischen Stammdaten!",
+        "en": "Update terminal: blue button on the beat — the TI fetches your fresh master data!"
+      },
+      "failHint": {
+        "de": "Tipp: Drück genau dann, wenn das gelbe Licht groß aufleuchtet — ganz in Ruhe.",
+        "en": "Tip: press right when the yellow light glows big — take your time."
+      },
+      "gateHint": {
+        "de": "Das Tor ist zu! Erst am Terminal die Daten aktualisieren: blauer Knopf im Takt der Lichter.",
+        "en": "The gate is locked! Update your data at the terminal first: blue button on the beat."
+      }
+    }
+  },
+  "parTimeSeconds": 40,
+  "stuckHint": {
+    "de": "Immer nach rechts! Sammle 13 Daten-Kacheln, dann öffnet das Portal am Ende.",
+    "en": "Keep heading right! Collect 13 data tiles, then the portal at the end opens."
+  },
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Willkommen im Daten-Check! Lauf nach rechts — Joystick oder Pfeiltasten.",
+      "textEn": "Welcome to the data check! Head right — joystick or arrow keys."
+    },
+    {
+      "type": "info-sign",
+      "tx": 12,
+      "ty": 16,
+      "tw": 2,
+      "th": 4,
+      "textDe": "Springen: roter Knopf oder LEERTASTE. Hol dir die leuchtenden Daten-Kacheln!",
+      "textEn": "Jump: red button or SPACE. Grab the glowing data tiles!"
+    },
+    {
+      "type": "info-sign",
+      "tx": 45,
+      "ty": 12,
+      "tw": 3,
+      "th": 8,
+      "textDe": "In der Luft nochmal springen: REZI trägt dich! Die goldene Kachel oben ist ein Bonus.",
+      "textEn": "Jump again in the air: REZI carries you! The golden tile up there is a bonus."
+    },
+    {
+      "type": "moving-platform",
+      "tx": 63,
+      "ty": 18,
+      "tw": 2,
+      "range": 64,
+      "speed": 58
+    },
+    {
+      "type": "timing-gate",
+      "tx": 73,
+      "ty": 15,
+      "tw": 7,
+      "th": 5,
+      "gate": "tor-daten"
+    },
+    {
+      "type": "gate",
+      "tx": 82,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-daten"
+    },
+    {
+      "type": "info-sign",
+      "tx": 90,
+      "ty": 15,
+      "tw": 2,
+      "th": 5,
+      "textDe": "Zwei Wege: Die Feder bringt dich hoch zu den Bonus-Kacheln — unten warten Störfelder.",
+      "textEn": "Two ways: the spring takes you up to the bonus tiles — down here are jamming fields."
+    },
+    {
+      "type": "info-sign",
+      "tx": 158,
+      "ty": 15,
+      "tw": 3,
+      "th": 5,
+      "textDe": "Alle Daten geprüft? Dann öffnet das Portal — 13 Kacheln reichen.",
+      "textEn": "All data checked? Then the portal opens — 13 tiles are enough."
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "station": {
+    "name": {
+      "de": "Die Identität",
+      "en": "Identity"
+    },
+    "portalText": {
+      "de": "Station: Die Identität — hier zählt nicht, was du hast, sondern wer du bist.",
+      "en": "Station: identity — what counts here is not what you carry, but who you are."
+    },
+    "reziText": {
+      "de": "Deine Karte hat mich ausgewiesen — nicht mich gespeichert!",
+      "en": "Your card identified me — it did not store me!"
+    },
+    "stampText": {
+      "de": "✓ Identität geprüft — jede Karte für ihre eigene Tür.",
+      "en": "✓ Identity checked — every card for its own door."
+    },
+    "badge": "eGK · SMC-B"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Anmeldung",
+      "en": "Reception"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "kartenterminal",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 9,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    }
+  },
+  "parTimeSeconds": 95,
+  "stuckHint": {
+    "de": "Immer nach rechts! TI-Aktion steckt die Karte, Shift wechselt die Hülle.",
+    "en": "Keep heading right! TI action inserts the card, Shift switches your shell."
+  },
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Vor dir liegt eine Gesundheitskarte. Nimm sie mit!",
+      "textEn": "There is a health card ahead. Pick it up!"
+    },
+    {
+      "type": "karte",
+      "tx": 10,
+      "ty": 18.2,
+      "karte": "egk",
+      "hint": {
+        "de": "eGK gefunden — sie weist dich aus. Gespeichert ist auf ihr nichts.",
+        "en": "Found the eGK — it identifies you. It stores nothing."
+      }
+    },
+    {
+      "type": "kartenleser",
+      "tx": 16,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-anmeldung",
+      "hint": {
+        "de": "Karte stecken: TI-Aktion drücken.",
+        "en": "Insert your card: press the TI action."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 20,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-anmeldung"
+    },
+    {
+      "type": "lauscher",
+      "tx": 28,
+      "ty": 18,
+      "patrol": 40,
+      "speed": 28,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 40,
+      "ty": 18,
+      "patrol": -30,
+      "speed": 24,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 50,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Noch ein Terminal — oben. Probier deine Karte ruhig aus.",
+      "textEn": "Another terminal — up there. Go ahead and try your card."
+    },
+    {
+      "type": "kartenleser",
+      "tx": 56,
+      "ty": 13.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "smcb"
+      ],
+      "hint": {
+        "de": "Dieses Terminal will den Praxisausweis sehen.",
+        "en": "This terminal wants to see the practice card."
+      },
+      "falsche-karteHint": {
+        "de": "ZUGRIFF VERWEIGERT — die eGK weist DICH aus, nicht die Praxis. Hier braucht es die SMC-B.",
+        "en": "ACCESS DENIED — the eGK identifies YOU, not the practice. This needs the SMC-B."
+      }
+    },
+    {
+      "type": "karte",
+      "tx": 64,
+      "ty": 18.2,
+      "karte": "smcb",
+      "hint": {
+        "de": "SMC-B — der Ausweis der Einrichtung. Eine zweite Rolle, eine zweite Karte.",
+        "en": "SMC-B — the institution’s card. A second role needs a second card."
+      }
+    },
+    {
+      "type": "lauscher",
+      "tx": 72,
+      "ty": 18,
+      "patrol": 26,
+      "speed": 30,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "kartenleser",
+      "tx": 80,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "smcb"
+      ],
+      "gate": "tor-zugang",
+      "gateHint": {
+        "de": "Dieses Tor prüft die Einrichtung — steck die SMC-B am Terminal links.",
+        "en": "This gate checks the institution — insert the SMC-B at the terminal on the left."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 86,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-zugang"
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 90,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 98,
+      "ty": 18,
+      "patrol": 26,
+      "speed": 32,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 114,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die Karte war der Schlüssel — der Inhalt lag nie auf ihr.",
+      "textEn": "The card was the key — the content was never on it."
+    }
+  ]
+}

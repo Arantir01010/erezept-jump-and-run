@@ -1,0 +1,109 @@
+{
+  "station": {
+    "name": {
+      "de": "Souveränität",
+      "en": "Sovereignty"
+    },
+    "portalText": {
+      "de": "Station: Am Ende entscheidet nicht das System, sondern du.",
+      "en": "Station: in the end it is not the system that decides, but you."
+    },
+    "reziText": {
+      "de": "Ich war ein Datenpaket. Wohin ich gehe, hast immer du bestimmt.",
+      "en": "I was a data packet. Where I go was always your decision."
+    },
+    "stampText": {
+      "de": "✓ Datensouveränität — die letzte Tür öffnest du.",
+      "en": "✓ Data sovereignty — the last door is yours to open."
+    },
+    "badge": "Welt 5 · Abschluss"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Deine Akte",
+      "en": "Your record"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "akte",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 8,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
+      }
+    }
+  },
+  "parTimeSeconds": 80,
+  "stuckHint": {
+    "de": "Ganz ruhig nach rechts — hier jagt dich niemand mehr.",
+    "en": "Calmly to the right — nobody is chasing you any more."
+  },
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Kein Lauscher mehr. Kein Tor. Nur noch der Weg.",
+      "textEn": "No more eavesdroppers. No gate. Just the path."
+    },
+    {
+      "type": "info-sign",
+      "tx": 40,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Die Akte gehört dir. Sie wird nicht ohne dich gefüllt.",
+      "textEn": "The record is yours. It is not filled without you."
+    },
+    {
+      "type": "vau-feld",
+      "tx": 45,
+      "ty": 12,
+      "tw": 6,
+      "th": 5
+    },
+    {
+      "type": "info-sign",
+      "tx": 72,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Du entscheidest, wer hineinsieht — und du kannst es zurücknehmen.",
+      "textEn": "You decide who looks inside — and you can take it back."
+    },
+    {
+      "type": "info-sign",
+      "tx": 88,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Einfach. Sicher. Digital.",
+      "textEn": "Simple. Secure. Digital."
+    },
+    {
+      "type": "letzte-tuer",
+      "tx": 93,
+      "ty": 14,
+      "th": 6
+    }
+  ]
+}

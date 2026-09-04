@@ -1,0 +1,144 @@
+{
+  "station": {
+    "name": {
+      "de": "KOV Gateway",
+      "en": "KOV gateway"
+    },
+    "portalText": {
+      "de": "Station: KOV Gateway — dein sicherer Tunnel in die TI.",
+      "en": "Station: KOV gateway — your secure tunnel into the TI."
+    },
+    "reziText": {
+      "de": "Verschlüsselt kann mich niemand mitlesen!",
+      "en": "Encrypted, nobody can read me!"
+    },
+    "stampText": {
+      "de": "✓ Verschlüsselt unterwegs im geschützten Netz.",
+      "en": "✓ Travelling encrypted in the protected network."
+    },
+    "badge": "VPN · E2E-Verschlüsselung"
+  },
+  "siegelIcon": "seal-vpn",
+  "cityAnchor": {
+    "facade": "gateway",
+    "label": {
+      "de": "Tor zur TI",
+      "en": "Gate to the TI"
+    }
+  },
+  "cameraMode": "tube",
+  "theme": "kov-gateway",
+  "enemySkin": "datenkrake",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 10,
+    "label": {
+      "de": "Datenbits",
+      "en": "Data bits"
+    }
+  },
+  "mechanics": {
+    "tube-scroll": {
+      "speed": 55
+    },
+    "stillstand-podest": {
+      "scanMs": 850,
+      "hint": {
+        "de": "Stillstehen: Das Gateway prüft dich!",
+        "en": "Stand still: the gateway checks you!"
+      },
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      }
+    },
+    "krypto-dusche": {
+      "hint": {
+        "de": "Blauer Knopf: Verschlüsselung anlegen!",
+        "en": "Blue button: apply encryption!"
+      }
+    }
+  },
+  "parTimeSeconds": 35,
+  "objects": [
+    {
+      "type": "stillstand-podest",
+      "tx": 26,
+      "ty": 17.6,
+      "gate": "gate-scan-1"
+    },
+    {
+      "type": "gate",
+      "name": "gate-scan-1",
+      "tx": 33,
+      "ty": 14,
+      "th": 5
+    },
+    {
+      "type": "krypto-dusche",
+      "tx": 58,
+      "ty": 13,
+      "gate": "gate-krypto"
+    },
+    {
+      "type": "gate",
+      "name": "gate-krypto",
+      "tx": 66,
+      "ty": 14,
+      "th": 5
+    },
+    {
+      "type": "stillstand-podest",
+      "tx": 94,
+      "ty": 17.6,
+      "gate": "gate-scan-2"
+    },
+    {
+      "type": "gate",
+      "name": "gate-scan-2",
+      "tx": 101,
+      "ty": 14,
+      "th": 5
+    },
+    {
+      "type": "deco",
+      "tx": 18,
+      "ty": 0.4,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 4
+    },
+    {
+      "type": "deco",
+      "tx": 48,
+      "ty": 0.2,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 5
+    },
+    {
+      "type": "deco",
+      "tx": 77,
+      "ty": 0.5,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 3
+    },
+    {
+      "type": "deco",
+      "tx": 105,
+      "ty": 0.3,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 5
+    },
+    {
+      "type": "deco",
+      "tx": 128,
+      "ty": 0.5,
+      "sprite": "krake-0",
+      "anim": "krake-swim",
+      "drift": 4
+    }
+  ]
+}

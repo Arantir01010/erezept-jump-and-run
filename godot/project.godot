@@ -1,0 +1,60 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Paul & REZI"
+config/description="Das e-Rezept Jump 'n' Run — Godot-Fassung. Paul begleitet sein e-Rezept REZI durch die Telematikinfrastruktur."
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+run/low_processor_mode=false
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.03, 0.05, 0.09, 1)
+
+[autoload]
+
+Game="*res://src/autoload/Game.gd"
+Sfx="*res://src/autoload/Sfx.gd"
+Kiosk="*res://src/autoload/Kiosk.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/vsync/vsync_mode=1
+window/dpi/allow_hidpi=true
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=false
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=8
+2d/default_gravity=3000.0
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+renderer/rendering_method.web="gl_compatibility"
+viewport/hdr_2d.web=false
+viewport/hdr_2d=true
+anti_aliasing/quality/msaa_2d=3
+anti_aliasing/quality/msaa_2d.web=0
+2d/shadow_atlas/size=4096
+textures/canvas_textures/default_texture_filter=1
+environment/defaults/default_clear_color=Color(0.03, 0.05, 0.09, 1)
+2d/snap/snap_2d_transforms_to_pixel=false

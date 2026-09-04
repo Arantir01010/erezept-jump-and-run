@@ -1,0 +1,97 @@
+{
+  "station": {
+    "name": {
+      "de": "Kartenterminal",
+      "en": "Card terminal"
+    },
+    "portalText": {
+      "de": "Station: Kartenterminal — dein Identitäts-Check.",
+      "en": "Station: card terminal — your identity check."
+    },
+    "reziText": {
+      "de": "Dr. Pixel signiert mich mit Arztausweis und PIN — jetzt bin ich rechtsgültig!",
+      "en": "Dr. Pixel signs me with his doctor ID and PIN — now I am legally valid!"
+    },
+    "stampText": {
+      "de": "✓ Identität geprüft & vom Arzt signiert.",
+      "en": "✓ Identity checked & signed by the doctor."
+    },
+    "badge": "eGK · eHBA · QES"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Arztpraxis",
+      "en": "Doctor's office"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "kartenterminal",
+  "enemySkin": "skimming-kralle",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 0,
+    "label": {
+      "de": "Datenbits",
+      "en": "Data bits"
+    }
+  },
+  "mechanics": {
+    "timing-gate": {
+      "steps": 4,
+      "stepMs": 900,
+      "hint": {
+        "de": "Blauer Knopf im Takt: Dr. Pixel gibt seine Arzt-PIN ein!",
+        "en": "Blue button on the beat: Dr. Pixel enters his doctor PIN!"
+      }
+    },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      }
+    },
+    "stamp-exit": {
+      "hint": {
+        "de": "Blauer Knopf unter dem Stempel: Signatur annehmen!",
+        "en": "Blue button under the stamp: accept the signature!"
+      }
+    }
+  },
+  "parTimeSeconds": 30,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 43.5,
+      "ty": 16,
+      "textDe": "Vorsicht, Skimming-Kralle — duck dich!",
+      "textEn": "Careful, skimming claw — duck!"
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 48.1,
+      "ty": 18.55,
+      "fromRight": true,
+      "reach": 42
+    },
+    {
+      "type": "timing-gate",
+      "tx": 58,
+      "ty": 15,
+      "gate": "gate-pin"
+    },
+    {
+      "type": "gate",
+      "name": "gate-pin",
+      "tx": 67,
+      "ty": 14
+    },
+    {
+      "type": "stamp-exit",
+      "tx": 89,
+      "ty": 14
+    }
+  ]
+}

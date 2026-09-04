@@ -1,0 +1,219 @@
+{
+  "station": {
+    "name": {
+      "de": "Der Kontextschlüssel",
+      "en": "The context key"
+    },
+    "portalText": {
+      "de": "Station: Die Sitzung — Schutz gilt nicht ewig.",
+      "en": "Station: the session — protection does not last forever."
+    },
+    "reziText": {
+      "de": "Läuft die Sitzung ab, falle ich in den Klartext zurück.",
+      "en": "When the session expires, I fall back into plain text."
+    },
+    "stampText": {
+      "de": "✓ Sitzung gehalten — abgelaufener Schutz schützt nicht.",
+      "en": "✓ Session kept alive — expired protection protects nothing."
+    },
+    "badge": "Kontextschlüssel"
+  },
+  "siegelIcon": "seal-generic",
+  "cityAnchor": {
+    "facade": "praxis",
+    "label": {
+      "de": "Sitzung",
+      "en": "Session"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "lauscher-auge",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 14,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "vau-feld": {
+      "hint": {
+        "de": "VAU: Hier arbeitest du im Klartext — und trotzdem sieht dich niemand!",
+        "en": "VAU: here you work in plain text — and still nobody sees you!"
+      }
+    },
+    "kontext-anker": {
+      "hint": {
+        "de": "Sitzung aufgefrischt — der Kontextschlüssel gilt wieder!",
+        "en": "Session refreshed — the context key is valid again!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    }
+  },
+  "parTimeSeconds": 60,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Der Kontextschlüssel gilt nur eine Weile. Danach bist du wieder sichtbar.",
+      "textEn": "The context key is valid for a while only. After that you are visible again."
+    },
+    {
+      "type": "lauscher",
+      "tx": 26,
+      "ty": 18,
+      "patrol": 0,
+      "speed": 22,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "vau-feld",
+      "tx": 34,
+      "ty": 13,
+      "tw": 13,
+      "th": 7,
+      "ttlMs": 5000
+    },
+    {
+      "type": "kontext-anker",
+      "tx": 42,
+      "ty": 17
+    },
+    {
+      "type": "lauscher",
+      "tx": 52,
+      "ty": 18,
+      "patrol": 28,
+      "speed": 34,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "vau-feld",
+      "tx": 60,
+      "ty": 15,
+      "tw": 6,
+      "th": 5,
+      "ttlMs": 4000
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 68,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 75,
+      "ty": 18,
+      "patrol": -24,
+      "speed": 36,
+      "reach": 96,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 82,
+      "ty": 18,
+      "patrol": 22,
+      "speed": 31,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "moving-platform",
+      "tx": 86,
+      "ty": 18,
+      "tw": 2,
+      "range": 48,
+      "speed": 58
+    },
+    {
+      "type": "vau-feld",
+      "tx": 110,
+      "ty": 9,
+      "tw": 6,
+      "th": 5,
+      "ttlMs": 3500
+    },
+    {
+      "type": "kontext-anker",
+      "tx": 112,
+      "ty": 12
+    },
+    {
+      "type": "lauscher",
+      "tx": 120,
+      "ty": 18,
+      "patrol": 20,
+      "speed": 34,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "vau-feld",
+      "tx": 134,
+      "ty": 15,
+      "tw": 5,
+      "th": 5,
+      "ttlMs": 3500
+    },
+    {
+      "type": "lauscher",
+      "tx": 142,
+      "ty": 18,
+      "patrol": 18,
+      "speed": 38,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "lauscher",
+      "tx": 158,
+      "ty": 18,
+      "patrol": -20,
+      "speed": 34,
+      "reach": 88,
+      "spread": 18
+    },
+    {
+      "type": "info-sign",
+      "tx": 170,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Eine abgelaufene Sitzung schützt nicht — sie fällt in den Klartext.",
+      "textEn": "An expired session does not protect — it falls back into plain text."
+    }
+  ]
+}

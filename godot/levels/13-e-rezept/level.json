@@ -1,0 +1,208 @@
+{
+  "station": {
+    "name": {
+      "de": "Das E-Rezept",
+      "en": "The e-prescription"
+    },
+    "portalText": {
+      "de": "Station: Die Apotheke — deine Karte gibt den Zugriff frei.",
+      "en": "Station: the pharmacy — your card releases the access."
+    },
+    "reziText": {
+      "de": "Auf der Karte steht nichts. Sie öffnet nur — wie ein Schlüssel.",
+      "en": "Nothing is stored on the card. It only opens — like a key."
+    },
+    "stampText": {
+      "de": "✓ Eingelöst — die Karte war der Schlüssel, nicht der Speicher.",
+      "en": "✓ Redeemed — the card was the key, not the storage."
+    },
+    "badge": "E-Rezept"
+  },
+  "siegelIcon": "seal-egk",
+  "cityAnchor": {
+    "facade": "apotheke",
+    "label": {
+      "de": "Apotheke",
+      "en": "Pharmacy"
+    }
+  },
+  "cameraMode": "horizontal",
+  "theme": "zentrale-zone",
+  "enemySkin": "skimming-kralle",
+  "collectible": {
+    "type": "datenbit",
+    "countRequired": 14,
+    "label": {
+      "de": "Prüfsummen",
+      "en": "checksums"
+    }
+  },
+  "huelle": {
+    "enabled": true,
+    "start": "klartext",
+    "toggleCooldownMs": 150
+  },
+  "mechanics": {
+    "lauscher": {
+      "seenText": {
+        "de": "MITGELESEN!",
+        "en": "READ ALONG!"
+      },
+      "akteur": {
+        "de": "Lauscher",
+        "en": "Eavesdropper"
+      },
+      "huelleHint": {
+        "de": "Unverschlüsselt liest er alles mit — schalte die Hülle um!",
+        "en": "Unencrypted he reads everything — switch your shell!"
+      }
+    },
+    "andock-plattform": {
+      "hint": {
+        "de": "Diese Plattform trägt nur Klartext — kurz sichtbar werden!",
+        "en": "This platform only carries plain text — become visible briefly!"
+      }
+    },
+    "deny-enemy": {
+      "grabsBeforeBlock": 2,
+      "denyText": {
+        "de": "ZUGRIFF VERWEIGERT",
+        "en": "ACCESS DENIED"
+      },
+      "duckHint": {
+        "de": "Ein falscher Kartenleser! Duck dich unter der Kralle durch.",
+        "en": "A fake card reader! Duck under the claw."
+      }
+    }
+  },
+  "parTimeSeconds": 60,
+  "objects": [
+    {
+      "type": "info-sign",
+      "tx": 5,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Das Rezept liegt im Fachdienst, nicht auf der Karte. Die Karte öffnet nur.",
+      "textEn": "The prescription is in the service, not on the card. The card only opens."
+    },
+    {
+      "type": "karte",
+      "tx": 12,
+      "ty": 18.2,
+      "karte": "egk"
+    },
+    {
+      "type": "lauscher",
+      "tx": 24,
+      "ty": 18,
+      "patrol": 34,
+      "speed": 31,
+      "reach": 92,
+      "spread": 20
+    },
+    {
+      "type": "info-sign",
+      "tx": 42,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Vorsicht: Nicht jeder Kartenleser ist echt. Duck dich!",
+      "textEn": "Careful: not every card reader is genuine. Duck!"
+    },
+    {
+      "type": "deny-enemy",
+      "tx": 47.1,
+      "ty": 18.55,
+      "fromRight": true,
+      "reach": 42
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 54,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 60,
+      "ty": 18,
+      "patrol": 30,
+      "speed": 34,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "kartenleser",
+      "tx": 68,
+      "ty": 16.9,
+      "tw": 3,
+      "th": 3,
+      "karten": [
+        "egk"
+      ],
+      "gate": "tor-apotheke",
+      "gateHint": {
+        "de": "Die Apotheke braucht deine Freigabe — eGK am ECHTEN Terminal stecken.",
+        "en": "The pharmacy needs your release — insert the eGK at the REAL terminal."
+      }
+    },
+    {
+      "type": "gate",
+      "tx": 76,
+      "ty": 14,
+      "th": 6,
+      "name": "tor-apotheke"
+    },
+    {
+      "type": "moving-platform",
+      "tx": 83,
+      "ty": 18,
+      "tw": 2,
+      "range": 48,
+      "speed": 58
+    },
+    {
+      "type": "lauscher",
+      "tx": 99,
+      "ty": 18,
+      "patrol": -26,
+      "speed": 36,
+      "reach": 92,
+      "spread": 18
+    },
+    {
+      "type": "andock-plattform",
+      "tx": 105,
+      "ty": 18.6,
+      "tw": 3
+    },
+    {
+      "type": "lauscher",
+      "tx": 111,
+      "ty": 18,
+      "patrol": 22,
+      "speed": 29,
+      "reach": 88,
+      "spread": 20
+    },
+    {
+      "type": "lauscher",
+      "tx": 147,
+      "ty": 18,
+      "patrol": 22,
+      "speed": 29,
+      "reach": 88,
+      "spread": 20
+    },
+    {
+      "type": "info-sign",
+      "tx": 160,
+      "ty": 16,
+      "tw": 3,
+      "th": 4,
+      "textDe": "Zieh die Karte — der Zugriff endet sofort. Es bleibt nichts zurück.",
+      "textEn": "Pull the card — access ends immediately. Nothing is left behind."
+    }
+  ]
+}

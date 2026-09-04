@@ -1,0 +1,15 @@
+# Godot 4 cache
+.godot/
+# Exportierte Builds
+build/
+build-web/
+# Generierte Screenshots aus dem Prüflauf
+shots/
+# Betriebssystem
+Thumbs.db
+.DS_Store
+
+# Marken-Assets (lizenzierte Schriften/Piktogramme): nicht ins öffentliche Repo
+assets/fonts/
+assets/brand/
+brand/lizenz/

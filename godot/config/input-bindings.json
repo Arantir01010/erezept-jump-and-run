@@ -1,0 +1,19 @@
+{
+  "gamepad": {
+    "axisDeadzone": 0.4,
+    "jumpButtons": [0, 2],
+    "actionButtons": [1, 3],
+    "toggleButtons": [4, 5],
+    "toggleOnUp": true,
+    "useDpad": true
+  },
+  "keyboard": {
+    "left": ["LEFT", "A"],
+    "right": ["RIGHT", "D"],
+    "up": ["UP", "W"],
+    "down": ["DOWN", "S"],
+    "jump": ["SPACE"],
+    "action": ["E", "ENTER"],
+    "toggle": ["SHIFT", "Q"]
+  }
+}
