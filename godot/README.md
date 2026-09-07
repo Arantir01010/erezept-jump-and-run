@@ -6,6 +6,7 @@ Markenregeln (nie kämpfen, „ZUGRIFF VERWEIGERT", VAU ist ein Raum) bleiben er
 Spielgefühl, Leveldesign, Grafik und Wiederspielwert sind neu.
 
 Bewertung, Recherche und Konzept: [`docs/ANALYSE-UND-KONZEPT.md`](docs/ANALYSE-UND-KONZEPT.md).
+Besucher-Umfrage zur Bewertung des Spiels (Fragebogen, Erfassung, Auswertung mit Formeln): [`docs/Umfrage-Paul-und-REZI.xlsx`](docs/Umfrage-Paul-und-REZI.xlsx).
 
 ## Starten
 
@@ -286,7 +287,7 @@ godot/
 ├── config/        Sync aus public/config/
 ├── assets/        generiert (audio/, qr/) · fonts/ + brand/ (Marke, lizenziert, nicht im Repo)
 ├── brand/         Marken-README + Lizenzdokumente
-├── docs/          Bewertung, Recherche, Konzept
+├── docs/          Bewertung, Recherche, Konzept, Umfrage (Excel)
 ├── i18n/          Übersetzungen (ui, intro, briefing, levels) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
 ├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
 ├── build/         Windows-Paket (generiert)      · build-web/  Browser-Fassung (generiert)
