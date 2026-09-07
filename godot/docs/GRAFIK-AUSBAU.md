@@ -143,7 +143,7 @@ Bildern mitten in der Blende: `01a-blende-zu.png`, `01a2-blende-auf.png`), alle 
 Briefings (`--shots-briefings`), `npm run validate` grün, Browser-Fassung und Windows-PCK
 neu gebaut.
 
-## Runde 4 (04.09.2026): Sechs Sprachen
+## Runde 4 (07.09.2026): Sechs Sprachen
 
 Flaggen oben rechts im Hauptmenü (DE EN FR ES ZH HI, Klick/Tipp, F2 blättert), das Menü
 baut sich neu auf, die gesamte Oberfläche folgt: Zeitreise, Probelauf, ePA-Wissen, alle
@@ -154,7 +154,7 @@ Mechanik (TranslationServer, auto_translate der Labels, `tr()` für formatierte 
 Schrift-Fallback, erzeugt aus den Übersetzungen (`tools/gen_i18n_fonts.py`). Geprüft mit
 Prüfläufen in zh, hi und fr über den ganzen Ablauf und einem F2-Tastentest.
 
-## Runde 5 (04.09.2026): Pause, Musik und Töne
+## Runde 5 (07.09.2026): Pause, Musik und Töne
 
 Pause im Level (ESC/P, START am Gamepad, Pause-Knopf im HUD für Finger und Maus) mit
 Menü Weiter / Musik / Töne / Hauptmenü (`src/ui/PauseMenu.gd`, Baum angehalten, Musik
@@ -168,7 +168,7 @@ ist jetzt elastisch (Level._update_tube): sie fährt von selbst, wartet aber, so
 150 px vom linken Rand steht (Prüf-Podest, Krypto-Dusche), und eilt ihm nie davon; der
 rechte Rand bleibt eine weiche Grenze. Prüflauf-Bild 07z-tunnel-wartet.png.
 
-## Runde 6 (04.09.2026): Musik
+## Runde 6 (07.09.2026): Musik
 
 Die synthetischen Musikschleifen aus gen_assets.py sind durch vier lizenzfreie Stücke
 von Pixabay ersetzt (Pixabay Content License, Nachweise in `assets/audio/CREDITS.md`):
@@ -178,7 +178,7 @@ Auswahl nach Loop-Tauglichkeit (keine Stille an den Enden), Lautheit auf −16 L
 angeglichen (ffmpeg loudnorm), MP3 128 kbit/s; `Sfx._stream()` lädt MP3 vor WAV.
 The Sounds Resource bleibt außen vor (Spielrips ohne Nutzungsrecht).
 
-## Runde 7 (04.09.2026): Token-Pass nach dem Design-Prompt
+## Runde 7 (07.09.2026): Token-Pass nach dem Design-Prompt
 
 Alle Oberflächenfarben laufen jetzt über die Brand-Tokens (`brand/DESIGN-PROMPT.md`,
 `Brand.gd`): Eyebrows, Aufforderungen, Erzählband-Kante, aktuelle Station und Baustein-
