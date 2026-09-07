@@ -6,6 +6,9 @@ und nicht die fachlichen Farben der Hülle (warm = offen, kühl = verschlüsselt
 
 Alles Marken-Wissen sitzt an einer Stelle: [`src/core/Brand.gd`](../src/core/Brand.gd).
 
+Prompt-Vorlage für KI-Werkzeuge im PwC-Look (Tokens, Schriften, Verbotsliste):
+[`DESIGN-PROMPT.md`](DESIGN-PROMPT.md).
+
 ## Was aus dem Brand-Paket übernommen wurde
 
 Das gelieferte Paket (`ITCCharter_Webfonts_July2024`, Helvetica Neue Desktop/Web, ITC Charter
