@@ -87,7 +87,7 @@ func _ready() -> void:
 	add_child(textlayer)
 	_build()
 	if weiter_text != "":
-		weiter = label(W - 12, 340, weiter_text, 10.5, {"color": Pen.hex(0xffd591), "spacing": 0.4, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+		weiter = label(W - 12, 340, weiter_text, 10.5, {"color": Brand.UI_ACCENT, "spacing": 0.4, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 		weiter.modulate.a = 0.0
 	if entrance:
 		_entrance()
@@ -162,10 +162,10 @@ func _draw_life_wrapper(c: CanvasItem) -> void:
 	_draw_story_band(c)
 	# Weiter-Zeile erst nach der Mindestdauer; vorher ein feiner Zeitbalken
 	if sperre > 0.0 and tz < sperre:
-		Pen.rect(c, W - 72, 339, 60, 1.6, Pen.hex(0xffd591, 0.2))
-		Pen.rect(c, W - 72, 339, 60.0 * tz / sperre, 1.6, Pen.hex(0xffd591, 0.6))
+		Pen.rect(c, W - 72, 339, 60, 1.6, Pen.alpha(Brand.UI_ACCENT, 0.25))
+		Pen.rect(c, W - 72, 339, 60.0 * tz / sperre, 1.6, Pen.alpha(Brand.UI_ACCENT_STRONG, 0.9))
 	for i in dots.size():
-		Pen.circle(c, W - 40 + i * 10, 352, 2, Pen.hex(0xffd591, 0.9 if dots[i] else 0.3))
+		Pen.circle(c, W - 40 + i * 10, 352, 2, Brand.UI_ACCENT if dots[i] else Pen.alpha(Brand.UI_TEXT_MUTED, 0.7))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -257,7 +257,7 @@ static func font_serif(spacing: float) -> Font:
 ## Titel + Untertitel wie auf allen Info-Screens.
 func header(titel: String, untertitel: String) -> void:
 	label(W / 2, 44, titel, 26, {"serif": true, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.2, "spacing": 1.2})
-	label(W / 2, 72, untertitel, 10.5, {"color": Pen.hex(0xcfe0ff), "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	label(W / 2, 72, untertitel, 10.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 
 
 # ---------------------------------------------------------------- Erzählband

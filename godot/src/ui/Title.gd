@@ -99,10 +99,10 @@ func _build() -> void:
 
 	# ---- Titel, Subline, Start-Zeile ----
 	var cfg: Dictionary = Game.config.get("titleScreen", {})
-	label(W / 2, 52, "PAUL & REZI", 8, {"color": Pen.hex(0xffd591), "spacing": 2.4, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	label(W / 2, 52, "PAUL & REZI", 8, {"color": Brand.UI_EYEBROW, "spacing": 2.4, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 	label(W / 2, 76, Game.t(cfg.get("headline", {"de": "Das e-Rezept"})), 36, {"serif": true, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.6, "spacing": 0.6})
-	label(W / 2, 101, Game.t(cfg.get("subline", {"de": "Spiele dich durch die TI und erhalte dein e-Rezept!"})), 11.5, {"color": Pen.hex(0xcfe0ff), "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
-	press = label(W - 12, 340, "", 12, {"color": Pen.hex(0xffd591), "spacing": 0.5, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	label(W / 2, 101, Game.t(cfg.get("subline", {"de": "Spiele dich durch die TI und erhalte dein e-Rezept!"})), 11.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	press = label(W - 12, 340, "", 12, {"color": Brand.UI_ACCENT, "spacing": 0.5, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 
 	# ---- Bedienungswahl: zwei Felder über der Start-Zeile ----
 	# Felder so breit wie ihr (übersetzter) Text + Symbol, der Rahmen mittig am oberen Rand
@@ -119,7 +119,7 @@ func _build() -> void:
 	for p in _pills:
 		var r: Rect2 = p["rect"]
 		_place(p["label"], r.position.x + 19.0, PILL_Y + PILL_H / 2)
-	label(320, PILL_Y + PILL_H + 5.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Pen.hex(0xffd591), "spacing": 1.2})
+	label(320, PILL_Y + PILL_H + 5.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Brand.UI_EYEBROW, "spacing": 1.2})
 	mode = Kiosk.suggested_input_mode()
 	_seg = 1.0 if mode == "touch" else 0.0
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,

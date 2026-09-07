@@ -28,10 +28,17 @@ const GREY_LIGHT := Color("#DEDEDE")
 const GREY_PALE := Color("#F2F2F2")
 const WHITE := Color("#FFFFFF")
 
-# ---- Rollen im Spiel-UI ----
+# ---- Rollen im Spiel-UI (Tokens; Namen wie im Design-Prompt brand/DESIGN-PROMPT.md) ----
+#   --pwc-orange    ORANGE     Marke, Primäraktion, Fortschritt
+#   --pwc-tangerine TANGERINE  Aufforderung, Hervorhebung, Eyebrow, aktiver Zustand
+#   --pwc-yellow    YELLOW     Erfolg, Auszeichnung, Bestwert
+#   --pwc-red       RED        Fehler, Warnung, verweigert (nie dekorativ)
+#   --surface / --surface-solid / --border / --text / --text-dim / --text-muted / --radius
 const UI_ACCENT := TANGERINE          # Aufforderungen, Hervorhebungen (auf dunklem Grund lesbarer als Orange)
 const UI_ACCENT_STRONG := ORANGE      # Primärknopf, Fortschrittsbalken
 const UI_HIGHLIGHT := YELLOW          # Medaillen, Bestwert, Erfolg
+const UI_EYEBROW := TANGERINE         # Eyebrow-Zeilen über Überschriften (Versalien, gesperrt)
+const UI_DANGER := RED                # Fehler, Warnung, verweigert
 const UI_PANEL := Color(0.176, 0.176, 0.176, 0.86)     # GREY_DARK mit Alpha
 const UI_PANEL_SOLID := Color(0.176, 0.176, 0.176, 0.97)
 const UI_BORDER := Color(1.0, 1.0, 1.0, 0.16)

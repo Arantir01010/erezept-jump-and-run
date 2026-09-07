@@ -62,7 +62,7 @@ func _init(idx := 0) -> void:
 func _build() -> void:
 	var stroke := Pen.hex(0x0a1730)
 	label(W / 2, 22, tr("STATION %d / %d") % [index + 1, Game.playlist.size()], 5.5,
-		{"color": Pen.hex(0xffd591), "spacing": 1.6, "stroke": stroke, "stroke_w": 1.0})
+		{"color": Brand.UI_EYEBROW, "spacing": 1.6, "stroke": stroke, "stroke_w": 1.0})
 	header(titel, str(daten.get("untertitel", "")))
 	story_cycle = text_zyklus
 	var zl: Array = daten.get("zeilen", [])

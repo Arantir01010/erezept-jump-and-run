@@ -72,7 +72,7 @@ func _init(wid := "epa-konto") -> void:
 func _build() -> void:
 	var v: Dictionary = DATEN[id]
 	label(W / 2, 22, tr("ePA-WISSEN · TEIL %d / 4") % int(TEIL[id]), 5.5,
-		{"color": Pen.hex(0xffd591), "spacing": 1.6, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+		{"color": Brand.UI_EYEBROW, "spacing": 1.6, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 	header(str(v["titel"]), str(v["untertitel"]))
 	story_cycle = float(v["zyklus"])
 	for z in v["zeilen"]:
