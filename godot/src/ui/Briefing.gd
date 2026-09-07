@@ -81,10 +81,10 @@ func _build() -> void:
 			{"color": Pen.hex(int(arr[4])), "spacing": 0.4, "stroke": stroke, "stroke_w": 0.9, "alpha": 0.0})
 		rufe.append([l, float(arr[5]), float(arr[6])])
 	# Tafel: Handgriffe und Bausteine dieses Levels
-	label(20, 276, "DAS TUST DU", 5, {"color": Pen.hex(0xffd591), "spacing": 1.0, "origin": Vector2(0, 0.5)})
+	label(20, 276, "DAS TUST DU", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
 	label(LEISTE_X, 276, BriefingDaten.text(str(daten.get("tust", ""))), 7.2,
 		{"color": Pen.hex(0xeef2f8), "bold": false, "origin": Vector2(0, 0.5)})
-	label(20, 306, "BAUSTEINE", 5, {"color": Pen.hex(0xffd591), "spacing": 1.0, "origin": Vector2(0, 0.5)})
+	label(20, 306, "BAUSTEINE", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
 	for i in bausteine.size():
 		baustein_labels.append(label(_leiste_x(i), 318, BriefingDaten.name_of(str(bausteine[i])), 4.4, {"color": Pen.hex(0xcfd6e6), "bold": false}))
 
@@ -221,16 +221,16 @@ func _route(c: CanvasItem) -> void:
 	var y := 11.0
 	Pen.rect(c, x0, y - 0.4, (n - 1) * step, 0.8, Color(1, 1, 1, 0.14))
 	if index > 0:
-		Pen.rect(c, x0, y - 0.5, index * step, 1.0, Pen.hex(BAND_ACCENT, 0.7))
+		Pen.rect(c, x0, y - 0.5, index * step, 1.0, Pen.alpha(Brand.UI_HIGHLIGHT, 0.7))
 	for i in n:
 		var x := x0 + i * step
 		if i < index:
-			Pen.circle(c, x, y, 2.3, Pen.hex(BAND_ACCENT, 0.95))
+			Pen.circle(c, x, y, 2.3, Brand.UI_HIGHLIGHT)
 			Pen.polyline(c, PackedVector2Array([Vector2(x - 1.1, y), Vector2(x - 0.2, y + 0.9), Vector2(x + 1.2, y - 1.0)]), Pen.hex(0x0a1730, 0.9), 0.5)
 		elif i == index:
 			var puls := 0.5 + 0.5 * sin(t * 3.0)
-			Pen.circle(c, x, y, 4.4 + puls * 1.2, Pen.hex(BAND_ACCENT, 0.18))
-			Pen.circle(c, x, y, 3.0, Pen.hex(BAND_ACCENT, 0.95))
+			Pen.circle(c, x, y, 4.4 + puls * 1.2, Pen.alpha(Brand.UI_ACCENT, 0.18))
+			Pen.circle(c, x, y, 3.0, Brand.UI_ACCENT)
 			Pen.circle(c, x, y, 1.2, Pen.hex(0x0a1730, 0.9))
 		else:
 			Pen.circle(c, x, y, 2.0, Pen.hex(0x0e1a2c, 0.95))
@@ -251,8 +251,8 @@ func _leiste_licht(c: CanvasItem) -> void:
 		return
 	var hx := _leiste_x(hi)
 	var puls := 0.5 + 0.5 * sin(t * 4.0)
-	Pen.circle(c, hx, 300, 9.5, Pen.hex(BAND_ACCENT, 0.07))
-	Pen.scircle(c, hx, 300, 9.5 + puls * 0.8, Pen.hex(BAND_ACCENT, 0.5 + puls * 0.35), 0.8)
+	Pen.circle(c, hx, 300, 9.5, Pen.alpha(Brand.UI_ACCENT, 0.07))
+	Pen.scircle(c, hx, 300, 9.5 + puls * 0.8, Pen.alpha(Brand.UI_ACCENT, 0.5 + puls * 0.35), 0.8)
 
 
 ## Bühnensockel: der Boden, auf dem die Mini-Szene spielt (volle Breite).

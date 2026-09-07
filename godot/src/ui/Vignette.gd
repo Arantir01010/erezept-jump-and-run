@@ -30,7 +30,6 @@ const BAND_Y := 84.0
 const BAND_PAD := 7.0
 const BAND_TEXT_X := 84.0       # links davon sitzt REZI als Erzähler
 const BAND_TEXT_W := 506.0
-const BAND_ACCENT := 0xffd591
 
 var theme := {}
 var sperre := 0.0
@@ -346,7 +345,7 @@ func _draw_story_band(c: CanvasItem) -> void:
 	Pen.rrect(c, BAND_X, y, BAND_W, h, 6, Pen.hex(0x070f1c, 0.88 * a))
 	Pen.vgradient(c, BAND_X + 6, y + 0.5, BAND_W - 12, h * 0.45, Color(1, 1, 1, 0.05 * a), Color(1, 1, 1, 0.0))
 	Pen.srrect(c, BAND_X, y, BAND_W, h, 6, Color(1, 1, 1, 0.16 * a), 0.8)
-	Pen.rrect(c, BAND_X + 3.5, y + 5, 2.4, h - 10, 1.2, Pen.hex(BAND_ACCENT, 0.95 * a))
+	Pen.rrect(c, BAND_X + 3.5, y + 5, 2.4, h - 10, 1.2, Pen.alpha(Brand.UI_ACCENT, 0.95 * a))
 	Pen.rect(c, BAND_TEXT_X - 9, y + 7, 0.6, h - 14, Color(1, 1, 1, 0.12 * a))
 	if story_narrator:
 		var cx := BAND_X + 28.0
@@ -360,7 +359,7 @@ func _draw_story_band(c: CanvasItem) -> void:
 	var n := story.size()
 	for i in n:
 		var on := i == _story_last
-		Pen.circle(c, BAND_X + BAND_W - 9 - (n - 1 - i) * 6, y + h - 4.5, 1.7 if on else 1.1, Pen.hex(BAND_ACCENT, (0.95 if on else 0.32) * a))
+		Pen.circle(c, BAND_X + BAND_W - 9 - (n - 1 - i) * 6, y + h - 4.5, 1.7 if on else 1.1, Pen.alpha(Brand.UI_ACCENT if on else Brand.UI_TEXT_MUTED, (0.95 if on else 0.7) * a))
 
 
 # ------------------------------------------------------------------ Entrance

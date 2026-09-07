@@ -178,6 +178,16 @@ Auswahl nach Loop-Tauglichkeit (keine Stille an den Enden), Lautheit auf −16 L
 angeglichen (ffmpeg loudnorm), MP3 128 kbit/s; `Sfx._stream()` lädt MP3 vor WAV.
 The Sounds Resource bleibt außen vor (Spielrips ohne Nutzungsrecht).
 
+## Runde 7 (04.09.2026): Token-Pass nach dem Design-Prompt
+
+Alle Oberflächenfarben laufen jetzt über die Brand-Tokens (`brand/DESIGN-PROMPT.md`,
+`Brand.gd`): Eyebrows, Aufforderungen, Erzählband-Kante, aktuelle Station und Baustein-
+Ring in Tangerine; geschaffte Stationen, Bestenliste und Bestwert in Yellow; Untertitel,
+Legende, Hinweise in #DEDEDE / #7D7D7D. Das Cremegold (#ffd591) und die Hellblau-Töne
+aus der Web-Fassung sind aus der UI verschwunden. Spielinhalte (Welten, Hülle-Farben,
+Schilder und Rufe der Mini-Szenen, Gold der Prüfsummen) bleiben unverändert. Geprüft in
+Deutsch, Französisch und Chinesisch über den ganzen Ablauf.
+
 ## 5. Nicht tun
 
 Neon auf Kanten, Glühen für alles, mehr Sättigung, dunklere Paletten, KI-generierte Assets

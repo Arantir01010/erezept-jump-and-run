@@ -34,7 +34,7 @@ func _ready() -> void:
 	add_child(bg)
 
 	_label("Dein e-Rezept ist da!", 74, Vector2(0, 60), Palette.WHITE, true, Brand.headline())
-	_label("Löse es am Medikamentenautomaten ein.", 30, Vector2(0, 150), Color(0.85, 0.9, 1.0))
+	_label("Löse es am Medikamentenautomaten ein.", 30, Vector2(0, 150), Brand.UI_TEXT_DIM)
 
 	# QR-Code: harte Kanten, ruhige weiße Fläche, kein Glühen (Funktion, keine Grafik)
 	var qr := TextureRect.new()
@@ -98,10 +98,10 @@ func _ready() -> void:
 
 	if Game.qualifies(Game.score):
 		_picker = true
-		_label(tr("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s") % Kiosk.label_action(), 24, Vector2(0, 760), Palette.GOLD)
+		_label(tr("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s") % Kiosk.label_action(), 24, Vector2(0, 760), Brand.UI_HIGHLIGHT)
 		avatar_label = _label(AVATARS[0], 64, Vector2(0, 800), Palette.WHITE)
-	hint = _label("", 22, Vector2(0, 1000), Color(0.7, 0.78, 0.9))
-	_label(Game.t(Game.config.get("disclaimer", {"de": ""})), 16, Vector2(0, 1040), Color(0.55, 0.6, 0.72))
+	hint = _label("", 22, Vector2(0, 1000), Brand.UI_TEXT_DIM)
+	_label(Game.t(Game.config.get("disclaimer", {"de": ""})), 16, Vector2(0, 1040), Brand.UI_TEXT_MUTED)
 	Sfx.play("seal")
 
 

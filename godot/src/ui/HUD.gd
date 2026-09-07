@@ -115,7 +115,7 @@ func _ready() -> void:
 	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var ls2 := LabelSettings.new()
 	ls2.font_size = 30
-	ls2.font_color = Color(0.78, 0.84, 0.94)
+	ls2.font_color = Brand.UI_TEXT_DIM
 	ls2.outline_size = 8
 	ls2.outline_color = Color(0.02, 0.04, 0.08, 0.85)
 	sub_label.label_settings = ls2

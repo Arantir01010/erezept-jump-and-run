@@ -58,7 +58,7 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 		center.add_child(chip)
 		col.add_child(center)
 	if pal.zone_name != "":
-		_add(col, "%s — %s" % [pal.zone_name, pal.zone_fact], 22, Color(0.75, 0.82, 0.94))
+		_add(col, "%s — %s" % [pal.zone_name, pal.zone_fact], 22, Brand.UI_TEXT_DIM)
 
 	# Medaillen
 	var row := HBoxContainer.new()
@@ -150,7 +150,7 @@ func _medal(parent: Control, title: String, value: String, got: bool) -> void:
 	val.text = value
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	val.add_theme_font_size_override("font_size", 18)
-	val.add_theme_color_override("font_color", Color(0.75, 0.8, 0.9))
+	val.add_theme_color_override("font_color", Brand.UI_TEXT_DIM)
 	v.add_child(val)
 	box.add_child(v)
 	parent.add_child(box)

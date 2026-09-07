@@ -123,7 +123,7 @@ func _build() -> void:
 	mode = Kiosk.suggested_input_mode()
 	_seg = 1.0 if mode == "touch" else 0.0
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
-		{"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(1, 0.5)})
+		{"color": Brand.UI_TEXT_DIM, "spacing": 0.3, "origin": Vector2(1, 0.5)})
 	_snd_labels = [
 		label(0, SND_Y + SND_H / 2, "MUSIK", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
 		label(0, SND_Y + SND_H / 2, "TÖNE", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
@@ -137,12 +137,12 @@ func _build() -> void:
 		sx += w + 4.0
 
 	# ---- Tafel links: Veranstaltung, Steuerung, Rechtshinweis ----
-	label(9, 290, str(Game.config.get("event", "Messe-Prototyp")), 4.4, {"color": Pen.hex(0xffd75e), "spacing": 0.4, "origin": Vector2(0, 0.5)})
+	label(9, 290, str(Game.config.get("event", "Messe-Prototyp")), 4.4, {"color": Brand.UI_EYEBROW, "spacing": 0.4, "origin": Vector2(0, 0.5)})
 	for i in 4:
 		var y := 301.0 + i * 8.6
 		_legend.append([
-			label(9, y, "", 4.0, {"color": Pen.hex(0xdfe6f0), "spacing": 0.3, "origin": Vector2(0, 0.5)}),
-			label(9, y + 4.2, "", 3.4, {"color": Pen.hex(0x9fb0cc), "bold": false, "origin": Vector2(0, 0.5)}),
+			label(9, y, "", 4.0, {"color": Brand.UI_TEXT, "spacing": 0.3, "origin": Vector2(0, 0.5)}),
+			label(9, y + 4.2, "", 3.4, {"color": Brand.UI_TEXT_MUTED, "bold": false, "origin": Vector2(0, 0.5)}),
 		])
 	_apply_mode()
 	var disc := Game.t(Game.config.get("disclaimer", {"de": "Inoffizielles Lernspiel — kein Produkt der gematik."}))
@@ -151,16 +151,16 @@ func _build() -> void:
 		if teil.strip_edges() != "":
 			teile.append(teil.strip_edges())
 	for i in mini(3, teile.size()):
-		label(9, 342 + i * 4.8, str(teile[i]), 3.3, {"color": Pen.hex(0x8fa2c4), "bold": false, "origin": Vector2(0, 0.5)})
+		label(9, 342 + i * 4.8, str(teile[i]), 3.3, {"color": Brand.UI_TEXT_MUTED, "bold": false, "origin": Vector2(0, 0.5)})
 
 	# ---- Tages-Bestenliste rechts oben (im Himmel, neben der Antenne) ----
 	var hs := Game.highscores()
 	if not hs.is_empty():
-		label(570, 152, "TAGES-BESTENLISTE", 4.6, {"color": Pen.hex(0xffd75e), "spacing": 1.0})
+		label(570, 152, "TAGES-BESTENLISTE", 4.6, {"color": Brand.UI_HIGHLIGHT, "spacing": 1.0})
 		for i in mini(5, hs.size()):
 			var e: Dictionary = hs[i]
 			var txt := "%d.  %s   %d P" % [i + 1, Reward.AVATARS[int(e.get("avatar", 0)) % Reward.AVATARS.size()], int(e.get("score", 0))]
-			label(570, 162 + i * 8, txt, 4.6, {"color": Pen.hex(0xdfe6f0), "bold": i == 0})
+			label(570, 162 + i * 8, txt, 4.6, {"color": Brand.UI_TEXT_DIM, "bold": i == 0})
 
 	# ---- Paul & REZI auf dem Apotheken-Dach ----
 	var floor_body := StaticBody2D.new()
@@ -349,7 +349,7 @@ func _draw_sound(c: CanvasItem) -> void:
 		Pen.srrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Brand.UI_ACCENT if an else Color(1, 1, 1, 0.18), 1.0 if an else 0.7)
 		var ix := r.position.x + 6.5
 		var iy := r.position.y + r.size.y / 2
-		var ic := Brand.UI_ACCENT if an else Pen.hex(0xdfe6f0, 0.6)
+		var ic := Brand.UI_ACCENT if an else Pen.alpha(Brand.UI_TEXT_DIM, 0.6)
 		if i == 0:
 			Pen.circle(c, ix - 1.2, iy + 2.0, 1.5, ic)
 			Pen.rect(c, ix + 0.1, iy - 3.4, 0.8, 5.4, ic)
@@ -481,7 +481,7 @@ func _draw_pills(c: CanvasItem) -> void:
 		var an: bool = p["mode"] == mode
 		var ix := r.position.x + 10.0
 		var iy := r.position.y + r.size.y / 2
-		var ic := Color(1, 1, 1, 0.96) if an else Pen.hex(0xdfe6f0, 0.62)
+		var ic := Color(1, 1, 1, 0.96) if an else Pen.alpha(Brand.UI_TEXT_DIM, 0.62)
 		if p["mode"] == "keyboard":
 			for k in 3:
 				Pen.rrect(c, ix - 5.4 + k * 3.6, iy - 3.6, 2.8, 2.6, 0.5, ic)
