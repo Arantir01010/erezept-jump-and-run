@@ -36,6 +36,12 @@ var _tube_x := 0.0
 var _max_progress := 0.0
 var _last_progress := 0.0
 var _last_stuck_tip := -100.0
+var _stuck_tips := 0
+var leitpfeil: Leitpfeil
+## Ab dieser Zeit ohne Fortschritt zeigt der Leitpfeil den Weg (game-config.json
+## „stuckGuideSeconds"; der erste REZI-Hinweis kommt nach STUCK_TIP_S).
+const STUCK_TIP_S := 18.0
+var stuck_guide_s := 30.0
 var _started := false
 var _verstreut_unterwegs := 0   # beim Treffer verloren, aber noch nicht als ScatteredBit da (deferred)
 var sun: DirectionalLight2D
@@ -102,9 +108,14 @@ func setup(level_data: LevelData) -> void:
 	player.double_jumped.connect(_on_double_jump)
 	player.wall_jumped.connect(func(): Fx.dust(self, player.global_position + Vector2(-player.facing * 14, -30), 4, 1.0))
 	player.got_hurt.connect(_on_hurt)
+	player.respawned.connect(_on_respawned)
 
 	rezi = Rezi.new()
 	add_child(rezi)
+	leitpfeil = Leitpfeil.new()
+	leitpfeil.player = player
+	add_child(leitpfeil)
+	stuck_guide_s = float(Game.config.get("stuckGuideSeconds", 30))
 	rezi.follow(player)
 	rezi.base_energy = pal.rezi_energy
 	for s in Game.seals:
@@ -258,7 +269,17 @@ func _on_landed(impact: float) -> void:
 		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.8, 0.88, 1.0), 30.0 + 70.0 * impact, 1.5 + impact)
 
 
+## Sturz → Fahne: kurz aus dem Dunkeln aufblenden, Kamera sitzt sofort auf Paul.
+func _on_respawned() -> void:
+	Statistik.sturz()
+	if camera:
+		camera.snap()
+	Fx.flash(Color(0.03, 0.05, 0.09), 0.9)
+	Sfx.play("land", 0.8, -4.0)
+
+
 func _on_hurt(lost: int) -> void:
+	Statistik.treffer()
 	_verstreut_unterwegs += lost
 	camera.kick(Vector2(player.facing * -60, -30))
 	rezi.scared()
@@ -338,7 +359,7 @@ func complete_level() -> void:
 	# Lichtwelle: kräftiger Kern, der schnell abklingt, plus weiter, weicher Hof
 	Fx.light_burst(self, rezi.global_position, Palette.GOLD, 300.0, 2.0, 0.6)
 	Fx.light_burst(self, rezi.global_position, Palette.tint(Palette.GOLD, 0.4), 560.0, 1.1, 1.3)
-	var result := Game.finish_level(data.id, level_time, data.par_time, data.bits_total)
+	var result := Game.finish_level(data.id, level_time, data.par_time, data.bits_total, data.hat_lauscher())
 	await get_tree().create_timer(1.8).timeout
 	completed.emit(result)
 
@@ -375,15 +396,85 @@ func _update_tube(delta: float) -> void:
 func _check_stuck(_delta: float) -> void:
 	if player.global_position.x > _max_progress + 12.0:
 		_max_progress = player.global_position.x
-		_last_progress = level_time
+		_fortschritt()
 		return
-	if player.controls_locked or Kiosk.idle_seconds() > 5.0:
-		_last_progress = level_time
+	# Wer still steht, ist nicht festgefahren (Idle) — und wer vor einer offenen
+	# Station wartet (Schleuse, Stempel, Kartenleser …), macht genau das Richtige.
+	if player.controls_locked or Kiosk.idle_seconds() > 5.0 or _wartet_an_station():
+		_fortschritt()
 		return
-	if level_time - _last_progress >= 18.0 and level_time - _last_stuck_tip >= 20.0:
+	var still := level_time - _last_progress
+	if still >= STUCK_TIP_S and level_time - _last_stuck_tip >= 20.0:
 		_last_stuck_tip = level_time
+		_stuck_tips += 1
 		var fallback := "Weiter nach rechts! %s = springen · %s = TI-Aktion" % [Kiosk.label_jump(), Kiosk.label_action()]
-		rezi.say(Game.t(data.stuck_hint, fallback) if data.stuck_hint != null else fallback, 4.0)
+		var tip: String = Game.t(data.stuck_hint, fallback) if data.stuck_hint != null else fallback
+		if still >= stuck_guide_s:
+			tip = tr("Folge meinem Pfeil!")
+		rezi.say(tip, 4.0)
+	if still >= stuck_guide_s:
+		leitpfeil.ziel = leit_ziel()
+		leitpfeil.zeigen = true
+
+
+func _fortschritt() -> void:
+	_last_progress = level_time
+	if leitpfeil:
+		leitpfeil.zeigen = false
+
+
+## Offene Station in Pauls Nähe? (Baustein mit done/opened == false, ±4 Kacheln)
+func _wartet_an_station() -> bool:
+	var px := player.global_position.x
+	for m in mechanics:
+		if not is_instance_valid(m) or not _offene_station(m):
+			continue
+		var r: Rect2 = m.rect
+		if px > r.position.x - 4.0 * Game.TILE and px < r.end.x + 4.0 * Game.TILE:
+			return true
+	return false
+
+
+static func _offene_station(m: Node) -> bool:
+	for feld in ["done", "opened"]:
+		var v = m.get(feld)
+		if v is bool:
+			return not v
+	return false
+
+
+## Wohin der Leitpfeil zeigt: Fehlen noch Prüfsummen für die Tür, zur nächsten
+## (auch verstreuten); sonst zur nächsten offenen Station rechts von Paul; sonst zur Tür.
+func leit_ziel() -> Vector2:
+	var p := player.global_position
+	var bester := Vector2.INF
+	if Game.bits_this_level() < data.count_required:
+		var naechst := INF
+		for m in mechanics:
+			if is_instance_valid(m) and m is Basics.Collectible and not m.taken:
+				var d := p.distance_to(m.global_position)
+				if d < naechst:
+					naechst = d
+					bester = m.global_position
+		for c in get_children():
+			if c is ScatteredBit:
+				var d2 := p.distance_to(c.global_position)
+				if d2 < naechst:
+					naechst = d2
+					bester = c.global_position
+		if bester != Vector2.INF:
+			return bester
+	var min_x := INF
+	for m in mechanics:
+		if is_instance_valid(m) and _offene_station(m) and m.global_position.x > p.x - 2.0 * Game.TILE and m.global_position.x < min_x:
+			min_x = m.global_position.x
+			bester = m.global_position
+	if bester != Vector2.INF:
+		return bester
+	for m in mechanics:
+		if is_instance_valid(m) and m is Basics.DoorExit:
+			return m.global_position
+	return Vector2(data.world_width(), p.y)
 
 
 ## Verstreutes Bit: hüpft, bleibt liegen, wieder einsammelbar (ohne Punkte).

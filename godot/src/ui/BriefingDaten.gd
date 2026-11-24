@@ -52,7 +52,6 @@ const STATIONEN := {
 		"zeilen": [
 			"Du steckst die eGK ins Terminal — die TI fragt online bei der Kasse: gültig? aktuell?",
 			"Erst dann schreibt der Arzt dein E-Rezept — digital im Praxissystem, nie auf der Karte.",
-			"Im Spiel: {lauf} laufen, {jump} springen, leuchtende Prüfsummen einsammeln.",
 			"Am Terminal {action} im Takt der Lichter drücken — dann öffnet das Tor.",
 			"Feder = hoch hinaus · rotes Störfeld = kostet nur Bits · Fahne = dein Rücksetzpunkt.",
 		],

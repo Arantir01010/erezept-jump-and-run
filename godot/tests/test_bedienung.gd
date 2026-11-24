@@ -344,7 +344,14 @@ func test_probelauf_zeigt_die_ti_aktion() -> void:
 	baum.root.add_child(intro)
 	extra.append(intro)
 	await echtzeit(Intro.TI_DRUCK + 0.6)
-	pruefe(intro._ti_t >= 0.0, "Paul drückt im Probelauf die TI-Aktion am Terminal")
+	# Mitmachen (Messe-Paket 2): Paul wartet am Terminal auf den Spieler
+	gleich(intro._warte, "action", "Probelauf wartet auf die TI-Aktion des Spielers")
+	pruefe(intro._ti_t < 0.0, "ohne Druck noch keine TI-Aktion")
+	Input.action_press("action")
+	await frames(2)
+	Input.action_release("action")
+	await echtzeit(0.3)
+	pruefe(intro._ti_t >= 0.0, "nach dem Druck: TI-Aktion am Terminal")
 	pruefe(intro._ti_popup.modulate.a > 0.5, "Tafel „TI-AKTION“ ist zu sehen")
 	if not Kiosk.has_gamepad() and not (Kiosk.touch_seen or Kiosk.touch_forced):
 		gleich(intro._ti_popup.tasten, ["E"], "am PC mit Taste E")

@@ -55,6 +55,12 @@ const FUSS_Y := 290.0
 const LAUF := 0.6
 const TERMINAL_X := 178.0      # kleines Terminal rechts neben Pauls Start
 const TI_DRUCK := 1.1          # Rundenzeit, zu der Paul die TI-Aktion drückt
+## Mitmachen (Messe-Paket 2, 11/2026): In der ersten Runde wartet Paul an drei
+## Stellen auf den Spieler — TI-Aktion am Terminal, Loslaufen, Absprung. Wer nichts
+## drückt, sieht nach WARTE_MAX Sekunden die Vorführung wie bisher. Die Hülle bleibt
+## Vorführung (gebraucht wird sie erst ab Station 04, dort erklärt das Briefing sie).
+const WARTE_MAX := 6.0
+const MITMACH_AKTIONEN := ["action", "move_right", "jump"]
 
 var phase := 1
 var popups: Array = []
@@ -69,6 +75,17 @@ var _bit_t := -10.0
 var _toggles := [false, false, false, false]
 var _ti_t := -10.0             # Rundenzeit des TI-Drucks (−10 = noch nicht)
 var _ti_popup: Node2D
+var _rt := 0.0                 # Rundenzeit; steht still, solange Paul auf den Spieler wartet
+var _last_tz := 0.0
+var _runde := 0
+var _warte := ""               # Aktion, auf die Paul gerade wartet ("" = keine)
+var _warte_seit := 0.0
+var _gedrueckt := false
+var _erledigt: Array[String] = []
+var _du_bist_dran: Label
+var mitmachen := true
+## Attract-Vorführung (Kiosk, Titel im Leerlauf): kein Mitmachen, nur zuschauen.
+var vorfuehrung := false
 
 
 func _init(p := 1) -> void:
@@ -107,7 +124,47 @@ func _build() -> void:
 
 func _tick(_delta: float) -> void:
 	if phase == 3:
+		var dt := tz - _last_tz
+		_last_tz = tz
+		if _warte != "" and Input.is_action_just_pressed(_warte):
+			_gedrueckt = true
+		if _warte == "":
+			_rt += dt
+			if _rt >= RUNDE:
+				_rt -= RUNDE
+				_runde += 1
+				_mitmachen_beenden()
 		_tick_tutorial()
+		if _du_bist_dran:
+			var soll := 1.0 if _warte != "" else 0.0
+			_du_bist_dran.modulate.a = move_toward(_du_bist_dran.modulate.a, soll, dt * 4.0)
+
+
+## Wartet Paul noch auf den Spieler? true = weiter (gedrückt, Zeit um oder kein Mitmachen).
+func _darf(aktion: String) -> bool:
+	if not mitmachen or _runde > 0 or _erledigt.has(aktion):
+		return true
+	if _warte != aktion:
+		_warte = aktion
+		_warte_seit = tz
+		_gedrueckt = false
+		var tasten := {"action": Kiosk.label_action(), "move_right": "→", "jump": Kiosk.label_jump()}
+		_du_bist_dran.text = tr("Du bist dran: %s!") % str(tasten.get(aktion, ""))
+		_du_bist_dran.reset_size()
+		_du_bist_dran.position = (Vector2(W / 2, 205) * S - _du_bist_dran.size * 0.5).round()
+	if _gedrueckt or tz - _warte_seit >= WARTE_MAX:
+		_warte = ""
+		_erledigt.append(aktion)
+		if _erledigt.size() >= MITMACH_AKTIONEN.size():
+			_mitmachen_beenden()
+		return true
+	return false
+
+
+## Mitmach-Teil vorbei: ab jetzt blättert jeder Knopf wie gewohnt weiter.
+func _mitmachen_beenden() -> void:
+	if sperre > TUTORIAL_SPERRE:
+		sperre = maxf(TUTORIAL_SPERRE, tz + 1.2)
 
 
 func _draw_static(c: CanvasItem) -> void:
@@ -611,6 +668,13 @@ func _build_tutorial() -> void:
 		_popup("HÜLLE", huelle, "an & aus — verschlüsselt bist du geschützt"),
 	]
 	_ti_popup = _popup("TI-AKTION", ti, "an Terminal und Kartenleser: Karte stecken, PIN, Stempel")
+	# Mitmachen: im Prüflauf (Screenshots nach der Uhr) nicht; sonst blockiert ein
+	# Knopfdruck das Weiterblättern, bis Paul die drei Dinge mit dem Spieler geübt hat.
+	mitmachen = Kiosk.shots_dir == "" and not vorfuehrung
+	if mitmachen:
+		sperre = 999.0
+	_du_bist_dran = label(W / 2, 205, "", 10.5, {"color": Pen.hex(0xffd75e), "spacing": 0.6, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	_du_bist_dran.modulate.a = 0.0
 	# Bühne: echter Grund, echte Grube
 	for r in [[0.0, 350.0, 316.0], [390.0, W, 316.0], [140.0, 350.0, 290.0], [390.0, 520.0, 290.0]]:
 		var body := StaticBody2D.new()
@@ -652,7 +716,7 @@ func _popup(titel: String, tasten: Array, hinweis: String) -> Node2D:
 
 
 func _tick_tutorial() -> void:
-	var rz := fmod(tz, RUNDE)      # Rundenzeit
+	var rz := _rt                  # Rundenzeit (steht, solange Paul auf den Spieler wartet)
 	var td := rz - VORLAUF         # Zeit der Lauf-Choreografie (negativ: Vorlauf am Terminal)
 	var px := player.global_position.x / S
 	if td < _last_td:
@@ -669,7 +733,7 @@ func _tick_tutorial() -> void:
 	# Vorlauf: Paul dreht sich zum Terminal und drückt die TI-Aktion
 	if td < 0.0:
 		player.facing = 1
-		if rz >= TI_DRUCK and _ti_t < 0.0:
+		if rz >= TI_DRUCK and _ti_t < 0.0 and _darf("action"):
 			_ti_t = rz
 			Sfx.play("ok", 1.1, -6.0)
 			rezi.happy()
@@ -681,15 +745,21 @@ func _tick_tutorial() -> void:
 	var fenster := [[0.4, j1], [j1, j1 + 1.6], [b1, b1 + 1.6], [6.2, 9.4]]
 	for i in popups.size():
 		popups[i].modulate.a = Pen.blende(td, fenster[i][0], fenster[i][1], 0.4)
+	if _warte == "jump":
+		popups[0].modulate.a = 0.0
+		popups[1].modulate.a = 1.0
 	if td < 1.0:
 		player.auto_axis = 0.0
 	elif td < 9.4:
 		if not _jumped1:
-			player.auto_axis = LAUF
+			player.auto_axis = LAUF if _darf("move_right") else 0.0
 			if px >= 330:
-				player.auto_jump = true
-				_jumped1 = true
-				_jump_t = td
+				if _darf("jump"):
+					player.auto_jump = true
+					_jumped1 = true
+					_jump_t = td
+				else:
+					player.auto_axis = 0.0
 		else:
 			player.auto_axis = LAUF if px < 470 else 0.0
 		if not _bit_taken and px >= 447:
@@ -761,7 +831,7 @@ func _draw_tutorial_static(c: CanvasItem) -> void:
 
 func _draw_tutorial_life(c: CanvasItem) -> void:
 	var K := Pen.K
-	var rz := fmod(tz, RUNDE)
+	var rz := _rt
 	var td := rz - VORLAUF
 	_terminal(c, rz)
 	# Datenbit auf Podest B — wird im Vorbeilaufen eingesammelt

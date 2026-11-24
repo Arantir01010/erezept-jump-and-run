@@ -54,28 +54,37 @@ func _ready() -> void:
 	frame.size = qr.size + Vector2(36, 36)
 	add_child(frame)
 	add_child(qr)
+	_info_qr()
 
-	# Siegel-Reihe
-	var seals := HBoxContainer.new()
-	seals.alignment = BoxContainer.ALIGNMENT_CENTER
-	seals.add_theme_constant_override("separation", 12)
-	seals.position = Vector2(0, 610)
-	seals.size = Vector2(1920, 60)
-	var idx := 1
-	for s in Game.seals:
+	# Siegel-Reihe als Zusammenfassung: je Station das Badge (Stichwort), statt nur
+	# „◉ 1 … ◉ 10" — damit am Ende sichtbar wird, was man unterwegs gesichert hat.
+	var badges := seal_badges()
+	if not badges.is_empty():
+		_label(tr("Das hast du gesichert:"), 24, Vector2(0, 606), Brand.UI_TEXT_DIM)
+	var seals := HFlowContainer.new()
+	seals.alignment = FlowContainer.ALIGNMENT_CENTER
+	seals.add_theme_constant_override("h_separation", 26)
+	seals.add_theme_constant_override("v_separation", 4)
+	seals.position = Vector2(160, 642)
+	seals.size = Vector2(1600, 80)
+	for b in badges:
 		var l := Label.new()
-		l.text = "◉ %d" % idx
+		l.text = "◉ " + str(b)
 		l.add_theme_font_size_override("font_size", 26)
 		l.add_theme_color_override("font_color", Palette.GOLD)
 		seals.add_child(l)
-		idx += 1
 	add_child(seals)
 
 	var rank := Game.rank()
 	var medals := 0
 	for r in Game.level_results:
 		medals += int(r.get("medal_count", 0))
-	_label(tr("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s") % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()], 30, Vector2(0, 680), Palette.WHITE)
+	if Game.wissen_medaille():
+		medals += 1
+	var zeile := tr("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s") % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()]
+	if Game.wissen_fragen > 0:
+		zeile += "  ·  " + tr("Wissen: %d / %d") % [Game.wissen_richtig, Game.wissen_fragen]
+	_label(zeile, 30, Vector2(0, 732), Palette.WHITE)
 
 	# Highscore
 	var hs := Game.highscores()
@@ -90,7 +99,7 @@ func _ready() -> void:
 	var i := 1
 	for e in hs:
 		var l := Label.new()
-		l.text = "%d.  %s   %d P" % [i, AVATARS[int(e["avatar"]) % AVATARS.size()], int(e["score"])]
+		l.text = "%d.  %s   %d P" % [i, AVATARS[absi(int(e.get("avatar", 0))) % AVATARS.size()], int(e.get("score", 0))]
 		l.add_theme_font_size_override("font_size", 24)
 		box.add_child(l)
 		i += 1
@@ -98,11 +107,63 @@ func _ready() -> void:
 
 	if Game.qualifies(Game.score):
 		_picker = true
-		_label(tr("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s") % Kiosk.label_action(), 24, Vector2(0, 760), Brand.UI_HIGHLIGHT)
-		avatar_label = _label(AVATARS[0], 64, Vector2(0, 800), Palette.WHITE)
+		_label(tr("Neuer Bestwert! Wähle dein Symbol: ◀ ▶  dann %s") % Kiosk.label_action(), 24, Vector2(0, 796), Brand.UI_HIGHLIGHT)
+		avatar_label = _label(AVATARS[0], 64, Vector2(0, 836), Palette.WHITE)
 	hint = _label("", 22, Vector2(0, 1000), Brand.UI_TEXT_DIM)
 	_label(Game.t(Game.config.get("disclaimer", {"de": ""})), 16, Vector2(0, 1040), Brand.UI_TEXT_MUTED)
 	Sfx.play("seal")
+
+
+## Zweiter, kleinerer QR-Code zum Mitnehmen (Punkt 17): Link zum Nachlesen aufs
+## Handy, links und deutlich abgesetzt vom Gewinncode für den Automaten.
+## Erzeugt von tools/gen_assets.py aus ending.infoLink; ohne Datei kein Code.
+func _info_qr() -> void:
+	const PFAD := "res://assets/qr/info.png"
+	var tex: Texture2D = null
+	if ResourceLoader.exists(PFAD):
+		tex = load(PFAD)
+	if tex == null or str(Game.config.get("ending", {}).get("infoLink", "")) == "":
+		return
+	var q := TextureRect.new()
+	q.texture = tex
+	q.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	q.stretch_mode = TextureRect.STRETCH_SCALE
+	q.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	q.size = Vector2(200, 200)
+	q.position = Vector2(320, 300)
+	var rahmen := ColorRect.new()
+	rahmen.color = Color.WHITE
+	rahmen.position = q.position - Vector2(10, 10)
+	rahmen.size = q.size + Vector2(20, 20)
+	add_child(rahmen)
+	add_child(q)
+	var l := Label.new()
+	l.text = tr("Mehr zum E-Rezept — mit dem Handy scannen")
+	l.position = Vector2(220, 528)
+	l.size = Vector2(400, 80)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_color_override("font_color", Brand.UI_TEXT_DIM)
+	add_child(l)
+
+
+## Badges der gesicherten Stationen in Spielreihenfolge (übersetzt). Ohne Badge
+## oder mit reinem Welt-Etikett („Welt 5 · Abschluss") bleibt die Station weg.
+static func seal_badges() -> Array[String]:
+	var out: Array[String] = []
+	for s in Game.seals:
+		var id := str((s as Dictionary).get("level_id", "")) if s is Dictionary else ""
+		if id == "":
+			continue
+		var data := LevelData.load_level(id)
+		var badge := str(data.station.get("badge", "")).strip_edges()
+		if badge == "" or badge.begins_with("Welt "):
+			continue
+		var t := TranslationServer.translate(badge)
+		if not out.has(t):
+			out.append(t)
+	return out
 
 
 func _label(text: String, size: int, pos: Vector2, color: Color, outline := false, font: Font = null) -> Label:

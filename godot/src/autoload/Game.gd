@@ -40,6 +40,9 @@ var encrypted := false
 var clean_interactions := 0
 var run_start_ms := 0
 var level_results: Array = []
+## Wissensabfrage am Ende (Quiz.gd): -1 = noch nicht gefragt.
+var wissen_richtig := -1
+var wissen_fragen := 0
 var protokoll: Array = []
 var combo := 0
 var combo_until := 0.0
@@ -68,6 +71,10 @@ func load_config() -> void:
 	var pl = _read_json("res://config/playlist.json")
 	playlist = pl if pl is Array else []
 	default_lang = str(config.get("language", "de"))
+	# Browser-Fassung: mit der Sprache des Browsers starten, wenn wir sie haben
+	# (Messe-Paket 3). Am Messe-PC bleibt es bei „language" aus der Konfiguration.
+	if OS.has_feature("web") and LANGS.has(OS.get_locale_language()):
+		default_lang = OS.get_locale_language()
 	_load_translations()
 	set_lang(default_lang)
 
@@ -163,6 +170,8 @@ func reset_run() -> void:
 	clean_interactions = 0
 	run_start_ms = Time.get_ticks_msec()
 	level_results = []
+	wissen_richtig = -1
+	wissen_fragen = 0
 	protokoll = []
 	combo = 0
 	combo_until = 0.0
@@ -289,14 +298,28 @@ func seen_in(level_id: String) -> int:
 	return n
 
 
+## Quiz vorbei: alle richtig = vierte Medaille „WISSEN“ (Punkte wie jede Medaille).
+func wissen_abschliessen(richtig: int, gesamt: int) -> void:
+	wissen_richtig = richtig
+	wissen_fragen = gesamt
+	if gesamt > 0 and richtig >= gesamt:
+		score += MEDAL_BONUS
+	hud_changed.emit()
+
+
+func wissen_medaille() -> bool:
+	return wissen_fragen > 0 and wissen_richtig >= wissen_fragen
+
+
 ## Level abgeschlossen: Medaillen (Zeit / Prüfsummen / Lückenlos) und Punkte.
-func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int) -> Dictionary:
+## mit_lauschern = false: LÜCKENLOS zählt nicht (Station ohne Lauscher, Messe-Paket 3).
+func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int, mit_lauschern := true) -> Dictionary:
 	var got := bits_this_level()
 	var seen := seen_in(level_id)
 	var medals := {
 		"zeit": time_s <= par_s,
 		"bits": bits_total > 0 and got >= bits_total,
-		"lueckenlos": seen == 0,
+		"lueckenlos": mit_lauschern and seen == 0,
 	}
 	var medal_count := 0
 	for k in medals:
@@ -306,7 +329,7 @@ func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int
 	var result := {
 		"level_id": level_id, "time": time_s, "par": par_s,
 		"bits": got, "bits_total": bits_total, "seen": seen,
-		"medals": medals, "medal_count": medal_count,
+		"medals": medals, "medal_count": medal_count, "mit_lauschern": mit_lauschern,
 	}
 	level_results.append(result)
 	hud_changed.emit()
@@ -389,7 +412,16 @@ func highscores() -> Array:
 	if not (data is Dictionary) or data.get("date", "") != _today():
 		return []
 	var entries = data.get("entries", [])
-	return entries if entries is Array else []
+	if not (entries is Array):
+		return []
+	# Nur gültige Einträge: eine halb geschriebene oder von Hand bearbeitete Datei
+	# darf weder den Titel noch den Abschluss-Bildschirm abbrechen.
+	var ok: Array = []
+	for e in entries:
+		if e is Dictionary and (e.get("score") is float or e.get("score") is int):
+			ok.append({"avatar": absi(int(e.get("avatar", 0))), "score": int(e["score"])})
+	ok.sort_custom(func(a, b): return int(a["score"]) > int(b["score"]))
+	return ok
 
 
 func qualifies(points: int) -> bool:
@@ -403,9 +435,24 @@ func add_highscore(avatar: int, points: int) -> void:
 	hs.sort_custom(func(a, b): return int(a["score"]) > int(b["score"]))
 	if hs.size() > 5:
 		hs.resize(5)
-	var f := FileAccess.open(HIGHSCORE_PATH, FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify({"date": _today(), "entries": hs}))
+	_write_json_atomic(HIGHSCORE_PATH, {"date": _today(), "entries": hs})
+
+
+## Erst in eine Nachbardatei schreiben, dann umbenennen: Stromausfall oder Absturz
+## mitten im Schreiben hinterlässt so die alte, heile Bestenliste statt einer halben.
+static func _write_json_atomic(path: String, data: Variant) -> bool:
+	var tmp := path + ".tmp"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(data))
+	f.close()
+	var dir := DirAccess.open(path.get_base_dir())
+	if dir == null:
+		return false
+	if dir.file_exists(path.get_file()):
+		dir.remove(path.get_file())
+	return dir.rename(tmp.get_file(), path.get_file()) == OK
 
 
 static func _read_json_user(path: String) -> Variant:

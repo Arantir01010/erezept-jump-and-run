@@ -34,6 +34,14 @@ var json := {}
 var station := {}
 var theme_name := "city"
 var camera_mode := "horizontal"
+
+
+## Gibt es Lauscher? Ohne sie wäre die Medaille LÜCKENLOS geschenkt.
+func hat_lauscher() -> bool:
+	for o in objects:
+		if o is Dictionary and str(o.get("type", "")) == "lauscher":
+			return true
+	return false
 var huelle_enabled := false
 var huelle_start := "klartext"
 var huelle_cooldown_ms := 150

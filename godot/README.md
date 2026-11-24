@@ -18,7 +18,8 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 
 | Schalter (nach `--`) | Wirkung |
 |---|---|
-| `--kiosk` | Vollbild, Cursor aus, Idle-Reset nach `idleResetSeconds` |
+| `--kiosk` | Vollbild, Cursor aus, Idle-Reset nach `idleResetSeconds`; F11/F12/Alt+F4 gesperrt, Musik/Töne-Wahl gilt nur bis zum Idle-Reset |
+| `--lautstaerke=<0–100>` | Gesamtlautstärke (sonst der gespeicherte Wert, Strg+F9/F10) |
 | `--fullscreen` | nur Vollbild |
 | `--level=<id>` | direkt in ein Level springen, z. B. `--level=04-die-huelle` |
 | `--shots=<ordner>` | automatischer Prüflauf: spielt selbst, speichert Screenshots (auch zwei Bilder mitten in der Blende), beendet sich |
@@ -33,13 +34,23 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 **Bedienungswahl im Hauptmenü:** Ein Segment-Schalter oben mittig, „TASTATUR · ARCADE" und
 „TOUCH" (Feldbreiten folgen dem übersetzten Text). Links/Rechts (Pfeile, WASD, Joystick) wechseln, Leertaste/roter Knopf startet mit
 der markierten Bedienung; ein Fingertipp auf ein Feld startet direkt damit, ein Tipp
-irgendwo sonst startet mit Touch, ein Mausklick nur auf ein Feld. Die Wahl (`Kiosk.input_mode`)
+irgendwo sonst startet mit Touch, ein Mausklick nur auf ein Feld. Rechts wählt Touch nur, wenn
+es etwas zu tippen gibt (Touchscreen erkannt oder schon berührt) — am Arcade-Kiosk bleibt
+der Stick nach rechts wirkungslos statt alle Hinweise auf TIPPEN umzustellen. Die Wahl (`Kiosk.input_mode`)
 steuert Bildschirm-Knüppel, Knopfnamen und Hinweistexte im ganzen Durchlauf; nach dem
 Idle-Reset zeigt das Menü die zuletzt gewählte Bedienung vor, sonst Touch auf Touchscreens.
 
 Tasten: Pfeile/WASD laufen & ducken · LEERTASTE springen (in der Luft nochmal = REZI-Schub) ·
-E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln · ESC/P Pause · F2 Sprache · F3 Musik ·
-F4 Töne · F11 Vollbild · F12 Screenshot.
+E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln (Pfeil/Stick nur senkrecht hoch, schräg hoch-rechts bleibt ein Sprung) · ESC/P Pause · F2 Sprache · F3 Musik ·
+F4 Töne · F11 Vollbild · F12 Screenshot (beide nicht im `--kiosk`).
+
+**Standpersonal:** Strg+F9 leiser, Strg+F10 lauter (10-%-Stufen, gespeichert in
+`user://einstellungen.cfg`, gilt auch im Kiosk) · Strg+Umschalt+F12 beendet den Kiosk
+(Exit-Code 7, `Messe-Kiosk.bat` startet dann nicht neu) · **Betreiber-Menü** mit Strg+Umschalt+F10
+oder SPRUNG + AKTION zusammen 5 s halten (`src/ui/Betrieb.gd`): Tagesstatistik je Station,
+Lautstärke, Tages-Bestenliste löschen (zweimal bestätigen), Spiel beenden. Ton: Busse „Musik" und „SFX" unter
+Master, auf Master ein harter Begrenzer bei −1 dB (zur Laufzeit in `Sfx._build_buses`). Alle
+Klänge und die Musik werden beim Start geladen (kein Ruckler beim ersten Abspielen).
 
 **Pause und Klang:** ESC, P, der START-Knopf am Gamepad oder der runde Pause-Knopf oben im
 HUD (Finger/Maus) halten das Level an. Das Pausenmenü (`src/ui/PauseMenu.gd`) bietet
@@ -48,16 +59,45 @@ Stationsbeginn), **Steuerung** (Tastentafel der erkannten Bedienung), Musik an/a
 Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion, Tipp oder Klick. Weist die
 Tür Paul zum dritten Mal ab, nennt REZI diesen Ausweg; reichen die Prüfsummen, die noch
 in der Station liegen, nicht mehr für das Ziel, öffnet die Tür von selbst. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
-(zwei Pillen, F3/F4); die Wahl liegt in `user://einstellungen.cfg` und überlebt Neustart
-und Idle-Reset. In der Pause läuft der Idle-Reset weiter (Messe: wer weggeht, landet
+(zwei Pillen, F3/F4); die Wahl liegt in `user://einstellungen.cfg` und überlebt den Neustart —
+außer im `--kiosk`: dort gilt sie nur für den laufenden Besucher und ist nach dem Idle-Reset
+wieder an (sonst bliebe der Stand stumm, wenn jemand „Musik aus" tippt). In der Pause läuft der Idle-Reset weiter (Messe: wer weggeht, landet
 wieder im Hauptmenü). `--test-eingabe=-,-,-,-,ESC,-,F12,DOWN,DOWN,SPACE,-,F12,ESC` prüft
 den Weg Taste → Pause → Menü.
 Arcade-Encoder: Belegung aus `config/input-bindings.json` (identisch zur Phaser-Fassung).
 
+**Statistik (anonym):** `src/core/Statistik.gd` zählt je Station erreicht, geschafft, Zeit,
+Treffer, Stürze, Neustarts und Abbrüche (Idle/Hauptmenü), je Durchlauf Sprache, Bedienung und
+Gesamtzeit — keine Namen, nichts verlässt den Rechner. Je Tag `user://statistik/tag-*.json`
+(Summe fürs Betreiber-Menü) und `ereignisse-*.jsonl` (eine Zeile je Ereignis, zufällige
+Lauf-ID). Auswertung: `python godot/tools/statistik_auswerten.py [ordner] [--csv x.csv]`
+(Standard: `%APPDATA%/Godot/app_userdata/Paul & REZI/statistik`). Testläufe (`--script`,
+`--headless`, `--shots`) zählen getrennt in `user://statistik-test/`.
+
+**Schneller ins Spiel:** In der Zeitreise überspringt Halten (1,2 s) FRÜHER **und** HEUTE und
+führt direkt zum Probelauf; `"zeitreise": false` in `config/game-config.json` lässt sie ganz
+weg. Im Probelauf wartet Paul in der ersten Runde auf den Spieler (TI-Aktion, loslaufen,
+springen — „Du bist dran"); wer nichts drückt, sieht nach 6 s die Vorführung.
+
+**Feststecken:** Nach 18 s ohne Fortschritt gibt REZI einen Tipp, ab `stuckGuideSeconds` (30)
+zeigt ein ruhiger Pfeil über Paul zum nächsten Ziel (fehlende Prüfsumme, offene Station, Tür).
+Wer an einer offenen Station wartet (Schleuse, Stempel …), gilt nicht als festgefahren.
+
+**Vorführung (Attract):** Steht im `--kiosk` der Titel `attractSeconds` (25) unberührt, spielt
+Paul den Probelauf allein vor; jeder Druck holt den Titel zurück. Kaputte Leveldaten
+(Datei fehlt, JSON defekt) überspringen die Station statt ein leeres Level zu zeigen.
+
+**Wissensabfrage und Info-QR:** Vor dem Abschluss fragt das Spiel zwei bis drei Fragen
+(links/rechts, Fragen in `config/wissensfragen.json`, abschaltbar mit `"wissensabfrage": false`).
+Alle richtig = vierte Medaille „WISSEN“. Die Fragen sind ein **Entwurf** fürs gematik-Review;
+solange dort `"entwurf": true` steht, zeigt das Quiz einen kleinen Vermerk. Neben dem Gewinn-QR
+für den Automaten steht ein kleiner Info-QR (`ending.infoLink`, erzeugt mit
+`python godot/tools/gen_assets.py --nur-qr`). Medaille LÜCKENLOS gibt es nur in Stationen mit Lauschern.
+
 ## Sprachen
 
 Sechs Sprachen, umschaltbar über die Flaggen oben rechts im Hauptmenü (Klick oder
-Fingertipp; F2 blättert): Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Hindi.
+Fingertipp; F2 oder Stick/Pfeil hoch/runter blättert; im Browser startet das Spiel in der Browsersprache, falls vorhanden): Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Hindi.
 Das Menü baut sich mit der neuen Sprache neu auf, alles danach (Zeitreise, Probelauf,
 ePA-Wissen, Briefings, HUD, Hinweise im Level, Stationskarte, Reward) folgt ihr. Beim
 Idle-Reset gilt wieder die Standardsprache (`language` in `config/game-config.json`).
@@ -193,6 +233,7 @@ Browser-Speicher (IndexedDB). Die Web-Export-Templates liegen in
 |---|---|
 | `Paul und REZI.lnk` / `.bat` | **Empfohlener Start.** Startet die offiziell signierte Godot-Laufzeit (Certum-Zertifikat) mit dem Spiel `PaulUndRezi.pck`. Läuft auch auf Windows 11 mit Smart App Control. |
 | `Paul und REZI (Messe-Kiosk).lnk` | dasselbe mit `--kiosk` (Vollbild, Cursor aus, Idle-Reset) |
+| `Messe-Kiosk.bat` | **Für den Messestand:** Kiosk mit Neustart-Schleife — nach Absturz oder Beenden startet das Spiel nach 3 s neu (Protokoll `kiosk-neustarts.log`); nur Strg+Umschalt+F12 beendet wirklich. Vorher am Messe-PC Energiesparen/Bildschirmschoner, Windows-Updates und Benachrichtigungen (Fokusassistent) abschalten; für Autostart die Datei in `shell:startup` verknüpfen. |
 | `PaulUndRezi.exe` | Einzel-EXE mit eingebettetem Spiel, selbstsigniert. Wird von Smart App Control blockiert (SAC akzeptiert nur CA-Zertifikate); auf anderen Rechnern reicht „Trotzdem ausführen". |
 | `PaulUndRezi-Zertifikat.cer` + `Zertifikat-vertrauen (optional).bat` | das selbstsignierte Zertifikat, optional in den Benutzerspeicher eintragen |
 | `LIESMICH.txt` | dieselbe Erklärung für den Messestand |
@@ -208,7 +249,7 @@ empfohlen.
 |---|---|
 | `python godot/tools/sync_levels.py` | Level + Konfiguration aus `design/` und `public/config/` nach `godot/levels/_import/` und `godot/config/` kopieren |
 | `python godot/tools/build_levels.py` | **alle zehn Level** aus dem Generator bauen (Geometrie + Objekte) und die Erreichbarkeit prüfen (Sprung 3 hoch / ~6 weit, Bonus per REZI-Schub, Sprungfedern) |
-| `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als MP3 von Pixabay, siehe `assets/audio/CREDITS.md` |
+| `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als OGG (Pixabay, aus MP3 umgewandelt), siehe `assets/audio/CREDITS.md` |
 | `powershell -ExecutionPolicy Bypass -File godot\tools\build.ps1` | Auslieferungspaket in `build/` (PCK + signierte Laufzeit + Verknüpfungen + EXE) |
 | `Godot … --headless --import` | Projekt-Cache aufbauen, Skriptfehler sehen (`SCRIPT ERROR`) |
 | `Godot --headless --path godot --fixed-fps 60 --script res://tests/lauf.gd` | **Testlauf** ohne Fenster (siehe „Tests"); `-- --nur=huelle` nur passende Dateien |
@@ -233,8 +274,12 @@ Phaser-Tests), Spielstand (Treffer kostet nur Bits dieser Station), Leveldaten a
 (Idle-Reset nur mit `--kiosk`), Level-Mechanik (verstreute Prüfsummen, Zeichen-Culling), ein
 Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt,
 Bedienung (`test_bedienung.gd`: Pausemenü, Neustart, Tür-Sicherheitsnetz, Tastenkappe,
-Blättern, Stationskarte, REZI-Lesezeit) und Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
-Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz). `test_texte.gd` prüft außerdem
+Blättern, Stationskarte, REZI-Lesezeit), Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
+Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz) und Messebetrieb (`test_messe.gd`:
+Bedienwahl ohne Touchscreen, Ton im Kiosk, Busse/Begrenzer, Lautstärke, Vorladen, Sturz →
+Fahne mit Blende und Kamera, Fahnen höchstens 35 Kacheln auseinander, kaputte Bestenliste,
+Abschluss-Badges, Zeitreise überspringen, Mitmach-Probelauf, Leitpfeil, Statistik,
+Betreiber-Menü). `test_texte.gd` prüft außerdem
 Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
 Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
 rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.

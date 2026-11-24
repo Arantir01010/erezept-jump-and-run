@@ -1,4 +1,9 @@
 {
+  "im Klartext mitgelesen: %d×": {"en": "read in plaintext: %d×", "fr": "lu en clair : %d×", "es": "leído en texto claro: %d×", "zh": "明文被看到 %d 次", "hi": "प्लेन टेक्स्ट में %d× देखा गया"},
+  "Vorführung — %s: Selbst spielen!": {"en": "Demo — %s: Play yourself!", "fr": "Démo — %s : À toi de jouer !", "es": "Demostración — %s: ¡Juega tú!", "zh": "先看看 — %s：自己玩！", "hi": "डेमो — %s: खुद खेलो!"},
+  "Das hast du gesichert:": {"en": "What you secured:", "fr": "Ce que tu as sécurisé :", "es": "Lo que has asegurado:", "zh": "你已保护：", "hi": "तुमने सुरक्षित किया:"},
+  "Folge meinem Pfeil!": {"en": "Follow my arrow!", "fr": "Suis ma flèche !", "es": "¡Sigue mi flecha!", "zh": "跟着我走！", "hi": "मेरे तीर के पीछे चलो!"},
+  "Du bist dran: %s!": {"en": "Your turn: %s!", "fr": "À toi : %s !", "es": "Te toca: %s!", "zh": "轮到你了：%s！", "hi": "तुम्हारी बारी: %s!"},
   "_": "Übersetzungen der Benutzeroberfläche: Schlüssel = deutscher Text, wie er im Code steht. Platzhalter (%s, %d, %.1f) unverändert lassen. Geladen von Game._load_translations().",
 
   "KLINIKUM": {"en": "HOSPITAL", "fr": "CLINIQUE", "es": "CLÍNICA", "zh": "医院", "hi": "अस्पताल"},
@@ -63,7 +68,7 @@
   "PRÜFSUMMEN": {"en": "CHECKSUMS", "fr": "SOMMES DE CONTRÔLE", "es": "SUMAS DE CONTROL", "zh": "校验和", "hi": "चेकसम"},
   "LÜCKENLOS": {"en": "AIRTIGHT", "fr": "SANS FAILLE", "es": "SIN FISURAS", "zh": "滴水不漏", "hi": "बेदाग़"},
   "nie mitgelesen": {"en": "never read along", "fr": "jamais espionné", "es": "nunca leído", "zh": "从未被窃听", "hi": "कभी नहीं पढ़ा गया"},
-  "%d× gesehen": {"en": "seen %d×", "fr": "vu %d×", "es": "visto %d×", "zh": "被看到 %d 次", "hi": "%d× देखा गया"},
+  "%d× gesehen": {"en": "seen %d×", "fr": "vu %d×", "es": "visto %d×", "zh": "被看到 %d 次", "hi": "प्लेन टेक्स्ट में %d× देखा गया"},
   "%d Punkte": {"en": "%d points", "fr": "%d points", "es": "%d puntos", "zh": "%d 分", "hi": "%d अंक"},
   "Weiter: %s": {"en": "Next: %s", "fr": "Suite : %s", "es": "Siguiente: %s", "zh": "继续：%s", "hi": "आगे: %s"},
   "Zum e-Rezept: %s": {"en": "To the e-prescription: %s", "fr": "Vers l'e-ordonnance : %s", "es": "A la receta electrónica: %s", "zh": "领取电子处方：%s", "hi": "ई-प्रिस्क्रिप्शन की ओर: %s"},

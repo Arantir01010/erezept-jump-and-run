@@ -68,6 +68,9 @@ cd /d "%~dp0"
 start "" "Godot_v4.7.2-stable_win64.exe" --main-pack "PaulUndRezi.pck" -- --fullscreen
 '@ | Set-Content -Path (Join-Path $Build "Paul und REZI.bat") -Encoding ASCII
 
+# Messe-Kiosk mit Neustart-Schleife (Absturz/Beenden -> Neustart nach 3 s)
+Copy-Item (Join-Path $PSScriptRoot "Messe-Kiosk.bat") (Join-Path $Build "Messe-Kiosk.bat") -Force
+
 Step "EXE signieren"
 $exe = Join-Path $Build "PaulUndRezi.exe"
 if (Test-Path $exe) {

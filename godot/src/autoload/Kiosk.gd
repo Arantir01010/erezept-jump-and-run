@@ -10,6 +10,13 @@ extends Node
 ##   --shots=<ordner>   Prüflauf: spielt automatisch, speichert PNGs, beendet sich
 ##   --shots-level=<id> Level für den Prüflauf (Standard: erstes Level der Playlist)
 ##   --lang=<code>      Sprache de/en/fr/es/zh/hi (im Browser: ?lang=fr)
+##   --lautstaerke=<0–100>  Gesamtlautstärke (sonst gespeicherter Wert)
+##
+## Standpersonal (immer): Strg+F9 leiser, Strg+F10 lauter (10-%-Stufen, gespeichert).
+## Im Messe-Kiosk sind F11 (Fenster), F12 (Screenshot) und Fenster-Schließen/Alt+F4
+## gesperrt; beenden nur mit Strg+Umschalt+F12.
+## Betreiber-Menü (Statistik, Lautstärke, Bestenliste, Beenden): Strg+Umschalt+F10
+## oder SPRUNG + AKTION zusammen 5 s halten (Arcade-Pult ohne Tastatur).
 
 signal any_input
 
@@ -22,6 +29,9 @@ const KEY_NAMES := {
 	"O": KEY_O, "P": KEY_P, "Q": KEY_Q, "R": KEY_R, "S": KEY_S, "T": KEY_T, "U": KEY_U,
 	"V": KEY_V, "W": KEY_W, "X": KEY_X, "Y": KEY_Y, "Z": KEY_Z, "CTRL": KEY_CTRL, "F2": KEY_F2, "F3": KEY_F3, "F4": KEY_F4,
 }
+
+## Exit-Code, wenn das Standpersonal bewusst beendet (Messe-Kiosk.bat: kein Neustart)
+const QUIT_OPERATOR := 7
 
 var kiosk_mode := false
 var idle_reset_seconds := 60.0
@@ -44,6 +54,11 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_parse_args()
 	_build_input_map()
+	if kiosk_mode:
+		# Fenster-Schließen (Alt+F4, X) beendet den Messe-Kiosk nicht
+		get_tree().set_auto_accept_quit(false)
+		# Besucherwahl Musik/Töne gilt im Kiosk nie über den Besucher hinaus
+		Sfx.reset_visitor_choices()
 	idle_reset_seconds = float(Game.config.get("idleResetSeconds", 60))
 	last_input_ms = Time.get_ticks_msec()
 	# Im Browser darf Vollbild nur auf eine Nutzeraktion hin angefordert werden
@@ -116,11 +131,9 @@ func _build_input_map() -> void:
 				var ev := InputEventKey.new()
 				ev.physical_keycode = code
 				InputMap.action_add_event(action, ev)
-	# Joystick hoch wechselt die Hülle (2-Button-Hardware, siehe README)
-	if bool(gp.get("toggleOnUp", true)):
-		var ev := InputEventKey.new()
-		ev.physical_keycode = KEY_UP
-		InputMap.action_add_event("toggle", ev)
+	# Joystick hoch wechselt die Hülle (2-Button-Hardware, siehe README) — aber nur
+	# senkrecht und kurz gehalten, nicht schräg nach oben (siehe _hoch_wechselt).
+	_toggle_on_up = bool(gp.get("toggleOnUp", true))
 	# Gamepad-Buttons
 	for b in gp.get("jumpButtons", [0, 2]):
 		_add_joy_button("jump", int(b))
@@ -133,14 +146,10 @@ func _build_input_map() -> void:
 		_add_joy_button("move_right", JOY_BUTTON_DPAD_RIGHT)
 		_add_joy_button("move_up", JOY_BUTTON_DPAD_UP)
 		_add_joy_button("move_down", JOY_BUTTON_DPAD_DOWN)
-		if bool(gp.get("toggleOnUp", true)):
-			_add_joy_button("toggle", JOY_BUTTON_DPAD_UP)
 	_add_joy_axis("move_left", JOY_AXIS_LEFT_X, -1.0)
 	_add_joy_axis("move_right", JOY_AXIS_LEFT_X, 1.0)
 	_add_joy_axis("move_up", JOY_AXIS_LEFT_Y, -1.0)
 	_add_joy_axis("move_down", JOY_AXIS_LEFT_Y, 1.0)
-	if bool(gp.get("toggleOnUp", true)):
-		_add_joy_axis("toggle", JOY_AXIS_LEFT_Y, -1.0)
 	# Bestätigen im Menü: Sprung ODER Aktion
 	if not InputMap.has_action("confirm"):
 		InputMap.add_action("confirm")
@@ -187,11 +196,96 @@ func _input(event: InputEvent) -> void:
 			last_input_ms = Time.get_ticks_msec()
 			any_input.emit()
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.physical_keycode == KEY_F11:
-			var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fs else DisplayServer.WINDOW_MODE_FULLSCREEN)
-		elif event.physical_keycode == KEY_F12:
-			save_screenshot("user://screenshot-%d.png" % Time.get_ticks_msec())
+		_handle_operator_key(event as InputEventKey)
+
+
+## Tasten fürs Standpersonal und den Entwicklerbetrieb. Im Messe-Kiosk bleiben
+## F11/F12 wirkungslos, damit Besucher weder das Vollbild verlassen noch die
+## Platte mit Screenshots füllen.
+const BETRIEB_HALTEN_S := 5.0
+var betrieb: Node
+var _beide_gehalten := 0.0
+## „Hoch = Hülle" (toggleOnUp): Früher wechselte jeder Druck nach oben die Hülle —
+## auch schräg nach oben-rechts, wie viele am 8-Wege-Stick springen wollen. Jetzt
+## nur, wenn hoch ohne links/rechts HOCH_HALTEN_S lang gehalten wird.
+const HOCH_HALTEN_S := 0.12
+var _toggle_on_up := true
+var _hoch_seit := 0.0
+var _hoch_aktiv := false
+
+
+func _hoch_senkrecht() -> bool:
+	if Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right"):
+		return false
+	if Input.is_physical_key_pressed(KEY_UP):
+		return true
+	for dev in Input.get_connected_joypads():
+		if Input.is_joy_button_pressed(dev, JOY_BUTTON_DPAD_UP):
+			return true
+		if Input.get_joy_axis(dev, JOY_AXIS_LEFT_Y) < -0.75 and absf(Input.get_joy_axis(dev, JOY_AXIS_LEFT_X)) < 0.5:
+			return true
+	return false
+
+
+func _hoch_wechselt(delta: float) -> void:
+	if not _toggle_on_up:
+		return
+	if _hoch_senkrecht():
+		_hoch_seit += delta
+		if _hoch_seit >= HOCH_HALTEN_S and not _hoch_aktiv:
+			_hoch_aktiv = true
+			Input.action_press("toggle")
+	else:
+		_hoch_seit = 0.0
+		if _hoch_aktiv:
+			_hoch_aktiv = false
+			Input.action_release("toggle")
+
+
+func _process(delta: float) -> void:
+	_hoch_wechselt(delta)
+	if Input.is_action_pressed("jump") and Input.is_action_pressed("action"):
+		_beide_gehalten += delta
+		if _beide_gehalten >= BETRIEB_HALTEN_S:
+			_beide_gehalten = -9999.0   # erst nach Loslassen wieder
+			open_betrieb()
+	else:
+		_beide_gehalten = 0.0
+
+
+## Betreiber-Menü öffnen (höchstens eins).
+func open_betrieb() -> void:
+	if is_instance_valid(betrieb):
+		return
+	betrieb = Betrieb.new()
+	get_tree().root.add_child(betrieb)
+
+
+func _handle_operator_key(k: InputEventKey) -> void:
+	if k.ctrl_pressed and k.shift_pressed and k.physical_keycode == KEY_F10:
+		open_betrieb()
+		get_viewport().set_input_as_handled()
+		return
+	if k.ctrl_pressed and k.physical_keycode == KEY_F9:
+		Sfx.change_volume(-Sfx.VOLUME_STEP)
+		get_viewport().set_input_as_handled()
+	elif k.ctrl_pressed and k.physical_keycode == KEY_F10:
+		Sfx.change_volume(Sfx.VOLUME_STEP)
+		get_viewport().set_input_as_handled()
+	elif k.physical_keycode == KEY_F12 and k.ctrl_pressed and k.shift_pressed:
+		if kiosk_mode:
+			get_tree().quit(QUIT_OPERATOR)   # Messe-Kiosk.bat startet dann nicht neu
+	elif k.physical_keycode == KEY_F11 and not kiosk_mode:
+		var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fs else DisplayServer.WINDOW_MODE_FULLSCREEN)
+	elif k.physical_keycode == KEY_F12 and not kiosk_mode:
+		save_screenshot("user://screenshot-%d.png" % Time.get_ticks_msec())
+
+
+func _notification(what: int) -> void:
+	# Messe-Kiosk: Schließen-Anforderung (Alt+F4) ignorieren — auto_accept_quit ist aus
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and kiosk_mode:
+		return
 
 
 func idle_seconds() -> float:
@@ -206,6 +300,7 @@ func consume_idle_reset() -> bool:
 	if not kiosk_mode or shots_dir != "" or idle_seconds() <= idle_reset_seconds:
 		return false
 	note_input()
+	Sfx.reset_visitor_choices()
 	return true
 
 
@@ -218,6 +313,13 @@ func set_input_mode(mode: String) -> void:
 	input_mode = mode
 	touch_forced = mode == "touch"
 	touch_seen = mode == "touch"
+
+
+## Kann hier überhaupt jemand tippen? Ohne Touchscreen (Arcade-Kiosk, PC) darf der
+## Stick nach rechts im Hauptmenü nicht auf Touch umschalten — sonst stehen überall
+## TIPPEN/KNÜPPEL-Hinweise, obwohl es nichts zu tippen gibt.
+func touch_possible() -> bool:
+	return touch_seen or touch_forced or DisplayServer.is_touchscreen_available()
 
 
 ## Vorschlag fürs Hauptmenü: Touch, wenn schon berührt wurde oder ein Touchscreen da ist.
