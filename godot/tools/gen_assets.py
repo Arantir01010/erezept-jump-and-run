@@ -14,6 +14,7 @@ bewusst leise gemischt: Rückmeldung und Stimmung, kein Ohrwurm-Zwang am Stand.
 """
 from __future__ import annotations
 
+import sys
 import json
 import math
 import struct
@@ -282,9 +283,26 @@ def qr() -> None:
     QR_DIR.mkdir(parents=True, exist_ok=True)
     img.save(QR_DIR / "reward.png")
     print(f"  ▦ qr/reward.png  ({payload}, {img.size[0]}×{img.size[1]} px)")
+    # Zweiter QR zum Mitnehmen (Messe-Paket 3, Punkt 17): Link zum Nachlesen aufs
+    # Handy. Getrennt vom Gewinncode für den Medikamentenautomaten.
+    link = cfg.get("ending", {}).get("infoLink", "")
+    ziel = QR_DIR / "info.png"
+    if link:
+        q = qrcode.QRCode(error_correction=ERROR_CORRECT_M, box_size=8, border=2)
+        q.add_data(link)
+        q.make(fit=True)
+        img = q.make_image(fill_color="black", back_color="white")
+        img.save(ziel)
+        print(f"  ▦ qr/info.png    ({link}, {img.size[0]}×{img.size[1]} px)")
+    elif ziel.exists():
+        ziel.unlink()
 
 
 if __name__ == "__main__":
+    if "--nur-qr" in sys.argv:
+        print("QR:")
+        qr()
+        raise SystemExit(0)
     print("Klänge:")
     sfx()
     print("Musik:")

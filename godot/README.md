@@ -87,6 +87,13 @@ Wer an einer offenen Station wartet (Schleuse, Stempel …), gilt nicht als fest
 Paul den Probelauf allein vor; jeder Druck holt den Titel zurück. Kaputte Leveldaten
 (Datei fehlt, JSON defekt) überspringen die Station statt ein leeres Level zu zeigen.
 
+**Wissensabfrage und Info-QR:** Vor dem Abschluss fragt das Spiel zwei bis drei Fragen
+(links/rechts, Fragen in `config/wissensfragen.json`, abschaltbar mit `"wissensabfrage": false`).
+Alle richtig = vierte Medaille „WISSEN“. Die Fragen sind ein **Entwurf** fürs gematik-Review;
+solange dort `"entwurf": true` steht, zeigt das Quiz einen kleinen Vermerk. Neben dem Gewinn-QR
+für den Automaten steht ein kleiner Info-QR (`ending.infoLink`, erzeugt mit
+`python godot/tools/gen_assets.py --nur-qr`). Medaille LÜCKENLOS gibt es nur in Stationen mit Lauschern.
+
 ## Sprachen
 
 Sechs Sprachen, umschaltbar über die Flaggen oben rechts im Hauptmenü (Klick oder

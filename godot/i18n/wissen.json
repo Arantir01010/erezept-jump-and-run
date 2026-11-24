@@ -1,0 +1,128 @@
+{
+  "WISSEN · Frage %d / %d": {
+    "en": "KNOWLEDGE · Question %d / %d",
+    "fr": "SAVOIR · Question %d / %d",
+    "es": "SABER · Pregunta %d / %d",
+    "zh": "知识 · 问题 %d / %d",
+    "hi": "ज्ञान · प्रश्न %d / %d"
+  },
+  "Entwurf — Fachreview ausstehend": {
+    "en": "Draft — expert review pending",
+    "fr": "Brouillon — relecture en attente",
+    "es": "Borrador — revisión pendiente",
+    "zh": "未经专家检查",
+    "hi": "मसौदा — समीक्षा बाकी"
+  },
+  "Richtig!": {
+    "en": "Correct!",
+    "fr": "Exact !",
+    "es": "¡Correcto!",
+    "zh": "对了！",
+    "hi": "सही!"
+  },
+  "Nicht ganz.": {
+    "en": "Not quite.",
+    "fr": "Pas tout à fait.",
+    "es": "No del todo.",
+    "zh": "不太对。",
+    "hi": "पूरी तरह नहीं।"
+  },
+  "Wissen: %d / %d": {
+    "en": "Knowledge: %d / %d",
+    "fr": "Savoir : %d / %d",
+    "es": "Saber: %d / %d",
+    "zh": "知识：%d / %d",
+    "hi": "ज्ञान: %d / %d"
+  },
+  "Was macht deine Gesundheitskarte beim E-Rezept?": {
+    "en": "What does your health card do for the e-prescription?",
+    "fr": "Que fait ta carte de santé pour l'e-ordonnance ?",
+    "es": "¿Qué hace tu tarjeta sanitaria con la receta electrónica?",
+    "zh": "你的健康卡在电子处方中做什么？",
+    "hi": "ई-प्रिस्क्रिप्शन में तुम्हारा हेल्थ कार्ड क्या करता है?"
+  },
+  "Sie speichert das Rezept.": {
+    "en": "It stores the prescription.",
+    "fr": "Elle enregistre l'ordonnance.",
+    "es": "Guarda la receta.",
+    "zh": "它保存处方。",
+    "hi": "यह प्रिस्क्रिप्शन सहेजता है।"
+  },
+  "Sie ist der Schlüssel.": {
+    "en": "It is the key.",
+    "fr": "Elle est la clé.",
+    "es": "Es la llave.",
+    "zh": "它是钥匙。",
+    "hi": "यह चाबी है।"
+  },
+  "Auf der Karte steht nichts. Sie öffnet nur — wie ein Schlüssel.": {
+    "en": "Nothing is stored on the card. It only opens — like a key.",
+    "fr": "Rien n'est stocké sur la carte. Elle ouvre seulement — comme une clé.",
+    "es": "En la tarjeta no hay nada. Solo abre — como una llave.",
+    "zh": "卡上什么都没有。它只负责打开——像一把钥匙。",
+    "hi": "कार्ड पर कुछ नहीं है। यह बस खोलता है — चाबी की तरह।"
+  },
+  "Was ist die VAU?": {
+    "en": "What is the VAU?",
+    "fr": "Qu'est-ce que la VAU ?",
+    "es": "¿Qué es la VAU?",
+    "zh": "VAU 是什么？",
+    "hi": "VAU क्या है?"
+  },
+  "Ein Raum, in dem niemand mitliest.": {
+    "en": "A room where nobody reads along.",
+    "fr": "Une pièce où personne ne lit par-dessus l'épaule.",
+    "es": "Una sala donde nadie lee a escondidas.",
+    "zh": "一个没人偷看的房间。",
+    "hi": "एक कमरा, जहाँ कोई नहीं पढ़ता।"
+  },
+  "Ein Tunnel durchs Netz.": {
+    "en": "A tunnel through the network.",
+    "fr": "Un tunnel à travers le réseau.",
+    "es": "Un túnel a través de la red.",
+    "zh": "一条穿过网络的隧道。",
+    "hi": "नेटवर्क से होकर एक सुरंग।"
+  },
+  "Ein Raum, kein Tunnel: Dort wird im Klartext gearbeitet, ohne dass der Betreiber mitliest.": {
+    "en": "A room, not a tunnel: work happens in plain text there, without the operator reading along.",
+    "fr": "Une pièce, pas un tunnel : on y travaille en clair, sans que l'exploitant ne lise.",
+    "es": "Una sala, no un túnel: allí se trabaja en texto claro sin que el operador lea.",
+    "zh": "是房间，不是隧道：在里面以明文处理，运营方却看不到。",
+    "hi": "सुरंग नहीं, कमरा: वहाँ प्लेन टेक्स्ट में काम होता है, और संचालक नहीं पढ़ पाता।"
+  },
+  "Deine Sitzung ist abgelaufen. Was passiert?": {
+    "en": "Your session has expired. What happens?",
+    "fr": "Ta session a expiré. Que se passe-t-il ?",
+    "es": "Tu sesión ha caducado. ¿Qué pasa?",
+    "zh": "你的会话过期了。会发生什么？",
+    "hi": "तुम्हारा सत्र खत्म हो गया। अब क्या होगा?"
+  },
+  "Die Daten bleiben geschützt.": {
+    "en": "The data stays protected.",
+    "fr": "Les données restent protégées.",
+    "es": "Los datos siguen protegidos.",
+    "zh": "数据还是受保护。",
+    "hi": "डेटा सुरक्षित रहता है।"
+  },
+  "Zurück in den Klartext.": {
+    "en": "Back to plain text.",
+    "fr": "Retour au texte en clair.",
+    "es": "De vuelta al texto claro.",
+    "zh": "回到明文。",
+    "hi": "वापस प्लेन टेक्स्ट में।"
+  },
+  "Eine abgelaufene Sitzung schützt nicht — sie fällt in den Klartext zurück.": {
+    "en": "An expired session does not protect — it falls back to plain text.",
+    "fr": "Une session expirée ne protège pas — elle retombe en clair.",
+    "es": "Una sesión caducada no protege: vuelve al texto claro.",
+    "zh": "过期的会话不再保护——它会退回明文。",
+    "hi": "खत्म हुआ सत्र सुरक्षा नहीं देता — वह प्लेन टेक्स्ट में लौट जाता है।"
+  },
+  "Mehr zum E-Rezept — mit dem Handy scannen": {
+    "en": "More about the e-prescription — scan with your phone",
+    "fr": "En savoir plus sur l'e-ordonnance — scanne avec ton téléphone",
+    "es": "Más sobre la receta electrónica — escanea con el móvil",
+    "zh": "了解电子处方——用手机扫一扫",
+    "hi": "ई-प्रिस्क्रिप्शन के बारे में और — फ़ोन से स्कैन करो"
+  }
+}
