@@ -38,11 +38,20 @@ func snap() -> void:
 	if target == null or manual:
 		return
 	_look = 0.0
-	_pos = target.global_position + Vector2(0, -140.0)
+	_pos = _ziel() + Vector2(0, -140.0)
 	_y_goal = _pos.y
 	_kick = Vector2.ZERO
 	_kick_vel = Vector2.ZERO
 	global_position = _pos.round()
+
+
+## Wo das Ziel in diesem Bild gezeichnet wird. Paul wird zwischen zwei Physik-
+## schritten interpoliert (Player.render_position); folgte die Kamera seiner Physik-
+## position, ruckelte er bei 120/144 Hz trotzdem gegen den Hintergrund.
+func _ziel() -> Vector2:
+	if target.has_method("render_position"):
+		return target.call("render_position")
+	return target.global_position
 
 
 func kick(v: Vector2) -> void:
@@ -67,7 +76,7 @@ func _process(delta: float) -> void:
 		on_floor = body.is_on_floor()
 	var want := clampf(vx / Player.T.run_speed, -1.0, 1.0) * lookahead
 	_look = lerpf(_look, want, 1.0 - exp(-2.4 * delta))
-	var goal := target.global_position + Vector2(_look, -140.0)
+	var goal := _ziel() + Vector2(_look, -140.0)
 	# vertikal: Totzone, damit kleine Sprünge das Bild nicht schaukeln
 	var dy := goal.y - _y_goal
 	if absf(dy) > 110.0:

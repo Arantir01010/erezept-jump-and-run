@@ -65,6 +65,10 @@ var ground_distance := 0.0
 
 ## Coyote-Zeit und Sprungpuffer (reine Regel, src/state/SprungFenster.gd).
 var _sprung := SprungFenster.new(T.coyote, T.buffer)
+## Physik-Interpolation: Position am Ende des vorletzten Physikschritts (siehe
+## render_position). Die Physik tickt mit 60 Hz, Monitore zeigen oft 120 oder 144
+## Bilder/s; ohne Interpolation rückte Paul dort in Sprüngen von 0 und 9 px vor.
+var _pos_vorher := Vector2.ZERO
 var _var_jump := 0.0
 var _can_double := true
 var _wall_lock := 0.0
@@ -85,6 +89,9 @@ const FACE_EPS := 30.0
 
 
 func _ready() -> void:
+	# Physik-Interpolation (project.godot) nur für Paul: Main schaltet sie für alles
+	# andere ab, weil es sich im Bildtakt bewegt. Gemessen mit tests/taktprobe.gd.
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	collision_layer = 2
 	collision_mask = 1
 	floor_snap_length = 8.0
@@ -100,6 +107,7 @@ func _ready() -> void:
 	visual.player = self
 	add_child(visual)
 	respawn_point = global_position
+	_pos_vorher = global_position
 
 
 var is_ducking: bool:
@@ -115,6 +123,26 @@ var is_andockfaehig: bool:
 	get: return huelle.andockfaehig if huelle_enabled else true
 
 
+## Wo Paul in diesem Bild gezeichnet wird: mit Physik-Interpolation zwischen den
+## letzten beiden Physikschritten (so rechnet auch Godot), sonst die Physikposition.
+## Alles, was Paul im Bild folgt (Kamera, Nachbilder), nimmt diese Position.
+func render_position() -> Vector2:
+	if not is_physics_interpolated_and_enabled():
+		return global_position
+	return _pos_vorher.lerp(global_position, Engine.get_physics_interpolation_fraction())
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESET_PHYSICS_INTERPOLATION:
+		_pos_vorher = global_position
+	elif what == NOTIFICATION_TRANSFORM_CHANGED:
+		# Paul bewegt sich nur im Physiktakt. Wird er außerhalb davon versetzt (Start,
+		# Probelauf im Intro, Titel, Prüfläufe), springt er hin, statt ein Bild lang
+		# quer durchs Bild zu gleiten.
+		if not Engine.is_in_physics_frame() and is_physics_interpolated_and_enabled():
+			reset_physics_interpolation()
+
+
 func try_toggle_huelle() -> bool:
 	if not huelle_enabled or controls_locked:
 		return false
@@ -127,6 +155,7 @@ func try_toggle_huelle() -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	_pos_vorher = global_position
 	if huelle_enabled:
 		huelle.tick(delta)
 	var on_floor := is_on_floor()
@@ -382,6 +411,7 @@ const RESPAWN_GRACE := 0.6
 
 func respawn() -> void:
 	global_position = respawn_point
+	reset_physics_interpolation()   # an die Fahne springen, nicht dorthin gleiten
 	velocity = Vector2.ZERO
 	_sprung.zuruecksetzen()
 	visual.flash = 1.0

@@ -22,6 +22,13 @@ var _level_index := 0
 var _neustart := false     # „Station neu starten" läuft (Blende) — kein zweites Pausemenü
 
 
+func _enter_tree() -> void:
+	# Physik-Interpolation (project.godot) gilt nur für Knoten, die sie ausdrücklich
+	# wollen (Paul, siehe Player.render_position). Alles andere bewegt sich im Bildtakt
+	# und würde interpoliert stocken — auch was Autoloads an die Wurzel hängen.
+	get_tree().root.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+
+
 func _ready() -> void:
 	# Markenschrift für alle Controls (Helvetica Neue; Fallback: Godot-Standard)
 	get_window().theme = Brand.theme()

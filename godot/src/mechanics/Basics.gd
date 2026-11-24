@@ -344,6 +344,9 @@ class MovingPlatform extends Mechanic:
 	var speed := 40.0 * 3.0
 	var _t := 0.0
 	var _start := Vector2.ZERO
+	## Versatz der letzten beiden Physikschritte (für die Physik-Interpolation).
+	var _x_vorher := 0.0
+	var _x_jetzt := 0.0
 
 	func spawn() -> void:
 		z_index = 4
@@ -368,11 +371,24 @@ class MovingPlatform extends Mechanic:
 		var period := (range_px * 2.0) / maxf(speed, 1.0)
 		var ph := fmod(_t, period) / period
 		var x := range_px * (1.0 - absf(ph * 2.0 - 1.0))
+		_x_vorher = _x_jetzt
+		_x_jetzt = x
 		body.position = _start + Vector2(x, 0)
 		queue_redraw()
 
+	## Mit Physik-Interpolation wird Paul zwischen zwei Physikschritten gezeichnet. Die
+	## Plattform muss es auch, sonst zuckt sie bei 120/144 Hz unter seinen Füßen.
+	func tick(_delta: float) -> void:
+		if get_tree().physics_interpolation:
+			queue_redraw()
+
+	func _bild_x() -> float:
+		if not get_tree().physics_interpolation:
+			return body.position.x
+		return _start.x + lerpf(_x_vorher, _x_jetzt, Engine.get_physics_interpolation_fraction())
+
 	func _draw() -> void:
-		var r := Rect2(body.position.x - rect.size.x / 2.0, -rect.size.y / 2.0, rect.size.x, 18.0)
+		var r := Rect2(_bild_x() - rect.size.x / 2.0, -rect.size.y / 2.0, rect.size.x, 18.0)
 		draw_line(Vector2(-rect.size.x / 2.0, r.get_center().y), Vector2(range_px + rect.size.x / 2.0, r.get_center().y), Color(pal.outline.r, pal.outline.g, pal.outline.b, 0.3), 3.0)
 		draw_panel(Rect2(r.position - Vector2(2, 2), r.size + Vector2(4, 4)), pal.outline, pal.outline, 7, 0.0, 0)
 		draw_panel(r, pal.cap, pal.cap, 6, 0.0, 0)

@@ -91,6 +91,21 @@ var _prev_facing := 0
 var _brake := 0.0
 
 
+func _init() -> void:
+	# Streckung und Blickrichtung ändern sich im Bildtakt (scale in _process): nicht
+	# interpolieren. Die Lage erbt PaulVisual von Paul, und der wird interpoliert.
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+
+
+## Wo PaulVisual in diesem Bild gezeichnet wird (Pauls Bildposition, siehe
+## Player.render_position). Der Kapuzenzipfel rechnet in dieser Lage, sonst zuckt er
+## bei 120/144 Hz im 60-Hz-Takt der Physik.
+func _bild_pos() -> Vector2:
+	if player == null:
+		return global_position
+	return player.render_position() + position
+
+
 func _process(delta: float) -> void:
 	if player == null:
 		return
@@ -320,7 +335,7 @@ func _hands(st: Player.State, duck: bool) -> PackedVector2Array:
 ## mit Schwerkraft, Luftwiderstand und leichtem Wind. Zeitkorrigiert, damit Hitstop
 ## (time_scale 0,02) die Kette mit einfriert statt sie weiterlaufen zu lassen.
 func _sim_tail(dt: float, anchor_local: Vector2) -> void:
-	var anchor := global_position + anchor_local * scale
+	var anchor := _bild_pos() + anchor_local * scale
 	if not _tail_ready or _tail[0].distance_to(anchor) > 200.0:
 		# Erster Frame oder Teleport (Respawn, Prüflauf): Kette hängt neu unter dem Anker
 		_tail = PackedVector2Array()
@@ -361,7 +376,7 @@ func _tail_local() -> PackedVector2Array:
 	var sxi := 1.0 / (scale.x if absf(scale.x) > 0.01 else 1.0)
 	var syi := 1.0 / (scale.y if absf(scale.y) > 0.01 else 1.0)
 	for i in _tail.size():
-		var rel := _tail[i] - global_position
+		var rel := _tail[i] - _bild_pos()
 		out.append(Vector2(rel.x * sxi, rel.y * syi))
 	return out
 
@@ -400,7 +415,7 @@ func _spawn_ghost(alpha: float) -> void:
 	g.z_index = player.z_index - 1
 	g.light_mask = light_mask
 	parent.add_child(g)
-	g.global_position = global_position
+	g.global_position = _bild_pos()   # dort, wo Paul gerade gezeichnet wird
 
 
 ## Ein eingefrorenes Nachbild: CanvasGroup, damit die halbtransparente Silhouette
