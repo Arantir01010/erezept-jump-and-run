@@ -96,9 +96,17 @@ Grund, mehrzeilig, REZI als Erzähler mit Sprechwellen, Aufbau Zeichen für Zeic
 Zeilenpunkte, leiser Tick je Zeile (`Vignette.story_line`, Takt über `story_cycle`).
 Jeder Screen gleitet beim Öffnen ein (`Vignette._entrance`); zwischen den Screens fährt
 eine schräge Blende mit orangefarbenem Saum durchs Bild (`src/shaders/wipe.gdshader`,
-`Main._fade_out` / `_fade_in`). Die Stationskarte nach jedem Level hat den Farbverlauf
-der Zone, einen drehenden Strahlenkranz, den Stempel-Einschlag des Stationsnamens und
-Funkenregen bei drei Medaillen (`src/ui/LevelCard.gd`).
+`Main._fade_out` / `_fade_in`). Die Stationskarte nach jedem Level (`src/ui/LevelCard.gd`)
+folgt `brand/DESIGN-PROMPT.md` statt dem früheren Look aus Farbverlauf, drehendem
+Strahlenkranz, drei Sternkarten und Funkenregen: ruhige Fläche in der Farbe der Zone, links
+die Route der Stationen, Eyebrow, Stationsname in Charter und der Merksatz, rechts eine
+Ergebnis-Tafel mit drei Zeilen (Zeit, Prüfsummen, Lückenlos) und den Punkten, darunter der
+Weiter-Knopf in PwC-Orange, links unten die Zone als Fußnote. Die Zeilen bekommen
+nacheinander ihren Prüfvermerk (gelb mit Haken = geschafft, Strichring = offen), bei drei
+von drei landet ein „GEPRÜFT“-Stempel; nach 2,4 s steht das Bild still. Lange Namen werden
+passend gesetzt, zweizeilige Sätze ausgeglichen umbrochen. `tests/test_stationskarte.gd`
+prüft das in allen Stationen und Sprachen, `tests/kartenbild.gd` macht Bilder der Karte
+ohne Durchspielen (Xvfb).
 
 | Screen | Datei | Inhalt |
 |---|---|---|
