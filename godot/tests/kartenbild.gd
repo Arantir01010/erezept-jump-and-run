@@ -78,7 +78,7 @@ func _los() -> void:
 		while Time.get_ticks_msec() - start < int(t * 1000.0):
 			await process_frame
 		await RenderingServer.frame_post_draw
-		var img := root.get_texture().get_image()
+		var img := Bildschirmbild.von(root)   # sRGB wie am Bildschirm (Forward+: linear)
 		DirAccess.make_dir_recursive_absolute(_ziel)
 		var name := "karte-%s-%dm-%ss" % [_level, _medaillen.size(), str(t)]
 		if _sprache != "":

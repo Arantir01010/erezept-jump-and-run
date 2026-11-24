@@ -87,7 +87,7 @@ func _los() -> void:
 		b.leben.queue_redraw()
 		await process_frame
 		await RenderingServer.frame_post_draw
-		var img := root.get_texture().get_image()
+		var img := Bildschirmbild.von(root)   # sRGB wie am Bildschirm (Forward+: linear)
 		DirAccess.make_dir_recursive_absolute(_ziel)
 		var name := "briefing-%s-%ss" % [_station, str(bei)]
 		if _sprache != "":

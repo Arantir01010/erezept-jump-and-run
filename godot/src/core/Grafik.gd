@@ -8,7 +8,8 @@ extends RefCounted
 ##   Stufe 0 „Browser" — Vorgabe im Web-Build und mit --webfx, genau die
 ##     bisherige Browser-Behandlung: Glüh-Sprites statt HDR-Glühfarben
 ##     (Fx.web_fallback), Partikel auf der CPU (Fx.gpu_particles_ok falsch:
-##     Siegel-Funken ohne Nachfunken, Regen ohne Kollision und Spritzer).
+##     Siegel-Funken ohne Nachfunken, Regen ohne Kollision und Spritzer),
+##     Wolken und Vordergrund ohne Weichzeichner (kulissen_unschaerfe).
 ##   Stufe 1 „Mitte" — HDR-Glühen und alle Shader wie Stufe 2. Abgeschaltet:
 ##     GPU-Partikel (CPU-Partikel wie im Browser; läuft so auch im
 ##     Compatibility-Rückfall ohne Compute/Sub-Emitter) und das 8×-MSAA der
@@ -122,6 +123,13 @@ static func glueh_sprites() -> bool:
 ## Nur Stufe 2: GPU-Partikel mit Sub-Emittern und Kollision (Fx.gpu_particles_ok).
 static func gpu_partikel() -> bool:
 	return stufe() == VOLL
+
+
+## Weichzeichner für Wolken und Vordergrund (je eine CanvasGroup mit
+## kulisse_blur, Backdrop): in Stufe 0 aus, wie im Browser schon immer. Ferne und
+## mittlere Stadt bleiben in jeder Stufe weich.
+static func kulissen_unschaerfe() -> bool:
+	return stufe() != BROWSER
 
 
 ## Obergrenze für das 2D-MSAA der Stufe (-1 = Projekteinstellung bleibt).
