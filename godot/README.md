@@ -193,12 +193,29 @@ empfohlen.
 | `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als MP3 von Pixabay, siehe `assets/audio/CREDITS.md` |
 | `powershell -ExecutionPolicy Bypass -File godot\tools\build.ps1` | Auslieferungspaket in `build/` (PCK + signierte Laufzeit + Verknüpfungen + EXE) |
 | `Godot … --headless --import` | Projekt-Cache aufbauen, Skriptfehler sehen (`SCRIPT ERROR`) |
+| `Godot --headless --path godot --fixed-fps 60 --script res://tests/lauf.gd` | **Testlauf** ohne Fenster (siehe „Tests"); `-- --nur=huelle` nur passende Dateien |
+| `Godot --headless --path godot --fixed-fps 60 --script res://tests/frame_messung.gd -- --level=<id>` | CPU-Zeit je Frame an mehreren Stellen einer Station (vorher/nachher vergleichen) |
+| `Godot --path godot --script res://tests/standbild.gd -- --level=<id> --an=vau-feld,0.42,pause --ziel=<ordner>` | Screenshots an gezielten Stellen (Baustein-Typ, Anteil der Breite, Pausemenü) |
 | `Godot … --headless --export-release "Windows" build/PaulUndRezi.exe` | Windows-Build (Preset in `export_presets.cfg`) |
 | `Godot … --quit-after 3600 -- --shots=<abs. Ordner>` | Screenshot-Prüflauf ohne Menschen am Rechner |
 | `Godot … --headless --export-release Web build-web/index.html` | Browser-Fassung nach `build-web/` (Preset „Web") |
 | `python godot/tools/serve_web.py [port]` | lokaler Server für die Browser-Fassung, öffnet den Browser |
 | `python godot/tools/gen_i18n_fonts.py` | Schrift-Untermengen für Chinesisch/Hindi aus den Übersetzungen neu bauen (`assets/i18n/`) |
 | `python godot/tools/deploy_web.py` | Web-Export neu bauen und als Branch `web` nach GitHub pushen — GitHub Pages veröffentlicht daraus: https://arantir01010.github.io/erezept-jump-and-run/ (`--no-export` nimmt `build-web/`, `--no-push` nur lokal) |
+
+### Tests
+
+`tests/lauf.gd` findet alle `tests/test_*.gd` und ruft jede Methode `test_*` auf. Gewertet
+werden die Prüfungen UND jede Fehlermeldung der Engine währenddessen (`tests/fehlerzaehler.gd`
+hängt sich als Logger an) — ein `SCRIPT ERROR` in einem Baustein lässt den Test durchfallen,
+auch wenn alle Prüfungen grün sind. Letzte Zeile: „N Tests, M fehlgeschlagen", Exit-Code 0/1.
+`--fixed-fps 60` macht die Spielzeit unabhängig vom Rechner. Inhalt: Hülle-Mechanik (Port der
+Phaser-Tests), Spielstand (Treffer kostet nur Bits dieser Station), Leveldaten aller Stationen,
+Übersetzungen (alle Sprachen, gleiche Platzhalter, jeder `tr("…")`-Text übersetzt), Kiosk
+(Idle-Reset nur mit `--kiosk`), Level-Mechanik (verstreute Prüfsummen, Zeichen-Culling) und ein
+Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt.
+`tests/` wird nicht exportiert. Ein fertiger GitHub-Workflow liegt in `tools/ci/godot-tests.yml`
+(Aktivieren nur durch Menschen: `.github/` gehört zum versiegelten Phaser-Kern).
 
 Alle Grafiken sind prozedural (Vektorzeichnung zur Laufzeit), alle Klänge synthetisiert —
 es gibt keine Binär-Assets mit Lizenzfragen. Wer gezeichnete Kunst einbauen will, ersetzt
@@ -228,7 +245,11 @@ Pendel-Plattformen über Gruben, schmale Podeste über Störfeldern, Wandsprung-
 (nur für Bonuswege), Lauscher an Ausstiegen; Station 01 bleibt sanft. Der Generator prüft
 per BFS, dass Pflichtwege ohne Treffer, ohne REZI-Schub und ohne Wandsprung lösbar sind
 (Hülle-Level mit kürzeren Sprungweiten), leitet Par-Zeit und Sammelziel ab und stellt
-sicher, dass die Prüflauf-Positionen 42/66/86 % freier Boden sind. Wer ein Level ändern
+sicher, dass die Prüflauf-Positionen 42/66/86 % freier Boden sind. Seit 24.11.2026 prüft er
+auch Hindernisse zwischen Absprung und Landung (kein „Sprung" mehr über einen 4 Kacheln hohen
+Turm) und **Einbahnstraßen**: Wo es keinen Rückweg zum Start gibt, müssen danach noch so viele
+Prüfsummen erreichbar sein, wie die Tür verlangt — sonst lehnt er das Level als Softlock ab
+(so entstand der Softlock am Kistenturm in Station 04). Wer ein Level ändern
 will, ändert die Bauanleitung im Generator und lässt ihn laufen — er lehnt unerreichbare
 Ziele ab. Aufruf: `python godot/tools/build_levels.py`. Runde 3 („etwas schwieriger"):
 Ketten-Lücken um eine Kachel weiter, das letzte Podest jeder Reihe eine Kachel breit,
@@ -277,7 +298,7 @@ godot/
 │   ├── actors/    Rezi.gd
 │   ├── world/     Level.gd · Terrain.gd + terrain/ (Blocktexturen, Wind-Flora, Pfützen, Bodennebel)
 │   │              · Backdrop.gd + backdrop/ (Ebenen, Leben, Vordergrund, Partikel, Lichtstrahlen) · GameCamera.gd
-│   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays (.gdshader)
+│   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays · vau_gitter (.gdshader)
 │   ├── mechanics/ Mechanic.gd · Basics.gd · Stations.gd (alle Bausteine)
 │   ├── state/     Huelle.gd (Kernmechanik)
 │   ├── fx/        Fx.gd (Partikel, Lichter, Hitstop, Stempel, Browser-Fallback) · PostFx.gd (Grading je Welt) · Weather.gd (Regen, Blitz)
@@ -289,7 +310,9 @@ godot/
 ├── brand/         Marken-README + Lizenzdokumente
 ├── docs/          Bewertung, Recherche, Konzept, Umfrage (Excel)
 ├── i18n/          Übersetzungen (ui, intro, briefing, levels) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
+├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd — nicht im Export
 ├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
+│                  · ci/godot-tests.yml (vorbereiteter GitHub-Workflow, nicht aktiv)
 ├── build/         Windows-Paket (generiert)      · build-web/  Browser-Fassung (generiert)
 └── shots/         Screenshot-Prüfläufe (generiert)
 ```
