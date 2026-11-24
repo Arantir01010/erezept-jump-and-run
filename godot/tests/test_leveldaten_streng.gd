@@ -300,8 +300,15 @@ func test_schema_kennt_jeden_gelesenen_parameter() -> void:
 	var re_param := RegEx.create_from_string("\\b(?:param|ltext)\\(\"([^\"]+)\"")
 	var re_obj := RegEx.create_from_string("\\bobj\\.get\\(\"([^\"]+)\"")
 	var gelesen := 0
-	for datei in ["res://src/mechanics/Basics.gd", "res://src/mechanics/Stations.gd"]:
-		var klasse := ""
+	var quellen: Array = [["res://src/mechanics/Basics.gd", ""], ["res://src/mechanics/Stations.gd", ""]]
+	# Seit der Aufteilung steht jeder Stationsbaustein in einer eigenen Datei
+	# (src/mechanics/stationen/): Klasse = Dateiname, kein „class … extends Mechanic“.
+	for f in DirAccess.get_files_at("res://src/mechanics/stationen"):
+		if f.ends_with(".gd"):
+			quellen.append(["res://src/mechanics/stationen/" + f, f.get_basename()])
+	for q in quellen:
+		var datei: String = q[0]
+		var klasse: String = q[1]
 		for zeile in FileAccess.get_file_as_string(datei).split("\n"):
 			var k := re_klasse.search(zeile)
 			if k:
