@@ -294,13 +294,14 @@ func seen_in(level_id: String) -> int:
 
 
 ## Level abgeschlossen: Medaillen (Zeit / Prüfsummen / Lückenlos) und Punkte.
-func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int) -> Dictionary:
+## mit_lauschern = false: LÜCKENLOS zählt nicht (Station ohne Lauscher, Messe-Paket 3).
+func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int, mit_lauschern := true) -> Dictionary:
 	var got := bits_this_level()
 	var seen := seen_in(level_id)
 	var medals := {
 		"zeit": time_s <= par_s,
 		"bits": bits_total > 0 and got >= bits_total,
-		"lueckenlos": seen == 0,
+		"lueckenlos": mit_lauschern and seen == 0,
 	}
 	var medal_count := 0
 	for k in medals:
@@ -310,7 +311,7 @@ func finish_level(level_id: String, time_s: float, par_s: float, bits_total: int
 	var result := {
 		"level_id": level_id, "time": time_s, "par": par_s,
 		"bits": got, "bits_total": bits_total, "seen": seen,
-		"medals": medals, "medal_count": medal_count,
+		"medals": medals, "medal_count": medal_count, "mit_lauschern": mit_lauschern,
 	}
 	level_results.append(result)
 	hud_changed.emit()
