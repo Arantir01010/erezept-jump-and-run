@@ -8,6 +8,10 @@ var level   # Level.gd (bewusst untypisiert: Level ↔ Mechanic verweisen aufein
 var obj := {}
 var type := ""
 var rect := Rect2()
+## Zeichen-Culling (Level._cull_mechanics): Wie weit zeichnet der Baustein über sein
+## Rechteck hinaus (Lichtkegel, Pendelweg)? Außerhalb von Bild + Rand ist er
+## unsichtbar — _draw entfällt, tick() läuft weiter (Zustand bleibt korrekt).
+var draw_reach := Vector2.ZERO
 
 
 func setup(lvl, o: Dictionary) -> void:
@@ -27,6 +31,11 @@ func spawn() -> void:
 
 func tick(_delta: float) -> void:
 	pass
+
+
+## Bereich, den der Baustein (an seiner aktuellen Position) bezeichnet.
+func cull_rect() -> Rect2:
+	return Rect2(global_position - rect.size / 2.0 - draw_reach, rect.size + draw_reach * 2.0)
 
 
 var player: Player:
@@ -109,14 +118,23 @@ func say(text: String, hold := 3.0) -> void:
 
 
 ## Weiche Panel-Zeichnung mit optionalem Glühen (Materialsystem).
+## Eine geteilte StyleBox für alle Bausteine: draw_style_box legt die Geometrie
+## sofort an, danach darf die Box für den nächsten Aufruf umgestellt werden.
+## Früher entstand je Aufruf und Frame eine neue StyleBoxFlat (Speicher-Churn).
+static var _panel_sb: StyleBoxFlat
+
 func draw_panel(r: Rect2, fill: Color, edge: Color, radius := 6, glow := 0.0, border := 2) -> void:
-	var sb := StyleBoxFlat.new()
+	if _panel_sb == null:
+		_panel_sb = StyleBoxFlat.new()
+		_panel_sb.anti_aliasing = true
+	var sb := _panel_sb
 	sb.bg_color = fill
 	sb.set_corner_radius_all(radius)
 	sb.border_color = edge
 	sb.set_border_width_all(border)
-	sb.anti_aliasing = true
 	if glow > 0.0:
 		sb.shadow_color = Color(edge.r, edge.g, edge.b, 0.35 * glow)
 		sb.shadow_size = int(14 * glow)
+	else:
+		sb.shadow_size = 0
 	draw_style_box(sb, r)

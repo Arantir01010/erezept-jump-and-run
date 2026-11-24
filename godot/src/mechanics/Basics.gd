@@ -298,6 +298,7 @@ class MovingPlatform extends Mechanic:
 		body.add_child(cs)
 		add_child(body)
 		_start = Vector2.ZERO
+		draw_reach = Vector2(range_px, 0.0)
 
 	func _physics_process(delta: float) -> void:
 		_t += delta

@@ -185,6 +185,7 @@ class Lauscher extends Mechanic:
 	var _blink_timer := 2.0
 	var _eye := Vector2.ZERO
 	var _cone_light: PointLight2D
+	static var _sclera_sb: StyleBoxFlat
 
 	func spawn() -> void:
 		z_index = 6
@@ -194,6 +195,7 @@ class Lauscher extends Mechanic:
 		spread = float(param("spread", 22)) * 3.0
 		pause = float(param("pauseMs", 600)) / 1000.0
 		patrol_to = base_x + float(param("patrol", 0)) * 3.0
+		draw_reach = Vector2(reach + 40.0, spread + 40.0)
 		_t = randf() * 3.0
 		# Der Blick als echtes Licht: Kegeltextur, in Blickrichtung gedreht
 		_cone_light = PointLight2D.new()
@@ -301,11 +303,12 @@ class Lauscher extends Mechanic:
 		draw_circle(Vector2.ZERO, 22.0, Color(0.12, 0.09, 0.14))
 		var open := 0.12 if _blink > 0.0 else 1.0
 		var sclera := Rect2(-18, -12 * open, 36, 24 * open)
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.97, 0.95, 0.92)
-		sb.set_corner_radius_all(12)
-		sb.anti_aliasing = true
-		draw_style_box(sb, sclera)
+		if _sclera_sb == null:
+			_sclera_sb = StyleBoxFlat.new()
+			_sclera_sb.bg_color = Color(0.97, 0.95, 0.92)
+			_sclera_sb.set_corner_radius_all(12)
+			_sclera_sb.anti_aliasing = true
+		draw_style_box(_sclera_sb, sclera)
 		if open > 0.5:
 			draw_circle(_eye, 8.0, Palette.glow(c, 1.4))
 			draw_circle(_eye, 4.0, Color(0.05, 0.04, 0.06))
@@ -370,6 +373,7 @@ class AndockPlattform extends Mechanic:
 # ---------------------------------------------------------------- VAU-Feld
 
 class VauFeld extends Mechanic:
+	const GITTER_SHADER := preload("res://src/shaders/vau_gitter.gdshader")
 	var ttl := 0.0
 	var inside := false
 	var _hint := false
@@ -377,6 +381,10 @@ class VauFeld extends Mechanic:
 	var _light: PointLight2D
 	var _ring_tex: GradientTexture2D
 	var _ring_ratio := -1.0
+	var _gitter: _Gitter
+	var _gitter_mat: ShaderMaterial
+	var _feld_sb: StyleBoxFlat
+	var _gezeichnet := ""
 
 	func spawn() -> void:
 		z_index = 3
@@ -385,6 +393,19 @@ class VauFeld extends Mechanic:
 		_light = Fx.light(self, Vector2.ZERO, Palette.VAU, maxf(rect.size.x, rect.size.y) * 0.9, 0.35)
 		if ttl > 0.0:
 			_ring_tex = _make_ring_texture()
+		var c := Palette.VAU
+		_feld_sb = StyleBoxFlat.new()
+		_feld_sb.border_color = Palette.glow(Color(c.r, c.g, c.b, 0.9), 1.4)
+		_feld_sb.set_border_width_all(2)
+		_feld_sb.set_corner_radius_all(10)
+		_feld_sb.anti_aliasing = true
+		# Wabengitter: eigener Knoten, EINMAL gezeichnet; die Welle macht der Shader
+		_gitter = _Gitter.new()
+		_gitter.feld = local_rect()
+		_gitter_mat = ShaderMaterial.new()
+		_gitter_mat.shader = GITTER_SHADER
+		_gitter.material = _gitter_mat
+		add_child(_gitter)
 
 	## Sitzungsuhr: konische Füllung (GradientTexture2D.FILL_CONIC, Godot 4.7) —
 	## eine violette Scheibe, die im Uhrzeigersinn leerläuft. Start oben (12 Uhr).
@@ -430,37 +451,25 @@ class VauFeld extends Mechanic:
 	func tick(delta: float) -> void:
 		_t += delta
 		_light.energy = (0.7 if inside else 0.35) + 0.06 * sin(_t * 2.5)
-		queue_redraw()
+		if not visible:
+			return
+		_gitter_mat.set_shader_parameter("t", _t)
+		# Neu zeichnen nur, wenn sich etwas ändert: drinnen/draußen, laufende Sitzungsuhr
+		var draining := ttl > 0.0 and inside and player.huelle.vau_expires
+		var stand := "%s|%s" % [inside, draining]
+		if draining or stand != _gezeichnet:
+			_gezeichnet = stand
+			queue_redraw()
 
 	func _draw() -> void:
 		var r := local_rect()
 		var c := Palette.VAU
-		var a := 0.22 if inside else 0.13
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(c.r, c.g, c.b, a)
-		sb.border_color = Palette.glow(Color(c.r, c.g, c.b, 0.9), 1.4)
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(10)
-		sb.anti_aliasing = true
-		draw_style_box(sb, r)
-		# Hex-Gitter (Raum, kein Tunnel)
-		var y := r.position.y + 14
-		var row := 0
-		while y < r.end.y - 8:
-			var x := r.position.x + 14 + (10 if row % 2 else 0)
-			while x < r.end.x - 8:
-				var pts := PackedVector2Array()
-				for k in 6:
-					pts.append(Vector2(x, y) + Vector2(6, 0).rotated(k * PI / 3.0 + PI / 6.0))
-				pts.append(pts[0])
-				draw_polyline(pts, Color(c.r, c.g, c.b, 0.13 + 0.08 * sin(_t * 2.0 + x * 0.05 + y * 0.03)), 1.0, true)
-				x += 20
-			y += 18
-			row += 1
+		_feld_sb.bg_color = Color(c.r, c.g, c.b, 0.22 if inside else 0.13)
+		draw_style_box(_feld_sb, r)
 		# Schild
 		draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 8), "VAU", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 22, Palette.glow(c, 1.3))
 		# Sitzungsfrische: konischer Ring über dem Schild — voll, solange niemand drin
-		# ist; läuft ab, sobald Paul in der VAU arbeitet (Kontextschlüssel).
+		# ist; läuft ab, sobald Paul in der VAU arbeitet (Sitzung mit frischen Schlüsseln).
 		if ttl > 0.0:
 			var draining := inside and player.huelle.vau_expires
 			var ratio := player.huelle.vau_ratio if draining else 1.0
@@ -479,8 +488,34 @@ class VauFeld extends Mechanic:
 			if ratio > 0.005:
 				var a0 := -PI / 2.0
 				draw_arc(center, 17.0, a0, a0 + TAU * ratio, maxi(4, int(40 * ratio) + 2), Palette.glow(Color(c.r, c.g, c.b, alpha), 1.4), 5.0, true)
-			# Schlüsselmarke in der Mitte: das ist der Kontextschlüssel
+			# Marke in der Mitte: die Sitzung
 			draw_circle(center, 3.5, Palette.glow(Color(c.r, c.g, c.b, alpha), 1.3))
+
+	## Das Wabengitter als EINE Linienliste (draw_multiline) — gezeichnet beim
+	## Erzeugen, danach nie wieder; Helligkeitswelle im Shader (vau_gitter.gdshader).
+	class _Gitter extends Node2D:
+		var feld := Rect2()
+
+		func _draw() -> void:
+			var c := Palette.VAU
+			var punkte := PackedVector2Array()
+			var ecken: Array[Vector2] = []
+			for k in 6:
+				ecken.append(Vector2(6, 0).rotated(k * PI / 3.0 + PI / 6.0))
+			var y := feld.position.y + 14
+			var row := 0
+			while y < feld.end.y - 8:
+				var x := feld.position.x + 14 + (10 if row % 2 else 0)
+				while x < feld.end.x - 8:
+					var m := Vector2(x, y)
+					for k in 6:
+						punkte.append(m + ecken[k])
+						punkte.append(m + ecken[(k + 1) % 6])
+					x += 20
+				y += 18
+				row += 1
+			if punkte.size() > 0:
+				draw_multiline(punkte, Color(c.r, c.g, c.b, 1.0), 1.0, true)
 
 
 # ---------------------------------------------------------------- Kontext-Anker

@@ -1,5 +1,6 @@
 extends "res://tests/testfall.gd"
-## Verhalten im laufenden Level: verstreute Prüfsummen, Sammelziel der Station 04 (Team-Feedback 9/2026).
+## Verhalten im laufenden Level: verstreute Prüfsummen, Zeichen-Culling,
+## Sammelziel der Station 04 (Team-Feedback 9/2026).
 
 var main: Node
 
@@ -49,6 +50,31 @@ func test_verstreute_pruefsummen_fallen_nicht_aus_der_welt() -> void:
 	for b in bits:
 		pruefe(b.global_position.y < lvl.data.world_height(),
 			"verstreute Prüfsumme liegt in der Welt (y=%.0f)" % b.global_position.y)
+
+
+func test_bausteine_ausserhalb_des_bildes_zeichnen_nicht() -> void:
+	var lvl = await _station("15-kontextschluessel")
+	if not pruefe(lvl != null, "Station 15 startet"):
+		return
+	await frames(5)
+	var sicht: Rect2 = lvl.view_rect()
+	var aus := 0
+	for m in lvl.mechanics:
+		if m.cull_rect().intersects(sicht):
+			pruefe(m.visible, "%s bei x=%.0f ist im Bild, aber unsichtbar" % [m.type, m.global_position.x])
+		elif not m.visible:
+			aus += 1
+	pruefe(aus > 10, "weit entfernte Bausteine zeichnen nicht (%d unsichtbar)" % aus)
+	# ans Ende versetzen: jetzt muss das Ende sichtbar sein, der Anfang nicht
+	lvl.player.global_position = Vector2((lvl.data.width - 8) * Game.TILE, lvl.data.world_height() - 3.0 * Game.TILE - 2.0)
+	lvl.player.velocity = Vector2.ZERO
+	await sekunden(1.0)
+	sicht = lvl.view_rect()
+	for m in lvl.mechanics:
+		if m.cull_rect().intersects(sicht):
+			pruefe(m.visible, "%s am Levelende im Bild, aber unsichtbar" % m.type)
+		if m.global_position.x < 30 * Game.TILE:
+			pruefe(not m.visible, "%s am Levelanfang zeichnet noch" % m.type)
 
 
 func test_station_04_kein_softlock_mehr() -> void:

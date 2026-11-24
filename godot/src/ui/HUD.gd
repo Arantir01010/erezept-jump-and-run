@@ -183,6 +183,8 @@ func bind(lvl: Level) -> void:
 	huelle_hint.visible = lvl.data.huelle_enabled
 	huelle_hint.text = tr("%s: Hülle wechseln") % Kiosk.label_toggle()
 	_last_huelle = ""
+	_zeit_text = ""
+	_zeit_unter_par = -1
 	cards_view.reset()
 	refresh()
 	# Portal-Einblendung: Stationsname groß, ein Satz — dann weg
@@ -213,14 +215,7 @@ func refresh() -> void:
 	route.done = Game.seals.size()
 	route.total = Game.playlist.size()
 	route.queue_redraw()
-	if level.data.huelle_enabled and level.player:
-		var s := level.player.huelle.state
-		huelle_label.text = Huelle.label_of(s)
-		huelle_label.add_theme_color_override("font_color", Huelle.color_of(s))
-		huelle_shape.state = s
-		huelle_shape.queue_redraw()
-		if level.player.huelle.vau_expires:
-			huelle_label.text = "VAU  %.1f s" % level.player.huelle.vau_left
+	_refresh_huelle()
 	var list := _level_cards()
 	if list.is_empty():
 		cards_box.visible = false
@@ -229,6 +224,21 @@ func refresh() -> void:
 		cards_view.layout(list)
 		cards_box.position = Vector2(CARDS_RIGHT - _Cards.width_for(list.size()) - 36.0, CARDS_Y)
 		cards_view.queue_redraw()
+
+
+## Hülle-Anzeige: Farbe, Form und Text nur bei Wechsel neu setzen (ein Theme-
+## Override löst jedes Mal ein Neu-Layout aus); die VAU-Restzeit in 0,1-s-Schritten.
+func _refresh_huelle() -> void:
+	if not level.data.huelle_enabled or level.player == null:
+		return
+	var h := level.player.huelle
+	var s := h.state
+	if s != _last_huelle:
+		_last_huelle = s
+		huelle_label.add_theme_color_override("font_color", Huelle.color_of(s))
+		huelle_shape.state = s
+		huelle_shape.queue_redraw()
+	huelle_label.text = ("VAU  %.1f s" % h.vau_left) if h.vau_expires else Huelle.label_of(s)
 
 
 ## Welche Ausweise dieses Level kennt: die liegenden Karten des Levels (auch die
@@ -271,16 +281,27 @@ func card_pop(card: String) -> void:
 	tw.tween_property(cards_box, "modulate", Color.WHITE, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
+## Zeit gegen Par: Text nur bei Änderung (0,1-s-Schritte), Farbe nur beim Wechsel
+## über/unter Par. Früher setzte jeder Frame Text UND Farb-Override (Neu-Layout) und
+## lief in der VAU-Sitzung das komplette refresh() — Teil des Ruckelns in Station 15.
+var _zeit_text := ""
+var _zeit_unter_par := -1
+
 func _process(_delta: float) -> void:
 	if level == null or not is_instance_valid(level):
 		return
 	var t := level.level_time
 	var par := level.data.par_time
-	var c := Palette.OK if t <= par else Palette.WARM
-	time_label.text = tr("Zeit %5.1f s   ·   Ziel %.0f s") % [t, par]
-	time_label.add_theme_color_override("font_color", c)
+	var text := tr("Zeit %5.1f s   ·   Ziel %.0f s") % [t, par]
+	if text != _zeit_text:
+		_zeit_text = text
+		time_label.text = text
+	var unter := 1 if t <= par else 0
+	if unter != _zeit_unter_par:
+		_zeit_unter_par = unter
+		time_label.add_theme_color_override("font_color", Palette.OK if unter == 1 else Palette.WARM)
 	if level.data.huelle_enabled and level.player and level.player.huelle.vau_expires:
-		refresh()
+		_refresh_huelle()
 
 
 func _on_combo(combo: int) -> void:

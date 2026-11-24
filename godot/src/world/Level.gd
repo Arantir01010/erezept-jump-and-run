@@ -211,6 +211,7 @@ func _process(delta: float) -> void:
 		level_time += delta
 		if data.huelle_enabled and Input.is_action_just_pressed("toggle"):
 			player.try_toggle_huelle()
+	_cull_mechanics()
 	for m in mechanics:
 		if is_instance_valid(m):
 			m.tick(delta)
@@ -218,6 +219,30 @@ func _process(delta: float) -> void:
 		_update_tube(delta)
 	if not finished:
 		_check_stuck(delta)
+
+
+## Zeichen-Culling: Bausteine außerhalb von Bild + CULL_RAND werden unsichtbar —
+## Godot überspringt dann ihr _draw (und das ihrer Kinder) ganz. tick() läuft für
+## alle weiter, damit Patrouillen, Tore und Sitzungen stimmen. Bis hierhin zeichnete
+## jede Station in jedem Frame ALLE Bausteine neu, auch weit außerhalb des Bildes.
+const CULL_RAND := Vector2(480.0, 360.0)
+
+func view_rect() -> Rect2:
+	var size := get_viewport().get_visible_rect().size
+	if camera == null:
+		return Rect2(Vector2.ZERO, size)
+	var z := camera.zoom
+	var welt := Vector2(size.x / maxf(z.x, 0.01), size.y / maxf(z.y, 0.01))
+	return Rect2(camera.get_screen_center_position() - welt / 2.0, welt)
+
+
+func _cull_mechanics() -> void:
+	var sicht := view_rect().grow_individual(CULL_RAND.x, CULL_RAND.y, CULL_RAND.x, CULL_RAND.y)
+	for m in mechanics:
+		if is_instance_valid(m):
+			var vis: bool = sicht.intersects(m.cull_rect())
+			if m.visible != vis:
+				m.visible = vis
 
 
 # ------------------------------------------------------------- Impact-Reaktionen
