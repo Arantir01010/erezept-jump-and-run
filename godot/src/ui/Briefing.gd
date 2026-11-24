@@ -402,7 +402,7 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 			Pen.rect(c, x - 1, y - 1, 2, 7, Pen.VAU_COL)
 			Pen.rect(c, x + 1, y + 3, 2.4, 1.6, Pen.VAU_COL)
 		"karte":
-			Pen.rrect(c, x - 7, y - 4.5, 14, 9, 1.4, Pen.hex(0x2c7a52))
+			Pen.rrect(c, x - 7, y - 4.5, 14, 9, 1.4, KartenFx.koerper("egk"))
 			Pen.rrect(c, x - 4.8, y - 2.2, 3.2, 4, 0.7, Pen.hex(0xffd75e))
 			Pen.rect(c, x - 7, y - 4.5, 14, 0.9, Color(1, 1, 1, 0.2))
 		"kartenleser":
@@ -539,14 +539,11 @@ func _akte(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0, voll := 0.0) -
 		Pen.rect(c, x - 7 * s, y + 2 * s + 3 * 3.4 * s, 14 * s * voll, 1.1 * s, Pen.hex(0x7fd07f, 0.95 * a))
 
 
-## Ausweis: eGK grün, HBA orange, SMC-B blau — immer mit goldenem Chip.
+## Ausweis: eGK grün, HBA orange, SMC-B blau — immer mit goldenem Chip. Die
+## Körperfarbe kommt aus KartenFx (dieselbe Quelle wie Karte, Kartenleser und HUD);
+## auch die eingesteckten Karten in den Mini-Szenen nehmen KartenFx.koerper().
 func _karte(c: CanvasItem, x: float, y: float, typ := "egk", s := 1.0, a := 1.0) -> void:
-	var col := 0x2c7a52
-	if typ == "hba":
-		col = 0xb8703a
-	elif typ == "smcb":
-		col = 0x4d6aa8
-	Pen.rrect(c, x - 8 * s, y - 5 * s, 16 * s, 10 * s, 1.6 * s, Pen.hex(col, a))
+	Pen.rrect(c, x - 8 * s, y - 5 * s, 16 * s, 10 * s, 1.6 * s, Pen.alpha(KartenFx.koerper(typ), a))
 	Pen.rrect(c, x - 5.5 * s, y - 2.4 * s, 3.6 * s, 4.4 * s, 0.8 * s, Pen.hex(0xffd75e, 0.95 * a))
 	Pen.rect(c, x - 8 * s, y - 5 * s, 16 * s, 1 * s, Color(1, 1, 1, 0.2 * a))
 
@@ -996,7 +993,7 @@ func _leben_02(c: CanvasItem, u: float) -> void:
 		var k := (u - 6.4) / 0.8
 		_karte(c, 304 - 10 * k, GY - 20 - 2 * k, "hba", 0.7, 1 - k * 0.5)
 	elif u >= 7.2:
-		Pen.rrect(c, 285, GY - 12.5, 10, 2.4, 0.8, Pen.hex(0xb8703a))
+		Pen.rrect(c, 285, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("hba"))
 	if u >= 7.2 and u < 12.8:
 		var progress := 0
 		var aktiv := -1
@@ -1332,7 +1329,7 @@ func _leben_05(c: CanvasItem, u: float) -> void:
 	var lichtA := G if u >= 2.4 else Pen.hex(0x4a5468)
 	_terminal(c, 150, GY, 14, 22, lichtA)
 	if u >= 2.4:
-		Pen.rrect(c, 145, GY - 12.5, 10, 2.4, 0.8, Pen.hex(0x2c7a52))
+		Pen.rrect(c, 145, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("egk"))
 	var offenA := 0.0
 	if u >= 2.6:
 		offenA = clampf((u - 2.6) / 0.6, 0.0, 1.0)
@@ -1351,7 +1348,7 @@ func _leben_05(c: CanvasItem, u: float) -> void:
 	if u >= 6.8 and u < 7.8:
 		Pen.srrect(c, 322, GY - 23, 16, 24, 1.5, Pen.alpha(Pen.DENY_COL, 0.8 * (1.0 - (u - 6.8))), 0.8)
 	if u >= 11.4:
-		Pen.rrect(c, 325, GY - 12.5, 10, 2.4, 0.8, Pen.hex(0x4d6aa8))
+		Pen.rrect(c, 325, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("smcb"))
 	var offenB := 0.0
 	if u >= 11.6:
 		offenB = clampf((u - 11.6) / 0.6, 0.0, 1.0)
@@ -1441,7 +1438,7 @@ func _leben_13(c: CanvasItem, u: float) -> void:
 	var licht := G if u >= 6.8 else Pen.hex(0x4a5468)
 	_terminal(c, 290, GY, 14, 22, licht)
 	if u >= 6.8:
-		Pen.rrect(c, 285, GY - 12.5, 10, 2.4, 0.8, Pen.hex(0x2c7a52))
+		Pen.rrect(c, 285, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("egk"))
 	var offen := 0.0
 	if u >= 10.8:
 		offen = clampf((u - 10.8) / 0.6, 0.0, 1.0)
@@ -1721,7 +1718,7 @@ func _leben_19(c: CanvasItem, u: float) -> void:
 			licht = Pen.alpha(Pen.DENY_COL, 0.6 + 0.4 * sin(t * 6.0))
 		_terminal(c, tx, GY, 14, 22, licht)
 		if u >= tp and (i < 2 or u < 13.4):
-			Pen.rrect(c, tx - 5, GY - 12.5, 10, 2.4, 0.8, Pen.hex(0x2c7a52))
+			Pen.rrect(c, tx - 5, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("egk"))
 		var offen := 0.0
 		if u >= tp + 0.2:
 			offen = clampf((u - tp - 0.2) / 0.6, 0.0, 1.0)
