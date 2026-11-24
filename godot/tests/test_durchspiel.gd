@@ -1,11 +1,14 @@
 extends "res://tests/testfall.gd"
 ## Durchspieltreiber (src/core/Eingabespur.gd, src/autoload/Aufnahme.gd): das Format
 ## der Aufnahmen, die Prüfung beim Laden, dieselben Aktionen wie das Spiel — und dass
-## eine Wiedergabe sich mit ihrer Aufnahme deckt (aufgenommen und zweimal abgespielt
-## im selben Lauf, daher unabhängig vom Levelinhalt). Ob die gespeicherten Aufnahmen
-## unter tests/durchspiel/ noch ans Ziel führen, prüft tools/pruefen.py Stufe 7.
+## eine Wiedergabe sich mit ihrer Aufnahme deckt, auch beim Hülle-Wechsel, den das
+## Spiel selbst im Bildtakt drückt (aufgenommen und zweimal abgespielt im selben Lauf,
+## daher unabhängig vom Levelinhalt). Ob die gespeicherten Aufnahmen unter
+## tests/durchspiel/ noch ans Ziel führen, prüft tools/pruefen.py Stufe 7.
 
 const STATION := "01-stammdaten"
+## Station mit Hülle (Klartext ⇄ verschlüsselt)
+const HUELLE_STATION := "04-die-huelle"
 const DATEI := "user://test_durchspiel_spur.json"
 ## Ziel der Aufnahme im Test — wird nie geschrieben (Paul erreicht die Tür nicht)
 const NIE := "user://test_durchspiel_nie.json"
@@ -14,6 +17,7 @@ var main: Node
 
 
 func aufraeumen() -> void:
+	_pfeil_hoch(false)
 	Aufnahme.aus()
 	if is_instance_valid(main):
 		main.queue_free()
@@ -164,8 +168,55 @@ func test_wiedergabe_deckt_sich_mit_der_aufnahme() -> void:
 		await _abbauen()
 
 
-func _station_starten() -> bool:
-	Kiosk.start_level_id = STATION
+## Was das Spiel selbst im Bildtakt drückt (Kiosk: Pfeil hoch kurz halten = Hülle, per
+## Input.action_press), nimmt die Aufnahme als Art „b“ auf, und die Wiedergabe drückt es
+## an derselben Stelle: Die Hülle wechselt im selben Schritt, und weil Paul verschlüsselt
+## langsamer läuft, deckt sich danach auch die Spur.
+func test_huelle_per_hoch_halten_im_selben_schritt() -> void:
+	Aufnahme.aus()
+	Aufnahme.aufnehmen(NIE, "test")
+	var laeuft := await _station_starten(HUELLE_STATION)
+	if not laeuft:
+		return
+	await frames(2)
+	gleich(_huelle(), Huelle.KLARTEXT, "Station beginnt im Klartext")
+	_pfeil_hoch(true)
+	var umschalt := await _warte_auf_huelle(Huelle.VERSCHLUESSELT, 60)
+	_pfeil_hoch(false)
+	pruefe(umschalt > 0, "Pfeil hoch gehalten → Hülle verschlüsselt")
+	await frames(5)
+	_taste("move_right", 1.0)
+	await frames(60)
+	_taste("move_right", 0.0)
+	await frames(20)
+	var band := Aufnahme.spur
+	var bis := Aufnahme.schritt
+	var ende := Aufnahme.paul_ort()
+	var huelle_ende := _huelle()
+	var folge := PackedStringArray()
+	for i in band.anzahl():
+		folge.append("%s:%s" % [band.aktion_bei(i), band.art_bei(i)])
+	gleich(folge, PackedStringArray(["move_up:e", "toggle:b", "move_up:e", "toggle:b", "move_right:e", "move_right:e"]),
+		"Pfeil hoch als Ereignis (e), der Hülle-Wechsel des Spiels im Bildtakt (b)")
+	await _abbauen()
+	for runde in 2:
+		Aufnahme.wiedergeben(band)
+		laeuft = await _station_starten(HUELLE_STATION)
+		if not laeuft:
+			return
+		var umschalt_jetzt := await _warte_auf_huelle(Huelle.VERSCHLUESSELT, 120)
+		gleich(umschalt_jetzt, umschalt, "Wiedergabe %d: Hülle wechselt im selben Schritt" % (runde + 1))
+		pruefe(await warte_bis(func() -> bool: return Aufnahme.schritt >= bis, 30.0),
+			"Wiedergabe %d erreicht Schritt %d" % [runde + 1, bis])
+		var abw := Aufnahme.ist.erste_abweichung(band)
+		pruefe(abw.is_empty(), "Wiedergabe %d deckt sich mit der Aufnahme: %s" % [runde + 1, str(abw)])
+		gleich(Aufnahme.paul_ort(), ende, "Wiedergabe %d: dieselbe Endposition in Schritt %d" % [runde + 1, bis])
+		gleich(_huelle(), huelle_ende, "Wiedergabe %d: dieselbe Hülle am Ende" % (runde + 1))
+		await _abbauen()
+
+
+func _station_starten(station := STATION) -> bool:
+	Kiosk.start_level_id = station
 	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	baum.root.add_child(main)
 	return pruefe(await warte_bis(func() -> bool: return Aufnahme.aktuelles_level() != null, 10.0), "Station startet")
@@ -186,3 +237,29 @@ func _taste(aktion: String, staerke: float) -> void:
 	ev.strength = staerke
 	ev.pressed = staerke > 0.0
 	Input.parse_input_event(ev)
+
+
+## Die echte Pfeiltaste (Kiosk prüft die physische Taste, nicht die Aktion move_up).
+func _pfeil_hoch(gedrueckt: bool) -> void:
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_UP
+	ev.physical_keycode = KEY_UP
+	ev.pressed = gedrueckt
+	Input.parse_input_event(ev)
+
+
+func _huelle() -> String:
+	var lvl := Aufnahme.aktuelles_level()
+	if lvl == null or not is_instance_valid(lvl.player):
+		return ""
+	return lvl.player.huelle.state
+
+
+## Warten, bis Pauls Hülle `soll` ist (höchstens max_bilder Bilder): Rückgabe ist der
+## Schritt, in dem das zuerst zu sehen ist, sonst -1.
+func _warte_auf_huelle(soll: String, max_bilder: int) -> int:
+	for i in max_bilder:
+		if _huelle() == soll:
+			return Aufnahme.schritt
+		await baum.process_frame
+	return -1
