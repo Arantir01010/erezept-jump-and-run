@@ -157,7 +157,9 @@ class DoorExit extends Mechanic:
 			_done = true
 			level.complete_level()
 		else:
-			var now := Time.get_ticks_msec() / 1000.0
+			# Spielzeit statt Wanduhr (Game.spielzeit): steht in der Pause, und die
+			# Wiedergabe einer Aufnahme (tests/durchspiel.gd) sagt dasselbe zur selben Zeit.
+			var now := Game.spielzeit
 			if now - _hint_at > 3.0:
 				_hint_at = now
 				_abgewiesen += 1
@@ -322,7 +324,7 @@ class InfoSign extends Mechanic:
 		make_sensor(rect, _on_enter)
 
 	func _on_enter(_p: Player) -> void:
-		var now := Time.get_ticks_msec() / 1000.0
+		var now := Game.spielzeit
 		if now - _last < 4.0:
 			return
 		_last = now
@@ -455,7 +457,7 @@ class Gate extends Mechanic:
 	func _on_bump(_p: Player) -> void:
 		if is_open:
 			return
-		var now := Time.get_ticks_msec() / 1000.0
+		var now := Game.spielzeit
 		if now - _last_bump > 0.6:
 			_bump_start = now
 		_last_bump = now
@@ -466,7 +468,7 @@ class Gate extends Mechanic:
 		_t += delta
 		_shake = maxf(0.0, _shake - delta * 4.0)
 		if not is_open and player_in_rect(Rect2(rect.position.x - 26, rect.position.y, rect.size.x + 52, rect.size.y)):
-			var now := Time.get_ticks_msec() / 1000.0
+			var now := Game.spielzeit
 			if now - _bump_start > 1.6 and now - _last_tip > 7.0 and absf(player.velocity.x) > 20.0:
 				_last_tip = now
 				say(open_hint if open_hint != "" else ltext("bumpHint",
