@@ -6,6 +6,7 @@ pruefen.py — alle Prüfstufen der Godot-Fassung mit einem Befehl, von billig n
     python3 godot/tools/pruefen.py                  Stufen 0–5 (vor dem Push, in der CI)
     python3 godot/tools/pruefen.py --schnell        nur Stufen 0 und 1, braucht kein Godot (Commit-Haken)
     python3 godot/tools/pruefen.py --bilder         zusätzlich Stufe 6 (Bildprobe; Linux: xvfb-run)
+    python3 godot/tools/pruefen.py --durchspiel     zusätzlich Stufe 7 (Aufnahmen tests/durchspiel/*.json abspielen)
     python3 godot/tools/pruefen.py --ohne-export    Stufe 5 auslassen (zählt als übersprungen)
     python3 godot/tools/pruefen.py --nur 2,3        nur diese Stufen (kein Import vorweg!)
     python3 godot/tools/pruefen.py --tests huelle   Stufe 4 nur mit passenden tests/test_*.gd
@@ -28,6 +29,10 @@ Stufen — jede endet mit genau einer Schlusszeile „STUFE <n> <name>: <urteil>
   5 Exportprobe      --export-pack „Web" und „Windows" (geht ohne Export-Vorlagen), PCK-Verzeichnis
                      lesen: Laufzeitdateien drin, tests/ tools/ docs/ shots/ build*/ nicht
   6 Bildprobe        nur mit --bilder: tests/standbild.gd an zwei Stationen, Bilder da, nicht einfarbig
+  7 Durchspiel       nur mit --durchspiel: tests/durchspiel.gd spielt jede Aufnahme tests/durchspiel/*.json in
+                     einem eigenen Prozess ab (--fixed-fps 60), je Station ziel/absturz/haenger/falsch; „ziel“
+                     besteht auch, wenn der Weg von der Aufnahme abweicht, wird dann aber genannt (nach einer
+                     gewollten Leveländerung neu aufnehmen); ohne Aufnahmen übersprungen
 
 Rückgabe: 0 = jede Stufe bestanden, 1 = mindestens eine fehlgeschlagen, 2 = keine fehlgeschlagen, aber
 etwas übersprungen (zählt nie als sauber). Letzte Zeile: „N Stufen, M fehlgeschlagen, K übersprungen".
@@ -70,6 +75,7 @@ FRIST_WARNUNGEN = 300
 FRIST_TESTS = 1000      # lauf.gd hat einen eigenen Wachhund nach 900 s
 FRIST_EXPORT = 600      # je Paket
 FRIST_BILD = 900        # je Station; unter Xvfb rendert Godot in Software (gemessen ~215 s je Station)
+FRIST_DURCHSPIEL = 600  # je Aufnahme; gemessen ~3 s für eine Station von 20 s (headless, --fixed-fps 60)
 
 BESTANDEN = "bestanden"
 FEHLGESCHLAGEN = "FEHLGESCHLAGEN"
@@ -111,6 +117,14 @@ EXPORT_PRESETS = ("Web", "Windows")
 # --- Stufe 6: Bilder --------------------------------------------------------------------------------------
 BILD_STATIONEN = (("01-stammdaten", "0.42"), ("15-kontextschluessel", "vau-feld"))
 BILD_MIN_SIGMA = 4.0    # Standardabweichung der Helligkeit (0–255); ein einfarbiges Bild hat 0
+
+# --- Stufe 7: Durchspiel ---------------------------------------------------------------------------------
+DURCHSPIEL_ORDNER = os.path.join(GODOT, "tests", "durchspiel")
+# tests/durchspiel_lauf.gd: je Aufnahme „DURCHLAUF <station> (<datei>): <ergebnis> – <angaben>“, am Ende
+# „N Durchläufe, M fehlgeschlagen“; am Ziel steht „deckungsgleich mit der Aufnahme“ oder „weicht … ab“.
+DURCHLAUF = re.compile(r"^DURCHLAUF (\S+) \((.*?)\): (ziel|absturz|haenger|falsch) – (.*)$")
+SCHLUSS_DURCHLAEUFE = re.compile(r"^(\d+) Durchläufe, (\d+) fehlgeschlagen$")
+DECKUNGSGLEICH = "deckungsgleich mit der Aufnahme"
 
 SCHLUSS_TESTS = re.compile(r"^(\d+) Tests, (\d+) fehlgeschlagen")
 SCHLUSS_WARNUNGEN = re.compile(r"^(\d+) Skripte, (\d+) Warnungen, (\d+) Skriptfehler$")
@@ -1119,6 +1133,69 @@ def stufe_6(ctx):
 
 
 # =========================================================================================================
+# Stufe 7 — Durchspiel (Aufnahmen abspielen)
+# =========================================================================================================
+
+def durchlauf_auswerten(zeilen):
+    """Ausgabe von tests/durchspiel.gd: die DURCHLAUF-Zeilen als (station, datei, ergebnis, angaben) und die
+    Schlusszeile als (anzahl, fehlgeschlagen), None ohne Schlusszeile."""
+    laeufe = [m.groups() for m in (DURCHLAUF.match(z.strip()) for z in zeilen) if m]
+    schluss = letzte_passende(zeilen, SCHLUSS_DURCHLAEUFE)
+    return laeufe, ((int(schluss.group(1)), int(schluss.group(2))) if schluss else None)
+
+
+def stufe_7(ctx):
+    """Je Aufnahme ein eigener Prozess: Ein Absturz oder Hänger verdeckt die übrigen Stationen nicht, und jede
+    hat ihr Log (godot/.pruefen/7-durchspiel-<name>.log)."""
+    e = Ergebnis()
+    aufnahmen = []
+    if os.path.isdir(DURCHSPIEL_ORDNER):
+        aufnahmen = sorted(f for f in os.listdir(DURCHSPIEL_ORDNER) if f.endswith(".json"))
+    if not aufnahmen:
+        return e.setze(UEBERSPRUNGEN, "keine Aufnahmen unter %s/ (aufnehmen: Kopf von tests/durchspiel.gd)"
+                       % rel(DURCHSPIEL_ORDNER))
+    if not ctx.godot:
+        return e.setze(FEHLGESCHLAGEN, "Godot nicht gefunden (--godot <pfad> oder Umgebungsvariable GODOT)")
+    teile, fehlgeschlagen, abweichend = [], 0, 0
+    for datei in aufnahmen:
+        name = os.path.splitext(datei)[0]
+        log = logpfad("7-durchspiel-%s.log" % name)
+        rc = ausfuehren([ctx.godot, "--headless", "--path", GODOT, "--fixed-fps", "60", "--script",
+                         "res://tests/durchspiel.gd", "--", "--wiedergabe=res://tests/durchspiel/" + datei],
+                        log, FRIST_DURCHSPIEL)
+        zeilen = log_zeilen(log)
+        laeufe, schluss = durchlauf_auswerten(zeilen)
+        e.liste("%s — Skriptfehler:" % datei, log_auswerten(zeilen)["skriptfehler"], 5)
+        if rc is None:
+            ergebnis, angaben = "haenger", "Zeitgrenze von %d s überschritten (Log: %s)" % (FRIST_DURCHSPIEL, rel(log))
+        elif len(laeufe) != 1 or schluss is None:
+            ergebnis = "absturz"
+            angaben = ("keine Zeile „DURCHLAUF …“ samt Schlusszeile „N Durchläufe, M fehlgeschlagen“, "
+                       "Rückgabecode %s (Log: %s)" % (rc, rel(log)))
+            e.details += schwanz(log, 6)
+        else:
+            ergebnis, angaben = laeufe[0][2], laeufe[0][3]
+            if ergebnis == "ziel" and (rc != 0 or schluss != (1, 0)):
+                ergebnis = "absturz"
+                angaben = "„ziel“ gemeldet, aber Rückgabecode %s und Schlusszeile „%d Durchläufe, %d fehlgeschlagen“ " \
+                          "(Log: %s)" % (rc, schluss[0], schluss[1], rel(log))
+        e.detail("%s: %s – %s" % (datei, ergebnis, angaben))
+        if ergebnis != "ziel":
+            fehlgeschlagen += 1
+            teile.append("%s %s" % (name, ergebnis))
+        elif DECKUNGSGLEICH not in angaben:
+            abweichend += 1
+            teile.append("%s ziel, abweichend" % name)
+        else:
+            teile.append("%s ziel" % name)
+    text = "%d Durchläufe, %d fehlgeschlagen (%s)" % (len(aufnahmen), fehlgeschlagen, "; ".join(teile))
+    if abweichend:
+        text += " — %d am Ziel, aber auf anderem Weg als aufgenommen: nach gewollter Leveländerung neu aufnehmen" \
+                % abweichend
+    return e.setze(FEHLGESCHLAGEN if fehlgeschlagen else BESTANDEN, text)
+
+
+# =========================================================================================================
 # Selbsttest — die Prüfer an künstlichen Dateien (läuft in Stufe 0 mit und einzeln mit --selbsttest)
 # =========================================================================================================
 
@@ -1309,6 +1386,21 @@ def selbsttest():
     finally:
         shutil.rmtree(temp, ignore_errors=True)
 
+    # Durchspiel-Ausgabe (Stufe 7)
+    laeufe, schluss = durchlauf_auswerten([
+        "DURCHLAUF 01-a (res://tests/durchspiel/01-a.json): ziel – Schritt 9 (0.1 s), Paul bei (1.000, 2.000; "
+        "Kachel 0/0), deckungsgleich mit der Aufnahme (Ende und 1 Spurpunkte)",
+        "WARNING: etwas anderes",
+        "  DURCHLAUF 02-b (res://x (y).json): falsch – Ziel nicht erreicht: Paul in Schritt 5 bei (—)",
+        "DURCHLAUF 03-c (res://z.json): gewonnen – kein bekanntes Ergebnis",
+        "2 Durchläufe, 1 fehlgeschlagen",
+    ])
+    pruefe([l[:3] for l in laeufe] == [("01-a", "res://tests/durchspiel/01-a.json", "ziel"),
+                                       ("02-b", "res://x (y).json", "falsch")] and schluss == (2, 1)
+           and DECKUNGSGLEICH in laeufe[0][3], "Durchspiel-Ausgabe falsch gelesen: %s / %s" % (laeufe, schluss))
+    pruefe(durchlauf_auswerten(["DURCHLAUF kaputt", "Durchläufe: 2"]) == ([], None),
+           "Durchspiel-Ausgabe ohne Zeilen falsch gelesen")
+
     # Grenzwerte
     ueber, unter = grenzen_vergleichen({"src": {"A": 3, "NEU": 1}, "tests": {"B": 1}},
                                        {"src": {"A": 2, "C": 4}, "tests": {"B": 1}})
@@ -1329,6 +1421,7 @@ STUFEN = [
     (4, "Tests", stufe_4),
     (5, "Exportprobe", stufe_5),
     (6, "Bildprobe", stufe_6),
+    (7, "Durchspiel", stufe_7),
 ]
 
 
@@ -1345,7 +1438,7 @@ def stufen_waehlen(a):
     elif a.schnell:
         nummern = [0, 1]
     else:
-        nummern = [0, 1, 2, 3, 4, 5] + ([6] if a.bilder else [])
+        nummern = [0, 1, 2, 3, 4, 5] + ([6] if a.bilder else []) + ([7] if a.durchspiel else [])
     ausgelassen = {5: "--ohne-export"} if a.ohne_export and 5 in nummern else {}
     return nummern, ausgelassen
 
@@ -1354,6 +1447,8 @@ def main():
     ap = argparse.ArgumentParser(description="Prüfstufen der Godot-Fassung (Kopf der Datei: alle Aufrufe).")
     ap.add_argument("--schnell", action="store_true", help="nur Stufen 0 und 1 (Commit-Haken, ohne Godot)")
     ap.add_argument("--bilder", action="store_true", help="zusätzlich Stufe 6 (Bildprobe, braucht ein Fenster/xvfb)")
+    ap.add_argument("--durchspiel", action="store_true",
+                    help="zusätzlich Stufe 7 (Aufnahmen unter tests/durchspiel/ abspielen)")
     ap.add_argument("--ohne-export", action="store_true", help="Stufe 5 auslassen (zählt als übersprungen)")
     ap.add_argument("--nur", metavar="N[,N…]", help="nur diese Stufen")
     ap.add_argument("--tests", metavar="TEIL", help="Stufe 4: nur tests/test_*.gd, deren Name TEIL enthält")
@@ -1365,8 +1460,9 @@ def main():
     a = ap.parse_args()
 
     if a.liste:
+        nur_mit = {6: " (nur mit --bilder)", 7: " (nur mit --durchspiel)"}
         for nr, name, _ in STUFEN:
-            print("Stufe %d: %s%s" % (nr, name, " (nur mit --bilder)" if nr == 6 else ""))
+            print("Stufe %d: %s%s" % (nr, name, nur_mit.get(nr, "")))
         return 0
     if a.selbsttest:
         zahl, fehler = selbsttest()
