@@ -56,7 +56,7 @@ const STATIONEN := {
 			"Am Terminal {action} im Takt der Lichter drücken — dann öffnet das Tor.",
 			"Feder = hoch hinaus · rotes Störfeld = kostet nur Bits · Fahne = dein Rücksetzpunkt.",
 		],
-		"tust": "{lauf} laufen · {jump} springen (2× = REZI-Schub) · {action} im Takt am Terminal · Tür öffnet ab 8 Prüfsummen",
+		"tust": "{lauf} laufen · {jump} springen (2× = REZI-Schub) · {action} im Takt am Terminal · Tür öffnet ab {n} {was}",
 		"schilder": [
 			[520, 177, "KRANKENKASSE", 5, WEISS, 0.8],
 			[150, 229, "ANMELDUNG", 3.6, MATT, 0.5],
