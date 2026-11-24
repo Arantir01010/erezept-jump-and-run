@@ -1,0 +1,27 @@
+{
+  "_hinweis": "ENTWURF — Fragen und Erklärungen vor der Messe von der gematik fachlich prüfen lassen. Solange \"entwurf\" true ist, zeigt das Spiel am Quiz einen kleinen Entwurf-Vermerk. Abschalten: \"wissensabfrage\": false in game-config.json.",
+  "entwurf": true,
+  "fragen": [
+    {
+      "frage": "Was macht deine Gesundheitskarte beim E-Rezept?",
+      "links": "Sie speichert das Rezept.",
+      "rechts": "Sie ist der Schlüssel.",
+      "richtig": "rechts",
+      "erklaerung": "Auf der Karte steht nichts. Sie öffnet nur — wie ein Schlüssel."
+    },
+    {
+      "frage": "Was ist die VAU?",
+      "links": "Ein Raum, in dem niemand mitliest.",
+      "rechts": "Ein Tunnel durchs Netz.",
+      "richtig": "links",
+      "erklaerung": "Ein Raum, kein Tunnel: Dort wird im Klartext gearbeitet, ohne dass der Betreiber mitliest."
+    },
+    {
+      "frage": "Deine Sitzung ist abgelaufen. Was passiert?",
+      "links": "Die Daten bleiben geschützt.",
+      "rechts": "Zurück in den Klartext.",
+      "richtig": "rechts",
+      "erklaerung": "Eine abgelaufene Sitzung schützt nicht — sie fällt in den Klartext zurück."
+    }
+  ]
+}
