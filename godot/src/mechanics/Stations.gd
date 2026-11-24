@@ -274,9 +274,9 @@ class Lauscher extends Mechanic:
 		var lost := player.hurt(global_position.x)
 		Game.mark_seen(data.id, ltext("akteur", {"de": "Lauscher", "en": "Eavesdropper"}))
 		Fx.deny_stamp(level, global_position + Vector2(0, -60), ltext("seenText", {"de": "MITGELESEN!", "en": "READ!"}))
-		Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
 		if lost <= 0:
 			return
+		Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
 		_hits += 1
 		if _hits >= 2 and _t - _last_tip > 6.0:
 			_last_tip = _t

@@ -198,8 +198,12 @@ func add_bits(n: int, bonus := false) -> void:
 
 
 ## Sonic-Prinzip: Treffer kostet ein paar Bits, nie den Fortschritt.
+## Abgezogen wird nur, was in DIESER Station gesammelt wurde: Die Tür zählt
+## bits_this_level(). Früher ging der Abzug vom Gesamtkonto — wer zu Beginn
+## getroffen wurde, sah weiter 0, und die nächsten Prüfsummen zählten unsichtbar
+## nicht mit (Team-Feedback 9/2026).
 func lose_bits(max_loss: int) -> int:
-	var lost := mini(bits, max_loss)
+	var lost := mini(bits_this_level(), max_loss)
 	bits -= lost
 	combo = 0
 	combo_until = 0.0
