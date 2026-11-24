@@ -28,6 +28,10 @@ Game="*res://src/autoload/Game.gd"
 Sfx="*res://src/autoload/Sfx.gd"
 Kiosk="*res://src/autoload/Kiosk.gd"
 
+[debug]
+
+file_logging/max_log_files=60
+
 [display]
 
 window/size/viewport_width=1920
