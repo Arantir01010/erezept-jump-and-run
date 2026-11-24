@@ -154,7 +154,7 @@ func _draw_glow(_c: CanvasItem) -> void:
 	pass
 
 
-## Bewegtes, jeden Frame: `t` absolute Sekunden, `tz` Sekunden seit Anzeige.
+## Bewegtes, jeden Frame: `t` Spielzeit dieser Szene in Sekunden, `tz` Sekunden seit Anzeige.
 func _draw_life(_c: CanvasItem) -> void:
 	pass
 
@@ -172,7 +172,9 @@ func _tick(_delta: float) -> void:
 # ------------------------------------------------------------------ Ablauf
 
 func _process(delta: float) -> void:
-	t = Time.get_ticks_msec() / 1000.0
+	# Spielzeit statt Wanduhr: steht in der Pause, folgt der Zeitlupe, und zwei
+	# Aufnahmen derselben Stelle zeigen dasselbe Bild (Bildprobe, Durchspiel).
+	t += delta
 	if _anchor < 0.0:
 		_anchor = t
 	tz = maxf(0.0, t - _anchor)

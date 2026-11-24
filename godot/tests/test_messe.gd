@@ -430,3 +430,56 @@ func test_lueckenlos_nur_mit_lauschern() -> void:
 	gleich(karte._vermerke.size(), 2, "Karte ohne Lauscher: nur Zeit und Prüfsummen")
 	karte.queue_free()
 	Game.level_results.clear()
+
+
+func test_quiz_vor_dem_abschluss() -> void:
+	pruefe(Quiz.aktiv(), "Wissensabfrage ist eingeschaltet und hat Fragen")
+	var fragen := Quiz.gueltige_fragen(Quiz.lade())
+	pruefe(fragen.size() >= 2 and fragen.size() <= 3, "zwei bis drei Fragen")
+	Game.reset_run()
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await frames(3)
+	main.show_reward()
+	await warte_bis(func(): return main._current is Quiz, 3.0)
+	if not pruefe(main._current is Quiz, "vor dem Abschluss kommt das Quiz"):
+		return
+	var q: Quiz = main._current
+	for f in q.fragen:
+		q.antworten(str(f["richtig"]))
+		pruefe(q._erklaerung.text != "", "nach der Antwort kommt die Erklärung")
+		q.weiter()
+	await warte_bis(func(): return main._current is Reward, 3.0)
+	pruefe(main._current is Reward, "danach der Abschluss")
+	gleich(Game.wissen_richtig, fragen.size(), "alle richtig gezählt")
+	pruefe(Game.wissen_medaille(), "alle richtig = Medaille WISSEN")
+	gleich(Game.score, Game.MEDAL_BONUS, "die Medaille bringt Punkte")
+
+
+func test_quiz_falsche_antwort() -> void:
+	Game.reset_run()
+	var q := Quiz.new()
+	baum.root.add_child(q)
+	await frames(1)
+	var f: Dictionary = q.fragen[0]
+	q.antworten("links" if str(f["richtig"]) == "rechts" else "rechts")
+	gleich(q.richtig, 0, "falsch gezählt")
+	q.antworten(str(f["richtig"]))
+	gleich(q.richtig, 0, "zweite Antwort auf dieselbe Frage zählt nicht")
+	pruefe(q._urteil.text != "", "Urteil sichtbar")
+	q.queue_free()
+
+
+func test_info_qr_neben_dem_gewinncode() -> void:
+	pruefe(ResourceLoader.exists("res://assets/qr/info.png"), "Info-QR erzeugt")
+	pruefe(ResourceLoader.exists("res://assets/qr/reward.png"), "Gewinn-QR für den Automaten bleibt")
+	Game.reset_run()
+	var r := Reward.new()
+	baum.root.add_child(r)
+	await frames(2)
+	var qrs := 0
+	for c in r.get_children():
+		if c is TextureRect:
+			qrs += 1
+	gleich(qrs, 2, "zwei Codes: Gewinn und Info")
+	r.queue_free()

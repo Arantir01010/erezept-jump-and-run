@@ -154,6 +154,22 @@ static func lauf_ende(grund: String) -> void:
 	_station = ""
 
 
+## Wissensabfrage beantwortet (Quiz.gd).
+static func wissen(richtig: int, gesamt: int) -> void:
+	if not lauf_aktiv():
+		return
+	_ereignis("wissen", {"richtig": richtig, "fragen": gesamt})
+	var s := _summe()
+	var w = s.get("wissen")
+	if not (w is Dictionary):
+		w = {}
+	w["beantwortet"] = int(w.get("beantwortet", 0)) + 1
+	w["richtig"] = int(w.get("richtig", 0)) + richtig
+	w["fragen"] = int(w.get("fragen", 0)) + gesamt
+	s["wissen"] = w
+	_speichern(s)
+
+
 # ------------------------------------------------------------------ Auswertung
 
 ## Tagessumme (für das Betreiber-Menü).

@@ -54,6 +54,7 @@ func _ready() -> void:
 	frame.size = qr.size + Vector2(36, 36)
 	add_child(frame)
 	add_child(qr)
+	_info_qr()
 
 	# Siegel-Reihe als Zusammenfassung: je Station das Badge (Stichwort), statt nur
 	# „◉ 1 … ◉ 10" — damit am Ende sichtbar wird, was man unterwegs gesichert hat.
@@ -78,7 +79,12 @@ func _ready() -> void:
 	var medals := 0
 	for r in Game.level_results:
 		medals += int(r.get("medal_count", 0))
-	_label(tr("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s") % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()], 30, Vector2(0, 732), Palette.WHITE)
+	if Game.wissen_medaille():
+		medals += 1
+	var zeile := tr("%d Punkte  ·  Sicherheitsstufe: %s  ·  %d Medaillen  ·  %.0f s") % [Game.score, Game.t(rank["label"]), medals, Game.elapsed_seconds()]
+	if Game.wissen_fragen > 0:
+		zeile += "  ·  " + tr("Wissen: %d / %d") % [Game.wissen_richtig, Game.wissen_fragen]
+	_label(zeile, 30, Vector2(0, 732), Palette.WHITE)
 
 	# Highscore
 	var hs := Game.highscores()
@@ -106,6 +112,40 @@ func _ready() -> void:
 	hint = _label("", 22, Vector2(0, 1000), Brand.UI_TEXT_DIM)
 	_label(Game.t(Game.config.get("disclaimer", {"de": ""})), 16, Vector2(0, 1040), Brand.UI_TEXT_MUTED)
 	Sfx.play("seal")
+
+
+## Zweiter, kleinerer QR-Code zum Mitnehmen (Punkt 17): Link zum Nachlesen aufs
+## Handy, links und deutlich abgesetzt vom Gewinncode für den Automaten.
+## Erzeugt von tools/gen_assets.py aus ending.infoLink; ohne Datei kein Code.
+func _info_qr() -> void:
+	const PFAD := "res://assets/qr/info.png"
+	var tex: Texture2D = null
+	if ResourceLoader.exists(PFAD):
+		tex = load(PFAD)
+	if tex == null or str(Game.config.get("ending", {}).get("infoLink", "")) == "":
+		return
+	var q := TextureRect.new()
+	q.texture = tex
+	q.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	q.stretch_mode = TextureRect.STRETCH_SCALE
+	q.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	q.size = Vector2(200, 200)
+	q.position = Vector2(320, 300)
+	var rahmen := ColorRect.new()
+	rahmen.color = Color.WHITE
+	rahmen.position = q.position - Vector2(10, 10)
+	rahmen.size = q.size + Vector2(20, 20)
+	add_child(rahmen)
+	add_child(q)
+	var l := Label.new()
+	l.text = tr("Mehr zum E-Rezept — mit dem Handy scannen")
+	l.position = Vector2(220, 528)
+	l.size = Vector2(400, 80)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_color_override("font_color", Brand.UI_TEXT_DIM)
+	add_child(l)
 
 
 ## Badges der gesicherten Stationen in Spielreihenfolge (übersetzt). Ohne Badge

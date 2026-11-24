@@ -71,13 +71,13 @@
       "hinweis": "19 kurze Klänge (Sprung, Sammeln, Tor, Siegel …). Legt gen_assets.py music_title.wav/music_level.wav wieder an, sind auch die synthetisch; OGG/MP3 hat im Spiel Vorrang."
     },
     {
-      "muster": "assets/qr/reward.png",
-      "quelle": "eigene Erzeugung: QR-Code mit dem statischen Gewinncode aus config/game-config.json (ending.staticPayload)",
+      "muster": ["assets/qr/reward.png", "assets/qr/info.png"],
+      "quelle": "eigene Erzeugung: QR-Codes aus config/game-config.json, reward.png mit dem statischen Gewinncode (ending.staticPayload), info.png mit dem Link zum Nachlesen (ending.infoLink; ohne Link entfällt die Datei)",
       "autor": "Projektteam",
       "lizenz": {"name": "eigenes Werk, keine Fremdrechte", "link": ""},
       "abgerufen": "",
       "erzeugt_von": "tools/gen_assets.py, Funktion qr() (Python-Paket qrcode, Fehlerkorrektur M)",
-      "hinweis": "Ändert sich staticPayload, das Bild neu erzeugen."
+      "hinweis": "Ändern sich staticPayload oder infoLink, die Bilder neu erzeugen (gen_assets.py --nur-qr)."
     },
     {
       "muster": "assets/i18n/NotoSansSC-subset.otf",
