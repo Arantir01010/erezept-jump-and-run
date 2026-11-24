@@ -262,6 +262,13 @@ func label_action() -> String:
 	return tr("BLAU") if has_gamepad() else "E"
 
 
+## Pause: ESC (Tastatur), START (Arcade/Gamepad), Pause-Knopf oben (Touch).
+func label_pause() -> String:
+	if touch_seen or touch_forced:
+		return "❚❚"
+	return "START" if has_gamepad() else "ESC"
+
+
 func label_toggle() -> String:
 	if touch_seen or touch_forced:
 		return tr("HÜLLE")

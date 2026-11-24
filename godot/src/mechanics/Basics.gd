@@ -128,6 +128,8 @@ class DoorExit extends Mechanic:
 	var _open_amount := 0.0
 	var _light: PointLight2D
 	var _glow: Sprite2D
+	var _abgewiesen := 0      # wie oft die Tür Paul schon weggeschickt hat
+	var _offen := false       # in tick() einmal je Frame bestimmt
 
 	func spawn() -> void:
 		z_index = 3
@@ -138,25 +140,39 @@ class DoorExit extends Mechanic:
 			_glow.position = Vector2(0, -30)
 
 	var unlocked: bool:
-		get: return Game.bits_this_level() >= data.count_required
+		get: return _offen_jetzt()
+
+	## Offen, wenn das Sammelziel erreicht ist — oder als Sicherheitsnetz, wenn alle
+	## Prüfsummen, die noch in der Station liegen (auch verstreute), nicht mehr
+	## reichen würden: Niemand soll vor einer Tür stehen, die nie mehr aufgeht.
+	func _offen_jetzt() -> bool:
+		var have := Game.bits_this_level()
+		var need := data.count_required
+		return have >= need or have + level.remaining_bits() < need
 
 	func _on_enter(_p: Player) -> void:
 		if _done:
 			return
-		if unlocked:
+		if _offen_jetzt():
 			_done = true
 			level.complete_level()
 		else:
 			var now := Time.get_ticks_msec() / 1000.0
 			if now - _hint_at > 3.0:
 				_hint_at = now
+				_abgewiesen += 1
 				var need := data.count_required - Game.bits_this_level()
-				say(tr("Noch %d %s sammeln!") % [need, Game.t(data.collect_label)])
+				var text := tr("Noch %d %s sammeln!") % [need, Game.t(data.collect_label)]
+				# Ab dem dritten Mal: der Ausweg (Team-Feedback 9/2026, Softlock in 04)
+				if _abgewiesen >= 3:
+					text += "\n" + tr("Hängst du fest? %s: Pause, dann „Station neu starten“.") % Kiosk.label_pause()
+				say(text, 5.0 if _abgewiesen >= 3 else 3.0)
 				Sfx.play("deny", 1.3, -6.0)
 
 	func tick(delta: float) -> void:
 		_t += delta
-		_open_amount = move_toward(_open_amount, 1.0 if unlocked else 0.0, delta * 2.0)
+		_offen = _offen_jetzt()
+		_open_amount = move_toward(_open_amount, 1.0 if _offen else 0.0, delta * 2.0)
 		_light.energy = _open_amount * (0.8 + 0.2 * sin(_t * 3.0))
 		if _glow:
 			Fx.set_glow(_glow, Palette.GOLD, _open_amount * (0.9 + 0.2 * sin(_t * 3.0)))
@@ -165,7 +181,7 @@ class DoorExit extends Mechanic:
 	func _draw() -> void:
 		var bottom := rect.size.y / 2.0
 		var frame := Rect2(-32, bottom - 100, 64, 100)
-		var c := Palette.GOLD if unlocked else pal.cap
+		var c := Palette.GOLD if _offen else pal.cap
 		draw_panel(Rect2(frame.position - Vector2(2, 2), frame.size + Vector2(4, 4)), pal.outline, pal.outline, 9, 0.0, 0)
 		draw_panel(frame, pal.fill, c, 8, _open_amount * 1.2, 3)
 		var inner := Rect2(-22, bottom - 90, 44, 86)

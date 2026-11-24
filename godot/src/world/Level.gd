@@ -37,6 +37,7 @@ var _max_progress := 0.0
 var _last_progress := 0.0
 var _last_stuck_tip := -100.0
 var _started := false
+var _verstreut_unterwegs := 0   # beim Treffer verloren, aber noch nicht als ScatteredBit da (deferred)
 var sun: DirectionalLight2D
 var weather: Weather
 static var _world_cache := {}
@@ -257,7 +258,8 @@ func _on_landed(impact: float) -> void:
 		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.8, 0.88, 1.0), 30.0 + 70.0 * impact, 1.5 + impact)
 
 
-func _on_hurt(_lost: int) -> void:
+func _on_hurt(lost: int) -> void:
+	_verstreut_unterwegs += lost
 	camera.kick(Vector2(player.facing * -60, -30))
 	rezi.scared()
 	Fx.flash(Palette.DENY, 0.28)
@@ -291,8 +293,22 @@ func on_collected(_c: Node) -> void:
 	pass
 
 
+## Prüfsummen, die noch in der Station liegen: nicht eingesammelte (auch Bonus)
+## plus verstreute. Für das Sicherheitsnetz der Tür (Basics.DoorExit).
+func remaining_bits() -> int:
+	var n := _verstreut_unterwegs
+	for m in mechanics:
+		if is_instance_valid(m) and m is Basics.Collectible and not m.taken:
+			n += 1
+	for c in get_children():
+		if c is ScatteredBit:
+			n += 1
+	return n
+
+
 ## Verstreute Bits sind ECHTE Objekte und wieder einsammelbar (Anti-Softlock).
 func _scatter_bits(pos: Vector2, count: int) -> void:
+	_verstreut_unterwegs = maxi(0, _verstreut_unterwegs - count)
 	for i in count:
 		var b := ScatteredBit.new()
 		b.global_position = pos

@@ -45,6 +45,8 @@ var combo := 0
 var combo_until := 0.0
 var _level_start_bits := 0
 var _bits_per_level := {}
+## Stand bei Stationsbeginn — Ziel von „Station neu starten" (Pausemenü).
+var _start_stand := {}
 
 # --- Karten (Identität, keine Währung) ---
 var cards: Array = []
@@ -169,12 +171,47 @@ func reset_run() -> void:
 	cards = []
 	card_slots = {}
 	assist_fails = {}
+	_start_stand = {}
 	hud_changed.emit()
 
 
+## Stationsbeginn (Level.setup): Zählstand für die Tür merken und den ganzen
+## Stand sichern, auf den „Station neu starten" zurückspringt.
 func mark_level_start() -> void:
 	_level_start_bits = bits
 	combo = 0
+	combo_until = 0.0
+	_start_stand = {
+		"bits": bits, "score": score, "encrypted": encrypted,
+		"clean_interactions": clean_interactions, "protokoll": protokoll.duplicate(true),
+		"cards": cards.duplicate(), "card_slots": card_slots.duplicate(),
+		"seals": seals.duplicate(true), "level_results": level_results.duplicate(true),
+		"bits_per_level": _bits_per_level.duplicate(),
+	}
+	hud_changed.emit()
+
+
+## „Station neu starten" (Pausemenü, Team-Feedback 9/2026): Alles, was in dieser
+## Station gesammelt, verloren, gesteckt oder protokolliert wurde, springt auf den
+## Stand bei Stationsbeginn zurück. Die Hilfen (assist_fails) bleiben bewusst:
+## Wer an einem Terminal festhing, bekommt die Verlangsamung auch im neuen Versuch.
+func restore_level_start() -> void:
+	if _start_stand.is_empty():
+		return
+	var s := _start_stand
+	bits = int(s["bits"])
+	score = int(s["score"])
+	encrypted = bool(s["encrypted"])
+	clean_interactions = int(s["clean_interactions"])
+	protokoll = (s["protokoll"] as Array).duplicate(true)
+	cards = (s["cards"] as Array).duplicate()
+	card_slots = (s["card_slots"] as Dictionary).duplicate()
+	seals = (s["seals"] as Array).duplicate(true)
+	level_results = (s["level_results"] as Array).duplicate(true)
+	_bits_per_level = (s["bits_per_level"] as Dictionary).duplicate()
+	_level_start_bits = bits
+	combo = 0
+	combo_until = 0.0
 	hud_changed.emit()
 
 
