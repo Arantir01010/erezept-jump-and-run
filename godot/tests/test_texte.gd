@@ -68,9 +68,10 @@ func test_platzhalter_stimmen_ueberein() -> void:
 
 
 func test_tr_texte_im_code_sind_uebersetzt() -> void:
-	# Jeder feste Text in tr("…") / Game.t("…") muss in einer i18n-Tabelle stehen.
+	# Jeder feste Text in tr("…") / Game.t("…") — auch in den statischen Helfern
+	# _tr("…") (BriefingDaten) und tr_s("…") (PauseMenu) — muss in einer i18n-Tabelle stehen.
 	var k := _schluessel()
-	var re := RegEx.create_from_string("\\b(?:tr|Game\\.t)\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+	var re := RegEx.create_from_string("\\b(?:tr|_tr|tr_s|Game\\.t)\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
 	for pfad in dateien("res://src", ".gd"):
 		var text := FileAccess.get_file_as_string(pfad)
 		for m in re.search_all(text):
@@ -107,3 +108,53 @@ func _sammle(v: Variant, out: Array) -> void:
 		for x in v:
 			_sammle(x, out)
 
+
+
+## Knopf-Platzhalter ({action}, {toggle}, {n} …) setzt der Code nach der
+## Übersetzung ein (BriefingDaten.tasten) — jede Sprache braucht dieselben.
+static func _knoepfe(s: String) -> Array:
+	var re := RegEx.create_from_string("\\{[a-z]+\\}")
+	var out: Array = []
+	for m in re.search_all(s):
+		out.append(m.get_string())
+	out.sort()
+	return out
+
+
+func test_knopf_platzhalter_stimmen_ueberein() -> void:
+	var tabellen := _tabellen()
+	for f in tabellen:
+		var d: Dictionary = tabellen[f]
+		for key in d:
+			if str(key).begins_with("_") or not (d[key] is Dictionary):
+				continue
+			var soll := _knoepfe(str(key))
+			for lc in SPRACHEN:
+				var ist := _knoepfe(str(d[key].get(lc, "")))
+				pruefe(ist == soll, "%s/%s: '%s' Knöpfe %s statt %s" % [f, lc, str(key).left(40), ist, soll])
+
+
+func test_chinesisch_und_hindi_ohne_kaestchen() -> void:
+	# Die zh/hi-Schriften sind Untermengen (tools/gen_i18n_fonts.py): ein neues
+	# Schriftzeichen in einer Übersetzung erschiene als Kästchen.
+	var schriften := {
+		"zh": load("res://assets/i18n/NotoSansSC-subset.otf") as Font,
+		"hi": load("res://assets/i18n/NotoSansDevanagari-subset.ttf") as Font,
+	}
+	for lc in schriften:
+		if not pruefe(schriften[lc] != null, "Schrift für %s fehlt" % lc):
+			return
+	var tabellen := _tabellen()
+	for f in tabellen:
+		var d: Dictionary = tabellen[f]
+		for key in d:
+			if str(key).begins_with("_") or not (d[key] is Dictionary):
+				continue
+			for lc in schriften:
+				var fehlt := ""
+				for ch in str(d[key].get(lc, "")):
+					var c := ch.unicode_at(0)
+					var eigen := c >= 0x2E80 if lc == "zh" else (c >= 0x0900 and c <= 0x097F)
+					if eigen and not schriften[lc].has_char(c) and not ch in fehlt:
+						fehlt += ch
+				pruefe(fehlt == "", "%s/%s: '%s' — Zeichen fehlen in der Schrift: %s" % [f, lc, str(key).left(40), fehlt])
