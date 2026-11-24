@@ -1,21 +1,26 @@
 extends "res://tests/testfall.gd"
 ## KARTENFARBEN — eine Quelle für eGK, HBA und SMC-B: KartenFx.INFO (Karte in der
-## Welt, Kartenleser, HUD, Flug) und über KartenFx.koerper() auch das Briefing.
-## Früher hatte das Briefing eigene Hex-Werte, die beim Umfärben nicht mitgingen.
+## Welt, Kartenleser, HUD, Flug) und über KartenFx.koerper() auch Briefing und Wissen.
+## Früher hatten beide eigene Hex-Werte, die beim Umfärben nicht mitgingen.
 
-## Die alten Kopien im Briefing (eGK, HBA, SMC-B).
-const ALTE_KOPIEN := ["0x2c7a52", "0xb8703a", "0x4d6aa8"]
+## Die alten Kopien (eGK, HBA, SMC-B), wie sie in Briefing und Wissen standen.
+const ALTE_KOPIEN: Array[String] = ["0x2c7a52", "0xb8703a", "0x4d6aa8"]
 ## Palette.shade schiebt Schatten Richtung Blau.
 const BLAU := 0.62
 
 
-## Das Briefing malt Karten aus KartenFx, nicht aus eigenen Hex-Werten.
-func test_briefing_nimmt_kartenfarben_aus_kartenfx() -> void:
+## Nur KartenFx kennt Kartenfarben: keine andere Datei unter src/ hat eigene Hex-Werte
+## dafür, und das Briefing malt seine Karten aus KartenFx.
+func test_kartenfarben_nur_aus_kartenfx() -> void:
+	for pfad in dateien("res://src", ".gd"):
+		if pfad.ends_with("/KartenFx.gd"):
+			continue
+		var inhalt := FileAccess.get_file_as_string(pfad)
+		for h in ALTE_KOPIEN:
+			pruefe(not inhalt.contains(h), "%s hat eine eigene Kartenfarbe (%s) — KartenFx.koerper() nehmen" % [pfad, h])
 	var text := FileAccess.get_file_as_string("res://src/ui/Briefing.gd")
 	if not pruefe(text != "", "src/ui/Briefing.gd nicht lesbar"):
 		return
-	for h in ALTE_KOPIEN:
-		pruefe(not text.contains(h), "Briefing.gd hat wieder eine eigene Kartenfarbe (%s) — KartenFx.koerper() nehmen" % h)
 	var von := text.find("func _karte(")
 	if not pruefe(von >= 0, "Briefing._karte nicht gefunden"):
 		return
@@ -29,7 +34,7 @@ func test_briefing_nimmt_kartenfarben_aus_kartenfx() -> void:
 ## eGK und SMC-B: Körper genau wie bisher in der Welt (Palette.shade mit 0,48) — die
 ## Spielgrafik bleibt pixelgleich.
 func test_koerper_egk_smcb_wie_bisher() -> void:
-	for k in ["egk", "smcb"]:
+	for k: String in ["egk", "smcb"]:
 		gleich(KartenFx.koerper(k), Palette.shade(KartenFx.color_of(k), 0.48), "%s: Kartenkörper" % k)
 
 
@@ -38,7 +43,7 @@ func test_koerper_egk_smcb_wie_bisher() -> void:
 ## Gelb/Oliv), und der goldene Chip des Briefings hebt sich ab (≥ 3:1, Maß für Grafik).
 func test_koerper_dunkel_kuehl_lesbar() -> void:
 	var chip := Pen.hex(0xffd75e)
-	for k in KartenFx.INFO:
+	for k: String in KartenFx.INFO:
 		var c := KartenFx.color_of(k)
 		var b := KartenFx.koerper(k)
 		pruefe(b.v <= c.v * 0.6, "%s: Körper nicht dunkel genug (Helligkeit %.2f bei Kartenfarbe %.2f)" % [k, b.v, c.v])

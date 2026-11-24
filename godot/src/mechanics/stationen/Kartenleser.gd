@@ -8,6 +8,9 @@ extends Mechanic
 ## Karte springt wieder heraus, Stempel. Belegt: Kopfschütteln.
 ## Spiellogik (Game.insert_card, Tor) bleibt sofort — die Animation läuft darüber.
 ## Fachlich: Die Karte öffnet, sie liefert keine Daten (Zugriff freigegeben).
+## Was das Terminal weiß und zeigt (LED, Anzeige, Karte im Schlitz, Abweis-Moment),
+## steht in der Regelklasse KartenleserRegel (src/state/, ohne Szene testbar); hier
+## bleiben Zeichnung, Licht, Klang, Effekte, Sprechblasen und die Kartenbewegung.
 
 ## Säule: Display, LED und Schlitz liegen über Kopf- und REZI-Höhe (REZI schwebt
 ## bei etwa −92 px, Oberkante ≈ −120), damit Paul davor nichts verdeckt.
@@ -27,41 +30,19 @@ const STATUS := {
 }
 var accepted: Array = []
 var terminal_id := ""
-var inserted := ""
-var opened := false
+## Zustand des Terminals (LED, Anzeige, Karte, Abweis-Moment …)
+var regel := KartenleserRegel.new()
 var _hint := false
-var _t := 0.0
-var _flash := 0.0
 var _light: PointLight2D
 var _glow: Sprite2D
-# Karten-Animation als reine Funktion von _anim_t (0..1): Art, Karte, Startpunkt
-var _anim_kind := ""       # "rein" | "raus" | "abgelehnt"
-var _anim_card := ""
+# Kartenbewegung als reine Funktion von _anim_t (0..1); Art und Karte: regel.anim, regel.anim_karte
 var _anim_t := 0.0
 var _anim_from := Vector2.ZERO
 var _anim_tw: Tween
-var _beat := false         # Abweis-Beat (Stempel, Rempler) schon gefeuert?
-var _seated := ""          # Karte, die sichtbar im Schlitz steckt
-var _led := "rot"          # rot | gelb | gruen
-var _led_until := 0.0
-var _shake := 0.0          # Rempler (falsche Karte)
-var _nod := 0.0            # Kopfschütteln (belegt)
-var _status := "stecken"
-var _status_color := Palette.WHITE
-var _status_until := 0.0
-var _say_pending := false
 
 func spawn() -> void:
 	z_index = 5
-	var raw = obj.get("karten", ["egk"])
-	if raw is String:
-		for s in str(raw).split(","):
-			accepted.append(s.strip_edges().to_lower())
-	else:
-		for s in raw:
-			accepted.append(str(s).to_lower())
-	if accepted.is_empty():
-		accepted.append("egk")
+	accepted = KartenleserRegel.karten_aus(obj.get("karten", ["egk"]))
 	terminal_id = "leser-%s" % str(rect.position.x)
 	make_sensor(rect, _enter, _exit)
 	# LED-Licht klein und im Ruhe-Rot schwach: Es soll die Säule nicht rot tönen
@@ -109,104 +90,67 @@ func _enter(_p: Player) -> void:
 
 ## Wer weggeht, nimmt seinen Ausweis mit — die Karte gleitet wieder heraus.
 func _exit(_p: Player) -> void:
-	if inserted != "":
+	if regel.eingesteckt != "":
 		Game.remove_card_from(terminal_id)
-		inserted = ""
-	_say_pending = false
-	if _seated != "" or _anim_kind == "rein":
-		var card := _seated if _seated != "" else _anim_card
-		_seated = ""
+	var card := regel.weggehen()
+	if card != "":
 		_play("raus", card, Vector2.ZERO, 0.3)
 		Sfx.play("tick", 0.9, -8.0)
-	_led = "rot"
-	_led_until = 0.0
-	_set_status("stecken", Palette.WHITE, 0.0)
 
 # --- Ablauf ---
 
 func tick(delta: float) -> void:
-	_t += delta
-	_flash = maxf(0.0, _flash - delta * 2.0)
-	_shake = maxf(0.0, _shake - delta * 3.0)
-	_nod = maxf(0.0, _nod - delta * 2.2)
-	if _led_until > 0.0 and _t >= _led_until:
-		_led_until = 0.0
-		_led = "gruen" if _seated != "" else "rot"
-	if _status_until > 0.0 and _t >= _status_until:
-		_status_until = 0.0
-		if _seated != "":
-			_set_status("frei", Palette.OK, 0.0)
-		else:
-			_set_status("stecken", Palette.WHITE, 0.0)
-	if _anim_kind == "abgelehnt" and not _beat and _anim_t >= 0.5:
-		_beat = true
+	if regel.tick(delta, _anim_t):
 		_reject_beat()
 	var lc := _led_color()
 	_light.color = lc
-	var breathe := 0.03 * sin(_t * PI) if _led != "gruen" else 0.0   # 0,5 Hz
+	var breathe := 0.03 * sin(regel.uhr * PI) if regel.led != "gruen" else 0.0   # 0,5 Hz
 	var base_e := 0.12
-	match _led:
+	match regel.led:
 		"gruen":
 			base_e = 0.55
 		"gelb":
 			base_e = 0.3
 		_:
-			base_e = 0.25 if _led_until > 0.0 else 0.12
-	_light.energy = base_e + _flash * 0.6 + breathe
+			base_e = 0.25 if regel.led_bis > 0.0 else 0.12
+	_light.energy = base_e + regel.blitz * 0.6 + breathe
 	if _glow:
-		Fx.set_glow(_glow, lc, (0.9 if _led == "gruen" else 0.35) + _flash * 0.6)
+		Fx.set_glow(_glow, lc, (0.9 if regel.led == "gruen" else 0.35) + regel.blitz * 0.6)
 	queue_redraw()
-	kappe(Vector2(W / 2.0 + 36.0, _slot_y()), player_in_rect(rect) and inserted == "" and _anim_kind == "", delta)
+	kappe(Vector2(W / 2.0 + 36.0, _slot_y()), player_in_rect(rect) and regel.kann_stecken(), delta)
 	if not player_in_rect(rect):
 		return
-	if Input.is_action_just_pressed("action") and inserted == "" and _anim_kind == "":
+	if Input.is_action_just_pressed("action") and regel.kann_stecken():
 		_versuch()
 
 func _versuch() -> void:
 	var res := Game.insert_card(accepted, terminal_id)   # Spiellogik sofort
 	var from := to_local(player.global_position + Vector2(0, -44.0))
+	var g = linked_gate()
+	var tor_auf := regel.stecken(res, true if g else false)
 	match str(res["result"]):
 		"ok":
-			inserted = str(res["card"])
-			_led = "gelb"
-			_led_until = 0.0
-			_set_status("prueft", Palette.WARM, 0.0)
 			Sfx.play("tick", 1.15, -6.0)
-			_play("rein", inserted, from, 0.5)
-			var g = linked_gate()
-			if g and not opened:
-				opened = true
+			_play("rein", regel.eingesteckt, from, 0.5)
+			if tor_auf:
 				g.open()
 				Game.add_security_bonus()
-				_say_pending = true
 		"falsche-karte":
-			_led = "gelb"
-			_set_status("prueft", Palette.WARM, 0.0)
 			Sfx.play("tick", 1.15, -6.0)
 			var wrong := str(Game.cards[0]) if Game.cards.size() > 0 else "egk"
 			_play("abgelehnt", wrong, from, 0.7)
 		"nicht-dabei":
 			Sfx.play("deny", 1.5, -8.0)
-			_set_status("keine", Palette.WARM, 2.4)
 			say(ltext("nicht-dabeiHint", {"de": "Die passende Karte hast du noch nicht — such sie unterwegs!",
 				"en": "You do not have the right card yet — find it along the way!"}))
 		"belegt":
 			Sfx.play("deny", 1.5, -8.0)
-			_nod = 1.0
-			_led = "gelb"
-			_led_until = _t + 1.2
-			_set_status("belegt", Palette.WARM, 2.6)
 			say(ltext("belegtHint", {"de": "Deine Karte steckt noch woanders — hol sie erst dort ab.",
 				"en": "Your card is still in another slot — pick it up there first."}))
 
-## Der Abweis-Moment (falsche Karte): Rempler, LED rot betont, Stempel — nur
-## die echte Zurückweisung durch die TI bekommt den Stempel.
+## Der Abweis-Moment (falsche Karte): Rempler, LED rot und Anzeige setzt die Regel;
+## hier der Stempel — nur die echte Zurückweisung durch die TI bekommt ihn.
 func _reject_beat() -> void:
-	_shake = 1.0
-	_flash = 1.0
-	_led = "rot"
-	_led_until = _t + 1.4
-	_set_status("abgelehnt", Palette.DENY, 2.6)
 	Fx.deny_stamp(level, _above(), ltext("denyText", {"de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED"}))
 	# REZIs Hinweis erst, wenn der Stempel verblasst — sonst überlagern sich beide
 	var hint := ltext("falsche-karteHint", {"de": "ZUGRIFF VERWEIGERT — diese Karte gehört hier nicht hin.",
@@ -215,13 +159,19 @@ func _reject_beat() -> void:
 		if is_inside_tree():
 			say(hint, 3.5))
 
-func _set_status(key: String, color: Color, hold: float) -> void:
-	_status = key
-	_status_color = color
-	_status_until = _t + hold if hold > 0.0 else 0.0
+## Farbe der Statuszeile: folgt allein aus der Anzeige der Regel.
+func _status_color() -> Color:
+	match regel.status:
+		"frei":
+			return Palette.OK
+		"abgelehnt":
+			return Palette.DENY
+		"prueft", "keine", "belegt":
+			return Palette.WARM
+	return Palette.WHITE
 
 func _led_color() -> Color:
-	match _led:
+	match regel.led:
 		"gruen":
 			return Palette.OK
 		"gelb":
@@ -233,38 +183,28 @@ func _led_color() -> Color:
 func _play(kind: String, card: String, from: Vector2, seconds: float) -> void:
 	if _anim_tw:
 		_anim_tw.kill()
-	_anim_kind = kind
-	_anim_card = card
+	regel.bewegung(kind, card)
 	_anim_from = from
 	_anim_t = 0.0
-	_beat = false
 	_anim_tw = create_tween()
 	_anim_tw.tween_property(self, "_anim_t", 1.0, seconds)
 	_anim_tw.tween_callback(_anim_done)
 
 ## Karte sitzt: LED grün, Ring, Funken, Klang, Display, Schwebetext, HUD-Pop.
 func _anim_done() -> void:
-	var kind := _anim_kind
-	_anim_kind = ""
-	if kind != "rein":
+	if not regel.bewegung_fertig():
 		return
-	_seated = _anim_card
-	_led = "gruen"
-	_led_until = 0.0
-	_flash = 1.0
-	var c := KartenFx.color_of(_seated)
+	var c := KartenFx.color_of(regel.steckt)
 	var at := to_global(Vector2(SLOT_X, _slot_y()))
 	Sfx.play("ok", 1.1)
 	Fx.ring(level, at, Palette.OK, 76.0)
 	Fx.sparkle(level, at, c, 10, 170.0)
 	Fx.light_burst(level, at, Palette.OK, 200.0, 1.1, 0.4)
-	_set_status("frei", Palette.OK, 0.0)
-	var inf := KartenFx.info(_seated)
+	var inf := KartenFx.info(regel.steckt)
 	Fx.float_text(level, _above(), "%s ✓ · %s" % [inf["kurz"],
 		Game.t({"de": "Zugriff freigegeben", "en": "access granted"})], c, 22)
-	KartenFx.hud_pop(level, _seated)
-	if _say_pending:
-		_say_pending = false
+	KartenFx.hud_pop(level, regel.steckt)
+	if regel.ansage_abholen():
 		say(Game.t(data.station.get("reziText", "")), 3.5)
 
 ## Lage der animierten Karte (Ecke oben links, Drehung, Deckkraft) —
@@ -318,8 +258,8 @@ func _draw() -> void:
 	var body := _body()
 	var by := body.position.y
 	# Rempler (falsche Karte) und Kopfschütteln (belegt): Bewegung um den Fuß, ≤ 3 Hz
-	var sx := sin(_t * 18.0) * 4.0 * _shake
-	var rot := sin(_t * 16.0) * 0.045 * _nod
+	var sx := sin(regel.uhr * 18.0) * 4.0 * regel.rempler
+	var rot := sin(regel.uhr * 16.0) * 0.045 * regel.nicken
 	var pivot := Vector2(sx, body.end.y)
 	var o := Vector2(0, -body.end.y)
 	draw_set_transform(pivot, rot, Vector2.ONE)
@@ -334,18 +274,18 @@ func _draw() -> void:
 	for a in accepted:
 		KartenFx.draw_card(self, Rect2(gx, disp.position.y + 6.0, 26, 17), str(a), "umriss")
 		gx += 30.0
-	var st: Dictionary = STATUS.get(_status, STATUS["stecken"])
+	var st: Dictionary = STATUS.get(regel.status, STATUS["stecken"])
 	var txt := Game.t(st)
 	var fs := _fit_font(Brand.sans("medium"), txt, 80.0, 11)
-	draw_string(Brand.sans("medium"), Vector2(disp.position.x + 4, disp.end.y - 8), txt, HORIZONTAL_ALIGNMENT_CENTER, disp.size.x - 8, fs, _status_color)
+	draw_string(Brand.sans("medium"), Vector2(disp.position.x + 4, disp.end.y - 8), txt, HORIZONTAL_ALIGNMENT_CENTER, disp.size.x - 8, fs, _status_color())
 	# Karte (animiert oder gesteckt) — vor dem Display, hinter der Front
 	var card := ""
 	var pose := {}
-	if _anim_kind != "":
-		card = _anim_card
-		pose = _card_pose(_anim_kind, _anim_t)
-	elif _seated != "":
-		card = _seated
+	if regel.anim != "":
+		card = regel.anim_karte
+		pose = _card_pose(regel.anim, _anim_t)
+	elif regel.steckt != "":
+		card = regel.steckt
 		pose = {"pos": _seat(), "rot": 0.0, "alpha": 1.0}
 	if card != "":
 		var p: Vector2 = pose["pos"]
@@ -370,8 +310,8 @@ func _draw() -> void:
 	# Schlitz mit Licht: atmet in der Farbe der erwarteten Karte, gesteckt = grün
 	draw_rect(Rect2(SLOT_X - 34, sy - 2, 68, 7), Color(0.02, 0.04, 0.08))
 	var slot_c := KartenFx.color_of(str(accepted[0]))
-	var slot_a := 0.45 + 0.25 * sin(_t * PI)   # 0,5 Hz
-	if _seated != "":
+	var slot_a := 0.45 + 0.25 * sin(regel.uhr * PI)   # 0,5 Hz
+	if regel.steckt != "":
 		slot_c = Palette.OK
 		slot_a = 0.9
 	draw_rect(Rect2(SLOT_X - 32, sy + 0.5, 64, 2), Color(slot_c.r, slot_c.g, slot_c.b, slot_a))
@@ -379,17 +319,17 @@ func _draw() -> void:
 	var lp := _led_pos() + o
 	var lc := _led_color()
 	var k := 1.0
-	match _led:
+	match regel.led:
 		"gruen":
 			k = 1.6
 		"gelb":
 			k = 1.5
 		_:
-			k = 1.5 if _led_until > 0.0 else 1.0
-	k *= 0.86 + 0.14 * sin(_t * PI)
+			k = 1.5 if regel.led_bis > 0.0 else 1.0
+	k *= 0.86 + 0.14 * sin(regel.uhr * PI)
 	draw_circle(lp, 9.5, Color(0.03, 0.05, 0.08, 0.95))
 	var led_draw := Palette.glow(lc, k) if not Fx.web_fallback() else lc.lightened(clampf(0.25 * (k - 1.0), 0.0, 0.3))
-	draw_circle(lp, 6.5 + _flash * 3.0, led_draw)
+	draw_circle(lp, 6.5 + regel.blitz * 3.0, led_draw)
 	draw_circle(lp + Vector2(-2, -2), 1.8, Color(1, 1, 1, 0.35))
 	# Säulenfront unter dem Schlitz: vertiefte Blende mit Lüftungsrillen
 	var vent := Rect2(-36, sy + 22.0, 72, front.size.y - 40.0)
