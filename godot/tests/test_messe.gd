@@ -214,3 +214,118 @@ func test_abschluss_zeigt_badges() -> void:
 	pruefe(b.has(TranslationServer.translate("Vertraulichkeit")), "Badge Station 04")
 	gleich(b.size(), 2, "reines Welt-Etikett der Station 20 bleibt weg")
 	Game.seals = _seals_alt
+
+
+# ================================================================ Paket 2
+
+func test_halten_ueberspringt_die_ganze_zeitreise() -> void:
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await frames(3)
+	main.show_intro(1)
+	await warte_bis(func(): return main._current is Intro and main._current.phase == 1, 3.0)
+	var frueher: Intro = main._current
+	frueher.uebersprungen = true
+	frueher._advance()
+	await warte_bis(func(): return main._current is Intro and main._current.phase == 3, 3.0)
+	gleich(int(main._current.phase), 3, "nach Halten in FRÜHER direkt zum Probelauf (HEUTE übersprungen)")
+
+
+func test_probelauf_macht_ohne_spieler_nach_frist_weiter() -> void:
+	var intro := Intro.new(3)
+	baum.root.add_child(intro)
+	var ende := Time.get_ticks_msec() + 4000   # die Intro rechnet mit der Uhr, nicht mit Frames
+	while intro._warte != "action" and Time.get_ticks_msec() < ende:
+		await baum.process_frame
+	gleich(intro._warte, "action", "wartet zuerst auf die TI-Aktion")
+	pruefe(intro.sperre > 100.0, "Knopfdruck blättert während des Mitmachens nicht weg")
+	intro._warte_seit -= Intro.WARTE_MAX   # Frist abgelaufen
+	await frames(3)
+	pruefe(intro._ti_t >= 0.0, "nach der Frist führt Paul die TI-Aktion selbst vor")
+	intro._mitmachen_beenden()
+	pruefe(intro.sperre < 100.0, "danach blättert jeder Knopf wieder weiter")
+	intro.queue_free()
+
+
+func test_leitpfeil_nach_langem_stillstand() -> void:
+	var lvl: Node = await _station("14-die-vau")
+	if not pruefe(lvl != null, "Station 14 läuft"):
+		return
+	Kiosk.note_input()
+	lvl._last_progress = lvl.level_time - lvl.stuck_guide_s - 1.0
+	lvl._max_progress = lvl.player.global_position.x + 1000.0
+	lvl._check_stuck(0.016)
+	pruefe(lvl.leitpfeil.zeigen, "Leitpfeil wird gezeigt")
+	pruefe(lvl.leitpfeil.ziel != Vector2.INF, "Leitpfeil hat ein Ziel")
+	lvl._fortschritt()
+	pruefe(not lvl.leitpfeil.zeigen, "bei Fortschritt verschwindet er")
+
+
+func test_warten_an_offener_station_ist_kein_feststecken() -> void:
+	var lvl: Node = await _station("01-stammdaten")
+	if not pruefe(lvl != null, "Station 01 läuft"):
+		return
+	var tor: Node = null
+	for m in lvl.mechanics:
+		if is_instance_valid(m) and m.get("done") is bool and not m.get("done"):
+			tor = m
+			break
+	if not pruefe(tor != null, "Station 01 hat eine offene Station"):
+		return
+	lvl.player.global_position = Vector2(tor.rect.position.x - Game.TILE, lvl.player.global_position.y)
+	pruefe(lvl._wartet_an_station(), "vor %s zu warten zählt nicht als Feststecken" % tor.type)
+
+
+func test_statistik_zaehlt_einen_durchlauf() -> void:
+	pruefe(Statistik.ist_testlauf(), "Testlauf erkannt (echte Messestatistik bleibt unberührt)")
+	Statistik.ordner_override = "user://statistik-unittest"
+	DirAccess.make_dir_recursive_absolute(Statistik.ordner())
+	for f in DirAccess.get_files_at(Statistik.ordner()):
+		DirAccess.remove_absolute(Statistik.ordner().path_join(f))
+	Statistik.lauf_start("de", "tastatur")
+	Statistik.station_start("01-stammdaten")
+	Statistik.treffer()
+	Statistik.sturz()
+	Statistik.station_ende(12.34)
+	Statistik.station_start("02-kartenterminal")
+	Statistik.neustart()
+	Statistik.lauf_ende("idle")
+	var s := Statistik.summe()
+	gleich(int(s["laeufe"]), 1, "ein Durchlauf")
+	var st1: Dictionary = s["stationen"]["01-stammdaten"]
+	gleich(int(st1["geschafft"]), 1, "Station 01 geschafft")
+	gleich(int(st1["treffer"]), 1, "ein Treffer")
+	gleich(int(st1["stuerze"]), 1, "ein Sturz")
+	nahe(float(st1["zeiten"][0]), 12.3, 0.05, "Zeit gespeichert")
+	var st2: Dictionary = s["stationen"]["02-kartenterminal"]
+	gleich(int(st2["neustarts"]), 1, "Neustart in Station 02")
+	gleich(int(st2["idle"]), 1, "Idle-Abbruch in Station 02")
+	var pfad := ""
+	for f in DirAccess.get_files_at(Statistik.ordner()):
+		if f.ends_with(".jsonl"):
+			pfad = Statistik.ordner().path_join(f)
+	var zeilen := FileAccess.get_file_as_string(pfad).strip_edges().split("\n")
+	gleich(zeilen.size(), 6, "sechs Ereignisse im Protokoll")
+	var erste = JSON.parse_string(zeilen[0])
+	pruefe(erste is Dictionary and str(erste.get("lauf", "")).length() == 8, "zufällige Lauf-ID")
+	nahe(Statistik.median([5, 1, 3, 100]), 4.0, 0.001, "Median gerade Anzahl")
+	for f in DirAccess.get_files_at(Statistik.ordner()):
+		DirAccess.remove_absolute(Statistik.ordner().path_join(f))
+	Statistik.ordner_override = ""
+
+
+func test_betreiber_menue() -> void:
+	_hs_sichern()
+	Kiosk.open_betrieb()
+	await frames(2)
+	pruefe(is_instance_valid(Kiosk.betrieb), "Betreiber-Menü offen")
+	pruefe(baum.paused, "Spiel angehalten")
+	Game.add_highscore(1, 10)
+	Kiosk.betrieb.ausfuehren("bestenliste")
+	pruefe(FileAccess.file_exists(Game.HIGHSCORE_PATH), "erster Druck löscht noch nicht")
+	Kiosk.betrieb.ausfuehren("bestenliste")
+	pruefe(not FileAccess.file_exists(Game.HIGHSCORE_PATH), "zweiter Druck löscht die Tages-Bestenliste")
+	Kiosk.betrieb.ausfuehren("schliessen")
+	await frames(2)
+	pruefe(not baum.paused, "nach dem Schließen läuft es weiter")
+	_hs_zurueck()

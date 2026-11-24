@@ -76,6 +76,9 @@ var _voll := false              # aktuelle Zeile ganz aufgebaut
 var _halten_seit := -1.0        # tz, seit ein Vor-Knopf gehalten wird (−1 = keiner)
 var _weiter_anzeige := ""
 var hinweis: Label              # „← zurück · halten: überspringen"
+## Wurde der Screen per Halten übersprungen (statt zu Ende geblättert)? Die
+## Zeitreise nutzt das, um FRÜHER und HEUTE zusammen zu überspringen.
+var uebersprungen := false
 static var _fonts := {}
 
 
@@ -112,7 +115,7 @@ func _ready() -> void:
 		weiter.modulate.a = 0.0
 		_weiter_anzeige = weiter_text
 	if paging():
-		hinweis = label(W - 12, 328.5, _blaetter_hinweis(), 7.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 0.8})
+		hinweis = label(W - 12, 327.5, _blaetter_hinweis(), 9.0, {"color": Brand.UI_TEXT_DIM, "bold": false, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 0.8})
 	if entrance:
 		_entrance()
 
@@ -201,6 +204,7 @@ func _blaettern_tick(delta: float) -> void:
 		if not Input.is_anything_pressed():
 			_halten_seit = -1.0
 		elif tz - _halten_seit >= HALTEN_S and not _done:
+			uebersprungen = true
 			_advance()
 	if weiter:
 		var letzte := seite >= story.size() - 1

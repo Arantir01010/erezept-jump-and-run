@@ -15,6 +15,8 @@ extends Node
 ## Standpersonal (immer): Strg+F9 leiser, Strg+F10 lauter (10-%-Stufen, gespeichert).
 ## Im Messe-Kiosk sind F11 (Fenster), F12 (Screenshot) und Fenster-Schließen/Alt+F4
 ## gesperrt; beenden nur mit Strg+Umschalt+F12.
+## Betreiber-Menü (Statistik, Lautstärke, Bestenliste, Beenden): Strg+Umschalt+F10
+## oder SPRUNG + AKTION zusammen 5 s halten (Arcade-Pult ohne Tastatur).
 
 signal any_input
 
@@ -206,7 +208,34 @@ func _input(event: InputEvent) -> void:
 ## Tasten fürs Standpersonal und den Entwicklerbetrieb. Im Messe-Kiosk bleiben
 ## F11/F12 wirkungslos, damit Besucher weder das Vollbild verlassen noch die
 ## Platte mit Screenshots füllen.
+const BETRIEB_HALTEN_S := 5.0
+var betrieb: Node
+var _beide_gehalten := 0.0
+
+
+func _process(delta: float) -> void:
+	if Input.is_action_pressed("jump") and Input.is_action_pressed("action"):
+		_beide_gehalten += delta
+		if _beide_gehalten >= BETRIEB_HALTEN_S:
+			_beide_gehalten = -9999.0   # erst nach Loslassen wieder
+			open_betrieb()
+	else:
+		_beide_gehalten = 0.0
+
+
+## Betreiber-Menü öffnen (höchstens eins).
+func open_betrieb() -> void:
+	if is_instance_valid(betrieb):
+		return
+	betrieb = Betrieb.new()
+	get_tree().root.add_child(betrieb)
+
+
 func _handle_operator_key(k: InputEventKey) -> void:
+	if k.ctrl_pressed and k.shift_pressed and k.physical_keycode == KEY_F10:
+		open_betrieb()
+		get_viewport().set_input_as_handled()
+		return
 	if k.ctrl_pressed and k.physical_keycode == KEY_F9:
 		Sfx.change_volume(-Sfx.VOLUME_STEP)
 		get_viewport().set_input_as_handled()

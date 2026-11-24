@@ -46,7 +46,9 @@ F4 Töne · F11 Vollbild · F12 Screenshot (beide nicht im `--kiosk`).
 
 **Standpersonal:** Strg+F9 leiser, Strg+F10 lauter (10-%-Stufen, gespeichert in
 `user://einstellungen.cfg`, gilt auch im Kiosk) · Strg+Umschalt+F12 beendet den Kiosk
-(Exit-Code 7, `Messe-Kiosk.bat` startet dann nicht neu). Ton: Busse „Musik" und „SFX" unter
+(Exit-Code 7, `Messe-Kiosk.bat` startet dann nicht neu) · **Betreiber-Menü** mit Strg+Umschalt+F10
+oder SPRUNG + AKTION zusammen 5 s halten (`src/ui/Betrieb.gd`): Tagesstatistik je Station,
+Lautstärke, Tages-Bestenliste löschen (zweimal bestätigen), Spiel beenden. Ton: Busse „Musik" und „SFX" unter
 Master, auf Master ein harter Begrenzer bei −1 dB (zur Laufzeit in `Sfx._build_buses`). Alle
 Klänge und die Musik werden beim Start geladen (kein Ruckler beim ersten Abspielen).
 
@@ -63,6 +65,23 @@ wieder an (sonst bliebe der Stand stumm, wenn jemand „Musik aus" tippt). In de
 wieder im Hauptmenü). `--test-eingabe=-,-,-,-,ESC,-,F12,DOWN,DOWN,SPACE,-,F12,ESC` prüft
 den Weg Taste → Pause → Menü.
 Arcade-Encoder: Belegung aus `config/input-bindings.json` (identisch zur Phaser-Fassung).
+
+**Statistik (anonym):** `src/core/Statistik.gd` zählt je Station erreicht, geschafft, Zeit,
+Treffer, Stürze, Neustarts und Abbrüche (Idle/Hauptmenü), je Durchlauf Sprache, Bedienung und
+Gesamtzeit — keine Namen, nichts verlässt den Rechner. Je Tag `user://statistik/tag-*.json`
+(Summe fürs Betreiber-Menü) und `ereignisse-*.jsonl` (eine Zeile je Ereignis, zufällige
+Lauf-ID). Auswertung: `python godot/tools/statistik_auswerten.py [ordner] [--csv x.csv]`
+(Standard: `%APPDATA%/Godot/app_userdata/Paul & REZI/statistik`). Testläufe (`--script`,
+`--headless`, `--shots`) zählen getrennt in `user://statistik-test/`.
+
+**Schneller ins Spiel:** In der Zeitreise überspringt Halten (1,2 s) FRÜHER **und** HEUTE und
+führt direkt zum Probelauf; `"zeitreise": false` in `config/game-config.json` lässt sie ganz
+weg. Im Probelauf wartet Paul in der ersten Runde auf den Spieler (TI-Aktion, loslaufen,
+springen — „Du bist dran"); wer nichts drückt, sieht nach 6 s die Vorführung.
+
+**Feststecken:** Nach 18 s ohne Fortschritt gibt REZI einen Tipp, ab `stuckGuideSeconds` (30)
+zeigt ein ruhiger Pfeil über Paul zum nächsten Ziel (fehlende Prüfsumme, offene Station, Tür).
+Wer an einer offenen Station wartet (Schleuse, Stempel …), gilt nicht als festgefahren.
 
 ## Sprachen
 
@@ -248,7 +267,8 @@ Blättern, Stationskarte, REZI-Lesezeit), Lesbarkeit (`test_lesbarkeit.gd`: HUD 
 Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz) und Messebetrieb (`test_messe.gd`:
 Bedienwahl ohne Touchscreen, Ton im Kiosk, Busse/Begrenzer, Lautstärke, Vorladen, Sturz →
 Fahne mit Blende und Kamera, Fahnen höchstens 35 Kacheln auseinander, kaputte Bestenliste,
-Abschluss-Badges). `test_texte.gd` prüft außerdem
+Abschluss-Badges, Zeitreise überspringen, Mitmach-Probelauf, Leitpfeil, Statistik,
+Betreiber-Menü). `test_texte.gd` prüft außerdem
 Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
 Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
 rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
