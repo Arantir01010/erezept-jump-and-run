@@ -9,7 +9,9 @@ extends RefCounted
 ## Flug-Knoten (Start, Ziel, Fortschritt). Kein Glühen auf Kanten: Der Chip
 ## fängt kurz Licht (Glanzband), mehr nicht.
 
-## Die Wahrheit für alle Anzeigen: Kürzel, Name, Rolle, Farbe.
+## Die Wahrheit für alle Anzeigen: Kürzel, Name, Rolle, Farbe. Die einzige Stelle
+## mit Kartenfarben — auch das Briefing (Briefing._karte) zeichnet daraus, über
+## koerper(). Keine Markenfarben: Karten sind Spielgrafik (brand/README.md).
 const INFO := {
 	"egk": {"kurz": "eGK", "name": "Gesundheitskarte", "rolle": "Versicherte", "color": Color(0.35, 0.80, 0.55)},
 	"hba": {"kurz": "HBA", "name": "Heilberufsausweis", "rolle": "Heilberuf", "color": Color(0.85, 0.55, 0.30)},
@@ -29,6 +31,20 @@ static func info(card: String) -> Dictionary:
 
 static func color_of(card: String) -> Color:
 	return info(card)["color"]
+
+
+## Körperfarbe der Karte — die Fläche, auf der Chip und Kürzel sitzen: Kartenfarbe
+## dunkel, satt und etwas kühler (Palette-Regeln „Vordergrund dunkel und satt",
+## „Schatten kühler"). Palette.shade schiebt den Farbton geradlinig Richtung Blau
+## (0,62); für warme Töne führt dieser Weg über Gelb — die HBA würde oliv, also
+## wärmer statt kühler. Dort bleibt der Farbton, nur Helligkeit und Sättigung
+## folgen. eGK und SMC-B: genau Palette.shade(Kartenfarbe, 0,48) wie bisher.
+static func koerper(card: String) -> Color:
+	var c := color_of(card)
+	var k := Palette.shade(c, 0.48)
+	if absf(0.62 - c.h) > 0.5:
+		k = Color.from_hsv(c.h, k.s, k.v, c.a)
+	return k
 
 
 ## Glanzlage 0..1 während des Lichtfangs, sonst -1 (reine Funktion der Zeit).
@@ -67,7 +83,7 @@ static func draw_card(ci: CanvasItem, r: Rect2, card: String, mode := "voll", gl
 		return
 	# Kontur (dunkel, nicht schwarz) und Körper: Kartenfarbe dunkel und kühl, Kappe oben hell
 	var outline := Color(0.08, 0.10, 0.14, 0.9 * alpha)
-	var body := Palette.shade(c, 0.48)
+	var body := koerper(card)
 	body.a = alpha
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = body
