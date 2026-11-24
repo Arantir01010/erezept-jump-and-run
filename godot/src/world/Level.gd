@@ -374,8 +374,15 @@ class ScatteredBit extends CharacterBody2D:
 				if absf(velocity.y) < 60.0:
 					velocity.y = 0.0
 		move_and_slide()
+		var lvl := get_parent() as Level
+		# In eine Grube gefallen (die Welt hat unten keinen Boden): am letzten
+		# Rücksetzpunkt wieder absetzen — verstreute Prüfsummen gehen nie verloren.
+		# Früher fielen sie endlos (Level 04, Team-Feedback 9/2026).
+		if lvl and lvl.player and global_position.y > lvl.data.world_height() + 64.0:
+			global_position = lvl.player.respawn_point + Vector2(randf_range(-24.0, 24.0), -90.0)
+			velocity = Vector2(0, -240.0)
+			_age = minf(_age, 0.4)
 		if _age > 0.7:
-			var lvl := get_parent() as Level
 			if lvl and lvl.player and global_position.distance_to(lvl.player.global_position + Vector2(0, -30)) < 40.0:
 				Game.bits += 1
 				Game.hud_changed.emit()

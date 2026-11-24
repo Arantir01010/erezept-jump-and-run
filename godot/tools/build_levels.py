@@ -276,6 +276,32 @@ def check(level: Level) -> tuple[list[str], dict]:
     def standable(x, y):
         return free(x, y) and free(x, y - 1) and solid(x, y + 1) and g[y][x] != "x"
 
+    # Durchgang für Sprünge: Paul (2 Kacheln hoch) passt in Spalte x mit den Füßen in
+    # Reihe r, wenn r und r-1 frei sind. passes[x][r] = Anzahl solcher Reihen ≤ r
+    # (Präfixsumme) → „gibt es zwischen lo und hi eine Lücke?" in O(1).
+    passes = []
+    for xx in range(w):
+        acc, col = 0, []
+        for r in range(H):
+            if free(xx, r) and free(xx, r - 1):
+                acc += 1
+            col.append(acc)
+        passes.append(col)
+
+    def clear_path(x, y, tx, ty, top):
+        """Sprung von (x,y) nach (tx,ty): Jede Spalte dazwischen braucht eine Lücke
+        zwischen Scheitel (höhere Standreihe − Sprunghöhe) und tieferer Standreihe.
+        Ohne diese Prüfung „sprang" der Check über den 4 Kacheln hohen Kistenturm in 04."""
+        lo = max(1, min(y, ty) - top)
+        hi = max(y, ty)
+        step = 1 if tx > x else -1
+        for xx in range(x + step, tx, step):
+            if not (0 <= xx < w):
+                return False
+            if passes[xx][hi] - passes[xx][lo - 1] <= 0:
+                return False
+        return True
+
     start = None
     targets = {}
     for y in range(H):
@@ -292,6 +318,7 @@ def check(level: Level) -> tuple[list[str], dict]:
     # 0-1-BFS: Laufen kostet 0, Sprung/Fahrt kostet 1 → Sprungzahl für die Par-Zeit
     INF = 10 ** 9
     dist = {start: 0}
+    adj: dict[tuple[int, int], list[tuple[int, int]]] = {}   # Bewegungsgraph (Rückweg-Prüfung)
     q = deque([start])
     while q:
         x, y = q.popleft()
@@ -318,8 +345,11 @@ def check(level: Level) -> tuple[list[str], dict]:
             for tx in range(x - maxdx, x + maxdx + 1):
                 if (tx, ty) == (x, y) or not standable(tx, ty):
                     continue
+                if not clear_path(x, y, tx, ty, top):
+                    continue
                 hops.append((tx, ty))
         hops.extend(rides.get((x, y), []))
+        adj[(x, y)] = walk + hops
         for c in walk:
             if dist.get(c, INF) > d:
                 dist[c] = d
@@ -329,6 +359,22 @@ def check(level: Level) -> tuple[list[str], dict]:
                 dist[c] = d + 1
                 q.append(c)
     reach = set(dist)
+
+    # Rückweg (Anti-Softlock, Team-Feedback 9/2026): Von welchen erreichten Stellen
+    # kommt Paul noch zum Start zurück? Rückwärtssuche über die umgedrehten Kanten.
+    radj: dict[tuple[int, int], list[tuple[int, int]]] = {}
+    for a, outs in adj.items():
+        for b in outs:
+            radj.setdefault(b, []).append(a)
+    back = {start}
+    stack = [start]
+    while stack:
+        c = stack.pop()
+        for p in radj.get(c, []):
+            if p not in back:
+                back.add(p)
+                stack.append(p)
+    no_return = [c for c in reach if c not in back]
 
     # Wandsprung (nur Bonus): Schacht = freie Spalte(n) zwischen zwei Wänden, 2–4 breit.
     # Von einer erreichten Standzelle in der Nähe geht es den Schacht hoch bis 3 über
@@ -466,8 +512,27 @@ def check(level: Level) -> tuple[list[str], dict]:
             for (rx, ry), d in dist.items():
                 if abs(rx - p[0]) <= 3 and -1 <= ry - p[1] <= 2:
                     jumps = min(jumps, d)
+    # Einbahnstraßen: Wer an einer Stelle ohne Rückweg ankommt (Kante von „Rückweg
+    # möglich" nach „kein Rückweg"), kann nur noch die Prüfsummen holen, die von dort
+    # aus erreichbar sind. Sind das weniger, als die Tür verlangt, steckt fest, wer
+    # vorher zu wenig gesammelt hat (Kistenturm in 04, Team-Feedback 9/2026).
+    easy_pts = [pt for pt, ch in targets.items() if ch == "o" and grabbable(pt, 4, 5, reach)]
+    entries = {b for a in back if a in adj for b in adj[a] if b not in back}
+    einbahn = None
+    for e in sorted(entries):
+        seen = {e}
+        stack = [e]
+        while stack:
+            c = stack.pop()
+            for nb in adj.get(c, []):
+                if nb not in seen:
+                    seen.add(nb)
+                    stack.append(nb)
+        n = sum(1 for pt in easy_pts if grabbable(pt, 4, 5, seen))
+        if einbahn is None or n < einbahn[1]:
+            einbahn = (e[0], n)
     info = {"jumps": jumps if jumps < INF else 0, "bits_easy": bits_easy, "bits_all": bits_all,
-            "bonus": bonus_all}
+            "bonus": bonus_all, "einbahn": einbahn}
     return problems, info
 
 
@@ -720,7 +785,9 @@ def lvl_04():
     L.sign(53, "Die Plattform trägt nur Klartext — und unten ist nichts.", "The platform only carries plain text — and below is nothing.")
     L.pit(55, 59)
     L.andock(56)
-    L.lauscher(62, patrol=36, speed=24, reach=92, spread=20)
+    # Lauscher rechts von der Plattform (vorher 62): sein Kegel endet jetzt vor der
+    # Kante (x 59) — auf der Plattform MUSS man Klartext sein, dort darf niemand mitlesen.
+    L.lauscher(65, patrol=36, speed=24, reach=92, spread=20)
     L.bits((61, 18), (65, 19)); L.cp(67)
     L.plat(70, 73, 17); L.bits((71, 15), (72, 15))
     L.spikes(74, 74)
@@ -751,14 +818,16 @@ def lvl_04():
     L.pillar(149, 18, w=2); L.bits((149, 16), (150, 16))
     L.spikes(151, 152)
     L.pillar(153, 17, w=2); L.bits((153, 15), (154, 15))
-    L.pillar(158, 16, w=2); L.bits((158, 14), (159, 14)); L.bonus(161, 12)
+    # Letztes Podest 3 statt 4 Kacheln hoch: Paul springt ~3,4 — von rechts kommt
+    # man wieder zurück (vorher Einbahnstraße mit nur 3 Prüfsummen danach = Softlock)
+    L.pillar(158, 17, w=2); L.bits((158, 15), (159, 15)); L.bonus(161, 13)
     L.spikes(160, 161)
     L.spikes(163, 163); L.bits((164, 19), (166, 19), (168, 18))
     L.cp(170)
     L.sign(172, "Geschafft! Vertraulichkeit heißt: unterwegs liest niemand mit.", "Well done! Confidentiality means nobody reads along on the way.")
     L.door(177)
     j = base_json(L.id)
-    return L, j, 14
+    return L, j, 10   # Team-Feedback 9/2026: Pflicht 10 statt 14 (erste Hülle-Station)
 
 
 @builder
@@ -1095,6 +1164,10 @@ def main() -> None:
         bits = sum(l.count("o") for l in lines)
         bonus = sum(l.count("*") for l in lines)
         need = count_required(info, wanted)
+        ein = info.get("einbahn")
+        if need > 0 and ein and ein[1] < need:
+            problems.append(f"Einbahnstraße bei x={ein[0]}: ab dort nur noch {ein[1]} Prüfsummen "
+                            f"erreichbar, die Tür verlangt {need} — kein Rückweg (Softlock)")
         j["collectible"]["countRequired"] = need
         j["parTimeSeconds"] = par_seconds(L, j, info)
         j["objects"] = L.objects
