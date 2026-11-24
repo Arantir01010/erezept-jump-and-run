@@ -3,6 +3,11 @@ extends CanvasLayer
 ## HUD — Stationsname, TI-Streckenkarte, Prüfsummen, Punkte, Zeit gegen Par,
 ## Hülle-Anzeige (Farbe UND Form UND Text — Barrierefreiheit), Karten,
 ## Titel-Einblendung beim Levelstart, Kombo-Anzeige.
+##
+## Optik-Analyse/Team-Feedback 9/2026: Die gestufte Rand-Vignette (zehn harte
+## Rechtecke je Rand, sichtbares Streifenraster) ist entfernt — PostFx hat schon
+## eine weiche. Die rechte Spalte hängt an der Bildkante (lief 6 px hinaus, die
+## Pillen überlappten), Zeit in PwC-Gelb statt Grün, Kombo mit dunkler Kontur.
 
 signal pause_requested
 
@@ -28,8 +33,9 @@ var hint_label: Label
 var _combo_tw: Tween
 var _last_huelle := ""
 
+const RAND := 28.0            # Abstand der Pillen zum Bildrand, links wie rechts
 ## Karten-Fächer: rechte Kante bündig mit der Zeit-Pille, Zeile unten rechts
-const CARDS_RIGHT := 1890.0
+const CARDS_RIGHT := 1920.0 - RAND
 const CARDS_Y := 950.0
 
 
@@ -39,28 +45,47 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	# Vignette (hält den Blick in der Mitte, dunkelt Ränder ab)
-	var vig := _Vignette.new()
-	vig.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(vig)
-
-	station = _pill(root, Vector2(28, 22), 24)
+	station = _pill(root, Vector2(RAND, 22), 24)
 	route = _Route.new()
 	route.position = Vector2(700, 30)
 	route.size = Vector2(520, 30)
 	root.add_child(route)
-	bits_label = _pill(root, Vector2(1560, 22), 24)
-	bits_label.custom_minimum_size = Vector2(150, 0)
-	score_label = _pill(root, Vector2(1740, 22), 24)
-	score_label.custom_minimum_size = Vector2(150, 0)
-	time_label = _pill(root, Vector2(1560, 78), 20)
-	time_label.custom_minimum_size = Vector2(330, 0)
-	# Pause-Knopf (Maus und Finger) zwischen Streckenkarte und Zählern
+
+	# Oben rechts, an der Bildkante verankert (wächst nach links, nie aus dem Bild):
+	# [Pause · Prüfsummen · Punkte] / Zeit / Kombo
+	var spalte := VBoxContainer.new()
+	spalte.anchor_left = 1.0
+	spalte.anchor_right = 1.0
+	spalte.offset_left = -RAND
+	spalte.offset_right = -RAND
+	spalte.offset_top = 18.0
+	spalte.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	spalte.add_theme_constant_override("separation", 10)
+	spalte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(spalte)
+	var zeile := HBoxContainer.new()
+	zeile.alignment = BoxContainer.ALIGNMENT_END
+	zeile.add_theme_constant_override("separation", 12)
+	zeile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spalte.add_child(zeile)
+	# Pause-Knopf (Maus und Finger) links neben den Zählern
 	pause_btn = _PauseButton.new()
-	pause_btn.position = Vector2(1478, 18)
 	pause_btn.pressed.connect(func(): pause_requested.emit())
-	root.add_child(pause_btn)
+	zeile.add_child(pause_btn)
+	var luecke := Control.new()      # etwas Luft zwischen Knopf und Zählern
+	luecke.custom_minimum_size = Vector2(4, 0)
+	luecke.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	zeile.add_child(luecke)
+	bits_label = _pill(zeile, Vector2.ZERO, 24)
+	bits_label.custom_minimum_size = Vector2(150, 0)
+	score_label = _pill(zeile, Vector2.ZERO, 24)
+	score_label.custom_minimum_size = Vector2(150, 0)
+	for l in [bits_label, score_label]:
+		(l.get_parent() as Control).size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Zeit so breit wie die beiden Zähler (2 × 186 + 12), rechtsbündig darunter
+	time_label = _pill(spalte, Vector2.ZERO, 20)
+	time_label.custom_minimum_size = Vector2(348, 0)
+	(time_label.get_parent() as Control).size_flags_horizontal = Control.SIZE_SHRINK_END
 
 	# Hülle-Anzeige unten links
 	huelle_box = PanelContainer.new()
@@ -123,13 +148,21 @@ func _ready() -> void:
 	root.add_child(title_box)
 	title_box.modulate.a = 0.0
 
+	# Kombo unter der Zeit, rechtsbündig, mit dunkler Kontur — ohne verschwand sie
+	# vor der warmen Archiv-Welt (Station 19/20)
 	combo_label = Label.new()
-	combo_label.position = Vector2(1560, 130)
-	combo_label.add_theme_font_size_override("font_size", 30)
-	combo_label.add_theme_font_override("font", Brand.sans("bold"))
-	combo_label.add_theme_color_override("font_color", Brand.UI_ACCENT)
+	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var lc := LabelSettings.new()
+	lc.font = Brand.sans("bold")
+	lc.font_size = 30
+	lc.font_color = Brand.UI_ACCENT
+	lc.outline_size = 9
+	lc.outline_color = Color(0.02, 0.04, 0.08, 0.9)
+	lc.shadow_color = Color(0, 0, 0, 0.45)
+	lc.shadow_size = 8
+	combo_label.label_settings = lc
 	combo_label.modulate.a = 0.0
-	root.add_child(combo_label)
+	spalte.add_child(combo_label)
 
 	# Hinweiszeile unten: Piktogramm „Glühbirne" (PwC-Werte-Set) + Text
 	hint_row = HBoxContainer.new()
@@ -299,7 +332,9 @@ func _process(_delta: float) -> void:
 	var unter := 1 if t <= par else 0
 	if unter != _zeit_unter_par:
 		_zeit_unter_par = unter
-		time_label.add_theme_color_override("font_color", Palette.OK if unter == 1 else Palette.WARM)
+		# unter Par: PwC-Gelb (Medaille noch drin), darüber ruhiges Grau — kein
+		# Grün (keine PwC-Farbe) und kein Warm (warm heißt im Spiel „Klartext")
+		time_label.add_theme_color_override("font_color", Brand.UI_HIGHLIGHT if unter == 1 else Brand.UI_TEXT_DIM)
 	if level.data.huelle_enabled and level.player and level.player.huelle.vau_expires:
 		_refresh_huelle()
 
@@ -309,6 +344,7 @@ func _on_combo(combo: int) -> void:
 		return
 	combo_label.text = tr("Kombo ×%d") % combo
 	combo_label.modulate.a = 1.0
+	combo_label.pivot_offset = Vector2(combo_label.size.x, combo_label.size.y * 0.5)   # wächst aus der rechten Kante
 	combo_label.scale = Vector2(1.3, 1.3)
 	if _combo_tw:
 		_combo_tw.kill()
@@ -450,19 +486,3 @@ class _Shape extends Control:
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -16), center + Vector2(16, 0), center + Vector2(0, 16), center + Vector2(-16, 0)]), g)
 			_:
 				draw_circle(center, 15.0, g)
-
-
-class _Vignette extends Control:
-	func _draw() -> void:
-		var s := size
-		var steps := 10
-		for i in steps:
-			var t := float(i) / steps
-			var a := pow(t, 2.2) * 0.55
-			var inset := (1.0 - t) * 0.0
-			var band := s.y * 0.06
-			# vier Ränder
-			draw_rect(Rect2(0, i * band * 0.5, s.x, band * 0.5), Color(0, 0, 0, a * 0.35))
-			draw_rect(Rect2(0, s.y - (i + 1) * band * 0.5, s.x, band * 0.5), Color(0, 0, 0, a * 0.5))
-			draw_rect(Rect2(i * band * 0.5, 0, band * 0.5, s.y), Color(0, 0, 0, a * 0.4))
-			draw_rect(Rect2(s.x - (i + 1) * band * 0.5, 0, band * 0.5, s.y), Color(0, 0, 0, a * 0.4))
