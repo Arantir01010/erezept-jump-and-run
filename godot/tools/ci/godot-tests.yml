@@ -1,0 +1,47 @@
+# GitHub-Actions-Workflow für die Godot-Fassung — VORBEREITET, NICHT AKTIV.
+#
+# Aktivieren (nur Menschen): diese Datei nach .github/workflows/godot-tests.yml
+# kopieren. .github/ gehört zum versiegelten Phaser-Kern (tools/check-core.ts);
+# danach `npm run guard:update` ausführen, sonst schlägt `npm run validate` an.
+#
+# Was der Lauf prüft:
+#   1. Level-Generator: alle zehn Stationen erreichbar, ohne Einbahn-Softlock, und
+#      die eingecheckten levels/<id>/ passen zum Generator (kein Handbetrieb).
+#   2. Godot-Import ohne Skriptfehler.
+#   3. Testlauf: tests/lauf.gd (Hülle, Spielstand, Leveldaten, Texte/Übersetzungen,
+#      Kiosk, Level-Mechanik, Rauchtest aller Stationen über die echte Hauptszene).
+name: Godot-Tests
+
+on:
+  push:
+    paths: ["godot/**"]
+  pull_request:
+    paths: ["godot/**"]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: "4.7.2-stable"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Level-Generator (Erreichbarkeit, Einbahn-Softlocks, Abgleich)
+        run: |
+          python3 godot/tools/build_levels.py
+          git diff --exit-code -- godot/levels || (echo "levels/ weicht vom Generator ab — build_levels.py laufen lassen und einchecken"; exit 1)
+
+      - name: Godot installieren
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
+          godot --version
+
+      - name: Import (Skriptfehler sichtbar machen)
+        run: godot --headless --path godot --import 2>&1 | tee import.log; ! grep -q "SCRIPT ERROR\|Parse Error" import.log
+
+      - name: Testlauf
+        run: godot --headless --path godot --fixed-fps 60 --script res://tests/lauf.gd
