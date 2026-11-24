@@ -54,13 +54,15 @@ func _ziel() -> Vector2:
 	return target.global_position
 
 
+## Kamerastoß (gedämpfte Feder). Fällt bei „Bewegung reduzieren" weg (Komfort.gd).
 func kick(v: Vector2) -> void:
-	_kick_vel += v
+	_kick_vel += v * Komfort.bewegung()
 
 
-## Zoom-Stoß für große Momente (Siegel): kurz näher ran, weich zurück.
+## Zoom-Stoß für große Momente (Siegel): kurz näher ran, weich zurück. Fällt bei
+## „Bewegung reduzieren" weg.
 func punch(amount: float) -> void:
-	_zoom_extra = maxf(_zoom_extra, amount)
+	_zoom_extra = maxf(_zoom_extra, amount * Komfort.bewegung())
 
 
 func _process(delta: float) -> void:

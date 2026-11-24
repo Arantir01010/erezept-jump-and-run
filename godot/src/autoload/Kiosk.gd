@@ -271,6 +271,7 @@ func consume_idle_reset() -> bool:
 		return false
 	note_input()
 	Sfx.reset_visitor_choices()
+	Komfort.besucher_zuruecksetzen()
 	return true
 
 
