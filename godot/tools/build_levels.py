@@ -1179,6 +1179,85 @@ def lvl_20():
 # --8<-- LEVELS --8<--
 
 
+# Fahnen-Abstand (Messe-Paket 11/2026): Nach einem Sturz geht es zurück zur letzten
+# Fahne. Mehr als ~35 Kacheln Weg zurück frustriert Laufpublikum (gemessen waren bis
+# zu 62). Lücken zwischen Start, Fahnen und Tür werden darum automatisch mit einer
+# zusätzlichen Fahne geteilt — an einer sicheren Stelle (3 Kacheln Standfläche, kein
+# Störfeld in der Nähe, nicht im Wirkbereich eines Bausteins), möglichst mittig, und
+# nur, wenn die Erreichbarkeitsprüfung danach weiterhin keine Probleme meldet.
+MAX_CP_GAP = 35
+CP_FREI_TYPEN = ("info-sign",)
+
+
+def _cp_blocked(level: Level) -> set[int]:
+    blocked: set[int] = set()
+    for o in level.objects:
+        if o["type"] in CP_FREI_TYPEN:
+            continue
+        tw_, _ = dims(o)
+        x0 = int(o["tx"])
+        rand = 2
+        if o["type"] == "lauscher":
+            rand = 2 + int((float(o.get("patrol", 0)) + float(o.get("reach", 96))) / 48.0 + 0.999)
+        for x in range(x0 - rand, x0 + max(1, int(tw_ + 0.999)) + rand):
+            blocked.add(x)
+    return blocked
+
+
+def _cp_candidates(level: Level, x_lo: int, x_hi: int) -> list[tuple[int, int]]:
+    g = level.g
+    blocked = _cp_blocked(level)
+    mid = (x_lo + x_hi) / 2.0
+    found = []
+    for x in range(x_lo + 8, x_hi - 7):
+        if x in blocked:
+            continue
+        for y in range(H - 2, 0, -1):
+            stand = all(0 <= x + d < level.w and g[y][x + d] == "." and g[y + 1][x + d] in SOLID for d in (-1, 0, 1))
+            if not stand:
+                continue
+            danger = any(0 <= x + d < level.w and (g[y][x + d] in "x^" or g[y + 1][x + d] == "x") for d in range(-2, 3))
+            if danger or g[y - 1][x] in SOLID or g[y - 2][x] in SOLID:
+                continue
+            # Bodenreihe bevorzugen, dann Nähe zur Mitte
+            found.append(((0 if y == GROUND else 1), abs(x - mid), x, y))
+    found.sort()
+    return [(x, y) for _, _, x, y in found]
+
+
+def _cp_markers(level: Level) -> list[int]:
+    xs = []
+    for row in level.g:
+        for x, ch in enumerate(row):
+            if ch in "PCD":
+                xs.append(x)
+    return sorted(set(xs))
+
+
+def add_checkpoints(level: Level) -> list[str]:
+    """Teilt zu lange Wege zwischen Fahnen. Gibt die Problemliste der letzten Prüfung zurück."""
+    problems, _ = check(level)
+    base = len(problems)
+    changed = True
+    while changed:
+        changed = False
+        xs = _cp_markers(level)
+        for a, b in zip(xs, xs[1:]):
+            if b - a <= MAX_CP_GAP:
+                continue
+            for x, y in _cp_candidates(level, a, b):
+                level.g[y][x] = "C"
+                p2, _ = check(level)
+                if len(p2) <= base:
+                    changed = True
+                    break
+                level.g[y][x] = "."
+            if changed:
+                break
+    problems, _ = check(level)
+    return problems
+
+
 def main() -> None:
     # Windows-Konsole (cp1252) kann ✓/✗ nicht — Ausgabe immer als UTF-8
     if hasattr(sys.stdout, "reconfigure"):
@@ -1186,6 +1265,7 @@ def main() -> None:
     ok = True
     for build in BUILDERS:
         L, j, wanted = build()
+        add_checkpoints(L)
         problems, info = check(L)
         lines = L.lines()
         bits = sum(l.count("o") for l in lines)

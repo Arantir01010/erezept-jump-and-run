@@ -32,6 +32,19 @@ func setup(t: Node2D, world_w: float, world_h: float) -> void:
 	make_current()
 
 
+## Sofort aufs Ziel springen statt hinzuschwenken (nach dem Zurücksetzen an die Fahne:
+## sonst fährt das Bild bis zu 60 Kacheln quer durchs Level zurück).
+func snap() -> void:
+	if target == null or manual:
+		return
+	_look = 0.0
+	_pos = target.global_position + Vector2(0, -140.0)
+	_y_goal = _pos.y
+	_kick = Vector2.ZERO
+	_kick_vel = Vector2.ZERO
+	global_position = _pos.round()
+
+
 func kick(v: Vector2) -> void:
 	_kick_vel += v
 

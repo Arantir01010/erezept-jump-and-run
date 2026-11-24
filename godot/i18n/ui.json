@@ -1,4 +1,5 @@
 {
+  "Das hast du gesichert:": {"en": "What you secured:", "fr": "Ce que tu as sécurisé :", "es": "Lo que has asegurado:", "zh": "你已保护：", "hi": "तुमने सुरक्षित किया:"},
   "_": "Übersetzungen der Benutzeroberfläche: Schlüssel = deutscher Text, wie er im Code steht. Platzhalter (%s, %d, %.1f) unverändert lassen. Geladen von Game._load_translations().",
 
   "KLINIKUM": {"en": "HOSPITAL", "fr": "CLINIQUE", "es": "CLÍNICA", "zh": "医院", "hi": "अस्पताल"},

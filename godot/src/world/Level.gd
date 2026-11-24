@@ -102,6 +102,7 @@ func setup(level_data: LevelData) -> void:
 	player.double_jumped.connect(_on_double_jump)
 	player.wall_jumped.connect(func(): Fx.dust(self, player.global_position + Vector2(-player.facing * 14, -30), 4, 1.0))
 	player.got_hurt.connect(_on_hurt)
+	player.respawned.connect(_on_respawned)
 
 	rezi = Rezi.new()
 	add_child(rezi)
@@ -256,6 +257,14 @@ func _on_landed(impact: float) -> void:
 		Fx.impact(impact * 0.5)
 		# Flacher, breiter Ring am Boden statt Kreis um die Füße
 		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.8, 0.88, 1.0), 30.0 + 70.0 * impact, 1.5 + impact)
+
+
+## Sturz → Fahne: kurz aus dem Dunkeln aufblenden, Kamera sitzt sofort auf Paul.
+func _on_respawned() -> void:
+	if camera:
+		camera.snap()
+	Fx.flash(Color(0.03, 0.05, 0.09), 0.9)
+	Sfx.play("land", 0.8, -4.0)
 
 
 func _on_hurt(lost: int) -> void:

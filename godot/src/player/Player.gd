@@ -17,6 +17,8 @@ signal landed(impact: float)
 signal got_hurt(lost: int)
 signal bits_scattered(pos: Vector2, count: int)
 signal state_changed(state: String)
+## Nach einem Sturz an die letzte Fahne zurückgesetzt (Level: Blende, Kamera).
+signal respawned
 
 ## Bewegungswerte nach Celeste (Player.cs), mit Faktor 6 von 8-px- auf 48-px-Kacheln
 ## skaliert: MaxRun 90 → 540, RunAccel 1000 → 6000, AirMult 0,65, Gravity 900 → 5400,
@@ -377,10 +379,22 @@ func set_respawn(p: Vector2) -> void:
 	respawn_point = p
 
 
+## Sturz in eine Grube: zurück an die letzte Fahne. Kurze Schonzeit, damit Paul
+## nicht direkt neben der Fahne in die nächste Gefahr läuft, solange das Bild noch
+## aufblendet (Level blendet aus Dunkel auf und setzt die Kamera hart nach).
+const RESPAWN_GRACE := 0.6
+
+
 func respawn() -> void:
 	global_position = respawn_point
 	velocity = Vector2.ZERO
+	_coyote = 0.0
+	_buffer = 0.0
 	visual.flash = 1.0
+	var now := Time.get_ticks_msec() / 1000.0
+	_invuln_until = maxf(_invuln_until, now + RESPAWN_GRACE)
+	visual.blink_until = _invuln_until
+	respawned.emit()
 
 
 ## Treffer: Bits spritzen weg, kurzer Rückstoß, Hitstop, Blinken.

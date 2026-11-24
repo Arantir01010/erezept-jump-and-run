@@ -389,7 +389,16 @@ func highscores() -> Array:
 	if not (data is Dictionary) or data.get("date", "") != _today():
 		return []
 	var entries = data.get("entries", [])
-	return entries if entries is Array else []
+	if not (entries is Array):
+		return []
+	# Nur gültige Einträge: eine halb geschriebene oder von Hand bearbeitete Datei
+	# darf weder den Titel noch den Abschluss-Bildschirm abbrechen.
+	var ok: Array = []
+	for e in entries:
+		if e is Dictionary and (e.get("score") is float or e.get("score") is int):
+			ok.append({"avatar": absi(int(e.get("avatar", 0))), "score": int(e["score"])})
+	ok.sort_custom(func(a, b): return int(a["score"]) > int(b["score"]))
+	return ok
 
 
 func qualifies(points: int) -> bool:
@@ -403,9 +412,24 @@ func add_highscore(avatar: int, points: int) -> void:
 	hs.sort_custom(func(a, b): return int(a["score"]) > int(b["score"]))
 	if hs.size() > 5:
 		hs.resize(5)
-	var f := FileAccess.open(HIGHSCORE_PATH, FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify({"date": _today(), "entries": hs}))
+	_write_json_atomic(HIGHSCORE_PATH, {"date": _today(), "entries": hs})
+
+
+## Erst in eine Nachbardatei schreiben, dann umbenennen: Stromausfall oder Absturz
+## mitten im Schreiben hinterlässt so die alte, heile Bestenliste statt einer halben.
+static func _write_json_atomic(path: String, data: Variant) -> bool:
+	var tmp := path + ".tmp"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(data))
+	f.close()
+	var dir := DirAccess.open(path.get_base_dir())
+	if dir == null:
+		return false
+	if dir.file_exists(path.get_file()):
+		dir.remove(path.get_file())
+	return dir.rename(tmp.get_file(), path.get_file()) == OK
 
 
 static func _read_json_user(path: String) -> Variant:

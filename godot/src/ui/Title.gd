@@ -272,7 +272,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("move_right"):
-		_select("touch")
+		if Kiosk.touch_possible():
+			_select("touch")
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
