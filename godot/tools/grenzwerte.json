@@ -1,0 +1,26 @@
+{
+  "_hinweis": "Obergrenzen der GDScript-Warnungen je Bereich und Art (Stufe 3 von tools/pruefen.py, Zählung: tests/typwarnungen.gd). Mehr = Fehler, weniger = Hinweis zum Nachziehen: python3 godot/tools/pruefen.py --nur 3 --grenzen-nachziehen. Nicht aufgeführte Arten: Grenze 0.",
+  "src": {
+    "CONFUSABLE_LOCAL_DECLARATION": 1,
+    "INCOMPATIBLE_TERNARY": 1,
+    "INTEGER_DIVISION": 2,
+    "SHADOWED_GLOBAL_IDENTIFIER": 5,
+    "SHADOWED_VARIABLE": 1,
+    "SHADOWED_VARIABLE_BASE_CLASS": 18,
+    "UNSAFE_CALL_ARGUMENT": 558,
+    "UNSAFE_CAST": 18,
+    "UNSAFE_METHOD_ACCESS": 69,
+    "UNSAFE_PROPERTY_ACCESS": 44,
+    "UNTYPED_DECLARATION": 260,
+    "UNUSED_PARAMETER": 1,
+    "UNUSED_PRIVATE_CLASS_VARIABLE": 2,
+    "UNUSED_VARIABLE": 1
+  },
+  "tests": {
+    "UNSAFE_CALL_ARGUMENT": 73,
+    "UNSAFE_CAST": 11,
+    "UNSAFE_METHOD_ACCESS": 82,
+    "UNSAFE_PROPERTY_ACCESS": 85,
+    "UNTYPED_DECLARATION": 134
+  }
+}
