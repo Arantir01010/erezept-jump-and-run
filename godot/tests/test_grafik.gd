@@ -195,7 +195,7 @@ func test_vorwaermen_laeuft_ohne_fehler_und_raeumt_auf() -> void:
 		var gpu := lage.find_children("*", "GPUParticles2D", true, false).size()
 		var cpu := lage.find_children("*", "CPUParticles2D", true, false).size()
 		# (im Compatibility-Renderer wärmt auch Stufe 2 keine GPU-Partikel vor)
-		var gpu_soll := s == 2 and RenderingServer.get_current_rendering_method() != "gl_compatibility"
+		var gpu_soll: bool = s == 2 and RenderingServer.get_current_rendering_method() != "gl_compatibility"
 		pruefe((gpu >= 3) == gpu_soll, "Stufe %d: GPU-Partikel nur in Stufe 2 (%d)" % [s, gpu])
 		pruefe(cpu >= 1, "Stufe %d: CPU-Partikel dabei" % s)
 		var mats := 0
