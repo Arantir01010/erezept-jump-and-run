@@ -210,8 +210,7 @@ func _draw_glow(c: CanvasItem) -> void:
 # -------------------------------------------------------------------- Leben
 
 func _draw_life(c: CanvasItem) -> void:
-	var v: Dictionary = DATEN[id]
-	var u := fmod(tz, float(v["zyklus"]))
+	var u := story_u()   # beim Blättern: Schleife im Abschnitt der aktuellen Zeile
 	match id:
 		"epa-konto":
 			_leben_konto(c, u)

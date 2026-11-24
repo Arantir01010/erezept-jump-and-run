@@ -435,7 +435,7 @@ func _draw_zeitreise_life(c: CanvasItem) -> void:
 		var fax := (fmod(t, 3.2) / 3.2) * 8
 		Pen.rect(c, 56, 261, 2.8, fax, Pen.hex(0xeef2f8, 0.95))
 	else:
-		var u := fmod(tz, ZYKLUS_HEUTE)
+		var u := story_u()   # beim Blättern: Schleife im Abschnitt der aktuellen Zeile
 		# --- Schritt 1: Gespräch, dann tippt der Arzt ---
 		Pen.sitzend(c, 49, 302, Pen.P_PATIENT)
 		Pen.sitzend(c, 75, 302, Pen.P_ARZT)

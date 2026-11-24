@@ -3,7 +3,9 @@ extends Control
 ## STATIONSKARTE nach jedem Level: Auftauch-Stempel („✓ …"), Fachbegriff-Chip,
 ## Zonen-Fakt, drei Medaillen (Zeit / Prüfsummen / Lückenlos) und Punkte.
 ## Ersetzt den Stadt-Zwischenlauf: kürzer, lesbarer, und der Wiederspielwert
-## steht sichtbar auf dem Tisch. Weiter per Knopf oder nach ein paar Sekunden.
+## steht sichtbar auf dem Tisch. Weiter nur per Knopf: Früher ging es nach 6 s
+## von selbst weiter — wer noch las, war plötzlich im nächsten Briefing (Team-
+## Feedback 9/2026). Verlässt jemand den Messestand, greift der Idle-Reset (--kiosk).
 ## Runde 3: Farbverlauf der Zone statt Schwarz, drehender Strahlenkranz hinter
 ## den Medaillen, der Stationsname schlägt wie ein Stempel ein, Funkenregen bei
 ## drei Medaillen.
@@ -13,7 +15,6 @@ signal done
 var _t := 0.0
 var _armed := false
 var _fired := false
-var _auto := 6.0
 var _pal: Palette
 var _bg: Vignette.Canvas
 var _stamp_t := -1.0
@@ -85,8 +86,6 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 		tw.parallel().tween_property(m, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		i += 1
 	get_tree().create_timer(0.8).timeout.connect(func(): _armed = true)
-	if Kiosk.shots_dir != "":
-		_auto = 999.0
 	var alle := medals.size() > 0 and medals.values().all(func(v): return bool(v))
 	if alle:
 		get_tree().create_timer(1.7).timeout.connect(func():
@@ -185,7 +184,24 @@ func _process(delta: float) -> void:
 		_bg.queue_redraw()
 	if _fired:
 		return
-	if (_armed and Input.is_action_just_pressed("confirm")) or _t > _auto:
-		_fired = true
-		Sfx.play("ok")
-		done.emit()
+	if _armed and Input.is_action_just_pressed("confirm"):
+		weiter()
+
+
+## Weiter zur nächsten Station (Knopf, Fingertipp, Prüflauf).
+func weiter() -> void:
+	if _fired:
+		return
+	_fired = true
+	Sfx.play("ok")
+	done.emit()
+
+
+func _input(event: InputEvent) -> void:
+	# Fingertipp oder Mausklick: weiter wie der Knopf — ohne Automatik der einzige
+	# Weg für Touch-Geräte (die Bildschirmknöpfe gibt es nur im Level).
+	if not _armed:
+		return
+	if (event is InputEventScreenTouch and event.pressed) or \
+			(event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		weiter()
