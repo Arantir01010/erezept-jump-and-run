@@ -186,6 +186,11 @@ class Lauscher extends Mechanic:
 	var _blink_timer := 2.0
 	var _eye := Vector2.ZERO
 	var _cone_light: PointLight2D
+	## 1 = Paul ist im Klartext (lesbar): Kegel warm mit Kontur — 0 = verschlüsselt
+	## oder in der VAU: Kegel blass und neutral, der Lauscher scheitert (Feedback 9/2026:
+	## „Gefahren schlecht zu sehen"). Weicher Übergang, kein Blinken.
+	var _warn := 1.0
+	const NEUTRAL := Color(0.74, 0.78, 0.86)
 	static var _sclera_sb: StyleBoxFlat
 
 	func spawn() -> void:
@@ -231,9 +236,10 @@ class Lauscher extends Mechanic:
 		if gesehen and _t - _last_hit >= 0.9:
 			_last_hit = _t
 			_erwischt()
+		_warn = move_toward(_warn, 1.0 if player.is_sichtbar else 0.0, delta * 4.0)
 		_cone_light.scale = Vector2(float(dir), 1.0)
-		_cone_light.color = Palette.DENY if gesehen else Palette.WARM
-		_cone_light.energy = (1.1 if gesehen else 0.65) + 0.08 * sin(_t * 7.0)
+		_cone_light.color = Palette.DENY if gesehen else NEUTRAL.lerp(Palette.WARM, _warn)
+		_cone_light.energy = (1.1 if gesehen else lerpf(0.3, 0.7, _warn)) + 0.08 * sin(_t * 7.0)
 		queue_redraw()
 
 	## Patrouille als reine Funktion der Zeit (deterministisch, lernbar).
@@ -287,18 +293,26 @@ class Lauscher extends Mechanic:
 				"en": "Tip: encrypt — then nobody can read you!"}))
 
 	func _draw() -> void:
-		# Sichtkegel: gestaffeltes Volumen, warm; beim Erfassen rot und dichter
-		var c := Palette.DENY if _seen else Palette.WARM
-		var base_a := 0.30 if _seen else 0.12
+		# Sichtkegel: gestaffeltes Volumen. Klartext: warm und dichter, mit Kontur an
+		# den Rändern; verschlüsselt/VAU: blass und neutral; beim Erfassen rot
+		var c := Palette.DENY if _seen else NEUTRAL.lerp(Palette.WARM, _warn)
+		var base_a := 0.30 if _seen else lerpf(0.06, 0.17, _warn)
 		for k in 3:
 			var frac := 1.0 - k * 0.28
 			var pts := PackedVector2Array([Vector2.ZERO, Vector2(dir * reach * frac, -spread * frac), Vector2(dir * reach * frac, spread * frac)])
 			draw_colored_polygon(pts, Color(c.r, c.g, c.b, base_a * (0.5 + k * 0.25)))
+		var kontur := 0.7 if _seen else 0.6 * _warn
+		if kontur > 0.01:
+			for s in [-1.0, 1.0]:
+				draw_line(Vector2(dir * 26.0, s * spread * 26.0 / reach), Vector2(dir * reach, s * spread),
+					Color(c.r, c.g, c.b, kontur), 3.0, true)
+			draw_line(Vector2(dir * reach, -spread), Vector2(dir * reach, spread), Color(c.r, c.g, c.b, kontur * 0.45), 2.0, true)
 		# Scan-Linien im Kegel
+		var scan_a := 0.35 if _seen else lerpf(0.12, 0.4, _warn)
 		for i in 4:
 			var f := fmod(_t * 0.5 + i * 0.25, 1.0)
 			var x := dir * reach * f
-			draw_line(Vector2(x, -spread * f), Vector2(x, spread * f), Color(c.r, c.g, c.b, (1.0 - f) * 0.35), 2.0, true)
+			draw_line(Vector2(x, -spread * f), Vector2(x, spread * f), Color(c.r, c.g, c.b, (1.0 - f) * scan_a), 2.0, true)
 		# Das Auge
 		draw_circle(Vector2.ZERO, 30.0, Color(c.r, c.g, c.b, 0.15))
 		draw_circle(Vector2.ZERO, 22.0, Color(0.12, 0.09, 0.14))
