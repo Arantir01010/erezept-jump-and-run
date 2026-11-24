@@ -94,8 +94,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	# Idle-Reset: niemand spielt → zurück zum Titel (Attract)
-	if screen != Screen.TITLE and Kiosk.shots_dir == "" and Kiosk.idle_seconds() > Kiosk.idle_reset_seconds:
+	# Idle-Reset (nur Messe-Modus): niemand spielt → zurück zum Titel (Attract)
+	if screen != Screen.TITLE and Kiosk.consume_idle_reset():
 		Game.set_lang(Game.default_lang)   # nächster Besucher: wieder die Standardsprache
 		show_title()
 

@@ -4,7 +4,8 @@ extends CanvasLayer
 ## dunkelt ab, zeigt „PAUSE", den Stationsnamen und vier Zeilen — Weiter, Musik
 ## an/aus, Töne an/aus, Zum Hauptmenü. Bedienung: Hoch/Runter + Bestätigen
 ## (Sprung/Aktion), Fingertipp oder Mausklick auf eine Zeile; ESC, P oder START
-## setzen fort. Der Idle-Reset gilt auch hier: wer weggeht, landet im Hauptmenü.
+## setzen fort. Im Messe-Modus gilt der Idle-Reset auch hier: wer weggeht, landet
+## im Hauptmenü.
 
 signal resumed
 signal quit_to_title
@@ -99,8 +100,8 @@ func _process(delta: float) -> void:
 	_t += delta
 	if _t > 0.3:
 		_armed = true
-	# Messe: niemand mehr da → zurück zum Hauptmenü, auch aus der Pause
-	if Kiosk.shots_dir == "" and Kiosk.idle_seconds() > Kiosk.idle_reset_seconds:
+	# Messe: niemand mehr da → zurück zum Hauptmenü, auch aus der Pause (nur --kiosk)
+	if Kiosk.consume_idle_reset():
 		quit_to_title.emit()
 
 
