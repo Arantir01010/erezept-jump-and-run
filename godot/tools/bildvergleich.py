@@ -66,7 +66,17 @@ def kennzahlen(rgb: np.ndarray) -> dict:
     }
 
 
+# Schriften mit Umlauten (Linux, Windows, macOS); Pillows eingebaute Schrift kennt kein „ü“
+SCHRIFTEN = ["DejaVuSans.ttf", "LiberationSans-Regular.ttf", "arial.ttf", "Arial.ttf", "segoeui.ttf",
+             "Helvetica.ttc"]
+
+
 def schrift(groesse: int):
+    for name in SCHRIFTEN:
+        try:
+            return ImageFont.truetype(name, groesse)
+        except OSError:
+            continue
     try:
         return ImageFont.load_default(size=groesse)
     except TypeError:  # Pillow < 10.1
