@@ -32,5 +32,6 @@
   "audio": true,
   "idleResetSeconds": 60,
   "softAutopilotSeconds": 240,
-  "stuckGuideSeconds": 30
+  "stuckGuideSeconds": 30,
+  "attractSeconds": 25
 }

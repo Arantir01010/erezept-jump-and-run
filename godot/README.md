@@ -41,7 +41,7 @@ steuert Bildschirm-Knüppel, Knopfnamen und Hinweistexte im ganzen Durchlauf; na
 Idle-Reset zeigt das Menü die zuletzt gewählte Bedienung vor, sonst Touch auf Touchscreens.
 
 Tasten: Pfeile/WASD laufen & ducken · LEERTASTE springen (in der Luft nochmal = REZI-Schub) ·
-E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln · ESC/P Pause · F2 Sprache · F3 Musik ·
+E TI-Aktion · SHIFT/Q/Pfeil hoch Hülle wechseln (Pfeil/Stick nur senkrecht hoch, schräg hoch-rechts bleibt ein Sprung) · ESC/P Pause · F2 Sprache · F3 Musik ·
 F4 Töne · F11 Vollbild · F12 Screenshot (beide nicht im `--kiosk`).
 
 **Standpersonal:** Strg+F9 leiser, Strg+F10 lauter (10-%-Stufen, gespeichert in
@@ -83,10 +83,14 @@ springen — „Du bist dran"); wer nichts drückt, sieht nach 6 s die Vorführu
 zeigt ein ruhiger Pfeil über Paul zum nächsten Ziel (fehlende Prüfsumme, offene Station, Tür).
 Wer an einer offenen Station wartet (Schleuse, Stempel …), gilt nicht als festgefahren.
 
+**Vorführung (Attract):** Steht im `--kiosk` der Titel `attractSeconds` (25) unberührt, spielt
+Paul den Probelauf allein vor; jeder Druck holt den Titel zurück. Kaputte Leveldaten
+(Datei fehlt, JSON defekt) überspringen die Station statt ein leeres Level zu zeigen.
+
 ## Sprachen
 
 Sechs Sprachen, umschaltbar über die Flaggen oben rechts im Hauptmenü (Klick oder
-Fingertipp; F2 blättert): Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Hindi.
+Fingertipp; F2 oder Stick/Pfeil hoch/runter blättert; im Browser startet das Spiel in der Browsersprache, falls vorhanden): Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Hindi.
 Das Menü baut sich mit der neuen Sprache neu auf, alles danach (Zeitreise, Probelauf,
 ePA-Wissen, Briefings, HUD, Hinweise im Level, Stationskarte, Reward) folgt ihr. Beim
 Idle-Reset gilt wieder die Standardsprache (`language` in `config/game-config.json`).

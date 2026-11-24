@@ -101,7 +101,42 @@ func _ready() -> void:
 		show_title()
 
 
+## Attract-Modus (Messe-Paket 3, 11/2026): Steht im Kiosk der Titel attractSeconds
+## (Standard 25 s) unberührt, spielt Paul den Probelauf als Vorführung vor — so sieht
+## man aus drei Metern, dass hier gespielt wird. Jeder Druck führt zurück zum Titel;
+## nach idleResetSeconds ohne Eingabe übernimmt der normale Idle-Reset.
+var _vorfuehrung := false
+
+
+func _vorfuehrung_faellig() -> bool:
+	return screen == Screen.TITLE and not _vorfuehrung and Kiosk.kiosk_mode and Kiosk.shots_dir == "" \
+		and not is_instance_valid(Kiosk.betrieb) and Kiosk.idle_seconds() >= float(Game.config.get("attractSeconds", 25))
+
+
+func show_vorfuehrung() -> void:
+	_vorfuehrung = true
+	await _fade_out(0.4)
+	_clear()
+	_set_screen(Screen.INTRO)
+	var intro := Intro.new(3)
+	intro.vorfuehrung = true
+	intro.weiter_text = tr("Vorführung — %s: Selbst spielen!") % Kiosk.label_confirm()
+	intro.done.connect(func():
+		if _vorfuehrung:
+			show_title())
+	overlay.add_child(intro)
+	_current = intro
+	_fade_in()
+
+
 func _process(_delta: float) -> void:
+	if _vorfuehrung_faellig():
+		show_vorfuehrung()
+		return
+	# Vorführung: jede Eingabe holt den Titel zurück (Kiosk.idle_seconds springt auf 0).
+	if _vorfuehrung and screen == Screen.INTRO and Kiosk.idle_seconds() < 0.3:
+		show_title()
+		return
 	# Idle-Reset (nur Messe-Modus): niemand spielt → zurück zum Titel (Attract)
 	if screen != Screen.TITLE and Kiosk.consume_idle_reset():
 		Statistik.lauf_ende("idle")
@@ -182,6 +217,8 @@ func _fade_in(t := 0.45) -> void:
 
 ## Hauptmenü: das lebende Klinikum. Jeder Knopf → Zeitreise.
 func show_title() -> void:
+	_vorfuehrung = false
+	Kiosk.note_input()   # Attract-Uhr läuft ab jetzt neu
 	await _fade_out(0.25)
 	_clear()
 	_set_screen(Screen.TITLE)
@@ -295,7 +332,11 @@ func _start_level(index: int, neustart := false) -> void:
 	var id := str(Game.playlist[index])
 	var data := LevelData.load_level(id)
 	if not data.errors.is_empty():
-		push_error("Level %s: %s" % [id, ", ".join(data.errors)])
+		# Kaputte Leveldaten: Station überspringen statt ein leeres Level zu zeigen —
+		# am Messestand ist ein fehlender Abschnitt besser als ein Spiel ohne Boden.
+		push_warning("Level %s übersprungen: %s" % [id, ", ".join(data.errors)])
+		_start_level(index + 1)
+		return
 	if not neustart:
 		Statistik.station_start(id)
 	level = Level.new()
