@@ -16,9 +16,14 @@ func _station(id: String) -> Node:
 		baum.root.add_child(main)
 		await frames(3)
 	Kiosk.note_input()
+	# Erst weiter, wenn die NEUE Station läuft (dieselbe Station noch einmal: die
+	# alte bleibt bis nach der Blende stehen und wird dann freigegeben).
+	# (Instanz-ID statt Knoten merken: ein freigegebener Knoten im Lambda meldet Fehler.)
+	var alt: int = main.level.get_instance_id() if is_instance_valid(main.level) else 0
 	main._start_level(maxi(0, Game.playlist.find(id)))
-	await warte_bis(func(): return main.screen == main.Screen.LEVEL and is_instance_valid(main.level) and main.level._started and main.level.data.id == id, 3.0)
-	return main.level
+	var neu := func() -> bool: return main.screen == main.Screen.LEVEL and is_instance_valid(main.level) and main.level.get_instance_id() != alt and main.level._started and main.level.data.id == id
+	await warte_bis(neu, 3.0)
+	return main.level if neu.call() else null
 
 
 func aufraeumen() -> void:

@@ -23,6 +23,11 @@ var trail: CPUParticles2D
 var bubble: PanelContainer
 var base_energy := 0.6
 var bubble_label: Label
+## Wohin REZIs Sätze gehen: ohne Ziel in die Blase über REZI (Titelbild), im Level
+## in die feste Untertitelleiste des HUD (Team-Feedback F4: die Blase wanderte mit
+## Figur und Kamera). Das Ziel bietet untertitel_zeigen(text) und untertitel_aus().
+var untertitel: Object = null
+var _spricht := false
 var _vel := Vector2.ZERO
 var _bob := 0.0
 var _blink := 0.0
@@ -174,15 +179,12 @@ func _process(delta: float) -> void:
 	_bubble_clock += delta
 	if bubble.visible:
 		bubble.position = Vector2(-bubble.size.x * 0.5 + 10.0, -bubble.size.y - 48.0)
-		if _bubble_clock > _bubble_until:
-			if not _queue.is_empty():
-				var naechster: Array = _queue.pop_front()
-				_zeige(str(naechster[0]), float(naechster[1]))
-			else:
-				_bubble_fade = create_tween()
-				_bubble_fade.tween_property(bubble, "modulate:a", 0.0, 0.25)
-				_bubble_fade.tween_callback(func(): bubble.visible = false)
-				_bubble_until = INF
+	if _spricht and _bubble_clock > _bubble_until:
+		if not _queue.is_empty():
+			var naechster: Array = _queue.pop_front()
+			_zeige(str(naechster[0]), float(naechster[1]))
+		else:
+			_verstumme()
 	queue_redraw()
 
 
@@ -200,13 +202,13 @@ func say(text: String, hold := 3.0) -> void:
 	if text == "":
 		return
 	var dauer := lesezeit(text, hold)
-	if bubble.visible and bubble_label.text == text and _bubble_until < INF:
+	if _spricht and bubble_label.text == text and _bubble_until < INF:
 		_bubble_until = maxf(_bubble_until, _bubble_clock + dauer)
 		return
 	for q in _queue:
 		if str(q[0]) == text:
 			return
-	if bubble.visible and _bubble_until < INF and _bubble_clock < _bubble_min:
+	if _spricht and _bubble_until < INF and _bubble_clock < _bubble_min:
 		_queue.append([text, dauer])
 		while _queue.size() > WARTEN_MAX:
 			_queue.pop_front()
@@ -219,19 +221,40 @@ func _zeige(text: String, dauer: float) -> void:
 	if _bubble_fade and _bubble_fade.is_valid():
 		_bubble_fade.kill()      # eine laufende Ausblendung darf die neue Blase nicht schließen
 	bubble_label.text = text
-	bubble.visible = true
-	bubble.modulate.a = 1.0
-	bubble.scale = Vector2(0.85, 0.85)
-	var tw := create_tween()
-	tw.tween_property(bubble, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_spricht = true
+	if _mit_leiste():
+		bubble.visible = false
+		untertitel.untertitel_zeigen(text)
+	else:
+		bubble.visible = true
+		bubble.modulate.a = 1.0
+		bubble.scale = Vector2(0.85, 0.85)
+		var tw := create_tween()
+		tw.tween_property(bubble, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_bubble_until = _bubble_clock + dauer
 	_bubble_min = _bubble_clock + minf(dauer, maxf(1.5, dauer * 0.5))
 	Sfx.play("ui", 1.1, -8.0)
 
 
-## Aktueller Satz (leer, wenn keine Blase steht) — für Tests und Prüfläufe.
+## Satz zu Ende: Blase ausblenden oder die Untertitelleiste leeren.
+func _verstumme() -> void:
+	_spricht = false
+	_bubble_until = INF
+	if _mit_leiste():
+		untertitel.untertitel_aus()
+	if bubble.visible:
+		_bubble_fade = create_tween()
+		_bubble_fade.tween_property(bubble, "modulate:a", 0.0, 0.25)
+		_bubble_fade.tween_callback(func(): bubble.visible = false)
+
+
+func _mit_leiste() -> bool:
+	return untertitel != null and is_instance_valid(untertitel)
+
+
+## Aktueller Satz (leer, wenn REZI nichts sagt) — für Tests und Prüfläufe.
 func spricht() -> String:
-	return bubble_label.text if bubble.visible and _bubble_until < INF else ""
+	return bubble_label.text if _spricht and _bubble_until < INF else ""
 
 
 func add_seal(seal_id: String) -> void:

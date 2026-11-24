@@ -10,6 +10,9 @@ extends CanvasLayer
 ## Pillen überlappten), Zeit in PwC-Gelb statt Grün, Kombo mit dunkler Kontur.
 ## Unter dem Stationsnamen steht die Zielzeile (Team-Feedback F15: „nicht immer
 ## klar, was als Nächstes kommt“): was hier zu tun ist und was danach kommt.
+## REZIs Sätze stehen im Level als feste Untertitelleiste unten in der Mitte
+## (Team-Feedback F4: die Blase wanderte mit Figur und Kamera und war vor bewegtem
+## Hintergrund schwer lesbar).
 
 signal pause_requested
 
@@ -34,6 +37,11 @@ var sub_label: Label
 var combo_label: Label
 var hint_row: HBoxContainer
 var hint_label: Label
+var untertitel_box: PanelContainer
+var untertitel_label: Label
+var _unten: VBoxContainer
+var _untertitel_tw: Tween
+var _hinweis_tw: Tween
 var _combo_tw: Tween
 var _last_huelle := ""
 
@@ -41,6 +49,15 @@ const RAND := 28.0            # Abstand der Pillen zum Bildrand, links wie recht
 ## Karten-Fächer: rechte Kante bündig mit der Zeit-Pille, Zeile unten rechts
 const CARDS_RIGHT := 1920.0 - RAND
 const CARDS_Y := 950.0
+## Untertitelleiste: Schriftgröße (Feedback: 26–28 px), größte Textbreite (≈ 80
+## Zeichen je Zeile), Abstand des Stapels zum unteren Bildrand, REZIs Farbe.
+const UNTERTITEL_GROESSE := 26
+const UNTERTITEL_MAX := 1040.0
+## Mit Bildschirm-Steuerung (Tablet) schmaler: rechts bleibt die Leiste links vom
+## AKTION-Knopf (TouchControls, Kreis um x = 1470, r = 66), links vom Knüppel frei.
+const UNTERTITEL_MAX_TOUCH := 720.0
+const UNTEN_RAND := 40.0
+const REZI_FARBE := Color(0.55, 0.85, 1.0)
 
 
 func _ready() -> void:
@@ -195,10 +212,49 @@ func _ready() -> void:
 	combo_label.modulate.a = 0.0
 	spalte.add_child(combo_label)
 
-	# Hinweiszeile unten: Piktogramm „Glühbirne" (PwC-Werte-Set) + Text
+	# Unten in der Mitte ein Stapel, der nach oben wächst: REZIs Untertitelleiste,
+	# darunter (nur am Anfang von Station 1) die Hinweiszeile zur Steuerung. Er
+	# liegt im Bodenstreifen unter Pauls Laufhöhe, zwischen Hülle-Anzeige und Karten.
+	_unten = VBoxContainer.new()
+	_unten.anchor_left = 0.5
+	_unten.anchor_right = 0.5
+	_unten.anchor_top = 1.0
+	_unten.anchor_bottom = 1.0
+	_unten.offset_top = -UNTEN_RAND
+	_unten.offset_bottom = -UNTEN_RAND
+	_unten.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_unten.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_unten.add_theme_constant_override("separation", 10)
+	_unten.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_unten)
+	untertitel_box = PanelContainer.new()
+	untertitel_box.add_theme_stylebox_override("panel", Brand.panel_style(Brand.UI_RADIUS, Brand.UI_PANEL_SOLID, Brand.UI_BORDER, 1, 24, 12))
+	untertitel_box.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	untertitel_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var uz := HBoxContainer.new()
+	uz.add_theme_constant_override("separation", 16)
+	uz.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var wer := Label.new()
+	wer.text = "REZI"
+	wer.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	wer.label_settings = Brand.label_settings(16, REZI_FARBE, Brand.spaced(Brand.sans("bold"), 3))
+	wer.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	wer.custom_minimum_size.y = UNTERTITEL_GROESSE * 1.25     # mittig zur ersten Textzeile
+	wer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	uz.add_child(wer)
+	untertitel_label = Label.new()
+	untertitel_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED   # Sätze kommen übersetzt
+	untertitel_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	untertitel_label.label_settings = Brand.label_settings(UNTERTITEL_GROESSE, Brand.UI_TEXT, Brand.sans("medium"))
+	uz.add_child(untertitel_label)
+	untertitel_box.add_child(uz)
+	_unten.add_child(untertitel_box)
+	untertitel_box.visible = false
+	untertitel_box.modulate.a = 0.0
+
+	# Hinweiszeile: Piktogramm „Glühbirne" (PwC-Werte-Set) + Text
 	hint_row = HBoxContainer.new()
-	hint_row.position = Vector2(0, 996)
-	hint_row.size = Vector2(1920, 44)
+	hint_row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	hint_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	hint_row.add_theme_constant_override("separation", 12)
 	var bulb := Brand.pictogram("reimagine-the-possible", true)
@@ -214,8 +270,9 @@ func _ready() -> void:
 	hint_label.add_theme_font_size_override("font_size", 22)
 	hint_label.add_theme_color_override("font_color", Palette.with_alpha(Palette.WHITE, 0.8))
 	hint_row.add_child(hint_label)
-	root.add_child(hint_row)
+	_unten.add_child(hint_row)
 	hint_row.modulate.a = 0.0
+	hint_row.visible = false
 
 	Game.hud_changed.connect(refresh)
 	Game.combo_changed.connect(_on_combo)
@@ -250,6 +307,9 @@ func bind(lvl: Level) -> void:
 	_ziel_text = ""
 	_ziel_schritt = ""
 	_zeit_text = ""
+	_untertitel_leeren()
+	if lvl.rezi:
+		lvl.rezi.untertitel = self
 	_zeit_unter_par = -1
 	cards_view.reset()
 	refresh()
@@ -265,10 +325,15 @@ func bind(lvl: Level) -> void:
 		var lauf := tr("Knüppel") if (Kiosk.touch_seen or Kiosk.touch_forced) else (tr("Joystick") if Kiosk.has_gamepad() else tr("Pfeiltasten/WASD"))
 		hint_label.text = tr("%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion") % [
 			lauf, Kiosk.label_jump(), Kiosk.label_action()]
-		var tw2 := create_tween()
-		tw2.tween_property(hint_row, "modulate:a", 1.0, 0.5)
-		tw2.tween_interval(6.0)
-		tw2.tween_property(hint_row, "modulate:a", 0.0, 0.8)
+		if _hinweis_tw and _hinweis_tw.is_valid():
+			_hinweis_tw.kill()
+		hint_row.visible = true
+		hint_row.modulate.a = 0.0
+		_hinweis_tw = create_tween()
+		_hinweis_tw.tween_property(hint_row, "modulate:a", 1.0, 0.5)
+		_hinweis_tw.tween_interval(6.0)
+		_hinweis_tw.tween_property(hint_row, "modulate:a", 0.0, 0.8)
+		_hinweis_tw.tween_callback(func(): hint_row.visible = false)   # gibt den Platz frei
 
 
 func refresh() -> void:
@@ -291,6 +356,55 @@ func refresh() -> void:
 		cards_view.layout(list)
 		cards_box.position = Vector2(CARDS_RIGHT - _Cards.width_for(list.size()) - 36.0, CARDS_Y)
 		cards_view.queue_redraw()
+
+
+## REZI spricht (Rezi.untertitel): Breite nach dem Satz, lange Sätze ausgeglichen
+## auf zwei Zeilen; weich ein- und ausgeblendet, die Leiste selbst bewegt sich nie.
+func untertitel_zeigen(text: String) -> void:
+	var max_b := UNTERTITEL_MAX_TOUCH if _touch_sichtbar() else UNTERTITEL_MAX
+	untertitel_label.custom_minimum_size.x = untertitel_breite(text, untertitel_label.label_settings.font, UNTERTITEL_GROESSE, max_b)
+	untertitel_label.text = text
+	untertitel_box.visible = true
+	untertitel_box.reset_size()
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	_untertitel_tw = create_tween()
+	_untertitel_tw.tween_property(untertitel_box, "modulate:a", 1.0, 0.2)
+
+
+func untertitel_aus() -> void:
+	if not untertitel_box.visible:
+		return
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	_untertitel_tw = create_tween()
+	_untertitel_tw.tween_property(untertitel_box, "modulate:a", 0.0, 0.25)
+	_untertitel_tw.tween_callback(func(): untertitel_box.visible = false)
+
+
+func _untertitel_leeren() -> void:
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	untertitel_label.text = ""
+	untertitel_box.visible = false
+	untertitel_box.modulate.a = 0.0
+
+
+## Textbreite der Leiste: kurze Sätze so breit wie sie sind, lange ausgeglichen
+## umbrochen (kein einzelnes Wort allein in der letzten Zeile), Zeilenumbrüche im
+## Satz bleiben.
+static func untertitel_breite(text: String, font: Font, groesse: int, max_breite := UNTERTITEL_MAX) -> float:
+	var breite := 0.0
+	for zeile in text.split("\n"):
+		var w := font.get_string_size(zeile, HORIZONTAL_ALIGNMENT_LEFT, -1, groesse).x
+		breite = maxf(breite, w if w <= max_breite else LevelCard.satzbreite(zeile, font, groesse, max_breite))
+	return ceilf(breite) + 2.0
+
+
+## Liegen Bildschirm-Knüppel und -Knöpfe gerade über dem Bild? (Main.touch)
+func _touch_sichtbar() -> bool:
+	var t: Variant = get_parent().get("touch") if get_parent() != null else null
+	return t is CanvasLayer and (t as CanvasLayer).visible
 
 
 ## Zielzeile aus Leveldaten und Lage: Welcher Ausgang beendet die Station, wie

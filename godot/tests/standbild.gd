@@ -7,7 +7,8 @@ extends SceneTree
 ##     --level=15-kontextschluessel --an=vau-feld,lauscher,spike,0.42 --ziel=/tmp/bilder
 ##
 ## --an: Baustein-Typen (Paul steht am ersten Baustein dieses Typs) oder Anteile der
-## Levelbreite. Zusätzlich: „pause" (Pausemenü öffnen). Dateien: <level>-<stelle>.png.
+## Levelbreite. Zusätzlich: „pause" (Pausemenü öffnen) und „rezi" (REZI sagt an Pauls
+## Stelle den Hängen-Tipp der Station, einen der längsten Sätze). Dateien: <level>-<stelle>.png.
 
 var _main: Node
 var _ziel := "user://standbild"
@@ -65,6 +66,13 @@ func _los() -> void:
 			await _bild("pause")
 			_main.toggle_pause()
 			await _warte(5)
+			continue
+		if stelle == "rezi":
+			var tipp = lvl.data.stuck_hint
+			var satz: String = load("res://src/ui/BriefingDaten.gd").tasten(game.t(tipp)) if tipp != null else "Weiter nach rechts!"
+			lvl.rezi.say(satz, 9.0)
+			await _warte(6)
+			await _bild("rezi")
 			continue
 		var ziel := Vector2.ZERO
 		if stelle.is_valid_float():

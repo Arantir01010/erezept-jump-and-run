@@ -122,8 +122,8 @@ Schriften unskaliert als Label. **Erzählzeilen blättert der Spieler selbst** (
 blättert zurück; Knopf 1,2 s halten überspringt den Screen; Finger/Maus im linken Drittel
 zurück, sonst vor. Screens ohne Erzählzeilen und der Prüflauf (`--shots`) laufen weiter nach
 der Uhr mit Mindestdauer. Die Stationskarte wartet auf Knopf, Tipp oder Klick. REZIs
-Sprechblasen stehen nach Textlänge (2,5–9 s); neue Sätze warten kurz, statt laufende zu
-überschreiben. Stationstexte nennen Knöpfe über Platzhalter (`{action}`, `{toggle}` …,
+Sätze (im Level in der Untertitelleiste, auf dem Titelbild als Blase) stehen nach Textlänge
+(2,5–9 s); neue Sätze warten kurz, statt laufende zu überschreiben. Stationstexte nennen Knöpfe über Platzhalter (`{action}`, `{toggle}` …,
 eingesetzt von `BriefingDaten.tasten`), über TI-Stationen schwebt eine Tastenkappe.
 Zeichen-Vokabular in `src/ui/Pen.gd`. Kein Blinken über 3 Hz.
 
@@ -235,7 +235,7 @@ Rauchtest, der jede Station über die echte Hauptszene startet, spielt und absch
 Bedienung (`test_bedienung.gd`: Pausemenü, Neustart, Tür-Sicherheitsnetz, Tastenkappe,
 Blättern, Stationskarte, REZI-Lesezeit) und Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
 Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz; `test_zielzeile.gd`: Zielzeile
-jeder Station). `test_texte.gd` prüft außerdem
+jeder Station; `test_untertitel.gd`: REZI-Untertitelleiste). `test_texte.gd` prüft außerdem
 Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
 Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
 rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
@@ -312,6 +312,15 @@ kommt, aus den Leveldaten: „Noch 4 Daten-Kacheln, dann zum Ausgang“, sobald 
 „Ausgang offen: weiter nach rechts“; Station 02 nennt den Stempel samt Taste, Station 20 die
 letzte Tür (`HUD.ziel()`). Beim Schrittwechsel hellt die Zeile einmal auf, sie blinkt nicht.
 `tests/test_zielzeile.gd` prüft alle Stationen und Sprachen.
+
+**Untertitelleiste (Team-Feedback F4):** Im Level spricht REZI nicht mehr in einer Blase, die
+mit Figur und Kamera über die bewegte Kulisse wandert, sondern in einer festen Leiste unten in
+der Mitte, im Bodenstreifen unter Pauls Laufhöhe: deckendes PwC-Grau, links „REZI“ in REZIs
+Blau, rechts der Satz. Lange Sätze brechen ausgeglichen auf höchstens drei Zeilen um
+(`HUD.untertitel_breite()`), solange die Steuerungs-Hinweiszeile steht, sitzt die Leiste
+darüber. Mit Bildschirm-Steuerung (Tablet) bleibt sie schmaler, damit Knüppel und
+AKTION-Knopf frei bleiben. Lesezeit und Warteschlange bleiben bei REZI (`Rezi.say()`), auf dem Titelbild ohne
+HUD bleibt die Blase. `tests/test_untertitel.gd` prüft Lage, Ausblenden und alle Sprachen.
 
 ## Marke (PwC)
 
