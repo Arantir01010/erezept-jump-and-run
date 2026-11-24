@@ -301,6 +301,7 @@ func consume_idle_reset() -> bool:
 		return false
 	note_input()
 	Sfx.reset_visitor_choices()
+	Komfort.besucher_zuruecksetzen()
 	return true
 
 
@@ -377,14 +378,45 @@ func label_toggle() -> String:
 	return tr("Joystick HOCH") if has_gamepad() else "SHIFT"
 
 
+## Laufende Screenshots im Hintergrund (Kennungen im WorkerThreadPool).
+var _bild_aufgaben: Array[int] = []
+
+
 func save_screenshot(path: String) -> void:
 	await RenderingServer.frame_post_draw
-	var img := get_viewport().get_texture().get_image()
+	var vp := get_viewport()
+	var img := vp.get_texture().get_image()
+	if img == null or img.is_empty():
+		return
 	var dir := path.get_base_dir()
 	if dir != "" and not dir.begins_with("user://") and not dir.begins_with("res://"):
 		DirAccess.make_dir_recursive_absolute(dir)
-	img.save_png(path)
+	# So speichern, wie der Bildschirm es zeigt (Bildschirmbild.gd): Forward+ mit
+	# hdr_2d liefert ein lineares Gleitkommabild, roh gespeichert viel zu dunkel.
+	# Das Umrechnen dauert bei 1920×1080 rund eine halbe Sekunde. Es läuft deshalb im
+	# Hintergrund, sonst gingen die Zeitgeber des Prüflaufs (--shots) danach zu früh.
+	var linear := Bildschirmbild.linear(vp)
+	Bildschirmbild.vorbereiten(linear)
+	bilder_abwarten(false)
+	_bild_aufgaben.append(WorkerThreadPool.add_task(_bild_schreiben.bind(img, linear, path), false, "Screenshot"))
+
+
+## Läuft im Hintergrund: umrechnen, speichern, dann erst melden.
+static func _bild_schreiben(img: Image, linear: bool, path: String) -> void:
+	Bildschirmbild.srgb(img, linear).save_png(path)
 	print("[shot] ", path)
+
+
+## Wartet auf die Screenshots im Hintergrund (vor dem Beenden). Mit alle = false
+## räumt es nur die fertigen ab.
+func bilder_abwarten(alle := true) -> void:
+	var offen: Array[int] = []
+	for id in _bild_aufgaben:
+		if alle or WorkerThreadPool.is_task_completed(id):
+			WorkerThreadPool.wait_for_task_completion(id)
+		else:
+			offen.append(id)
+	_bild_aufgaben = offen
 
 
 # ------------------------------------------------------------------ Prüflauf
@@ -423,6 +455,7 @@ func run_shots(main) -> void:
 			await save_screenshot(dir.path_join("b%02d-%s-a.png" % [i + 1, str(Game.playlist[i])]))
 			await get_tree().create_timer(6.6).timeout
 			await save_screenshot(dir.path_join("b%02d-%s-b.png" % [i + 1, str(Game.playlist[i])]))
+		bilder_abwarten()
 		print("[shots] Briefings fertig → ", dir)
 		get_tree().quit()
 		return
@@ -482,6 +515,7 @@ func run_shots(main) -> void:
 		main.show_reward()
 		await get_tree().create_timer(1.2).timeout
 		await save_screenshot(dir.path_join("09-reward.png"))
+	bilder_abwarten()
 	print("[shots] fertig → ", dir)
 	get_tree().quit()
 

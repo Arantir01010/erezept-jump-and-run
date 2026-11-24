@@ -34,7 +34,7 @@ var level_h := 1104.0
 var lamps: Array = []   # Weltpositionen der Laternen (Level setzt dort Lichter)
 var foreground: Parallax2D
 var _blur_shader: Shader
-var _web := false
+var _ohne_unschaerfe := false   # Grafikstufe 0: Wolken und Vordergrund scharf
 
 
 func build(palette: Palette, width: float, height: float, seed_text: String) -> void:
@@ -43,7 +43,7 @@ func build(palette: Palette, width: float, height: float, seed_text: String) -> 
 	level_h = height
 	z_index = -10
 	light_mask = 2
-	_web = OS.has_feature("web")
+	_ohne_unschaerfe = not Grafik.kulissen_unschaerfe()
 	if BLUR_ENABLED:
 		_blur_shader = load(BLUR_SHADER)
 	var ground := level_h - 3 * Game.TILE
@@ -55,7 +55,7 @@ func build(palette: Palette, width: float, height: float, seed_text: String) -> 
 	sun_p.add_child(_ebene("sonne", seed_text + "sun", 1))
 
 	# Wolken: eigenes Leben, weich
-	_layer("wolken", 0.10, CLOUD_BLUR if not _web else 0.0, seed_text + "wolken")
+	_layer("wolken", 0.10, CLOUD_BLUR if not _ohne_unschaerfe else 0.0, seed_text + "wolken")
 	# Ferne Stadt: stark weich
 	_layer("far", 0.22, FAR_BLUR, seed_text + "far")
 
@@ -229,7 +229,7 @@ func _foreground(seed_text: String) -> void:
 	v.copies = 3
 	v.light_mask = 2
 	v.build(seed_text)
-	var use_group := BLUR_ENABLED and _blur_shader != null and not _web
+	var use_group := BLUR_ENABLED and _blur_shader != null and not _ohne_unschaerfe
 	if use_group:
 		var g := _group(FRONT_BLUR)
 		g.add_child(v)

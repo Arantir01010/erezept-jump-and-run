@@ -1,12 +1,17 @@
 class_name KulisseLeben
 extends Node2D
-## KULISSEN-LEBEN — alles Bewegte einer Ebene als REINE FUNKTION DER ZEIT
-## (kein Zustand, wie in Title.gd): Wolkenzug, Bodennebel, schwankende Bäume
+## KULISSEN-LEBEN — alles Bewegte einer Ebene als REINE FUNKTION DER SPIELZEIT
+## (einziger Zustand: die Zeit `zeit`): Wolkenzug, Bodennebel, schwankende Bäume
 ## und Kübelpflanzen, Vogelschwärme (Flügelschlag 1,9 Hz), ferne Fahrzeug-
 ## lichter, blinkende Antennen (0,5 Hz), Fenster mit Innenleben am Abend,
 ## Server-LEDs (≤ 2,5 Hz, gedämpft) und schwebender Papierstaub im Archiv.
 ## Nur dieser Knoten ruft queue_redraw() — die statische Ebene bleibt statisch.
 ## Sparsam und ruhig: nichts hier darf den Blick von der Spielfläche ziehen.
+##
+## Spielzeit statt Uhr: `zeit` summiert das delta je Bild. So steht die Kulisse in
+## der Pause (der Knoten wird dann nicht verarbeitet), folgt der Zeitlupe und dem
+## Trefferstopp (Engine.time_scale) wie das restliche Spiel und beginnt mit jeder
+## Station bei 0 — zwei Aufnahmen derselben Stelle zeigen dieselbe Kulisse.
 
 const FLAP_HZ := 1.9        # Flügelschlag — unter 3 Hz (Barrierefreiheit)
 const ANTENNA_HZ := 0.5
@@ -25,11 +30,8 @@ var inhabitants: Array = [] # {p, ph, ph2}
 var leds: Array = []        # {p, hz, ph, c}
 var specks: Array = []      # {p, ph, r}
 var fog_tex: ImageTexture
+var zeit := 0.0             # Spielzeit dieser Ebene in s (seit dem Aufbau, im Bildtakt)
 var _ox := 0.0
-
-
-static func now() -> float:
-	return Time.get_ticks_msec() / 1000.0
 
 
 func ground_y() -> float:
@@ -90,7 +92,8 @@ func build(seed_text: String) -> void:
 						"ph": rng.randf_range(0, TAU), "r": rng.randf_range(2.0, 4.5) if kind == "mid" else rng.randf_range(3.0, 6.0)})
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	zeit += delta
 	queue_redraw()
 
 
@@ -103,7 +106,7 @@ func _visible_local() -> Rect2:
 
 
 func _draw() -> void:
-	var t := now()
+	var t := zeit
 	var ground := ground_y()
 	if kind == "fog":
 		if fog_tex:

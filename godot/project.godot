@@ -27,6 +27,11 @@ locale/fallback="de"
 Game="*res://src/autoload/Game.gd"
 Sfx="*res://src/autoload/Sfx.gd"
 Kiosk="*res://src/autoload/Kiosk.gd"
+Aufnahme="*res://src/autoload/Aufnahme.gd"
+
+[debug]
+
+file_logging/max_log_files=60
 
 [display]
 
@@ -47,6 +52,7 @@ pointing/emulate_touch_from_mouse=false
 
 common/physics_ticks_per_second=60
 common/max_physics_steps_per_frame=8
+common/physics_interpolation=true
 2d/default_gravity=3000.0
 
 [rendering]

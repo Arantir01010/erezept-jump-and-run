@@ -22,7 +22,7 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 | `--lautstaerke=<0–100>` | Gesamtlautstärke (sonst der gespeicherte Wert, Strg+F9/F10) |
 | `--fullscreen` | nur Vollbild |
 | `--level=<id>` | direkt in ein Level springen, z. B. `--level=04-die-huelle` |
-| `--shots=<ordner>` | automatischer Prüflauf: spielt selbst, speichert Screenshots (auch zwei Bilder mitten in der Blende), beendet sich |
+| `--shots=<ordner>` | automatischer Prüflauf: spielt selbst, speichert Screenshots (auch zwei Bilder mitten in der Blende), beendet sich. Die Bilder sind sRGB wie auf dem Bildschirm, auch in Forward+ |
 | `--shots-level=<id>` | Level für den Prüflauf |
 | `--touch` | Bildschirm-Steuerung sofort einblenden (Test am PC: die Maus spielt den Finger) |
 | `--webfx` | Browser-Pfad am Desktop testen: Glüh-Sprites statt HDR-Glühen, CPU-Partikel |
@@ -102,7 +102,7 @@ Das Menü baut sich mit der neuen Sprache neu auf, alles danach (Zeitreise, Prob
 ePA-Wissen, Briefings, HUD, Hinweise im Level, Stationskarte, Reward) folgt ihr. Beim
 Idle-Reset gilt wieder die Standardsprache (`language` in `config/game-config.json`).
 
-- **Übersetzungen** liegen in `i18n/*.json` (`ui`, `intro`, `briefing`, `levels`): Schlüssel
+- **Übersetzungen** liegen in `i18n/*.json` (`ui`, `intro`, `briefing`, `levels`, `wissen`): Schlüssel
   ist der deutsche Text, genau wie er im Code oder in `levels/*/level.json` steht, Spalten
   `en fr es zh hi`. `Game._load_translations()` lädt sie in den TranslationServer; Labels
   übersetzen sich selbst (auto_translate), formatierte Texte holen `tr()`, Level-Texte
@@ -190,9 +190,12 @@ python godot/tools/serve_web.py            # http://localhost:8060/ — öffnet 
 ```
 
 `godot/build-web/` ist die komplette Browser-Fassung: `index.html`, `index.js`, `index.wasm`
-(≈ 40 MB Godot-Laufzeit), `index.pck` (das Spiel, ≈ 1 MB), Audio-Worklets, Icons, dazu
-`Start im Browser.bat`, `serve_web.py` und `LIESMICH.txt`. Ein Web-Build läuft nicht per
-Doppelklick auf `index.html` (Browser laden `.wasm`/`.pck` nur über HTTP), deshalb der
+(≈ 40 MB Godot-Laufzeit), `index.pck` (das Spiel, ≈ 6 MB), Audio-Worklets, Icons, dazu
+`Start im Browser.bat`, `serve_web.py` und `LIESMICH.txt`. Das PCK ist für Web und Windows
+gleich groß: 5 949 456 Bytes, davon 4,6 MB Musik (gemessen am 24.11.2026 mit `--export-pack`,
+ohne Markenschriften). Mit den lokal eingelegten Markenschriften kommt knapp 1 MB dazu.
+Ein Web-Build läuft nicht per Doppelklick auf `index.html` (Browser laden `.wasm`/`.pck`
+nur über HTTP), deshalb der
 kleine Server; für die Veröffentlichung reicht jeder statische Webspace mit HTTPS
 (GitHub Pages, Netlify, itch.io …). Der Build ist **ohne Thread-Unterstützung** exportiert,
 braucht also keine Cross-Origin-Isolation-Header.
@@ -248,7 +251,9 @@ empfohlen.
 | Befehl | Zweck |
 |---|---|
 | `python godot/tools/sync_levels.py` | Level + Konfiguration aus `design/` und `public/config/` nach `godot/levels/_import/` und `godot/config/` kopieren |
-| `python godot/tools/build_levels.py` | **alle zehn Level** aus dem Generator bauen (Geometrie + Objekte) und die Erreichbarkeit prüfen (Sprung 3 hoch / ~6 weit, Bonus per REZI-Schub, Sprungfedern) |
+| `python godot/tools/build_levels.py` | **alle zehn Level** aus dem Generator bauen (Geometrie + Objekte) und die Erreichbarkeit prüfen (Sprung 3 hoch / 5 weit, in Hülle-Leveln 4; Bonus per REZI-Schub, Sprungfedern). Mit `--sprungweiten` zeigt er je Level den breitesten Pflichtsprung und schreibt nichts |
+| `python3 godot/tools/pruefen.py` | alle Prüfstufen vor dem Push (siehe „Prüfen vor dem Commit") |
+| `python godot/tools/erzeugung_protokoll.py --neu …` | eine Erzeugung mit einem KI-Dienst festhalten (Prompt, Modell, Kosten, SHA-256); `--pruefen` prüft das Protokoll, `--liste` zeigt die Kosten |
 | `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als OGG (Pixabay, aus MP3 umgewandelt), siehe `assets/audio/CREDITS.md` |
 | `powershell -ExecutionPolicy Bypass -File godot\tools\build.ps1` | Auslieferungspaket in `build/` (PCK + signierte Laufzeit + Verknüpfungen + EXE) |
 | `Godot … --headless --import` | Projekt-Cache aufbauen, Skriptfehler sehen (`SCRIPT ERROR`) |
@@ -281,14 +286,55 @@ Fahne mit Blende und Kamera, Fahnen höchstens 35 Kacheln auseinander, kaputte B
 Abschluss-Badges, Zeitreise überspringen, Mitmach-Probelauf, Leitpfeil, Statistik,
 Betreiber-Menü). `test_texte.gd` prüft außerdem
 Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
-Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
-rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
+Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Gewartet wird in Spielzeit,
+nicht in Echtzeit (siehe „Flüssig an schnellen Monitoren“).
 `tests/` wird nicht exportiert. Ein fertiger GitHub-Workflow liegt in `tools/ci/godot-tests.yml`
 (Aktivieren nur durch Menschen: `.github/` gehört zum versiegelten Phaser-Kern).
 
-Alle Grafiken sind prozedural (Vektorzeichnung zur Laufzeit), alle Klänge synthetisiert —
-es gibt keine Binär-Assets mit Lizenzfragen. Wer gezeichnete Kunst einbauen will, ersetzt
-die `_draw()`-Methoden von `PaulVisual`, `Rezi`, `Terrain`, `Backdrop` durch Sprites.
+### Prüfen vor dem Commit
+
+`godot/tools/pruefen.py` prüft die Godot-Fassung von billig nach teuer. Es braucht Python 3.8+
+und Godot 4.7.2 aus `PATH`, `GODOT` oder `--godot <pfad>`:
+
+```bash
+python3 godot/tools/pruefen.py            # Stufen 0–5 und 7: Dateien, Level-Generator, Import, Typwarnungen, Tests, Exportprobe, Durchspiel
+python3 godot/tools/pruefen.py --schnell  # nur 0 und 1, ~2 s, ohne Godot
+python3 godot/tools/pruefen.py --bilder   # zusätzlich Bildprobe (Linux: xvfb-run, mehrere Minuten)
+python3 godot/tools/pruefen.py --nur 7    # nur das Durchspiel
+```
+
+Jede Stufe schreibt eine Zeile `STUFE n Name: …`. Die letzte lautet
+`N Stufen, M fehlgeschlagen, K übersprungen`. Rückgabe 0 heißt sauber, 1 Fehler, 2 etwas
+übersprungen. Die Logs liegen in `godot/.pruefen/`. Mehr Typwarnungen als in
+`godot/tools/grenzwerte.json` lassen Stufe 3 scheitern. Die Grenzen zieht man nur bewusst nach:
+`--nur 3 --grenzen-nachziehen`.
+
+Der Commit-Haken wird einmal je Klon eingeschaltet und gilt für alle Arbeitskopien:
+`git config core.hooksPath godot/tools/githooks`. Dann läuft `--schnell` vor jedem Commit mit
+Dateien unter `godot/`. Abschalten: `git config --unset core.hooksPath`. Einmal umgehen:
+`git commit --no-verify`.
+
+### Herkunft der Dateien
+
+Alle Grafiken sind prozedural (Vektorzeichnung zur Laufzeit), die kurzen Klänge synthetisiert
+(`tools/gen_assets.py`). Fremd sind die vier Musikstücke (Pixabay Content License) und die
+Noto-Schriften (SIL OFL 1.1). Die Markenschriften und Piktogramme sind lizenziert und nicht im
+Repository. Die Herkunft jeder Datei steht in `assets/HERKUNFT.json`, `tests/test_herkunft.gd`
+prüft, dass keine fehlt.
+
+**Offen:** Pixabay untersagt die Weitergabe der Stücke als eigenständige Dateien. Im
+öffentlichen Repository liegen sie aber einzeln, aus dem Web-Paket lassen sie sich herauslösen.
+Die Entscheidung steht aus.
+
+Dateien von einem KI-Dienst bekommen in `HERKUNFT.json` das Feld `"ki": true`. Jede Erzeugung
+kommt als eine Zeile nach `docs/erzeugungsprotokoll.jsonl`, mit Prompt, Modell, Datum, Kosten
+und SHA-256 der Datei (`python godot/tools/erzeugung_protokoll.py --neu …`). Der Test verlangt
+zu jeder KI-Datei eine Zeile mit derselben SHA-256. Zugangsdaten, signierte Adressen und
+E-Mail-Adressen lehnt das Werkzeug ab. `docs/` wird nicht exportiert, Prompts und Kosten
+landen also nie im Spiel.
+
+Wer gezeichnete Kunst einbauen will, ersetzt die `_draw()`-Methoden von `PaulVisual`, `Rezi`,
+`Terrain`, `Backdrop` durch Sprites.
 
 ## Level
 
@@ -305,7 +351,12 @@ Drei Godot-Erweiterungen im Layout:
 
 Plattformen `=` sind von unten durchspringbar. Paul hat zusätzlich den REZI-Schub
 (Doppelsprung) und Wandsprung; Pflichtwege sollten trotzdem mit einem Sprung
-(3 Kacheln hoch, ~5 Kacheln weit) lösbar sein — der Schub ist für Bonuswege.
+(3 Kacheln hoch, 5 Kacheln weit, in Hülle-Leveln 4) lösbar sein — der Schub ist für Bonuswege.
+
+`LevelData` lädt streng. Jedes Feld wird gegen das Schema in `src/core/LevelData.gd` geprüft.
+Tippfehler, fehlende Pflichtfelder, Kommazahlen in Ganzzahlfeldern und falsche Typen werden
+zu Befunden, je eine Zeile `<datei>: <feld>: <grund>`. Im Spiel erscheinen sie nur als
+Warnung, das Level läuft weiter. `tests/test_leveldaten_streng.gd` wertet sie als Fehler.
 
 Alle zehn Level in `levels/<id>/` entstehen aus `tools/build_levels.py` (Kishōtenketsu:
 Einführung → Entwicklung → Wendung mit Weggabelung → Abschluss). Seit 03.09.2026 sind sie
@@ -343,6 +394,25 @@ gefärbte Schatten aller Lichter, Sonnendrift je Station, Paul mit Kapuzenzipfel
 (Kettensimulation), Schmierstreckung und Geisterspur beim REZI-Schub, REZI mit Mimik,
 VAU-Ring, Siegel-Burst. Im Browser ersetzen Glüh-Sprites das HDR-Glühen (`Fx.web_fallback`).
 
+### Grafikstufen und Glühen
+
+Wie aufwendig gezeichnet wird, entscheidet eine Stelle: `src/core/Grafik.gd`. Stufen ändern nur
+die Bildqualität, nie Ort, Größe oder Zeitpunkt.
+
+| Stufe | Wann | Was |
+|---|---|---|
+| 0 „Browser" | Web-Build, `--webfx` | Glüh-Sprites statt HDR-Glühen, CPU-Partikel |
+| 1 „Mitte" | `--grafik=1` | HDR-Glühen bleibt, CPU- statt GPU-Partikel, 2D-MSAA höchstens 2× |
+| 2 „Voll" | Desktop-Vorgabe | HDR-Glühen, GPU-Partikel mit Sub-Emittern, MSAA 8× |
+
+`--grafik=0|1|2` übersteuert die Wahl, auch `--webfx`. Für das Glühen gibt es zwei Varianten.
+`--glow=a` ist die Vorgabe mit den bisherigen Werten. `--glow=b` nutzt den Modus Screen mit
+Schwelle 2,0, Stärke 0,3 und Entbänderung. `--glow=aus` ist nur zum Messen gedacht. F7 wechselt
+zwischen A und B und blendet kurz ein, welche Variante läuft. Das geht nur mit `--vergleich`
+oder im Debug-Build ohne `--kiosk`. Beim Start wärmt `Grafik.vorwaermen` Shader und Partikel
+unter der Blende vor, `--ohne-vorwaermen` schaltet das ab. Bilder vergleichen:
+`python godot/tools/bildvergleich.py vorher/ nachher/ --aus vergleich/ --md`.
+
 **Lesbarkeit (Team-Feedback 9/2026):** Das HUD hat keine eigene Rand-Vignette mehr (die
 gestufte zeichnete ein Streifenraster); die Zähler hängen in einer Spalte an der rechten
 Bildkante, die Zeit ist unter Par PwC-Gelb. Störfelder sind deckend rot mit dunkler Kontur,
@@ -350,6 +420,42 @@ rot-dunkel schraffiertem Sockel und rotem Bodenschein, der ruhig mit 1,2 Hz atme
 Orange, denn warm heißt „Klartext". Der Lauscher-Kegel ist nur warm mit Kontur, solange Paul
 im Klartext lesbar ist; verschlüsselt oder in der VAU wird er blass und neutral. Paul blinkt
 nach einem Treffer mit 2 Hz.
+
+### Flüssig an schnellen Monitoren
+
+Die Physik tickt mit 60 Hz. Paul wird zwischen zwei Physikschritten gezeichnet
+(Physik-Interpolation, nur für ihn). Wer Paul im Bild folgt, also Kamera, Nachbilder und
+Leitpfeil, nimmt `Player.render_position()` und nicht `global_position`. Messen:
+`godot --headless --path godot --fixed-fps 144 --script res://tests/taktprobe.gd`.
+
+Alles mit Zeitbezug zählt Spielzeit statt Wanduhr: Sie steht in der Pause und folgt der Zeitlupe.
+Kombo-Fenster, Laufzeit und die Abstände zwischen REZIs Tipps an Tür, Infoschild und Tor laufen
+über `Game.spielzeit`. Schonzeit und Sprungfenster zählen im Physikschritt mit. Titel, Intro,
+Briefings und das Kulissen-Leben rechnen aus `delta`. Tests warten deshalb mit `sekunden()` oder
+`frames()`. Echte Zeit messen nur die Messe-Statistik und der Kiosk-Leerlauf (Idle-Reset,
+Vorführung, Steck-Tipp und Leitpfeil, wenn lange nichts gedrückt wurde).
+
+### Durchspiel (Aufnahmen)
+
+Ob eine Station nach einer Leveländerung noch lösbar ist, zeigt Stufe 7 von `pruefen.py`
+(`--nur 7` allein, `--ohne-durchspiel` lässt sie aus). Sie spielt jede Aufnahme
+`tests/durchspiel/<station>.json` in einem eigenen Prozess ab, headless mit `--fixed-fps 60`,
+etwa 3 s je Station. Je Station meldet sie `ziel`, `absturz`, `haenger` oder `falsch`. Kommt Paul
+auf anderem Weg als aufgenommen ans Ziel, besteht die Station, die Zeile nennt es aber. Nach
+einer gewollten Änderung an einer Station wird sie neu aufgenommen:
+
+- **Ohne Menschen:** `Godot --headless --path godot --fixed-fps 60 --script res://tests/durchspiel.gd -- --suche=<station>`.
+  Der Läufer läuft, springt, wartet die Kralle ab und drückt PIN-Schleuse und Stempel. Er duckt
+  nicht, wechselt die Hülle nicht, steckt keine Karten und dockt nicht an.
+- **Am PC:** `Godot --path godot --fixed-fps 60 -- --windowed --level=<station> --aufnahme=res://tests/durchspiel/<station>.json`,
+  dann die Station bis durch die Tür spielen. Geschrieben wird am Ziel. Ohne `--fixed-fps 60` oder
+  mit Pause vermerkt die Datei das, die Wiedergabe kann dann abweichen.
+
+Einzeln abspielen: `… --script res://tests/durchspiel.gd -- --wiedergabe=res://tests/durchspiel/<station>.json`.
+`--wiederholen=N`, `--vorlauf=N` und `--zufall-stoeren` prüfen den Determinismus. Aufnahmen gibt
+es für 01, 02, 04, 14 und 20; die übrigen fünf Stationen schafft der Läufer nicht, sie braucht
+eine Aufnahme am PC. `tests/test_durchspiel.gd` prüft das Format und dass sich eine Wiedergabe
+mit ihrer Aufnahme deckt.
 
 ## Marke (PwC)
 
@@ -361,6 +467,21 @@ Lizenz-Hinweis (Desktop-EULA, App-Einbettung klären) stehen in
 [`brand/README.md`](brand/README.md). Fehlen die Schriftdateien, läuft das Spiel mit der
 Godot-Standardschrift weiter.
 
+## Bausteine und Regeln
+
+Jeder Stationsbaustein (Kartenleser, Lauscher, VAU-Feld …) steht in einer eigenen Datei unter
+`src/mechanics/stationen/`. `src/mechanics/Stations.gd` ist nur das Verzeichnis:
+`Stations.REGISTRY` ordnet jedem Typ aus `level.json` sein Skript zu. Die alten Namen wie
+`Stations.Kartenleser` gelten weiter. Ein neuer Baustein braucht eine eigene Datei und einen
+Eintrag in `Stations.gd`, die `.uid` wird mit committet. Seine Felder gehören ins Schema
+`LevelData.BAUSTEINE`, sonst schlägt `tests/test_leveldaten_streng.gd` an.
+
+`src/state/` enthält reine Regelklassen. Sie erben von `RefCounted` und halten Zustand und
+Regeln ohne Szene. Die Zeit kommt als Argument, Änderungen gehen per Signal hinaus. So laufen
+sie im Test ohne Level (Beispiele: `Huelle`, `SprungFenster`). Knoten, Zeichnen, Dateien, Uhr,
+Eingabe, Autoloads und Klassen der äußeren Ordner sind dort tabu. Das prüft
+`python godot/tools/schichten_pruefen.py` (Schlusszeile `N Dateien, M Brüche`).
+
 ## Struktur
 
 ```
@@ -370,25 +491,32 @@ godot/
 ├── src/
 │   ├── Main.gd                      Ablauf: Hauptmenü → Zeitreise → Probelauf → Level → Karte → (Wissen) → … → Reward
 │   ├── autoload/  Game.gd (Zustand, Punkte, Medaillen, Highscore) · Sfx.gd (Klang) · Kiosk.gd (Eingabe, Messe, Prüflauf)
-│   ├── core/      LevelData.gd (Level-Parser) · Palette.gd (Materialsystem) · Brand.gd (PwC-Schrift, UI-Farben)
+│   │              · Aufnahme.gd (Eingaben aufnehmen und abspielen, ohne --aufnahme untätig)
+│   ├── core/      LevelData.gd (Level-Parser mit Schema) · Palette.gd (Materialsystem) · Brand.gd (PwC-Schrift, UI-Farben)
+│   │              · Grafik.gd (Grafikstufen, Glühen) · Komfort.gd (Bewegung reduzieren) · Statistik.gd (anonyme Zählung)
+│   │              · Bildschirmbild.gd (Aufnahmen in sRGB) · Eingabespur.gd (Format der Durchspiel-Aufnahmen)
 │   ├── player/    Player.gd (Controller) · PaulVisual.gd (Figur)
 │   ├── actors/    Rezi.gd
 │   ├── world/     Level.gd · Terrain.gd + terrain/ (Blocktexturen, Wind-Flora, Pfützen, Bodennebel)
 │   │              · Backdrop.gd + backdrop/ (Ebenen, Leben, Vordergrund, Partikel, Lichtstrahlen) · GameCamera.gd
 │   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays · vau_gitter (.gdshader)
-│   ├── mechanics/ Mechanic.gd · Basics.gd · Stations.gd (alle Bausteine)
-│   ├── state/     Huelle.gd (Kernmechanik)
+│   ├── mechanics/ Mechanic.gd · Basics.gd · KartenFx.gd · Stations.gd (Verzeichnis) · stationen/ (ein Baustein je Datei)
+│   ├── state/     Huelle.gd (Kernmechanik) · SprungFenster.gd · KartenleserRegel.gd — reine Regelklassen ohne Szene
 │   ├── fx/        Fx.gd (Partikel, Lichter, Hitstop, Stempel, Browser-Fallback) · PostFx.gd (Grading je Welt) · Weather.gd (Regen, Blitz)
 │   └── ui/        Vignette.gd + Pen.gd (Info-Screen-Basis) · Title.gd (Hauptmenü/Klinikum) · Intro.gd (Zeitreise + Probelauf)
-│                  · Wissen.gd (ePA-Sequenzen) · TouchControls.gd · HUD.gd · LevelCard.gd · Reward.gd
+│                  · Wissen.gd (ePA-Sequenzen) · Quiz.gd (Wissensabfrage) · TouchControls.gd · HUD.gd · LevelCard.gd · Reward.gd
 ├── levels/        Godot-eigene Level; _import/ = Sync aus design/
 ├── config/        Sync aus public/config/
-├── assets/        generiert (audio/, qr/) · fonts/ + brand/ (Marke, lizenziert, nicht im Repo)
+├── assets/        audio/ (Klänge generiert, Musik von Pixabay) · qr/ · i18n/ (Noto-Untermengen) · HERKUNFT.json
+│                  · fonts/ + brand/ (Marke, lizenziert, nicht im Repo)
 ├── brand/         Marken-README + Lizenzdokumente
 ├── docs/          Bewertung, Recherche, Konzept, Umfrage (Excel)
-├── i18n/          Übersetzungen (ui, intro, briefing, levels) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
-├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd — nicht im Export
+│                  · erzeugungsprotokoll.jsonl (KI-Erzeugungen, entsteht mit dem ersten Eintrag)
+├── i18n/          Übersetzungen (ui, intro, briefing, levels, wissen) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
+├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd · durchspiel*.gd + durchspiel/ (Aufnahmen) — nicht im Export
 ├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
+│                  · pruefen.py + grenzwerte.json (Prüfstufen) · schichten_pruefen.py · bildvergleich.py
+│                  · erzeugung_protokoll.py (KI-Protokoll) · statistik_auswerten.py · githooks/ (Commit-Haken)
 │                  · ci/godot-tests.yml (vorbereiteter GitHub-Workflow, nicht aktiv)
 ├── build/         Windows-Paket (generiert)      · build-web/  Browser-Fassung (generiert)
 └── shots/         Screenshot-Prüfläufe (generiert)

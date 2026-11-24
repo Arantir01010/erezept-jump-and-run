@@ -141,6 +141,8 @@
   "Musik: aus": {"en": "Music: off", "fr": "Musique : non", "es": "Música: no", "zh": "音乐：关", "hi": "संगीत: बंद"},
   "Töne: an": {"en": "Sounds: on", "fr": "Sons : oui", "es": "Sonidos: sí", "zh": "音效：开", "hi": "ध्वनि: चालू"},
   "Töne: aus": {"en": "Sounds: off", "fr": "Sons : non", "es": "Sonidos: no", "zh": "音效：关", "hi": "ध्वनि: बंद"},
+  "Bewegung reduzieren: an": {"en": "Reduce motion: on", "fr": "Réduire les animations : oui", "es": "Reducir movimiento: sí", "zh": "简化动效：开", "hi": "गति कम करो: चालू"},
+  "Bewegung reduzieren: aus": {"en": "Reduce motion: off", "fr": "Réduire les animations : non", "es": "Reducir movimiento: no", "zh": "简化动效：关", "hi": "गति कम करो: बंद"},
   "Zum Hauptmenü": {"en": "To the main menu", "fr": "Vers le menu principal", "es": "Al menú principal", "zh": "返回主菜单", "hi": "मुख्य मेनू पर"},
   "MUSIK": {"en": "MUSIC", "fr": "MUSIQUE", "es": "MÚSICA", "zh": "音乐", "hi": "संगीत"},
   "TÖNE": {"en": "SOUNDS", "fr": "SONS", "es": "SONIDOS", "zh": "音效", "hi": "ध्वनि"},

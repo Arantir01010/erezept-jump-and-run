@@ -157,7 +157,9 @@ class DoorExit extends Mechanic:
 			_done = true
 			level.complete_level()
 		else:
-			var now := Time.get_ticks_msec() / 1000.0
+			# Spielzeit statt Wanduhr (Game.spielzeit): steht in der Pause, und die
+			# Wiedergabe einer Aufnahme (tests/durchspiel.gd) sagt dasselbe zur selben Zeit.
+			var now := Game.spielzeit
 			if now - _hint_at > 3.0:
 				_hint_at = now
 				_abgewiesen += 1
@@ -322,7 +324,7 @@ class InfoSign extends Mechanic:
 		make_sensor(rect, _on_enter)
 
 	func _on_enter(_p: Player) -> void:
-		var now := Time.get_ticks_msec() / 1000.0
+		var now := Game.spielzeit
 		if now - _last < 4.0:
 			return
 		_last = now
@@ -344,6 +346,9 @@ class MovingPlatform extends Mechanic:
 	var speed := 40.0 * 3.0
 	var _t := 0.0
 	var _start := Vector2.ZERO
+	## Versatz der letzten beiden Physikschritte (für die Physik-Interpolation).
+	var _x_vorher := 0.0
+	var _x_jetzt := 0.0
 
 	func spawn() -> void:
 		z_index = 4
@@ -368,11 +373,24 @@ class MovingPlatform extends Mechanic:
 		var period := (range_px * 2.0) / maxf(speed, 1.0)
 		var ph := fmod(_t, period) / period
 		var x := range_px * (1.0 - absf(ph * 2.0 - 1.0))
+		_x_vorher = _x_jetzt
+		_x_jetzt = x
 		body.position = _start + Vector2(x, 0)
 		queue_redraw()
 
+	## Mit Physik-Interpolation wird Paul zwischen zwei Physikschritten gezeichnet. Die
+	## Plattform muss es auch, sonst zuckt sie bei 120/144 Hz unter seinen Füßen.
+	func tick(_delta: float) -> void:
+		if get_tree().physics_interpolation:
+			queue_redraw()
+
+	func _bild_x() -> float:
+		if not get_tree().physics_interpolation:
+			return body.position.x
+		return _start.x + lerpf(_x_vorher, _x_jetzt, Engine.get_physics_interpolation_fraction())
+
 	func _draw() -> void:
-		var r := Rect2(body.position.x - rect.size.x / 2.0, -rect.size.y / 2.0, rect.size.x, 18.0)
+		var r := Rect2(_bild_x() - rect.size.x / 2.0, -rect.size.y / 2.0, rect.size.x, 18.0)
 		draw_line(Vector2(-rect.size.x / 2.0, r.get_center().y), Vector2(range_px + rect.size.x / 2.0, r.get_center().y), Color(pal.outline.r, pal.outline.g, pal.outline.b, 0.3), 3.0)
 		draw_panel(Rect2(r.position - Vector2(2, 2), r.size + Vector2(4, 4)), pal.outline, pal.outline, 7, 0.0, 0)
 		draw_panel(r, pal.cap, pal.cap, 6, 0.0, 0)
@@ -439,7 +457,7 @@ class Gate extends Mechanic:
 	func _on_bump(_p: Player) -> void:
 		if is_open:
 			return
-		var now := Time.get_ticks_msec() / 1000.0
+		var now := Game.spielzeit
 		if now - _last_bump > 0.6:
 			_bump_start = now
 		_last_bump = now
@@ -450,7 +468,7 @@ class Gate extends Mechanic:
 		_t += delta
 		_shake = maxf(0.0, _shake - delta * 4.0)
 		if not is_open and player_in_rect(Rect2(rect.position.x - 26, rect.position.y, rect.size.x + 52, rect.size.y)):
-			var now := Time.get_ticks_msec() / 1000.0
+			var now := Game.spielzeit
 			if now - _bump_start > 1.6 and now - _last_tip > 7.0 and absf(player.velocity.x) > 20.0:
 				_last_tip = now
 				say(open_hint if open_hint != "" else ltext("bumpHint",

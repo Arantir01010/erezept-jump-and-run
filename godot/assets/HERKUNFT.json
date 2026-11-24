@@ -1,0 +1,167 @@
+{
+  "zweck": "Herkunft jeder Nicht-Code-Datei unter godot/assets/ und godot/brand/: woher, von wem, unter welcher Lizenz, mit welchem Werkzeug. Geprüft von tests/test_herkunft.gd.",
+  "regeln": [
+    "muster: Glob relativ zu godot/ (* und ? ohne „/“, ** auch über Ordner) — Text oder Liste.",
+    "Jede Datei unter assets/ und brand/ (ohne .import/.uid und ohne gitignorierte Ordner) passt zu mindestens einem Eintrag; jeder Eintrag ohne lokal trifft mindestens eine Datei.",
+    "lokal: true = liegt nur auf Arbeitsplätzen mit Brand-Paket, in einem per godot/.gitignore ausgeschlossenen Ordner; der Test verlangt dafür keine Datei.",
+    "lizenz: name + link (Lizenztext oder -seite; leer nur ohne Fremdquelle), optional kurzfassung.",
+    "abgerufen: Tag des Abrufs bzw. der Übernahme (JJJJ-MM-TT), leer bei eigener Erzeugung.",
+    "ki: true = von einem KI-Dienst erzeugt. Jede Datei braucht dann eine Zeile in docs/erzeugungsprotokoll.jsonl mit gleicher SHA-256 (tools/erzeugung_protokoll.py --neu); erzeugt_von nennt Dienst und Modell."
+  ],
+  "eintraege": [
+    {
+      "muster": ["assets/audio/music_title.ogg", "assets/audio/music_title.mp3"],
+      "quelle": "https://pixabay.com/music/electronic-chillcalming-chiptune-loop-527182/ („Chill/Calming Chiptune Loop“)",
+      "autor": "Reganati",
+      "lizenz": {
+        "name": "Pixabay Content License",
+        "link": "https://pixabay.com/service/license-summary/",
+        "kurzfassung": "Nutzung in eigenen Projekten, auch kommerziell, ohne Namensnennung erlaubt; nicht erlaubt ist die Weitergabe der Stücke als eigenständige Dateien (assets/audio/CREDITS.md)."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
+      "hinweis": "Hauptmenü, Zeitreise, Wissen, Briefings. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
+    },
+    {
+      "muster": ["assets/audio/music_level.ogg", "assets/audio/music_level.mp3"],
+      "quelle": "https://pixabay.com/music/video-games-8bit-theme-loop-chiptune-symphony-387749/ („8Bit theme Loop – Chiptune Symphony“)",
+      "autor": "MusicInMedia",
+      "lizenz": {
+        "name": "Pixabay Content License",
+        "link": "https://pixabay.com/service/license-summary/",
+        "kurzfassung": "Nutzung in eigenen Projekten, auch kommerziell, ohne Namensnennung erlaubt; nicht erlaubt ist die Weitergabe der Stücke als eigenständige Dateien (assets/audio/CREDITS.md)."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
+      "hinweis": "Stationen 01–05. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
+    },
+    {
+      "muster": ["assets/audio/music_level2.ogg", "assets/audio/music_level2.mp3"],
+      "quelle": "https://pixabay.com/music/synthwave-game-level-pixel-quest-loop-578505/ („Game Level Pixel Quest Loop“)",
+      "autor": "alex-morgan",
+      "lizenz": {
+        "name": "Pixabay Content License",
+        "link": "https://pixabay.com/service/license-summary/",
+        "kurzfassung": "Nutzung in eigenen Projekten, auch kommerziell, ohne Namensnennung erlaubt; nicht erlaubt ist die Weitergabe der Stücke als eigenständige Dateien (assets/audio/CREDITS.md)."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "ffmpeg: Anfangsstille (0,4 s) entfernt, loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
+      "hinweis": "Stationen 13–20. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
+    },
+    {
+      "muster": ["assets/audio/music_reward.ogg", "assets/audio/music_reward.mp3"],
+      "quelle": "https://pixabay.com/music/upbeat-that-game-arcade-236111/ („That Game Arcade“)",
+      "autor": "moodmode",
+      "lizenz": {
+        "name": "Pixabay Content License",
+        "link": "https://pixabay.com/service/license-summary/",
+        "kurzfassung": "Nutzung in eigenen Projekten, auch kommerziell, ohne Namensnennung erlaubt; nicht erlaubt ist die Weitergabe der Stücke als eigenständige Dateien (assets/audio/CREDITS.md)."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
+      "hinweis": "Reward-Screen. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
+    },
+    {
+      "muster": "assets/audio/*.wav",
+      "quelle": "eigene Erzeugung: Synthese aus Code (Sinus/Rechteck/Dreieck/Rauschen mit Hüllkurven), keine Fremdquelle",
+      "autor": "Projektteam",
+      "lizenz": {"name": "eigenes Werk, keine Fremdrechte", "link": ""},
+      "abgerufen": "",
+      "erzeugt_von": "tools/gen_assets.py (numpy)",
+      "hinweis": "19 kurze Klänge (Sprung, Sammeln, Tor, Siegel …). Legt gen_assets.py music_title.wav/music_level.wav wieder an, sind auch die synthetisch; OGG/MP3 hat im Spiel Vorrang."
+    },
+    {
+      "muster": ["assets/qr/reward.png", "assets/qr/info.png"],
+      "quelle": "eigene Erzeugung: QR-Codes aus config/game-config.json, reward.png mit dem statischen Gewinncode (ending.staticPayload), info.png mit dem Link zum Nachlesen (ending.infoLink; ohne Link entfällt die Datei)",
+      "autor": "Projektteam",
+      "lizenz": {"name": "eigenes Werk, keine Fremdrechte", "link": ""},
+      "abgerufen": "",
+      "erzeugt_von": "tools/gen_assets.py, Funktion qr() (Python-Paket qrcode, Fehlerkorrektur M)",
+      "hinweis": "Ändern sich staticPayload oder infoLink, die Bilder neu erzeugen (gen_assets.py --nur-qr)."
+    },
+    {
+      "muster": "assets/i18n/NotoSansSC-subset.otf",
+      "quelle": "https://github.com/notofonts/noto-cjk (Sans/OTF/SimplifiedChinese, NotoSansCJKsc-Regular.otf, Version 2.004)",
+      "autor": "© 2014-2021 Adobe (Noto Sans CJK SC); Noto ist eine Marke von Google",
+      "lizenz": {
+        "name": "SIL Open Font License 1.1",
+        "link": "https://openfontlicense.org",
+        "kurzfassung": "Nutzen, Einbetten, Ändern (Untermenge) und Weitergeben erlaubt, der Lizenztext liegt bei (assets/i18n/OFL.txt); die Schrift nicht für sich allein verkaufen."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "tools/gen_i18n_fonts.py (fontTools: Untermenge mit den Zeichen aus i18n/*.json)",
+      "hinweis": "Fallback für Chinesisch. Abruftag = Commit d54d4f3. Nach jeder Änderung an den Übersetzungen neu erzeugen."
+    },
+    {
+      "muster": "assets/i18n/NotoSansDevanagari-subset.ttf",
+      "quelle": "https://github.com/google/fonts (ofl/notosansdevanagari, NotoSansDevanagari[wdth,wght].ttf, Version 2.006)",
+      "autor": "Copyright 2022 The Noto Project Authors (https://github.com/notofonts/devanagari); Noto ist eine Marke von Google",
+      "lizenz": {
+        "name": "SIL Open Font License 1.1",
+        "link": "https://openfontlicense.org",
+        "kurzfassung": "Nutzen, Einbetten, Ändern (Untermenge) und Weitergeben erlaubt, der Lizenztext liegt bei (assets/i18n/OFL.txt); die Schrift nicht für sich allein verkaufen."
+      },
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "tools/gen_i18n_fonts.py (fontTools: Instanz wght 500/wdth 100, Untermenge mit den Zeichen aus i18n/*.json)",
+      "hinweis": "Fallback für Hindi. Abruftag = Commit d54d4f3. Nach jeder Änderung an den Übersetzungen neu erzeugen."
+    },
+    {
+      "muster": "assets/i18n/OFL.txt",
+      "quelle": "Lizenztexte der beiden Noto-Quellen (noto-cjk, google/fonts), zusammengefügt",
+      "autor": "SIL International (Lizenztext); Copyright-Zeilen der Noto-Schriften",
+      "lizenz": {"name": "SIL Open Font License 1.1", "link": "https://openfontlicense.org"},
+      "abgerufen": "2026-09-04",
+      "erzeugt_von": "tools/gen_i18n_fonts.py",
+      "hinweis": "Muss mit den Noto-Untermengen ausgeliefert werden (OFL); landet über den Exportfilter *.txt im PCK."
+    },
+    {
+      "muster": ["assets/HERKUNFT.json", "assets/audio/CREDITS.md", "brand/README.md", "brand/DESIGN-PROMPT.md", "brand/.gdignore"],
+      "quelle": "eigene Dokumentation",
+      "autor": "Projektteam",
+      "lizenz": {"name": "eigenes Werk, keine Fremdrechte", "link": ""},
+      "abgerufen": "",
+      "erzeugt_von": "von Hand",
+      "hinweis": "Keine Spieldaten. brand/.gdignore hält brand/ aus dem Godot-Import heraus."
+    },
+    {
+      "muster": "assets/fonts/HelveticaNeueLTPro-*.ttf",
+      "quelle": "geliefertes Brand-Paket, HelveticaNeue_Desktop_July2024 (archive/brand-quelle_ITCCharter-HelveticaNeue-PwC-Piktogramme_July2024.zip)",
+      "autor": "Monotype (Lizenzgeber laut beiliegender EULA)",
+      "lizenz": {"name": "Monotype Font Software EULA (Desktop-Lizenz)", "link": "brand/lizenz/HelveticaNeue_Font-Software-EULA.pdf"},
+      "abgerufen": "2026-09-03",
+      "erzeugt_von": "tools/aufraeumen.py (sechs Schnitte unverändert aus dem Paket kopiert)",
+      "hinweis": "Lizenzierte Markenschrift, Einbettung in Apps klären: Die Desktop-EULA deckt das Einbetten in eine ausgelieferte Anwendung (PCK/EXE/Web) nicht ausdrücklich ab (brand/README.md). Per .gitignore nicht im Repository.",
+      "lokal": true
+    },
+    {
+      "muster": "assets/fonts/ITCCharterCom-*.ttf",
+      "quelle": "geliefertes Brand-Paket, ITCCharter_Desktop_July2024 (archive/brand-quelle_ITCCharter-HelveticaNeue-PwC-Piktogramme_July2024.zip)",
+      "autor": "Monotype (Lizenzgeber laut beiliegender EULA)",
+      "lizenz": {"name": "Monotype Font Software EULA (Desktop-Lizenz)", "link": "brand/lizenz/ITCCharter_Font-Software-EULA.pdf"},
+      "abgerufen": "2026-09-03",
+      "erzeugt_von": "tools/aufraeumen.py (vier Schnitte unverändert aus dem Paket kopiert)",
+      "hinweis": "Lizenzierte Markenschrift, Einbettung in Apps klären: Die Desktop-EULA deckt das Einbetten in eine ausgelieferte Anwendung (PCK/EXE/Web) nicht ausdrücklich ab (brand/README.md). Per .gitignore nicht im Repository.",
+      "lokal": true
+    },
+    {
+      "muster": "assets/brand/pictograms/*.png",
+      "quelle": "geliefertes Brand-Paket, PwC_values_pictograms_rgb_png (archive/brand-quelle_ITCCharter-HelveticaNeue-PwC-Piktogramme_July2024.zip)",
+      "autor": "PwC",
+      "lizenz": {"name": "PwC-Markenmaterial aus dem internen Brand-Paket (keine Lizenzdatei beigelegt)", "link": ""},
+      "abgerufen": "2026-09-03",
+      "erzeugt_von": "tools/aufraeumen.py (fünf Werte-Piktogramme in Weiß und Schwarz, nur umbenannt)",
+      "hinweis": "Markenzeichen — Nutzung außerhalb interner PwC-Vorführungen mit dem Brand-Team klären. Per .gitignore nicht im Repository.",
+      "lokal": true
+    },
+    {
+      "muster": "brand/lizenz/*",
+      "quelle": "geliefertes Brand-Paket: Monotype-EULAs, Trademark-Hinweise, Font-Listen, Metadaten (archive/brand-quelle_ITCCharter-HelveticaNeue-PwC-Piktogramme_July2024.zip)",
+      "autor": "Monotype",
+      "lizenz": {"name": "Lizenzunterlagen des Schriftherstellers", "link": ""},
+      "abgerufen": "2026-09-03",
+      "erzeugt_von": "tools/aufraeumen.py (sieben Dokumente, umbenannt kopiert)",
+      "hinweis": "Belege für die Schriftlizenz, nicht Teil des Spiels. Per .gitignore nicht im Repository.",
+      "lokal": true
+    }
+  ]
+}

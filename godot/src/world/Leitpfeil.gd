@@ -27,8 +27,11 @@ func _process(delta: float) -> void:
 	visible = _a > 0.01
 	if not visible:
 		return
-	global_position = player.global_position + Vector2(0, -ABSTAND)
-	var richtung := ziel - player.global_position
+	# Pauls Bildposition (Physik-Interpolation): der Pfeil bewegt sich auch an 120/144-Hz-
+	# Monitoren genau mit ihm, statt im 60-Hz-Takt der Physik zu zucken
+	var bei: Vector2 = player.call("render_position") if player.has_method("render_position") else player.global_position
+	global_position = bei + Vector2(0, -ABSTAND)
+	var richtung := ziel - bei
 	rotation = richtung.angle() if richtung.length() > 1.0 else 0.0
 	queue_redraw()
 

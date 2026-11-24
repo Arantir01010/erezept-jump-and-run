@@ -3,16 +3,26 @@ extends SceneTree
 ## Vergleiche ohne Menschen am Rechner (braucht ein Fenster, z. B. unter Xvfb):
 ##
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path godot --rendering-method gl_compatibility \
-##     --resolution 1920x1080 --script res://tests/standbild.gd -- --windowed --webfx \
+##     --fixed-fps 10 --resolution 1920x1080 --script res://tests/standbild.gd -- --windowed --webfx \
 ##     --level=15-kontextschluessel --an=vau-feld,lauscher,spike,0.42 --ziel=/tmp/bilder
 ##
 ## --an: Baustein-Typen (Paul steht am ersten Baustein dieses Typs) oder Anteile der
 ## Levelbreite. Zusätzlich: „pause" (Pausemenü öffnen). Dateien: <level>-<stelle>.png.
+##
+## Gespeichert wird, was der Bildschirm zeigt: sRGB, auch in Forward+ mit hdr_2d
+## (dort ist das Viewport-Bild linear — Bildschirmbild.von wandelt um).
+## Wiederholbar: Mit --fixed-fps 10 und dem festen Zufallsstartwert (--seed=<n>,
+## Vorgabe 20261124; --zufall = wie im Spiel) zeigen zwei Aufnahmen derselben
+## Stelle dasselbe Bild — die Kulisse läuft in Spielzeit, nicht nach der Uhr.
+
+const SEED := 20261124
 
 var _main: Node
 var _ziel := "user://standbild"
 var _level := "15-kontextschluessel"
 var _stellen: Array[String] = ["0.42"]
+var _seed := SEED
+var _fester_seed := true
 
 
 func _initialize() -> void:
@@ -24,6 +34,10 @@ func _initialize() -> void:
 			_stellen.assign(s.get_slice("=", 1).split(","))
 		elif s.begins_with("--ziel="):
 			_ziel = s.get_slice("=", 1)
+		elif s.begins_with("--seed=") and s.get_slice("=", 1).is_valid_int():
+			_seed = s.get_slice("=", 1).to_int()
+		elif s == "--zufall":
+			_fester_seed = false
 	process_frame.connect(_los, CONNECT_ONE_SHOT)
 
 
@@ -32,11 +46,9 @@ func _warte(n: int) -> void:
 		await process_frame
 
 
-
-
 func _bild(name: String) -> void:
 	await RenderingServer.frame_post_draw
-	var img := root.get_texture().get_image()
+	var img := Bildschirmbild.von(root)
 	DirAccess.make_dir_recursive_absolute(_ziel)
 	var pfad := _ziel.path_join("%s-%s.png" % [_level, name])
 	img.save_png(pfad)
@@ -48,6 +60,8 @@ func _los() -> void:
 	var game := root.get_node("Game")
 	var kiosk := root.get_node("Kiosk")
 	var tile: float = game.TILE
+	if _fester_seed:
+		seed(_seed)   # Zwinkern, Phasen der Bausteine, Partikel: jedes Mal dieselbe Folge
 	_main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(_main)
 	await _warte(5)

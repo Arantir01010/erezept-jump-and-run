@@ -16,3 +16,6 @@ brand/lizenz/
 
 # Python-Cache der Werkzeuge
 __pycache__/
+
+# Logs und Bilder von tools/pruefen.py (der Ordner bekommt dort seine .gdignore)
+.pruefen/

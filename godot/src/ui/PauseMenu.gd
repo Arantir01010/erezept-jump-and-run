@@ -1,8 +1,9 @@
 class_name PauseMenu
 extends CanvasLayer
 ## PAUSE — Overlay über dem Level (Layer 50, läuft bei angehaltenem Baum weiter):
-## dunkelt ab, zeigt „PAUSE", den Stationsnamen und sechs Zeilen — Weiter, Station
-## neu starten, Steuerung, Musik an/aus, Töne an/aus, Zum Hauptmenü. Bedienung:
+## dunkelt ab, zeigt „PAUSE", den Stationsnamen und sieben Zeilen — Weiter, Station
+## neu starten, Steuerung, Musik an/aus, Töne an/aus, Bewegung reduzieren an/aus
+## (keine Kamerastöße, Komfort.gd), Zum Hauptmenü. Bedienung:
 ## Hoch/Runter + Bestätigen (Sprung/Aktion), Fingertipp oder Mausklick auf eine
 ## Zeile; ESC, P oder START setzen fort. Im Messe-Modus gilt der Idle-Reset auch
 ## hier: wer weggeht, landet im Hauptmenü.
@@ -15,7 +16,7 @@ signal resumed
 signal restart_requested
 signal quit_to_title
 
-const ROWS := ["weiter", "neustart", "steuerung", "musik", "toene", "menue"]
+const ROWS := ["weiter", "neustart", "steuerung", "musik", "toene", "bewegung", "menue"]
 
 var index := 0
 var station_name := ""
@@ -155,6 +156,7 @@ func _refresh() -> void:
 		tr("Steuerung"),
 		tr("Musik: an") if Sfx.music_on else tr("Musik: aus"),
 		tr("Töne: an") if Sfx.sound_on else tr("Töne: aus"),
+		tr("Bewegung reduzieren: an") if Komfort.bewegung_reduziert() else tr("Bewegung reduzieren: aus"),
 		tr("Zum Hauptmenü"),
 	]
 	for i in _rows.size():
@@ -245,6 +247,10 @@ func _activate(i: int) -> void:
 			_refresh()
 		"toene":
 			Sfx.set_sound(not Sfx.sound_on)
+			Sfx.play("tick")
+			_refresh()
+		"bewegung":
+			Komfort.setze_bewegung_reduziert(not Komfort.bewegung_reduziert())
 			Sfx.play("tick")
 			_refresh()
 		"menue":
