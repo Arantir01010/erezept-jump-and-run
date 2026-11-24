@@ -112,10 +112,32 @@ func test_bildschirmbild_wandelt_linear_in_srgb() -> void:
 		nahe(float(c.g8), float(Bildschirmbild.srgb_byte(v * 0.5)), 1.0, "linear %.5f (G) → sRGB" % (v * 0.5))
 		gleich(c.b8, 0, "Schwarz bleibt Schwarz")
 		gleich(c.a8, 255, "deckend")
-	# 8-Bit-Bilder (Browser, Compatibility, ohne hdr_2d) sind schon sRGB
+	# 8-Bit-Bilder (Browser, ohne hdr_2d) sind schon sRGB
 	var acht := Image.create_empty(2, 1, false, Image.FORMAT_RGBA8)
 	acht.set_pixel(0, 0, Color8(127, 64, 191, 255))
 	pruefe(Bildschirmbild.srgb(acht) == acht, "8-Bit-Bild kommt unverändert zurück")
+	# Compatibility mit hdr_2d: Gleitkommapuffer, aber schon sRGB — nur begrenzen
+	var gleit := Image.create_empty(2, 1, false, Image.FORMAT_RGBAH)
+	gleit.set_pixel(0, 0, Color(0.25, 0.5, 0.75, 1.0))
+	gleit.set_pixel(1, 0, Color(1.7, 0.0, 0.0, 1.0))
+	var begrenzt := Bildschirmbild.srgb(gleit, false)
+	gleich(begrenzt.get_format(), Image.FORMAT_RGBA8, "sRGB-Gleitkomma → 8 Bit")
+	var c0 := begrenzt.get_pixel(0, 0)
+	nahe(float(c0.r8), 64.0, 1.0, "sRGB-Gleitkomma 0,25 bleibt 0,25 (nicht aufgehellt)")
+	nahe(float(c0.g8), 128.0, 1.0, "sRGB-Gleitkomma 0,5 bleibt 0,5")
+	gleich(begrenzt.get_pixel(1, 0).r8, 255, "über 1 begrenzt")
+
+
+func test_bildschirmbild_erkennt_lineare_viewports() -> void:
+	knoten = Node.new()
+	baum.root.add_child(knoten)
+	var vp := SubViewport.new()
+	knoten.add_child(vp)
+	vp.use_hdr_2d = false
+	gleich(Bildschirmbild.linear(vp), false, "ohne hdr_2d: 8 Bit sRGB")
+	vp.use_hdr_2d = true
+	gleich(Bildschirmbild.linear(vp), RenderingServer.get_current_rendering_method() != "gl_compatibility",
+		"mit hdr_2d linear nur außerhalb von Compatibility")
 
 
 func test_bildwerkzeuge_speichern_srgb() -> void:
