@@ -55,6 +55,10 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	var medals: Dictionary = result.get("medals", {})
 	var got: Array[bool] = [bool(medals.get("zeit", false)), bool(medals.get("bits", false)),
 		bool(medals.get("lueckenlos", false))]
+	# Ohne Lauscher (Station 01–03) gibt es nichts mitzulesen: Zeile und Medaille entfallen.
+	var mit_lauschern := bool(result.get("mit_lauschern", true))
+	if not mit_lauschern:
+		got.resize(2)
 
 	# ---- links oben: Eyebrow, Stationsname, Merksatz, Fachbegriff
 	var links := VBoxContainer.new()
@@ -99,8 +103,9 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	var zeilen := [
 		[tr("ZEIT"), tr("%.1f s / Ziel %.0f s") % [result.get("time", 0.0), result.get("par", 0.0)]],
 		[tr("PRÜFSUMMEN"), "%d / %d" % [result.get("bits", 0), result.get("bits_total", 0)]],
-		[tr("LÜCKENLOS"), tr("nie mitgelesen") if got[2] else tr("%d× gesehen") % int(result.get("seen", 0))],
 	]
+	if mit_lauschern:
+		zeilen.append([tr("LÜCKENLOS"), tr("nie mitgelesen") if got[2] else tr("im Klartext mitgelesen: %d×") % int(result.get("seen", 0))])
 	for i in zeilen.size():
 		liste.add_child(_regel())
 		liste.add_child(_zeile(str(zeilen[i][0]), str(zeilen[i][1]), got[i]))

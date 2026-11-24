@@ -409,3 +409,24 @@ func test_kaputtes_level_wird_uebersprungen() -> void:
 	if pruefe(is_instance_valid(main.level), "es läuft ein Level"):
 		gleich(main.level.data.id, str(alt[0]), "die kaputte Station wird übersprungen, die nächste startet")
 	Game.playlist = alt
+
+
+func test_lueckenlos_nur_mit_lauschern() -> void:
+	var ohne := Game.finish_level("test-ohne", 10.0, 20.0, 0, false)
+	pruefe(not bool(ohne["medals"]["lueckenlos"]), "ohne Lauscher keine geschenkte Medaille LÜCKENLOS")
+	var mit := Game.finish_level("test-mit", 10.0, 20.0, 0, true)
+	pruefe(bool(mit["medals"]["lueckenlos"]), "mit Lauschern und nie gesehen: Medaille")
+	var d := LevelData.load_level(str(Game.playlist[0]))
+	pruefe(not d.hat_lauscher(), "Station 01 hat keine Lauscher")
+	var mit_l := false
+	for id in Game.playlist:
+		if LevelData.load_level(str(id)).hat_lauscher():
+			mit_l = true
+	pruefe(mit_l, "mindestens eine Station hat Lauscher")
+	var karte := LevelCard.new()
+	baum.root.add_child(karte)
+	karte.setup(d, ohne, true)
+	await frames(2)
+	gleich(karte._vermerke.size(), 2, "Karte ohne Lauscher: nur Zeit und Prüfsummen")
+	karte.queue_free()
+	Game.level_results.clear()

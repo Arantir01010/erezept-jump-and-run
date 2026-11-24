@@ -359,7 +359,7 @@ func complete_level() -> void:
 	# Lichtwelle: kräftiger Kern, der schnell abklingt, plus weiter, weicher Hof
 	Fx.light_burst(self, rezi.global_position, Palette.GOLD, 300.0, 2.0, 0.6)
 	Fx.light_burst(self, rezi.global_position, Palette.tint(Palette.GOLD, 0.4), 560.0, 1.1, 1.3)
-	var result := Game.finish_level(data.id, level_time, data.par_time, data.bits_total)
+	var result := Game.finish_level(data.id, level_time, data.par_time, data.bits_total, data.hat_lauscher())
 	await get_tree().create_timer(1.8).timeout
 	completed.emit(result)
 
