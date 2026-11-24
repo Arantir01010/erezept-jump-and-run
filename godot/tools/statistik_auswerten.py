@@ -58,7 +58,7 @@ def auswerten(ereignisse: list[dict]) -> tuple[dict, dict]:
     st: dict[str, dict] = defaultdict(lambda: {"erreicht": 0, "geschafft": 0, "zeiten": [], "treffer": 0,
                                                "stuerze": 0, "versuche": 0, "neustarts": 0, "abbrueche": 0, "idle": 0})
     laeufe = {"gestartet": 0, "fertig": 0, "gesamtzeiten": [], "sprachen": Counter(), "bedienung": Counter(),
-              "enden": Counter()}
+              "enden": Counter(), "quiz": 0, "quiz_richtig": 0, "quiz_fragen": 0}
     reihenfolge: list[str] = []
     for e in ereignisse:
         art = e.get("art")
@@ -85,6 +85,10 @@ def auswerten(ereignisse: list[dict]) -> tuple[dict, dict]:
                 s["abbrueche"] += 1
                 if e.get("grund") == "idle":
                     s["idle"] += 1
+        if art == "wissen":
+            laeufe["quiz"] += 1
+            laeufe["quiz_richtig"] += int(e.get("richtig", 0))
+            laeufe["quiz_fragen"] += int(e.get("fragen", 0))
         if art == "lauf_ende":
             laeufe["enden"][e.get("grund", "?")] += 1
             if e.get("grund") == "geschafft":
@@ -115,6 +119,9 @@ def main() -> None:
           f"{mmss(statistics.median(laeufe['gesamtzeiten']) if laeufe['gesamtzeiten'] else None)}")
     print("Enden:     " + ", ".join(f"{k} {v}" for k, v in laeufe["enden"].most_common()))
     print("Sprachen:  " + ", ".join(f"{k} {v}" for k, v in laeufe["sprachen"].most_common()))
+    if laeufe["quiz_fragen"]:
+        print(f"Quiz:      {laeufe['quiz']}× beantwortet, "
+              f"{100 * laeufe['quiz_richtig'] / laeufe['quiz_fragen']:.0f} % der Antworten richtig")
     print("Bedienung: " + ", ".join(f"{k} {v}" for k, v in laeufe["bedienung"].most_common()))
     print()
     kopf = ["Station", "erreicht", "geschafft", "Quote", "Median", "Treffer/V", "Stürze/V", "Neustarts", "Abbrüche (Idle)"]

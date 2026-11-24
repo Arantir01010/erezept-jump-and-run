@@ -38,8 +38,11 @@ var score := 0
 var seals: Array = []
 var encrypted := false
 var clean_interactions := 0
-var run_start_ms := 0
+var lauf_start := 0.0          # Spielzeit beim Laufbeginn (s), siehe spielzeit
 var level_results: Array = []
+## Wissensabfrage am Ende (Quiz.gd): -1 = noch nicht gefragt.
+var wissen_richtig := -1
+var wissen_fragen := 0
 var protokoll: Array = []
 var combo := 0
 var combo_until := 0.0
@@ -56,9 +59,20 @@ var card_slots := {}
 var assist_fails := {}
 
 
+## Spielzeit in Sekunden: zählt im Physiktakt, steht in der Pause und folgt der
+## Zeitlupe (Fx). Kombo-Fenster und Laufzeit hängen daran statt an der Wanduhr: Die
+## Pause bricht keine Kombo mehr ab, und ein Durchspiel mit --fixed-fps ergibt jedes
+## Mal dieselben Punkte. Messe-Statistik und Kiosk-Leerlauf messen bewusst echte Zeit.
+var spielzeit := 0.0
+
+
 func _ready() -> void:
 	load_config()
 	reset_run()
+
+
+func _physics_process(delta: float) -> void:
+	spielzeit += delta
 
 
 func load_config() -> void:
@@ -165,8 +179,10 @@ func reset_run() -> void:
 	seals = []
 	encrypted = false
 	clean_interactions = 0
-	run_start_ms = Time.get_ticks_msec()
+	lauf_start = spielzeit
 	level_results = []
+	wissen_richtig = -1
+	wissen_fragen = 0
 	protokoll = []
 	combo = 0
 	combo_until = 0.0
@@ -225,7 +241,7 @@ func bits_this_level() -> int:
 
 func add_bits(n: int, bonus := false) -> void:
 	bits += n
-	var now := Time.get_ticks_msec() / 1000.0
+	var now := spielzeit
 	if now <= combo_until:
 		combo += 1
 	else:
@@ -267,8 +283,9 @@ func add_security_bonus() -> void:
 	hud_changed.emit()
 
 
+## Laufzeit in Spielzeit (ohne Pausen), für Abschluss und Zugriffsprotokoll.
 func elapsed_seconds() -> float:
-	return (Time.get_ticks_msec() - run_start_ms) / 1000.0
+	return spielzeit - lauf_start
 
 
 ## Endscreen-Rang als Sicherheitsstufe.
@@ -291,6 +308,19 @@ func seen_in(level_id: String) -> int:
 		if e["level_id"] == level_id:
 			n += 1
 	return n
+
+
+## Quiz vorbei: alle richtig = vierte Medaille „WISSEN“ (Punkte wie jede Medaille).
+func wissen_abschliessen(richtig: int, gesamt: int) -> void:
+	wissen_richtig = richtig
+	wissen_fragen = gesamt
+	if gesamt > 0 and richtig >= gesamt:
+		score += MEDAL_BONUS
+	hud_changed.emit()
+
+
+func wissen_medaille() -> bool:
+	return wissen_fragen > 0 and wissen_richtig >= wissen_fragen
 
 
 ## Level abgeschlossen: Medaillen (Zeit / Prüfsummen / Lückenlos) und Punkte.

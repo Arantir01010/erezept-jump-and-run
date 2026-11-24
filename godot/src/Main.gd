@@ -355,7 +355,22 @@ func _bedienung() -> String:
 	return "gamepad" if Kiosk.has_gamepad() else "tastatur"
 
 
+## Wissensabfrage (Quiz.gd) einmal je Durchlauf vor dem Abschluss.
+func show_quiz() -> void:
+	await _fade_out(0.3)
+	_clear()
+	_set_screen(Screen.WISSEN)
+	var q := Quiz.new()
+	q.done.connect(show_reward)
+	overlay.add_child(q)
+	_current = q
+	_fade_in()
+
+
 func show_reward() -> void:
+	if Game.wissen_richtig < 0 and Kiosk.shots_dir == "" and Quiz.aktiv():
+		show_quiz()
+		return
 	Statistik.lauf_ende("geschafft")
 	await _fade_out(0.3)
 	_clear()

@@ -23,7 +23,8 @@
     "type": "static",
     "staticPayload": "EREZEPT-MESSE-GEWINN",
     "rewardScreenSeconds": 45,
-    "minQrSeconds": 10
+    "minQrSeconds": 10,
+    "infoLink": "https://www.das-e-rezept-fuer-deutschland.de/"
   },
   "disclaimer": {
     "de": "Inoffizielles Lernspiel — kein Produkt der gematik. Dient der Wissensvermittlung.",
@@ -33,5 +34,6 @@
   "idleResetSeconds": 60,
   "softAutopilotSeconds": 240,
   "stuckGuideSeconds": 30,
-  "attractSeconds": 25
+  "attractSeconds": 25,
+  "wissensabfrage": true
 }

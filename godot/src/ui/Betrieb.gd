@@ -68,6 +68,9 @@ func _ueberblick() -> String:
 	var txt := "Heute (%s): %d Durchläufe gestartet · %d bis zum Ende (%.0f %%)" % [s.get("datum", ""), gestartet, fertig, quote]
 	if not gesamt.is_empty():
 		txt += " · Gesamtzeit Median %s" % _mmss(Statistik.median(gesamt))
+	var w = s.get("wissen")
+	if w is Dictionary and int(w.get("fragen", 0)) > 0:
+		txt += " · Quiz %d× (%.0f %% richtig)" % [int(w.get("beantwortet", 0)), 100.0 * int(w.get("richtig", 0)) / int(w.get("fragen", 1))]
 	if Statistik.ist_testlauf():
 		txt += "   [Testlauf: eigene Zählung]"
 	return txt

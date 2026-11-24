@@ -4,8 +4,8 @@ extends "res://tests/testfall.gd"
 ## Sicherheitsnetz der Tür, selbst blättern, Stationskarte ohne Automatik,
 ## REZI-Sprechblasen nach Lesezeit, Sammelziel im Briefing.
 ##
-## Vignette, Intro und Tür rechnen mit der Uhr (Time.get_ticks_msec), nicht mit
-## Frames — dafür gibt es echtzeit().
+## Vignette und Intro laufen in Spielzeit (mit --fixed-fps 60 ist ein Frame 1/60 s):
+## Gewartet wird mit sekunden() oder frames(), nie nach der Wanduhr.
 
 var main: Node
 var extra: Array = []
@@ -32,13 +32,6 @@ func aufraeumen() -> void:
 	if is_instance_valid(main):
 		main.queue_free()
 	await frames(3)
-
-
-## Echtzeit abwarten (mit --fixed-fps laufen Frames schneller als die Uhr).
-func echtzeit(s: float) -> void:
-	var ende := Time.get_ticks_msec() + int(s * 1000.0)
-	while Time.get_ticks_msec() < ende:
-		await baum.process_frame
 
 
 func _baustein(lvl: Node, klasse: Variant) -> Node:
@@ -296,7 +289,7 @@ func test_briefing_blaettert_selbst() -> void:
 	gleich(b.seite, 0, "ohne Knopf bleibt die erste Zeile stehen")
 	var u: float = b.story_u()
 	pruefe(u >= float(b.story[0]["von"]) and u < float(b.story[0]["bis"]), "Bühne läuft im Abschnitt der Zeile")
-	await echtzeit(0.3)      # Schonzeit gegen den Druck vom Screen davor
+	await sekunden(0.3)      # Schonzeit gegen den Druck vom Screen davor
 	b._voll = false
 	b._unhandled_input(_taste(KEY_RIGHT))
 	gleich(b.seite, 0, "erster Druck zeigt die ganze Zeile")
@@ -320,21 +313,21 @@ func test_halten_ueberspringt_den_screen() -> void:
 	baum.root.add_child(b)
 	extra.append(b)
 	await frames(2)
-	await echtzeit(0.3)
+	await sekunden(0.3)
 	var fertig := [false]
 	b.done.connect(func(): fertig[0] = true)
 	# kurz drücken: blättert, überspringt nicht
 	Input.action_press("confirm")
 	b._unhandled_input(_taste(KEY_SPACE))
-	await echtzeit(0.3)
+	await sekunden(0.3)
 	Input.action_release("confirm")
 	b._unhandled_input(_taste(KEY_SPACE, false))
-	await echtzeit(Vignette.HALTEN_S)
+	await sekunden(Vignette.HALTEN_S)
 	pruefe(not fertig[0], "kurzer Druck überspringt nicht")
 	# halten: nach HALTEN_S ist der Screen übersprungen
 	Input.action_press("confirm")
 	b._unhandled_input(_taste(KEY_SPACE))
-	await echtzeit(Vignette.HALTEN_S + 0.3)
+	await sekunden(Vignette.HALTEN_S + 0.3)
 	pruefe(fertig[0], "gehalten: Screen übersprungen")
 	Input.action_release("confirm")
 
@@ -343,14 +336,17 @@ func test_probelauf_zeigt_die_ti_aktion() -> void:
 	var intro := Intro.new(3)
 	baum.root.add_child(intro)
 	extra.append(intro)
-	await echtzeit(Intro.TI_DRUCK + 0.6)
+	await sekunden(Intro.TI_DRUCK + 0.6)
 	# Mitmachen (Messe-Paket 2): Paul wartet am Terminal auf den Spieler
 	gleich(intro._warte, "action", "Probelauf wartet auf die TI-Aktion des Spielers")
 	pruefe(intro._ti_t < 0.0, "ohne Druck noch keine TI-Aktion")
+	# Ein Timer meldet sich erst nach den _process-Aufrufen des Bildes; ein Druck dort
+	# gälte nur für dieses schon gelaufene Bild. Also am Bildanfang drücken.
+	await frames(1)
 	Input.action_press("action")
 	await frames(2)
 	Input.action_release("action")
-	await echtzeit(0.3)
+	await sekunden(0.3)
 	pruefe(intro._ti_t >= 0.0, "nach dem Druck: TI-Aktion am Terminal")
 	pruefe(intro._ti_popup.modulate.a > 0.5, "Tafel „TI-AKTION“ ist zu sehen")
 	if not Kiosk.has_gamepad() and not (Kiosk.touch_seen or Kiosk.touch_forced):
