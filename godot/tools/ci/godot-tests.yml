@@ -4,12 +4,19 @@
 # kopieren. .github/ gehört zum versiegelten Phaser-Kern (tools/check-core.ts);
 # danach `npm run guard:update` ausführen, sonst schlägt `npm run validate` an.
 #
-# Was der Lauf prüft:
-#   1. Level-Generator: alle zehn Stationen erreichbar, ohne Einbahn-Softlock, und
-#      die eingecheckten levels/<id>/ passen zum Generator (kein Handbetrieb).
-#   2. Godot-Import ohne Skriptfehler.
-#   3. Testlauf: tests/lauf.gd (Hülle, Spielstand, Leveldaten, Texte/Übersetzungen,
-#      Kiosk, Level-Mechanik, Rauchtest aller Stationen über die echte Hauptszene).
+# Der Lauf ist derselbe Prüflauf wie lokal: python3 godot/tools/pruefen.py (Stufen 0–5).
+#   0 Dateien: NUL-/Steuerzeichen, CRLF, UTF-8, .uid je Skript, JSON streng (vor dem Import:
+#     so fällt eine nicht eingecheckte .uid auf, die lokal nur auf der Platte liegt)
+#   1 Level-Generator: alle zehn Stationen erreichbar, ohne Einbahn-Softlock, und die
+#     eingecheckten levels/<id>/ passen zum Generator (kein Handbetrieb)
+#   2 Godot-Import ohne Skriptfehler
+#   3 Typwarnungen: GDScript-Warnungen je Art nicht über tools/grenzwerte.json
+#   4 Testlauf tests/lauf.gd (Hülle, Spielstand, Leveldaten, Texte/Übersetzungen, Kiosk,
+#     Level-Mechanik, Rauchtest aller Stationen über die echte Hauptszene, …)
+#   5 Exportprobe: Web- und Windows-Paket (--export-pack braucht keine Export-Vorlagen)
+#     enthalten alle Laufzeitdateien und nichts aus tests/ tools/ docs/ shots/ build*/
+# Rückgabecode 2 (etwas übersprungen) lässt den Lauf ebenfalls scheitern — mit Absicht.
+# Die Bildprobe (Stufe 6, --bilder) läuft hier nicht: unter Xvfb ~4 min je Station.
 name: Godot-Tests
 
 on:
@@ -22,26 +29,27 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       GODOT_VERSION: "4.7.2-stable"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Level-Generator (Erreichbarkeit, Einbahn-Softlocks, Abgleich)
-        run: |
-          python3 godot/tools/build_levels.py
-          git diff --exit-code -- godot/levels || (echo "levels/ weicht vom Generator ab — build_levels.py laufen lassen und einchecken"; exit 1)
-
       - name: Godot installieren
         run: |
           curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
           unzip -q godot.zip
+          rm godot.zip
           sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
           godot --version
 
-      - name: Import (Skriptfehler sichtbar machen)
-        run: godot --headless --path godot --import 2>&1 | tee import.log; ! grep -q "SCRIPT ERROR\|Parse Error" import.log
+      - name: Prüflauf (godot/tools/pruefen.py, Stufen 0–5)
+        run: python3 godot/tools/pruefen.py --godot /usr/local/bin/godot
 
-      - name: Testlauf
-        run: godot --headless --path godot --fixed-fps 60 --script res://tests/lauf.gd
+      - name: Logs sichern (nur bei Fehlschlag)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pruefen-logs
+          path: godot/.pruefen/
+          include-hidden-files: true

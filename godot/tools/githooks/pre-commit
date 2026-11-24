@@ -1,0 +1,44 @@
+#!/bin/sh
+# Commit-Haken der Godot-Fassung: Schnellprüfung (godot/tools/pruefen.py --schnell, Stufen 0
+# und 1: Dateien und Level-Generator) für jeden Commit, der Dateien unter godot/ enthält.
+# Dauert wenige Sekunden und braucht kein Godot. Commits ohne godot/-Dateien laufen durch.
+#
+# Aktivieren (einmal je Klon; gilt für alle Commits und alle Worktrees dieses Klons):
+#     git config core.hooksPath godot/tools/githooks
+# Abschalten:        git config --unset core.hooksPath
+# Einmal umgehen:    git commit --no-verify
+#
+# POSIX-sh: läuft unter Linux/macOS und mit Git für Windows (Git Bash und GUI-Clients).
+
+wurzel=$(git rev-parse --show-toplevel) || exit 1
+cd "$wurzel" || exit 1
+
+# Nur, wenn der Commit godot/ berührt (auch Löschen und Umbenennen).
+if [ -z "$(git diff --cached --name-only -- godot/)" ]; then
+	exit 0
+fi
+
+# Python 3.8+ finden: python3 → python → py -3. Der Probeaufruf zählt, nicht nur der Name —
+# unter Windows ist „python3" oft bloß der Verweis auf den Microsoft Store.
+pruefe_python='import sys; sys.exit(sys.version_info < (3, 8))'
+if python3 -c "$pruefe_python" >/dev/null 2>&1; then
+	set -- python3
+elif python -c "$pruefe_python" >/dev/null 2>&1; then
+	set -- python
+elif py -3 -c "$pruefe_python" >/dev/null 2>&1; then
+	set -- py -3
+else
+	echo "pre-commit: kein Python 3.8+ gefunden (python3, python, py -3) — Commit abgebrochen." >&2
+	echo "pre-commit: Python installieren oder einmalig umgehen: git commit --no-verify" >&2
+	exit 1
+fi
+
+"$@" -X utf8 godot/tools/pruefen.py --schnell
+rc=$?
+if [ "$rc" -ne 0 ]; then
+	echo "" >&2
+	echo "pre-commit: godot/tools/pruefen.py --schnell endet mit $rc — Commit abgebrochen." >&2
+	echo "pre-commit: Befunde oben beheben (Logs: godot/.pruefen/). Notfall: git commit --no-verify" >&2
+	exit 1
+fi
+exit 0
