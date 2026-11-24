@@ -6,7 +6,7 @@
     "lokal: true = liegt nur auf Arbeitsplätzen mit Brand-Paket, in einem per godot/.gitignore ausgeschlossenen Ordner; der Test verlangt dafür keine Datei.",
     "lizenz: name + link (Lizenztext oder -seite; leer nur ohne Fremdquelle), optional kurzfassung.",
     "abgerufen: Tag des Abrufs bzw. der Übernahme (JJJJ-MM-TT), leer bei eigener Erzeugung.",
-    "KI-erzeugte Dateien zusätzlich mit tools/erzeugung_protokoll.py protokollieren (docs/erzeugungsprotokoll.jsonl) und in erzeugt_von darauf verweisen."
+    "ki: true = von einem KI-Dienst erzeugt. Jede Datei braucht dann eine Zeile in docs/erzeugungsprotokoll.jsonl mit gleicher SHA-256 (tools/erzeugung_protokoll.py --neu); erzeugt_von nennt Dienst und Modell."
   ],
   "eintraege": [
     {
@@ -20,7 +20,7 @@
       },
       "abgerufen": "2026-09-04",
       "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
-      "hinweis": "Hauptmenü, Zeitreise, Wissen, Briefings. Abruftag nicht festgehalten — Datum des Commits d4ac30b. Pixabay untersagt die Weitergabe als eigenständige Datei, im öffentlichen Repository ist sie aber einzeln abrufbar — klären (z. B. wie die Markenschriften per .gitignore nur lokal halten)."
+      "hinweis": "Hauptmenü, Zeitreise, Wissen, Briefings. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
     },
     {
       "muster": ["assets/audio/music_level.ogg", "assets/audio/music_level.mp3"],
@@ -33,7 +33,7 @@
       },
       "abgerufen": "2026-09-04",
       "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
-      "hinweis": "Stationen 01–05. Abruftag nicht festgehalten — Datum des Commits d4ac30b. Pixabay untersagt die Weitergabe als eigenständige Datei, im öffentlichen Repository ist sie aber einzeln abrufbar — klären (z. B. wie die Markenschriften per .gitignore nur lokal halten)."
+      "hinweis": "Stationen 01–05. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
     },
     {
       "muster": ["assets/audio/music_level2.ogg", "assets/audio/music_level2.mp3"],
@@ -46,7 +46,7 @@
       },
       "abgerufen": "2026-09-04",
       "erzeugt_von": "ffmpeg: Anfangsstille (0,4 s) entfernt, loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
-      "hinweis": "Stationen 13–20. Abruftag nicht festgehalten — Datum des Commits d4ac30b. Pixabay untersagt die Weitergabe als eigenständige Datei, im öffentlichen Repository ist sie aber einzeln abrufbar — klären (z. B. wie die Markenschriften per .gitignore nur lokal halten)."
+      "hinweis": "Stationen 13–20. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
     },
     {
       "muster": ["assets/audio/music_reward.ogg", "assets/audio/music_reward.mp3"],
@@ -59,7 +59,7 @@
       },
       "abgerufen": "2026-09-04",
       "erzeugt_von": "ffmpeg: loudnorm auf −16 LUFS; seit 11/2026 OGG Vorbis (-c:a libvorbis -q:a 2) statt MP3 128 kbit/s",
-      "hinweis": "Reward-Screen. Abruftag nicht festgehalten — Datum des Commits d4ac30b. Pixabay untersagt die Weitergabe als eigenständige Datei, im öffentlichen Repository ist sie aber einzeln abrufbar — klären (z. B. wie die Markenschriften per .gitignore nur lokal halten)."
+      "hinweis": "Reward-Screen. Abruftag nicht festgehalten — Datum des Commits d4ac30b. OFFEN, die Entscheidung steht aus: Pixabay untersagt die Weitergabe als eigenständige Datei. Im öffentlichen Repository ist sie aber einzeln abrufbar, aus dem Web-Paket lässt sie sich herauslösen."
     },
     {
       "muster": "assets/audio/*.wav",

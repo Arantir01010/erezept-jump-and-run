@@ -2,9 +2,10 @@
 Level-Generator der Godot-Fassung: baut alle zehn Stationen nach den
 Leveldesign-Regeln (Kishōtenketsu: Einführung → Entwicklung → Wendung mit
 Weggabelung → Abschluss) und prüft die Erreichbarkeit mit den Sprungmaßen
-(3 hoch, ~6 weit; Hülle-Level ~5, weil verschlüsselt langsamer gelaufen wird).
+(3 hoch, 5 weit; Hülle-Level 4, weil verschlüsselt langsamer gelaufen wird).
 
     python godot/tools/build_levels.py
+    python godot/tools/build_levels.py --sprungweiten   # nur auswerten, schreibt nichts
 
 Schreibt godot/levels/<id>/layout.txt + level.json. Stationstexte und
 Mechanik-Parameter kommen aus godot/levels/_import/<id>/level.json (Sync aus

@@ -44,10 +44,11 @@ func _leser(lvl, karte: String) -> Variant:
 	return bester
 
 
-## Was der Leser gerade zeigt und weiß.
+## Was der Leser gerade zeigt und weiß — die einzige Stelle, die sein Inneres liest.
 func _zustand(k) -> Dictionary:
-	return {"led": k._led, "status": k._status, "steckt": k._seated, "anim": k._anim_kind,
-		"eingesteckt": k.inserted, "tor_gemerkt": k.opened}
+	var r: KartenleserRegel = k.regel
+	return {"led": r.led, "status": r.status, "steckt": r.steckt, "anim": r.anim,
+		"eingesteckt": r.eingesteckt, "tor_gemerkt": r.geoeffnet, "rempler": r.rempler, "nicken": r.nicken}
 
 
 func _erwarte(k, soll: Dictionary, wann: String) -> void:
@@ -92,7 +93,7 @@ func test_falsche_karte_prallt_ab() -> void:
 	_erwarte(k, {"led": "gelb", "status": "prueft", "anim": "abgelehnt"}, "vor dem Abprallen")
 	await sekunden(0.3)
 	_erwarte(k, {"led": "rot", "status": "abgelehnt", "anim": "abgelehnt"}, "abgeprallt")
-	pruefe(k._shake > 0.0, "Rempler läuft")
+	pruefe(float(_zustand(k)["rempler"]) > 0.0, "Rempler läuft")
 	await sekunden(0.4)
 	_erwarte(k, {"anim": "", "steckt": "", "status": "abgelehnt"}, "Karte wieder heraus")
 	await sekunden(2.4)
@@ -116,7 +117,7 @@ func test_ohne_karte_und_karte_steckt_woanders() -> void:
 	Game.card_slots = {"egk": "anderes-terminal"}
 	k._versuch()
 	_erwarte(k, {"led": "gelb", "status": "belegt", "anim": "", "eingesteckt": ""}, "steckt woanders")
-	pruefe(k._nod > 0.0, "Kopfschütteln läuft")
+	pruefe(float(_zustand(k)["nicken"]) > 0.0, "Kopfschütteln läuft")
 	await sekunden(1.4)
 	_erwarte(k, {"led": "rot", "status": "belegt"}, "LED zurück, Anzeige noch")
 	await sekunden(1.5)
