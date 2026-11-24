@@ -97,6 +97,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Idle-Reset (nur Messe-Modus): niemand spielt → zurück zum Titel (Attract)
 	if screen != Screen.TITLE and Kiosk.consume_idle_reset():
+		Statistik.lauf_ende("idle")
 		Game.set_lang(Game.default_lang)   # nächster Besucher: wieder die Standardsprache
 		show_title()
 
@@ -119,6 +120,7 @@ func toggle_pause() -> void:
 	pause_menu.resumed.connect(_resume)
 	pause_menu.restart_requested.connect(restart_level)
 	pause_menu.quit_to_title.connect(func():
+		Statistik.lauf_ende("hauptmenue")
 		_resume()
 		show_title())
 	add_child(pause_menu)
@@ -177,8 +179,11 @@ func show_title() -> void:
 	_clear()
 	_set_screen(Screen.TITLE)
 	Game.reset_run()
+	Statistik.lauf_ende("abgebrochen")   # nur, falls noch ein Durchlauf offen ist
 	var title := Title.new()
-	title.start_requested.connect(func(): show_intro(1))
+	# Zeitreise (FRÜHER/HEUTE) abschaltbar: game-config.json „zeitreise": false
+	# startet direkt mit dem Probelauf.
+	title.start_requested.connect(func(): show_intro(1 if bool(Game.config.get("zeitreise", true)) else 3))
 	title.lang_requested.connect(func(code):
 		Game.set_lang(code)
 		show_title())
@@ -197,7 +202,9 @@ func show_intro(phase: int) -> void:
 	var intro := Intro.new(phase)
 	intro.done.connect(func():
 		if phase < 3:
-			show_intro(phase + 1)
+			# Halten überspringt die ganze Zeitreise (FRÜHER und HEUTE), nicht nur
+			# den einen Screen — bis zum ersten Sprung waren es sonst ~75 s.
+			show_intro(3 if intro.uebersprungen else phase + 1)
 		else:
 			start_run(0))
 	overlay.add_child(intro)
@@ -235,6 +242,7 @@ func show_briefing(index: int) -> void:
 
 func start_run(index := 0) -> void:
 	Game.reset_run()
+	Statistik.lauf_start(Game.lang, _bedienung())
 	go_level(index)
 
 
@@ -259,6 +267,7 @@ func restart_level() -> void:
 	if screen != Screen.LEVEL or not is_instance_valid(level) or level.finished or _neustart:
 		return
 	_neustart = true
+	Statistik.neustart()
 	level.process_mode = Node.PROCESS_MODE_DISABLED
 	Sfx.play("ui")
 	_start_level(_level_index, true)
@@ -280,6 +289,8 @@ func _start_level(index: int, neustart := false) -> void:
 	var data := LevelData.load_level(id)
 	if not data.errors.is_empty():
 		push_error("Level %s: %s" % [id, ", ".join(data.errors)])
+	if not neustart:
+		Statistik.station_start(id)
 	level = Level.new()
 	world.add_child(level)
 	level.setup(data)
@@ -289,6 +300,7 @@ func _start_level(index: int, neustart := false) -> void:
 
 
 func _on_level_completed(result: Dictionary) -> void:
+	Statistik.station_ende(level.level_time if is_instance_valid(level) else 0.0)
 	await _fade_out(0.3)
 	_set_screen(Screen.CARD)
 	var card := LevelCard.new()
@@ -302,7 +314,15 @@ func _on_level_completed(result: Dictionary) -> void:
 	_fade_in()
 
 
+## Bedienung für die Statistik: touch, gamepad oder tastatur.
+func _bedienung() -> String:
+	if Kiosk.input_mode == "touch" or Kiosk.touch_forced:
+		return "touch"
+	return "gamepad" if Kiosk.has_gamepad() else "tastatur"
+
+
 func show_reward() -> void:
+	Statistik.lauf_ende("geschafft")
 	await _fade_out(0.3)
 	_clear()
 	_set_screen(Screen.REWARD)

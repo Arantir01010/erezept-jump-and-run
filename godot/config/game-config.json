@@ -31,5 +31,6 @@
   },
   "audio": true,
   "idleResetSeconds": 60,
-  "softAutopilotSeconds": 240
+  "softAutopilotSeconds": 240,
+  "stuckGuideSeconds": 30
 }
