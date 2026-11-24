@@ -3,10 +3,10 @@
 """
 pruefen.py — alle Prüfstufen der Godot-Fassung mit einem Befehl, von billig nach teuer.
 
-    python3 godot/tools/pruefen.py                  Stufen 0–5 (vor dem Push, in der CI)
+    python3 godot/tools/pruefen.py                  Stufen 0–5 und 7 (vor dem Push, in der CI)
     python3 godot/tools/pruefen.py --schnell        nur Stufen 0 und 1, braucht kein Godot (Commit-Haken)
     python3 godot/tools/pruefen.py --bilder         zusätzlich Stufe 6 (Bildprobe; Linux: xvfb-run)
-    python3 godot/tools/pruefen.py --durchspiel     zusätzlich Stufe 7 (Aufnahmen tests/durchspiel/*.json abspielen)
+    python3 godot/tools/pruefen.py --ohne-durchspiel  Stufe 7 auslassen (zählt als übersprungen)
     python3 godot/tools/pruefen.py --ohne-export    Stufe 5 auslassen (zählt als übersprungen)
     python3 godot/tools/pruefen.py --nur 2,3        nur diese Stufen (kein Import vorweg!)
     python3 godot/tools/pruefen.py --tests huelle   Stufe 4 nur mit passenden tests/test_*.gd
@@ -29,7 +29,7 @@ Stufen — jede endet mit genau einer Schlusszeile „STUFE <n> <name>: <urteil>
   5 Exportprobe      --export-pack „Web" und „Windows" (geht ohne Export-Vorlagen), PCK-Verzeichnis
                      lesen: Laufzeitdateien drin, tests/ tools/ docs/ shots/ build*/ nicht
   6 Bildprobe        nur mit --bilder: tests/standbild.gd an zwei Stationen, Bilder da, nicht einfarbig
-  7 Durchspiel       nur mit --durchspiel: tests/durchspiel.gd spielt jede Aufnahme tests/durchspiel/*.json in
+  7 Durchspiel       tests/durchspiel.gd spielt jede Aufnahme tests/durchspiel/*.json in
                      einem eigenen Prozess ab (--fixed-fps 60), je Station ziel/absturz/haenger/falsch; „ziel“
                      besteht auch, wenn der Weg von der Aufnahme abweicht, wird dann aber genannt (nach einer
                      gewollten Leveländerung neu aufnehmen); ohne Aufnahmen übersprungen
@@ -1438,8 +1438,12 @@ def stufen_waehlen(a):
     elif a.schnell:
         nummern = [0, 1]
     else:
-        nummern = [0, 1, 2, 3, 4, 5] + ([6] if a.bilder else []) + ([7] if a.durchspiel else [])
-    ausgelassen = {5: "--ohne-export"} if a.ohne_export and 5 in nummern else {}
+        nummern = [0, 1, 2, 3, 4, 5, 7] + ([6] if a.bilder else [])
+    ausgelassen = {}
+    if a.ohne_export and 5 in nummern:
+        ausgelassen[5] = "--ohne-export"
+    if a.ohne_durchspiel and 7 in nummern:
+        ausgelassen[7] = "--ohne-durchspiel"
     return nummern, ausgelassen
 
 
@@ -1447,8 +1451,8 @@ def main():
     ap = argparse.ArgumentParser(description="Prüfstufen der Godot-Fassung (Kopf der Datei: alle Aufrufe).")
     ap.add_argument("--schnell", action="store_true", help="nur Stufen 0 und 1 (Commit-Haken, ohne Godot)")
     ap.add_argument("--bilder", action="store_true", help="zusätzlich Stufe 6 (Bildprobe, braucht ein Fenster/xvfb)")
-    ap.add_argument("--durchspiel", action="store_true",
-                    help="zusätzlich Stufe 7 (Aufnahmen unter tests/durchspiel/ abspielen)")
+    ap.add_argument("--ohne-durchspiel", action="store_true",
+                    help="Stufe 7 (Aufnahmen unter tests/durchspiel/ abspielen) auslassen, zählt als übersprungen")
     ap.add_argument("--ohne-export", action="store_true", help="Stufe 5 auslassen (zählt als übersprungen)")
     ap.add_argument("--nur", metavar="N[,N…]", help="nur diese Stufen")
     ap.add_argument("--tests", metavar="TEIL", help="Stufe 4: nur tests/test_*.gd, deren Name TEIL enthält")
@@ -1460,7 +1464,7 @@ def main():
     a = ap.parse_args()
 
     if a.liste:
-        nur_mit = {6: " (nur mit --bilder)", 7: " (nur mit --durchspiel)"}
+        nur_mit = {6: " (nur mit --bilder)"}
         for nr, name, _ in STUFEN:
             print("Stufe %d: %s%s" % (nr, name, nur_mit.get(nr, "")))
         return 0

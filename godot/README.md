@@ -22,7 +22,7 @@ Godot liegt portabel im Repo unter `.tools/`. Aus dem Repo-Stammverzeichnis:
 | `--lautstaerke=<0–100>` | Gesamtlautstärke (sonst der gespeicherte Wert, Strg+F9/F10) |
 | `--fullscreen` | nur Vollbild |
 | `--level=<id>` | direkt in ein Level springen, z. B. `--level=04-die-huelle` |
-| `--shots=<ordner>` | automatischer Prüflauf: spielt selbst, speichert Screenshots (auch zwei Bilder mitten in der Blende), beendet sich |
+| `--shots=<ordner>` | automatischer Prüflauf: spielt selbst, speichert Screenshots (auch zwei Bilder mitten in der Blende), beendet sich. Die Bilder sind sRGB wie auf dem Bildschirm, auch in Forward+ |
 | `--shots-level=<id>` | Level für den Prüflauf |
 | `--touch` | Bildschirm-Steuerung sofort einblenden (Test am PC: die Maus spielt den Finger) |
 | `--webfx` | Browser-Pfad am Desktop testen: Glüh-Sprites statt HDR-Glühen, CPU-Partikel |
@@ -297,9 +297,10 @@ nicht in Echtzeit (siehe „Flüssig an schnellen Monitoren“).
 und Godot 4.7.2 aus `PATH`, `GODOT` oder `--godot <pfad>`:
 
 ```bash
-python3 godot/tools/pruefen.py            # Stufen 0–5: Dateien, Level-Generator, Import, Typwarnungen, Tests, Exportprobe
+python3 godot/tools/pruefen.py            # Stufen 0–5 und 7: Dateien, Level-Generator, Import, Typwarnungen, Tests, Exportprobe, Durchspiel
 python3 godot/tools/pruefen.py --schnell  # nur 0 und 1, ~2 s, ohne Godot
 python3 godot/tools/pruefen.py --bilder   # zusätzlich Bildprobe (Linux: xvfb-run, mehrere Minuten)
+python3 godot/tools/pruefen.py --nur 7    # nur das Durchspiel
 ```
 
 Jede Stufe schreibt eine Zeile `STUFE n Name: …`. Die letzte lautet
@@ -427,12 +428,34 @@ Die Physik tickt mit 60 Hz. Paul wird zwischen zwei Physikschritten gezeichnet
 Leitpfeil, nimmt `Player.render_position()` und nicht `global_position`. Messen:
 `godot --headless --path godot --fixed-fps 144 --script res://tests/taktprobe.gd`.
 
-Spiellogik mit Zeitbezug (Kombo-Fenster, Laufzeit, Schonzeit, Sprungfenster) zählt Spielzeit
-(`Game.spielzeit`), nicht die Wanduhr. Sie steht in der Pause und folgt der Zeitlupe. Titel,
-Intro und Briefings rechnen ebenfalls aus `delta`. Tests warten deshalb mit `sekunden()` oder
-`frames()`. Echte Zeit messen die Messe-Statistik und der Kiosk-Leerlauf. Ebenfalls nach der
-Uhr, aber ohne Einfluss auf Punkte, laufen die Abstände zwischen REZIs Tipps und das
-Kulissen-Leben.
+Alles mit Zeitbezug zählt Spielzeit statt Wanduhr: Sie steht in der Pause und folgt der Zeitlupe.
+Kombo-Fenster, Laufzeit und die Abstände zwischen REZIs Tipps an Tür, Infoschild und Tor laufen
+über `Game.spielzeit`. Schonzeit und Sprungfenster zählen im Physikschritt mit. Titel, Intro,
+Briefings und das Kulissen-Leben rechnen aus `delta`. Tests warten deshalb mit `sekunden()` oder
+`frames()`. Echte Zeit messen nur die Messe-Statistik und der Kiosk-Leerlauf (Idle-Reset,
+Vorführung, Steck-Tipp und Leitpfeil, wenn lange nichts gedrückt wurde).
+
+### Durchspiel (Aufnahmen)
+
+Ob eine Station nach einer Leveländerung noch lösbar ist, zeigt Stufe 7 von `pruefen.py`
+(`--nur 7` allein, `--ohne-durchspiel` lässt sie aus). Sie spielt jede Aufnahme
+`tests/durchspiel/<station>.json` in einem eigenen Prozess ab, headless mit `--fixed-fps 60`,
+etwa 3 s je Station. Je Station meldet sie `ziel`, `absturz`, `haenger` oder `falsch`. Kommt Paul
+auf anderem Weg als aufgenommen ans Ziel, besteht die Station, die Zeile nennt es aber. Nach
+einer gewollten Änderung an einer Station wird sie neu aufgenommen:
+
+- **Ohne Menschen:** `Godot --headless --path godot --fixed-fps 60 --script res://tests/durchspiel.gd -- --suche=<station>`.
+  Der Läufer läuft, springt, wartet die Kralle ab und drückt PIN-Schleuse und Stempel. Er duckt
+  nicht, wechselt die Hülle nicht, steckt keine Karten und dockt nicht an.
+- **Am PC:** `Godot --path godot --fixed-fps 60 -- --windowed --level=<station> --aufnahme=res://tests/durchspiel/<station>.json`,
+  dann die Station bis durch die Tür spielen. Geschrieben wird am Ziel. Ohne `--fixed-fps 60` oder
+  mit Pause vermerkt die Datei das, die Wiedergabe kann dann abweichen.
+
+Einzeln abspielen: `… --script res://tests/durchspiel.gd -- --wiedergabe=res://tests/durchspiel/<station>.json`.
+`--wiederholen=N`, `--vorlauf=N` und `--zufall-stoeren` prüfen den Determinismus. Aufnahmen gibt
+es für 01, 02, 04, 14 und 20; die übrigen fünf Stationen schafft der Läufer nicht, sie braucht
+eine Aufnahme am PC. `tests/test_durchspiel.gd` prüft das Format und dass sich eine Wiedergabe
+mit ihrer Aufnahme deckt.
 
 ## Marke (PwC)
 
@@ -468,15 +491,17 @@ godot/
 ├── src/
 │   ├── Main.gd                      Ablauf: Hauptmenü → Zeitreise → Probelauf → Level → Karte → (Wissen) → … → Reward
 │   ├── autoload/  Game.gd (Zustand, Punkte, Medaillen, Highscore) · Sfx.gd (Klang) · Kiosk.gd (Eingabe, Messe, Prüflauf)
+│   │              · Aufnahme.gd (Eingaben aufnehmen und abspielen, ohne --aufnahme untätig)
 │   ├── core/      LevelData.gd (Level-Parser mit Schema) · Palette.gd (Materialsystem) · Brand.gd (PwC-Schrift, UI-Farben)
 │   │              · Grafik.gd (Grafikstufen, Glühen) · Komfort.gd (Bewegung reduzieren) · Statistik.gd (anonyme Zählung)
+│   │              · Bildschirmbild.gd (Aufnahmen in sRGB) · Eingabespur.gd (Format der Durchspiel-Aufnahmen)
 │   ├── player/    Player.gd (Controller) · PaulVisual.gd (Figur)
 │   ├── actors/    Rezi.gd
 │   ├── world/     Level.gd · Terrain.gd + terrain/ (Blocktexturen, Wind-Flora, Pfützen, Bodennebel)
 │   │              · Backdrop.gd + backdrop/ (Ebenen, Leben, Vordergrund, Partikel, Lichtstrahlen) · GameCamera.gd
 │   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays · vau_gitter (.gdshader)
 │   ├── mechanics/ Mechanic.gd · Basics.gd · KartenFx.gd · Stations.gd (Verzeichnis) · stationen/ (ein Baustein je Datei)
-│   ├── state/     Huelle.gd (Kernmechanik) · SprungFenster.gd — reine Regelklassen ohne Szene
+│   ├── state/     Huelle.gd (Kernmechanik) · SprungFenster.gd · KartenleserRegel.gd — reine Regelklassen ohne Szene
 │   ├── fx/        Fx.gd (Partikel, Lichter, Hitstop, Stempel, Browser-Fallback) · PostFx.gd (Grading je Welt) · Weather.gd (Regen, Blitz)
 │   └── ui/        Vignette.gd + Pen.gd (Info-Screen-Basis) · Title.gd (Hauptmenü/Klinikum) · Intro.gd (Zeitreise + Probelauf)
 │                  · Wissen.gd (ePA-Sequenzen) · Quiz.gd (Wissensabfrage) · TouchControls.gd · HUD.gd · LevelCard.gd · Reward.gd
@@ -488,7 +513,7 @@ godot/
 ├── docs/          Bewertung, Recherche, Konzept, Umfrage (Excel)
 │                  · erzeugungsprotokoll.jsonl (KI-Erzeugungen, entsteht mit dem ersten Eintrag)
 ├── i18n/          Übersetzungen (ui, intro, briefing, levels, wissen) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
-├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd — nicht im Export
+├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd · durchspiel*.gd + durchspiel/ (Aufnahmen) — nicht im Export
 ├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
 │                  · pruefen.py + grenzwerte.json (Prüfstufen) · schichten_pruefen.py · bildvergleich.py
 │                  · erzeugung_protokoll.py (KI-Protokoll) · statistik_auswerten.py · githooks/ (Commit-Haken)

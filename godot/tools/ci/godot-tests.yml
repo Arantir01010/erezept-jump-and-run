@@ -4,7 +4,7 @@
 # kopieren. .github/ gehört zum versiegelten Phaser-Kern (tools/check-core.ts);
 # danach `npm run guard:update` ausführen, sonst schlägt `npm run validate` an.
 #
-# Der Lauf ist derselbe Prüflauf wie lokal: python3 godot/tools/pruefen.py (Stufen 0–5).
+# Der Lauf ist derselbe Prüflauf wie lokal: python3 godot/tools/pruefen.py (Stufen 0–5 und 7).
 #   0 Dateien: NUL-/Steuerzeichen, CRLF, UTF-8, .uid je Skript, JSON streng (vor dem Import:
 #     so fällt eine nicht eingecheckte .uid auf, die lokal nur auf der Platte liegt)
 #   1 Level-Generator: alle zehn Stationen erreichbar, ohne Einbahn-Softlock, und die
@@ -43,7 +43,7 @@ jobs:
           sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
           godot --version
 
-      - name: Prüflauf (godot/tools/pruefen.py, Stufen 0–5)
+      - name: Prüflauf (godot/tools/pruefen.py, Stufen 0–5 und 7)
         run: python3 godot/tools/pruefen.py --godot /usr/local/bin/godot
 
       - name: Logs sichern (nur bei Fehlschlag)
