@@ -287,35 +287,43 @@ func test_schema_kennt_alle_bausteine() -> void:
 func test_schema_kennt_jeden_gelesenen_parameter() -> void:
 	var typen_von := {}   # Klassenname → [Bausteintypen]
 	var re_reg := RegEx.create_from_string("\"([a-z-]+)\": (?:Basics\\.)?([A-Z][A-Za-z]+)")
-	for datei in ["res://src/world/Level.gd", "res://src/mechanics/Stations.gd"]:
+	for datei: String in ["res://src/world/Level.gd", "res://src/mechanics/Stations.gd"]:
 		var text := FileAccess.get_file_as_string(datei)
 		var a := text.find("const REGISTRY := {")
 		var block := text.substr(a, text.find("\n}", a) - a)
-		for m in re_reg.search_all(block):
-			if not typen_von.has(m.get_string(2)):
-				typen_von[m.get_string(2)] = []
-			typen_von[m.get_string(2)].append(m.get_string(1))
+		for m: RegExMatch in re_reg.search_all(block):
+			var typen: Array = typen_von.get(m.get_string(2), [])
+			typen.append(m.get_string(1))
+			typen_von[m.get_string(2)] = typen
 	pruefe(typen_von.size() >= 20, "REGISTRY gelesen (%d Klassen)" % typen_von.size())
 	var re_klasse := RegEx.create_from_string("^class (\\w+) extends Mechanic")
 	var re_param := RegEx.create_from_string("\\b(?:param|ltext)\\(\"([^\"]+)\"")
 	var re_obj := RegEx.create_from_string("\\bobj\\.get\\(\"([^\"]+)\"")
 	var gelesen := 0
-	var quellen: Array = [["res://src/mechanics/Basics.gd", ""], ["res://src/mechanics/Stations.gd", ""]]
-	# Seit der Aufteilung steht jeder Stationsbaustein in einer eigenen Datei
-	# (src/mechanics/stationen/): Klasse = Dateiname, kein „class … extends Mechanic“.
-	for f in DirAccess.get_files_at("res://src/mechanics/stationen"):
+	var quellen: Array[Array] = [["res://src/mechanics/Basics.gd", ""], ["res://src/mechanics/Stations.gd", ""]]
+	# Seit der Aufteilung steht jeder Stationsbaustein in einer eigenen Datei (src/mechanics/stationen/),
+	# ohne „class … extends Mechanic“. Stations.gd lädt sie als Konstante — deren Name steht im REGISTRY.
+	var re_lade := RegEx.create_from_string("(?m)^const (\\w+) := preload\\(\"(res://[^\"]+\\.gd)\"\\)")
+	var geladen := {}
+	for m: RegExMatch in re_lade.search_all(FileAccess.get_file_as_string("res://src/mechanics/Stations.gd")):
+		quellen.append([m.get_string(2), m.get_string(1)])
+		geladen[m.get_string(2)] = true
+	for f: String in DirAccess.get_files_at("res://src/mechanics/stationen"):
 		if f.ends_with(".gd"):
-			quellen.append(["res://src/mechanics/stationen/" + f, f.get_basename()])
-	for q in quellen:
+			pruefe(geladen.has("res://src/mechanics/stationen/" + f),
+				"stationen/%s lädt Stations.gd nicht als Konstante — Schema-Abgleich fehlt" % f)
+	pruefe(geladen.size() >= 12, "Stationsbausteine aus Stations.gd gelesen (%d)" % geladen.size())
+	for q: Array in quellen:
 		var datei: String = q[0]
 		var klasse: String = q[1]
-		for zeile in FileAccess.get_file_as_string(datei).split("\n"):
+		for zeile: String in FileAccess.get_file_as_string(datei).split("\n"):
 			var k := re_klasse.search(zeile)
 			if k:
 				klasse = k.get_string(1)
 			if klasse == "" or not typen_von.has(klasse):
 				continue
-			for typ in typen_von[klasse]:
+			var typen: Array = typen_von[klasse]
+			for typ: String in typen:
 				var b: Dictionary = LevelData.BAUSTEINE.get(typ, {})
 				var param: Dictionary = b.get("param", {})
 				var alle := LevelData.felder_von(typ) if LevelData.BAUSTEINE.has(typ) else {}
