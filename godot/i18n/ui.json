@@ -150,5 +150,6 @@
   "Hängst du fest? %s: Pause, dann „Station neu starten“.": {"en": "Stuck? %s: pause, then “Restart station”.", "fr": "Bloqué ? %s : pause, puis « Recommencer la station ».", "es": "¿Atascado? %s: pausa y luego «Reiniciar la estación».", "zh": "卡住了？按 %s 暂停，然后选“重新开始本站”。", "hi": "अटक गए? %s: पॉज़, फिर “स्टेशन फिर से शुरू करो”।"},
   "links tippen: zurück · halten: überspringen": {"en": "tap left: back · hold: skip", "fr": "toucher à gauche : retour · maintenir : passer", "es": "toca a la izquierda: atrás · mantén: saltar", "zh": "点击左侧：返回 · 按住：跳过", "hi": "बाईं ओर टैप: वापस · दबाए रखो: छोड़ो"},
   "%s zurück · %s halten: überspringen": {"en": "%s back · hold %s: skip", "fr": "%s retour · maintenir %s : passer", "es": "%s atrás · mantén %s: saltar", "zh": "%s 返回 · 按住 %s：跳过", "hi": "%s वापस · %s दबाए रखो: छोड़ो"},
-  "%s: weiter": {"en": "%s: next", "fr": "%s : suite", "es": "%s: seguir", "zh": "%s：继续", "hi": "%s: आगे"}
+  "%s: weiter": {"en": "%s: next", "fr": "%s : suite", "es": "%s: seguir", "zh": "%s：继续", "hi": "%s: आगे"},
+  "DEIN ERGEBNIS": {"en": "YOUR RESULT", "fr": "TON RÉSULTAT", "es": "TU RESULTADO", "zh": "你的结果", "hi": "तुम्हारा परिणाम"}
 }
