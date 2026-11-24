@@ -237,33 +237,80 @@ class Spring extends Mechanic:
 # ---------------------------------------------------------------- Störfeld
 
 class Spike extends Mechanic:
+	## Störfeld: auch ohne Leuchten lesbar (Team-Feedback 9/2026 „schlecht zu sehen,
+	## wenn es gerade nicht rot leuchtet", Optik-Analyse O2). Vier Zacken über die
+	## ganze Kachel mit dunkler Kontur und dauerhaft deckendem Kern, Sockel mit
+	## Warnschraffur, roter Bodenschein; im Browser ein Ersatz-Glühen. Der Kern
+	## atmet nur leicht (±15 %, 1,2 Hz) — kein Blinken, weit unter 3 Hz.
+	const ZACKEN := 4
+	const SOCKEL_H := 10.0
+	const PULS_HZ := 1.2
 	var _t := 0.0
+	var _puls := 1.0
 	var _light: PointLight2D
+	var _glow: Sprite2D
+	var _schraffur: Array = []      # Streifen des Sockels, einmal berechnet
 
 	func spawn() -> void:
 		z_index = 4
 		make_sensor(Rect2(rect.position.x + 6, rect.position.y + 14, rect.size.x - 12, rect.size.y - 14), _on_enter)
-		_light = Fx.light(self, Vector2(0, -10), Palette.DENY, 70.0, 0.35)
+		_t = randf() * 2.0
+		var r := local_rect()
+		_light = Fx.light(self, Vector2(0, r.end.y - 16.0), Palette.DENY, 80.0, 0.35)
+		if Fx.web_fallback():
+			_glow = Fx.glow_sprite(self, Palette.DENY, 34.0, 0.5)
+			_glow.position = Vector2(0, r.end.y - 14.0)
+		# Warnschraffur: schräge Streifen, auf den Sockel zugeschnitten
+		var sockel := PackedVector2Array([Vector2(r.position.x, r.end.y - SOCKEL_H), Vector2(r.end.x, r.end.y - SOCKEL_H),
+			Vector2(r.end.x, r.end.y), Vector2(r.position.x, r.end.y)])
+		var x := r.position.x - SOCKEL_H
+		while x < r.end.x:
+			var streifen := PackedVector2Array([Vector2(x, r.end.y), Vector2(x + 5.0, r.end.y),
+				Vector2(x + 5.0 + SOCKEL_H, r.end.y - SOCKEL_H), Vector2(x + SOCKEL_H, r.end.y - SOCKEL_H)])
+			_schraffur.append_array(Geometry2D.intersect_polygons(streifen, sockel))
+			x += 10.0
 
 	func _on_enter(p: Player) -> void:
 		p.hurt(global_position.x)
 
 	func tick(delta: float) -> void:
 		_t += delta
-		_light.energy = 0.3 + 0.2 * absf(sin(_t * 9.0))
+		_puls = 1.0 + 0.15 * sin(_t * TAU * PULS_HZ)
+		_light.energy = 0.35 * _puls
+		if _glow:
+			Fx.set_glow(_glow, Palette.DENY, 0.5 * _puls)
 		queue_redraw()
 
 	func _draw() -> void:
 		var r := local_rect()
 		var c := Palette.DENY
-		draw_rect(Rect2(r.position.x, r.end.y - 8, r.size.x, 8), pal.outline)
-		draw_rect(Rect2(r.position.x + 1, r.end.y - 7, r.size.x - 2, 6), pal.cap)
-		for i in 3:
-			var x := r.position.x + 8 + i * 16.0
-			var flick := 0.7 + 0.3 * sin(_t * 12.0 + i * 2.0)
-			var tri := PackedVector2Array([Vector2(x - 1, r.end.y - 6), Vector2(x + 5, r.position.y + 10), Vector2(x + 11, r.end.y - 6)])
-			draw_colored_polygon(tri, pal.outline)
-			draw_colored_polygon(PackedVector2Array([Vector2(x + 1, r.end.y - 7), Vector2(x + 5, r.position.y + 13), Vector2(x + 9, r.end.y - 7)]), Palette.glow(Color(c.r, c.g, c.b, flick), 1.3))
+		var boden := r.end.y - SOCKEL_H
+		# roter Bodenschein: weich nach oben auslaufend, hinter den Zacken
+		var schein := Color(c.r, c.g, c.b, 0.30 * _puls)
+		var klar := Color(c.r, c.g, c.b, 0.0)
+		draw_polygon(PackedVector2Array([Vector2(r.position.x - 6, boden), Vector2(r.end.x + 6, boden),
+			Vector2(r.end.x - 2, boden - 22), Vector2(r.position.x + 2, boden - 22)]),
+			PackedColorArray([schein, schein, klar, klar]))
+		# Zacken: dunkle Kontur, deckender Kern (Licht- und Schattenflanke), heller Grat
+		var w := r.size.x / ZACKEN
+		var spitze := r.position.y + 8.0
+		# Beide Flanken bleiben im Rot-Ton: Palette.tint/shade drehen Rot Richtung Orange,
+		# und Orange heißt im Spiel „Klartext". HDR-Faktor pulst um 1,3 und streift die
+		# Glow-Schwelle nur im Hoch.
+		var hell := Palette.glow(c, 1.3 * _puls)
+		var dunkel := c.darkened(0.4)
+		for i in ZACKEN:
+			var x0 := r.position.x + i * w
+			var m := x0 + w * 0.5
+			draw_colored_polygon(PackedVector2Array([Vector2(x0 - 1.5, boden + 1), Vector2(m, spitze - 3.0), Vector2(x0 + w + 1.5, boden + 1)]), pal.outline)
+			draw_colored_polygon(PackedVector2Array([Vector2(x0 + 1.5, boden), Vector2(m, spitze), Vector2(m, boden)]), hell)
+			draw_colored_polygon(PackedVector2Array([Vector2(m, boden), Vector2(m, spitze), Vector2(x0 + w - 1.5, boden)]), dunkel)
+			draw_line(Vector2(m, spitze + 1.0), Vector2(m - w * 0.18, boden - 6.0), Color(1, 0.9, 0.85, 0.55), 1.5, true)
+		# Sockel mit Warnschraffur (rot/dunkel) und dunkler Kante
+		draw_rect(Rect2(r.position.x, boden, r.size.x, SOCKEL_H), pal.outline)
+		for s in _schraffur:
+			draw_colored_polygon(s, c)
+		draw_rect(Rect2(r.position.x, boden, r.size.x, SOCKEL_H), pal.outline, false, 2.0)
 
 
 # ---------------------------------------------------------------- Hinweiszone
