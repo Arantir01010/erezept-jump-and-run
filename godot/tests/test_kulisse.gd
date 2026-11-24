@@ -145,3 +145,28 @@ func test_bildwerkzeuge_speichern_srgb() -> void:
 		var text := FileAccess.get_file_as_string(f)
 		pruefe(text.contains("Bildschirmbild.von(root)"), "%s speichert über Bildschirmbild (sRGB)" % f)
 		pruefe(not text.contains("root.get_texture().get_image()"), "%s liest das lineare Viewport-Bild direkt" % f)
+
+
+## Screenshots aus dem Spiel (F12, Prüflauf --shots): sRGB wie auf dem Schirm, und das
+## Umrechnen läuft im Hintergrund, damit die Zeitgeber des Prüflaufs nicht zu früh gehen.
+func test_kiosk_screenshot_speichert_srgb_im_hintergrund() -> void:
+	var pfad := "user://test-kiosk-screenshot.png"
+	var roh_pfad := "user://test-kiosk-screenshot-roh.png"
+	var img := Image.create(8, 8, false, Image.FORMAT_RGBAH)
+	img.fill(Color(0.2140, 0.2140, 0.2140, 1.0))   # linear 0,214 ist sRGB-Mittelgrau 128
+	# Gegenprobe: so hat save_screenshot früher gespeichert, viel zu dunkel
+	img.save_png(roh_pfad)
+	var roh := Image.load_from_file(ProjectSettings.globalize_path(roh_pfad))
+	nahe(float(roh.get_pixel(0, 0).g8), 55.0, 1.0, "roh gespeichert bleibt das Bild linear")
+	Bildschirmbild.vorbereiten(true)
+	Kiosk._bild_aufgaben.append(WorkerThreadPool.add_task(Kiosk._bild_schreiben.bind(img, true, pfad)))
+	Kiosk.bilder_abwarten()
+	gleich(Kiosk._bild_aufgaben.size(), 0, "nach dem Abwarten ist nichts mehr offen")
+	var geladen := Image.load_from_file(ProjectSettings.globalize_path(pfad))
+	if pruefe(geladen != null and not geladen.is_empty(), "Screenshot geschrieben"):
+		nahe(float(geladen.get_pixel(3, 3).g8), 128.0, 1.0, "Screenshot in sRGB wie auf dem Schirm")
+	var text := FileAccess.get_file_as_string("res://src/autoload/Kiosk.gd")
+	pruefe(text.contains("WorkerThreadPool.add_task(_bild_schreiben"), "save_screenshot rechnet im Hintergrund um")
+	pruefe(text.count("bilder_abwarten()\n") >= 2, "der Prüflauf wartet vor beiden Enden auf die Bilder")
+	for f: String in [pfad, roh_pfad]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(f))

@@ -29,6 +29,12 @@ static func von(vp: Viewport) -> Image:
 	return srgb(vp.get_texture().get_image(), linear(vp))
 
 
+## Umrechnungstabelle schon im Hauptthread anlegen. Wer srgb() auf einem
+## Hintergrund-Thread aufruft (Kiosk.save_screenshot), liest sie dann nur noch.
+static func vorbereiten(ist_linear := true) -> void:
+	_tabelle_holen(ist_linear)
+
+
 ## Liegt das Viewport-Bild linear vor? Nur mit hdr_2d außerhalb von Compatibility.
 static func linear(vp: Viewport) -> bool:
 	return vp.use_hdr_2d and RenderingServer.get_current_rendering_method() != "gl_compatibility"
