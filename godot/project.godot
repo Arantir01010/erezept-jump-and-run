@@ -27,6 +27,7 @@ locale/fallback="de"
 Game="*res://src/autoload/Game.gd"
 Sfx="*res://src/autoload/Sfx.gd"
 Kiosk="*res://src/autoload/Kiosk.gd"
+Aufnahme="*res://src/autoload/Aufnahme.gd"
 
 [debug]
 
