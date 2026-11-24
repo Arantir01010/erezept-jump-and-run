@@ -53,6 +53,11 @@
 
   "%s: Hülle wechseln": {"en": "%s: switch shell", "fr": "%s : changer d'enveloppe", "es": "%s: cambiar envoltura", "zh": "%s：切换外壳", "hi": "%s: कवच बदलो"},
   "%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion": {"en": "%s run · %s jump (again in the air = REZI boost) · %s TI action", "fr": "%s courir · %s sauter (encore en l'air = boost REZI) · %s action TI", "es": "%s correr · %s saltar (otra vez en el aire = impulso REZI) · %s acción TI", "zh": "%s 跑动 · %s 跳跃（空中再按 = REZI 助推）· %s TI 操作", "hi": "%s दौड़ो · %s कूदो (हवा में फिर से = REZI बूस्ट) · %s TI एक्शन"},
+  "ZIEL": {"en": "GOAL", "fr": "OBJECTIF", "es": "META", "zh": "目标", "hi": "लक्ष्य"},
+  "Noch %d %s, dann zum Ausgang": {"en": "%d more %s, then to the exit", "fr": "Encore %d %s, puis vers la sortie", "es": "%d %s más, luego a la salida", "zh": "还需 %d 个%s，然后去出口门", "hi": "अभी %d %s और, फिर निकास द्वार की ओर"},
+  "Ausgang offen: weiter nach rechts": {"en": "Exit open: keep heading right", "fr": "Sortie ouverte : continue vers la droite", "es": "Salida abierta: sigue hacia la derecha", "zh": "出口门已开：继续向右", "hi": "निकास द्वार खुला: दाईं ओर चलते रहो"},
+  "Am Ende signieren: %s am Stempel": {"en": "Sign at the end: %s at the stamp", "fr": "Signe à la fin : %s au tampon", "es": "Firma al final: %s en el sello", "zh": "最后签名：在印章下按 %s", "hi": "अंत में हस्ताक्षर: मुहर पर %s"},
+  "Weiter nach rechts zur letzten Tür": {"en": "Keep heading right to the last door", "fr": "Continue vers la droite jusqu'à la dernière porte", "es": "Sigue hacia la derecha hasta la última puerta", "zh": "继续向右，走到最后一扇门", "hi": "दाईं ओर चलो, आख़िरी दरवाज़े तक"},
   "Zeit %5.1f s   ·   Ziel %.0f s": {"en": "Time %5.1f s   ·   Target %.0f s", "fr": "Temps %5.1f s   ·   Objectif %.0f s", "es": "Tiempo %5.1f s   ·   Meta %.0f s", "zh": "时间 %5.1f 秒   ·   目标 %.0f 秒", "hi": "समय %5.1f s   ·   लक्ष्य %.0f s"},
   "Kombo ×%d": {"en": "Combo ×%d", "fr": "Combo ×%d", "es": "Combo ×%d", "zh": "连击 ×%d", "hi": "कॉम्बो ×%d"},
   "VERSCHLÜSSELT": {"en": "ENCRYPTED", "fr": "CHIFFRÉ", "es": "CIFRADO", "zh": "已加密", "hi": "एन्क्रिप्टेड"},

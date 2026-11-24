@@ -234,7 +234,8 @@ Phaser-Tests), Spielstand (Treffer kostet nur Bits dieser Station), Leveldaten a
 Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt,
 Bedienung (`test_bedienung.gd`: Pausemenü, Neustart, Tür-Sicherheitsnetz, Tastenkappe,
 Blättern, Stationskarte, REZI-Lesezeit) und Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
-Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz). `test_texte.gd` prüft außerdem
+Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz; `test_zielzeile.gd`: Zielzeile
+jeder Station). `test_texte.gd` prüft außerdem
 Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
 Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
 rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
@@ -305,6 +306,12 @@ rot-dunkel schraffiertem Sockel und rotem Bodenschein, der ruhig mit 1,2 Hz atme
 Orange, denn warm heißt „Klartext". Der Lauscher-Kegel ist nur warm mit Kontur, solange Paul
 im Klartext lesbar ist; verschlüsselt oder in der VAU wird er blass und neutral. Paul blinkt
 nach einem Treffer mit 2 Hz.
+
+**Zielzeile (Team-Feedback F15):** Unter dem Stationsnamen steht, was zu tun ist und was danach
+kommt, aus den Leveldaten: „Noch 4 Daten-Kacheln, dann zum Ausgang“, sobald die Tür offen ist
+„Ausgang offen: weiter nach rechts“; Station 02 nennt den Stempel samt Taste, Station 20 die
+letzte Tür (`HUD.ziel()`). Beim Schrittwechsel hellt die Zeile einmal auf, sie blinkt nicht.
+`tests/test_zielzeile.gd` prüft alle Stationen und Sprachen.
 
 ## Marke (PwC)
 

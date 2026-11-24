@@ -8,12 +8,16 @@ extends CanvasLayer
 ## Rechtecke je Rand, sichtbares Streifenraster) ist entfernt — PostFx hat schon
 ## eine weiche. Die rechte Spalte hängt an der Bildkante (lief 6 px hinaus, die
 ## Pillen überlappten), Zeit in PwC-Gelb statt Grün, Kombo mit dunkler Kontur.
+## Unter dem Stationsnamen steht die Zielzeile (Team-Feedback F15: „nicht immer
+## klar, was als Nächstes kommt“): was hier zu tun ist und was danach kommt.
 
 signal pause_requested
 
 var level: Level
 var pause_btn: _PauseButton
 var station: Label
+var ziel_box: PanelContainer
+var ziel_label: Label
 var route: _Route
 var bits_label: Label
 var score_label: Label
@@ -45,7 +49,34 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	station = _pill(root, Vector2(RAND, 22), 24)
+	# Oben links: Stationsname, darunter die Zielzeile (beide so breit wie ihr Text)
+	var links := VBoxContainer.new()
+	links.position = Vector2(RAND, 22)
+	links.add_theme_constant_override("separation", 10)
+	links.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(links)
+	station = _pill(links, Vector2.ZERO, 24)
+	(station.get_parent() as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	ziel_box = PanelContainer.new()
+	ziel_box.add_theme_stylebox_override("panel", _pill_style())
+	ziel_box.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	ziel_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ziel_zeile := HBoxContainer.new()
+	ziel_zeile.add_theme_constant_override("separation", 14)
+	ziel_zeile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var eyebrow := Label.new()
+	eyebrow.text = tr("ZIEL")
+	eyebrow.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	eyebrow.label_settings = Brand.label_settings(16, Brand.UI_EYEBROW, Brand.spaced(Brand.sans("bold"), 3))
+	eyebrow.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ziel_zeile.add_child(eyebrow)
+	ziel_label = Label.new()
+	ziel_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED   # Text kommt schon übersetzt
+	ziel_label.label_settings = Brand.label_settings(22, Brand.UI_TEXT, Brand.sans("medium"))
+	ziel_zeile.add_child(ziel_label)
+	ziel_box.add_child(ziel_zeile)
+	links.add_child(ziel_box)
+	ziel_box.visible = false
 	route = _Route.new()
 	route.position = Vector2(700, 30)
 	route.size = Vector2(520, 30)
@@ -216,6 +247,8 @@ func bind(lvl: Level) -> void:
 	huelle_hint.visible = lvl.data.huelle_enabled
 	huelle_hint.text = tr("%s: Hülle wechseln") % Kiosk.label_toggle()
 	_last_huelle = ""
+	_ziel_text = ""
+	_ziel_schritt = ""
 	_zeit_text = ""
 	_zeit_unter_par = -1
 	cards_view.reset()
@@ -248,6 +281,7 @@ func refresh() -> void:
 	route.done = Game.seals.size()
 	route.total = Game.playlist.size()
 	route.queue_redraw()
+	_refresh_ziel()
 	_refresh_huelle()
 	var list := _level_cards()
 	if list.is_empty():
@@ -257,6 +291,52 @@ func refresh() -> void:
 		cards_view.layout(list)
 		cards_box.position = Vector2(CARDS_RIGHT - _Cards.width_for(list.size()) - 36.0, CARDS_Y)
 		cards_view.queue_redraw()
+
+
+## Zielzeile aus Leveldaten und Lage: Welcher Ausgang beendet die Station, wie
+## viele Prüfsummen fehlen noch, ist die Tür schon offen. Ein Text pro Schritt;
+## beim Wechsel des Schritts hellt die Pille einmal kurz auf (kein Blinken).
+var _ziel_text := ""
+var _ziel_schritt := ""
+
+func _refresh_ziel() -> void:
+	var tuer: Node = null
+	var typen: Array[String] = []
+	for m in level.mechanics:
+		if is_instance_valid(m):
+			typen.append(str(m.type))
+			if m.type == "door-exit" and tuer == null:
+				tuer = m
+	var z := ziel(typen, level.data.count_required - Game.bits_this_level(),
+		tuer != null and bool(tuer.unlocked), Game.t(level.data.collect_label), Kiosk.label_action())
+	var text := str(z.text)
+	if text == _ziel_text:
+		return
+	var wechsel := _ziel_schritt != "" and str(z.schritt) != _ziel_schritt
+	_ziel_text = text
+	_ziel_schritt = str(z.schritt)
+	ziel_label.text = text
+	ziel_box.visible = text != ""
+	if wechsel:
+		ziel_box.modulate = Color(1.35, 1.35, 1.35)
+		var tw := create_tween()
+		tw.tween_property(ziel_box, "modulate", Color.WHITE, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## Schritt und Text der Zielzeile. typen: Bausteine der Station; fehlt: noch zu
+## sammelnde Prüfsummen; tuer_offen: die Ausgangstür lässt Paul schon durch
+## (Ziel erreicht oder Sicherheitsnetz). Ausgang nach Vorrang: letzte Tür
+## (Station 20), Stempel (Station 02), sonst die Tür am Ende.
+static func ziel(typen: Array, fehlt: int, tuer_offen: bool, sammel: String, aktion: String) -> Dictionary:
+	if "letzte-tuer" in typen:
+		return {"schritt": "letzte-tuer", "text": Game.t("Weiter nach rechts zur letzten Tür")}
+	if "stamp-exit" in typen:
+		return {"schritt": "stempel", "text": Game.t("Am Ende signieren: %s am Stempel") % aktion}
+	if "door-exit" in typen:
+		if tuer_offen or fehlt <= 0:
+			return {"schritt": "tuer-offen", "text": Game.t("Ausgang offen: weiter nach rechts")}
+		return {"schritt": "sammeln", "text": Game.t("Noch %d %s, dann zum Ausgang") % [fehlt, sammel]}
+	return {"schritt": "", "text": ""}
 
 
 ## Hülle-Anzeige: Farbe, Form und Text nur bei Wechsel neu setzen (ein Theme-
