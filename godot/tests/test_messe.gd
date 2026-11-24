@@ -329,3 +329,83 @@ func test_betreiber_menue() -> void:
 	await frames(2)
 	pruefe(not baum.paused, "nach dem Schließen läuft es weiter")
 	_hs_zurueck()
+
+
+# ================================================================ Paket 3
+
+func test_attract_vorfuehrung_im_leerlauf() -> void:
+	Kiosk.kiosk_mode = true
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await warte_bis(func(): return main._current is Title, 3.0)
+	Kiosk.last_input_ms = Time.get_ticks_msec() - 26000
+	await warte_bis(func(): return main._current is Intro, 3.0)
+	if not pruefe(main._current is Intro, "nach 25 s Leerlauf im Titel läuft die Vorführung"):
+		return
+	var intro: Intro = main._current
+	pruefe(intro.vorfuehrung and not intro.mitmachen, "Vorführung: Paul spielt allein, wartet auf niemanden")
+	gleich(main.screen, main.Screen.INTRO, "Bildschirm Vorführung")
+	Kiosk.note_input()   # ein Besucher drückt etwas
+	await warte_bis(func(): return main._current is Title, 3.0)
+	pruefe(main._current is Title, "jeder Druck holt den Titel zurück")
+	pruefe(not main._vorfuehrung, "Vorführung beendet")
+
+
+func test_ohne_kiosk_keine_vorfuehrung() -> void:
+	Kiosk.kiosk_mode = false
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await warte_bis(func(): return main._current is Title, 3.0)
+	Kiosk.last_input_ms = Time.get_ticks_msec() - 26000
+	await frames(20)
+	pruefe(main._current is Title, "am PC/im Browser bleibt der Titel stehen")
+
+
+func test_schraeg_hoch_wechselt_die_huelle_nicht() -> void:
+	var hoch := InputEventKey.new()
+	hoch.physical_keycode = KEY_UP
+	hoch.pressed = true
+	Input.parse_input_event(hoch)
+	Input.action_press("move_right")
+	await frames(2)
+	Kiosk._hoch_wechselt(0.3)
+	pruefe(not Input.is_action_pressed("toggle"), "hoch + rechts (schräg springen) schaltet die Hülle nicht")
+	Input.action_release("move_right")
+	Kiosk._hoch_wechselt(0.05)
+	pruefe(not Input.is_action_pressed("toggle"), "ganz kurz senkrecht hoch: noch nicht")
+	Kiosk._hoch_wechselt(0.1)
+	pruefe(Input.is_action_pressed("toggle"), "senkrecht hoch gehalten: Hülle wechselt")
+	hoch.pressed = false
+	Input.parse_input_event(hoch)
+	await frames(2)
+	Kiosk._hoch_wechselt(0.016)
+	pruefe(not Input.is_action_pressed("toggle"), "loslassen gibt die Hülle-Taste frei")
+
+
+func test_sprache_per_stick_im_titel() -> void:
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await warte_bis(func(): return main._current is Title, 3.0)
+	var title: Node = main._current
+	var vorher := Game.lang
+	var ev := InputEventAction.new()
+	ev.action = "move_down"
+	ev.pressed = true
+	title._unhandled_input(ev)
+	var i: int = Game.LANGS.find(vorher)
+	await warte_bis(func(): return Game.lang != vorher, 2.0)
+	gleich(Game.lang, str(Game.LANGS[(i + 1) % Game.LANGS.size()]), "runter = nächste Sprache")
+	Game.set_lang(vorher)
+
+
+func test_kaputtes_level_wird_uebersprungen() -> void:
+	var alt: Array = Game.playlist.duplicate()
+	Game.playlist.insert(0, "99-gibt-es-nicht")
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	baum.root.add_child(main)
+	await frames(3)
+	main._start_level(0)
+	await warte_bis(func(): return is_instance_valid(main.level) and main.level.data != null, 3.0)
+	if pruefe(is_instance_valid(main.level), "es läuft ein Level"):
+		gleich(main.level.data.id, str(alt[0]), "die kaputte Station wird übersprungen, die nächste startet")
+	Game.playlist = alt

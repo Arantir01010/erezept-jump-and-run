@@ -1,4 +1,5 @@
 {
+  "Vorführung — %s: Selbst spielen!": {"en": "Demo — %s: Play yourself!", "fr": "Démo — %s : À toi de jouer !", "es": "Demostración — %s: ¡Juega tú!", "zh": "先看看 — %s：自己玩！", "hi": "डेमो — %s: खुद खेलो!"},
   "Das hast du gesichert:": {"en": "What you secured:", "fr": "Ce que tu as sécurisé :", "es": "Lo que has asegurado:", "zh": "你已保护：", "hi": "तुमने सुरक्षित किया:"},
   "Folge meinem Pfeil!": {"en": "Follow my arrow!", "fr": "Suis ma flèche !", "es": "¡Sigue mi flecha!", "zh": "跟着我走！", "hi": "मेरे तीर के पीछे चलो!"},
   "Du bist dran: %s!": {"en": "Your turn: %s!", "fr": "À toi : %s !", "es": "Te toca: %s!", "zh": "轮到你了：%s！", "hi": "तुम्हारी बारी: %s!"},

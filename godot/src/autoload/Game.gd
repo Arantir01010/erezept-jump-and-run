@@ -68,6 +68,10 @@ func load_config() -> void:
 	var pl = _read_json("res://config/playlist.json")
 	playlist = pl if pl is Array else []
 	default_lang = str(config.get("language", "de"))
+	# Browser-Fassung: mit der Sprache des Browsers starten, wenn wir sie haben
+	# (Messe-Paket 3). Am Messe-PC bleibt es bei „language" aus der Konfiguration.
+	if OS.has_feature("web") and LANGS.has(OS.get_locale_language()):
+		default_lang = OS.get_locale_language()
 	_load_translations()
 	set_lang(default_lang)
 

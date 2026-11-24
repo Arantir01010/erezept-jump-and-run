@@ -131,11 +131,9 @@ func _build_input_map() -> void:
 				var ev := InputEventKey.new()
 				ev.physical_keycode = code
 				InputMap.action_add_event(action, ev)
-	# Joystick hoch wechselt die Hülle (2-Button-Hardware, siehe README)
-	if bool(gp.get("toggleOnUp", true)):
-		var ev := InputEventKey.new()
-		ev.physical_keycode = KEY_UP
-		InputMap.action_add_event("toggle", ev)
+	# Joystick hoch wechselt die Hülle (2-Button-Hardware, siehe README) — aber nur
+	# senkrecht und kurz gehalten, nicht schräg nach oben (siehe _hoch_wechselt).
+	_toggle_on_up = bool(gp.get("toggleOnUp", true))
 	# Gamepad-Buttons
 	for b in gp.get("jumpButtons", [0, 2]):
 		_add_joy_button("jump", int(b))
@@ -148,14 +146,10 @@ func _build_input_map() -> void:
 		_add_joy_button("move_right", JOY_BUTTON_DPAD_RIGHT)
 		_add_joy_button("move_up", JOY_BUTTON_DPAD_UP)
 		_add_joy_button("move_down", JOY_BUTTON_DPAD_DOWN)
-		if bool(gp.get("toggleOnUp", true)):
-			_add_joy_button("toggle", JOY_BUTTON_DPAD_UP)
 	_add_joy_axis("move_left", JOY_AXIS_LEFT_X, -1.0)
 	_add_joy_axis("move_right", JOY_AXIS_LEFT_X, 1.0)
 	_add_joy_axis("move_up", JOY_AXIS_LEFT_Y, -1.0)
 	_add_joy_axis("move_down", JOY_AXIS_LEFT_Y, 1.0)
-	if bool(gp.get("toggleOnUp", true)):
-		_add_joy_axis("toggle", JOY_AXIS_LEFT_Y, -1.0)
 	# Bestätigen im Menü: Sprung ODER Aktion
 	if not InputMap.has_action("confirm"):
 		InputMap.add_action("confirm")
@@ -211,9 +205,45 @@ func _input(event: InputEvent) -> void:
 const BETRIEB_HALTEN_S := 5.0
 var betrieb: Node
 var _beide_gehalten := 0.0
+## „Hoch = Hülle" (toggleOnUp): Früher wechselte jeder Druck nach oben die Hülle —
+## auch schräg nach oben-rechts, wie viele am 8-Wege-Stick springen wollen. Jetzt
+## nur, wenn hoch ohne links/rechts HOCH_HALTEN_S lang gehalten wird.
+const HOCH_HALTEN_S := 0.12
+var _toggle_on_up := true
+var _hoch_seit := 0.0
+var _hoch_aktiv := false
+
+
+func _hoch_senkrecht() -> bool:
+	if Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right"):
+		return false
+	if Input.is_physical_key_pressed(KEY_UP):
+		return true
+	for dev in Input.get_connected_joypads():
+		if Input.is_joy_button_pressed(dev, JOY_BUTTON_DPAD_UP):
+			return true
+		if Input.get_joy_axis(dev, JOY_AXIS_LEFT_Y) < -0.75 and absf(Input.get_joy_axis(dev, JOY_AXIS_LEFT_X)) < 0.5:
+			return true
+	return false
+
+
+func _hoch_wechselt(delta: float) -> void:
+	if not _toggle_on_up:
+		return
+	if _hoch_senkrecht():
+		_hoch_seit += delta
+		if _hoch_seit >= HOCH_HALTEN_S and not _hoch_aktiv:
+			_hoch_aktiv = true
+			Input.action_press("toggle")
+	else:
+		_hoch_seit = 0.0
+		if _hoch_aktiv:
+			_hoch_aktiv = false
+			Input.action_release("toggle")
 
 
 func _process(delta: float) -> void:
+	_hoch_wechselt(delta)
 	if Input.is_action_pressed("jump") and Input.is_action_pressed("action"):
 		_beide_gehalten += delta
 		if _beide_gehalten >= BETRIEB_HALTEN_S:

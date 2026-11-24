@@ -84,6 +84,8 @@ var _gedrueckt := false
 var _erledigt: Array[String] = []
 var _du_bist_dran: Label
 var mitmachen := true
+## Attract-Vorführung (Kiosk, Titel im Leerlauf): kein Mitmachen, nur zuschauen.
+var vorfuehrung := false
 
 
 func _init(p := 1) -> void:
@@ -668,7 +670,7 @@ func _build_tutorial() -> void:
 	_ti_popup = _popup("TI-AKTION", ti, "an Terminal und Kartenleser: Karte stecken, PIN, Stempel")
 	# Mitmachen: im Prüflauf (Screenshots nach der Uhr) nicht; sonst blockiert ein
 	# Knopfdruck das Weiterblättern, bis Paul die drei Dinge mit dem Spieler geübt hat.
-	mitmachen = Kiosk.shots_dir == ""
+	mitmachen = Kiosk.shots_dir == "" and not vorfuehrung
 	if mitmachen:
 		sperre = 999.0
 	_du_bist_dran = label(W / 2, 205, "", 10.5, {"color": Pen.hex(0xffd75e), "spacing": 0.6, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})

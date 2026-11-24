@@ -276,7 +276,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_select("touch")
 		get_viewport().set_input_as_handled()
 		return
+	# Hoch/Runter blättert die Sprache — am Arcade-Pult gibt es weder F2 noch Maus.
 	if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
+		get_viewport().set_input_as_handled()
+		_cycle_lang(-1 if event.is_action_pressed("move_up") else 1)
 		return
 	if event is InputEventScreenTouch and event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION:
 		var flag := _flag_at(event.position)
@@ -386,9 +389,10 @@ func _choose_lang(code: String) -> void:
 	lang_requested.emit(code)
 
 
-func _cycle_lang() -> void:
+func _cycle_lang(schritt := 1) -> void:
 	var i: int = Game.LANGS.find(Game.lang)
-	_choose_lang(str(Game.LANGS[(i + 1) % Game.LANGS.size()]))
+	var n: int = Game.LANGS.size()
+	_choose_lang(str(Game.LANGS[(i + schritt + n) % n]))
 
 
 ## Sechs Flaggen aus Grundformen; die gewählte hell mit Akzentrand und Marker.
