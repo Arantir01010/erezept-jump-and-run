@@ -43,8 +43,11 @@ F4 Töne · F11 Vollbild · F12 Screenshot.
 
 **Pause und Klang:** ESC, P, der START-Knopf am Gamepad oder der runde Pause-Knopf oben im
 HUD (Finger/Maus) halten das Level an. Das Pausenmenü (`src/ui/PauseMenu.gd`) bietet
-Weiter, Musik an/aus, Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion,
-Tipp oder Klick. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
+Weiter, **Station neu starten** (dieselbe Station ohne Briefing, Spielstand zurück auf den
+Stationsbeginn), **Steuerung** (Tastentafel der erkannten Bedienung), Musik an/aus,
+Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion, Tipp oder Klick. Weist die
+Tür Paul zum dritten Mal ab, nennt REZI diesen Ausweg; reichen die Prüfsummen, die noch
+in der Station liegen, nicht mehr für das Ziel, öffnet die Tür von selbst. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
 (zwei Pillen, F3/F4); die Wahl liegt in `user://einstellungen.cfg` und überlebt Neustart
 und Idle-Reset. In der Pause läuft der Idle-Reset weiter (Messe: wer weggeht, landet
 wieder im Hauptmenü). `--test-eingabe=-,-,-,-,ESC,-,F12,DOWN,DOWN,SPACE,-,F12,ESC` prüft
@@ -84,7 +87,7 @@ Hauptmenü (Klinikum, Bedienungswahl)  →  FRÜHER  →  HEUTE  →  SO SPIELST
 
 | Screen | Datei | Inhalt |
 |---|---|---|
-| Pause | `src/ui/PauseMenu.gd` | Overlay über dem Level (Baum angehalten): Weiter, Musik an/aus, Töne an/aus, Zum Hauptmenü; Idle-Reset läuft weiter. |
+| Pause | `src/ui/PauseMenu.gd` | Overlay über dem Level (Baum angehalten): Weiter, Station neu starten, Steuerung, Musik an/aus, Töne an/aus, Zum Hauptmenü; Idle-Reset läuft weiter (nur `--kiosk`). |
 | Stations-Briefing | `src/ui/Briefing.gd` + `src/ui/BriefingDaten.gd` | Vor jeder der zehn Stationen: was in der Wirklichkeit passiert, 4–5 laienverständliche Zeilen im Takt, animierte Mini-Szene der Mechanik, „Das tust du" mit den Knopfnamen der gewählten Bedienung, Leiste aller Bausteine des Levels (aus `level.json` + `layout.txt`). Oben die Reiseroute der zehn Stationen (Haken für geschaffte, die aktuelle pulsiert), Bühnenlicht auf der Szene, die Bausteine treten nacheinander hervor. Inhalte in `BriefingDaten.STATIONEN`; Prüfschalter `--shots=<dir> --shots-briefings` fotografiert alle zehn. |
 
 **Erzählband:** Alle Erzählzeilen (FRÜHER, HEUTE, ePA-Wissen, Briefings) stehen in einem
@@ -101,13 +104,20 @@ Funkenregen bei drei Medaillen (`src/ui/LevelCard.gd`).
 |---|---|---|
 | Hauptmenü | `src/ui/Title.gd` | Das Klinikum im Puppenhaus-Schnitt (OP, Stationen, Flur, Empfang; im Keller Konnektor → VAU → Fachdienst ePA), Aufzug, Heli, Passanten, Datenpulse; Paul & REZI auf dem Apotheken-Dach; Steuerungstafel, Tages-Bestenliste. 1:1-Port des Web-Hauptmenüs. |
 | FRÜHER / HEUTE | `src/ui/Intro.gd` (Phase 1, 2) | Die Zeitreise: dieselbe Straße, zwei Zeiten. Papier, Boten, Fax, Warteschlangen — dann die TI als Lehrstück in fünf Schritten (Sprechzimmer, Konnektor legt die Hülle an, TI-Gateway, VAU schreibt die Akte, Abruf in App und beim nächsten Arzt). **Das ist die Erklärung, was sich mit ePA und TI geändert hat.** |
-| SO SPIELST DU | `src/ui/Intro.gd` (Phase 3) | Probelauf: der echte Paul läuft im Autopilot über eine Grube, sammelt ein Datenbit, schaltet die Hülle — Popups mit Tastenkappen (Tastatur, Arcade-Knöpfe oder Touch-Knöpfe, je nach erkannter Hardware). |
+| SO SPIELST DU | `src/ui/Intro.gd` (Phase 3) | Probelauf: zuerst drückt Paul am Terminal die TI-Aktion (Tafel „TI-AKTION“ mit Taste E / Knopf BLAU / AKTION), dann läuft der echte Paul im Autopilot über eine Grube, sammelt ein Datenbit, schaltet die Hülle — Popups mit Tastenkappen (Tastatur, Arcade-Knöpfe oder Touch-Knöpfe, je nach erkannter Hardware). |
 | ePA-Wissen | `src/ui/Wissen.gd` | Vier Lehrsequenzen („Deine Akte", „Die Medikationsliste", „Befugnis auf Zeit", „Deine Regeln") vor den vier ePA-Stationen, Zuordnung in `Wissen.VOR_LEVEL`. |
 
 Alle Info-Screens erben von `src/ui/Vignette.gd`: Bühne im 640×360-Design-Raum der
 Web-Fassung (Node2D ×3 → 1920×1080, Koordinaten der Originale gelten unverändert),
-Schriften unskaliert als Label, Mindest-Anzeigedauer mit Zeitbalken, danach blättert jeder
-Knopf/Tipp weiter. Zeichen-Vokabular in `src/ui/Pen.gd`. Kein Blinken über 3 Hz.
+Schriften unskaliert als Label. **Erzählzeilen blättert der Spieler selbst** (Team-Feedback
+9/2026): jeder Knopf zeigt erst die ganze Zeile, dann die nächste; ← / Steuerkreuz links
+blättert zurück; Knopf 1,2 s halten überspringt den Screen; Finger/Maus im linken Drittel
+zurück, sonst vor. Screens ohne Erzählzeilen und der Prüflauf (`--shots`) laufen weiter nach
+der Uhr mit Mindestdauer. Die Stationskarte wartet auf Knopf, Tipp oder Klick. REZIs
+Sprechblasen stehen nach Textlänge (2,5–9 s); neue Sätze warten kurz, statt laufende zu
+überschreiben. Stationstexte nennen Knöpfe über Platzhalter (`{action}`, `{toggle}` …,
+eingesetzt von `BriefingDaten.tasten`), über TI-Stationen schwebt eine Tastenkappe.
+Zeichen-Vokabular in `src/ui/Pen.gd`. Kein Blinken über 3 Hz.
 
 ## Touch-Steuerung (Tablet)
 
@@ -212,8 +222,14 @@ auch wenn alle Prüfungen grün sind. Letzte Zeile: „N Tests, M fehlgeschlagen
 `--fixed-fps 60` macht die Spielzeit unabhängig vom Rechner. Inhalt: Hülle-Mechanik (Port der
 Phaser-Tests), Spielstand (Treffer kostet nur Bits dieser Station), Leveldaten aller Stationen,
 Übersetzungen (alle Sprachen, gleiche Platzhalter, jeder `tr("…")`-Text übersetzt), Kiosk
-(Idle-Reset nur mit `--kiosk`), Level-Mechanik (verstreute Prüfsummen, Zeichen-Culling) und ein
-Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt.
+(Idle-Reset nur mit `--kiosk`), Level-Mechanik (verstreute Prüfsummen, Zeichen-Culling), ein
+Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt,
+Bedienung (`test_bedienung.gd`: Pausemenü, Neustart, Tür-Sicherheitsnetz, Tastenkappe,
+Blättern, Stationskarte, REZI-Lesezeit) und Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
+Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz). `test_texte.gd` prüft außerdem
+Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
+Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
+rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
 `tests/` wird nicht exportiert. Ein fertiger GitHub-Workflow liegt in `tools/ci/godot-tests.yml`
 (Aktivieren nur durch Menschen: `.github/` gehört zum versiegelten Phaser-Kern).
 
@@ -273,6 +289,14 @@ Sonnenstrahlen, Blocktexturen mit Normal-Maps und Bevel-Kanten, Wind in Gras und
 gefärbte Schatten aller Lichter, Sonnendrift je Station, Paul mit Kapuzenzipfel
 (Kettensimulation), Schmierstreckung und Geisterspur beim REZI-Schub, REZI mit Mimik,
 VAU-Ring, Siegel-Burst. Im Browser ersetzen Glüh-Sprites das HDR-Glühen (`Fx.web_fallback`).
+
+**Lesbarkeit (Team-Feedback 9/2026):** Das HUD hat keine eigene Rand-Vignette mehr (die
+gestufte zeichnete ein Streifenraster); die Zähler hängen in einer Spalte an der rechten
+Bildkante, die Zeit ist unter Par PwC-Gelb. Störfelder sind deckend rot mit dunkler Kontur,
+rot-dunkel schraffiertem Sockel und rotem Bodenschein, der ruhig mit 1,2 Hz atmet — kein
+Orange, denn warm heißt „Klartext". Der Lauscher-Kegel ist nur warm mit Kontur, solange Paul
+im Klartext lesbar ist; verschlüsselt oder in der VAU wird er blass und neutral. Paul blinkt
+nach einem Treffer mit 2 Hz.
 
 ## Marke (PwC)
 
