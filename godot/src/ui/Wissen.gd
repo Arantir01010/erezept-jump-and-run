@@ -110,9 +110,10 @@ func _akte(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0) -> void:
 		Pen.rect(c, x - 7 * s, y + 2 * s + i * 3.4 * s, 14 * s, 1.1 * s, Pen.hex(0x9aa6bc, 0.8 * a))
 
 
-## eGK: die grüne Gesundheitskarte mit Chip — Schlüssel, kein Speicher.
+## eGK: die grüne Gesundheitskarte mit Chip — Schlüssel, kein Speicher. Körperfarbe
+## aus KartenFx (dieselbe Quelle wie Briefing, Karte, Kartenleser und HUD).
 func _karte(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0) -> void:
-	Pen.rrect(c, x - 8 * s, y - 5 * s, 16 * s, 10 * s, 1.6 * s, Pen.hex(0x2c7a52, a))
+	Pen.rrect(c, x - 8 * s, y - 5 * s, 16 * s, 10 * s, 1.6 * s, Pen.alpha(KartenFx.koerper("egk"), a))
 	Pen.rrect(c, x - 5.5 * s, y - 2.4 * s, 3.6 * s, 4.4 * s, 0.8 * s, Pen.hex(0xffd75e, 0.95 * a))
 	Pen.rect(c, x - 8 * s, y - 5 * s, 16 * s, 1 * s, Color(1, 1, 1, 0.2 * a))
 
