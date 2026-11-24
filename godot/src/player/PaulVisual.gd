@@ -30,7 +30,10 @@ extends Node2D
 var player: Player
 var squash := Vector2.ONE
 var flash := 0.0
-var blink_until := 0.0
+## Restzeit des Unverwundbar-Blinkens in Spielzeit (s); Player setzt sie bei Treffer
+## und Rücksetzen. Läuft mit dem Spiel ab, in der Pause also nicht weiter.
+var blink_left := 0.0
+var _blink_t := 0.0
 const BLINK_S := 0.5        # Periode des Unverwundbar-Blinkens (2 Hz)
 
 ## Paul trägt Warm gegen die kühle Welt (Mario-Regel: Figur komplementär zur Umgebung).
@@ -193,10 +196,12 @@ func _process(delta: float) -> void:
 
 	# Unverwundbar: Blinken mit 2 Hz — deutlich unter der 3-Hz-Grenze (Barrierefreiheit).
 	# Früher 0,28 s je Periode, also 3,6 Hz, entgegen diesem Kommentar.
-	var now := Time.get_ticks_msec() / 1000.0
-	if now < blink_until:
-		modulate.a = 0.35 if fmod(now, BLINK_S) < BLINK_S * 0.5 else 1.0
+	if blink_left > 0.0:
+		blink_left = maxf(0.0, blink_left - delta)
+		_blink_t += delta
+		modulate.a = 0.35 if fmod(_blink_t, BLINK_S) < BLINK_S * 0.5 else 1.0
 	else:
+		_blink_t = 0.0
 		modulate.a = 1.0
 	queue_redraw()
 

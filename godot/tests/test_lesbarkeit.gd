@@ -88,14 +88,13 @@ func test_paul_blinkt_unter_3_hz() -> void:
 	if not pruefe(lvl != null, "Station 01 startet"):
 		return
 	var vis = lvl.player.visual
-	vis.blink_until = Time.get_ticks_msec() / 1000.0 + 5.0
-	# Das Blinken läuft nach der Uhr — 2 s Echtzeit beobachten
+	vis.blink_left = 5.0
+	# Das Blinken läuft in Spielzeit — 2 s Spielzeit beobachten (120 Frames bei --fixed-fps 60)
 	var werte: Array = []
-	var start := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - start < 2000:
+	for i in 120:
 		werte.append(vis.modulate.a)
 		await baum.process_frame
-	vis.blink_until = 0.0
+	vis.blink_left = 0.0
 	var hz := _hz(werte, 0.7, 2.0)
 	pruefe(hz > 0.5, "Paul blinkt nach einem Treffer (%.1f Hz)" % hz)
 	pruefe(hz <= 3.0, "Blinken höchstens 3 Hz (ist %.1f Hz)" % hz)

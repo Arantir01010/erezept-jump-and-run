@@ -63,12 +63,14 @@ var vy_before := 0.0
 ## Abstand der Füße zum Boden darunter (für den Kontaktschatten).
 var ground_distance := 0.0
 
-var _coyote := 0.0
-var _buffer := 0.0
+## Coyote-Zeit und Sprungpuffer (reine Regel, src/state/SprungFenster.gd).
+var _sprung := SprungFenster.new(T.coyote, T.buffer)
 var _var_jump := 0.0
 var _can_double := true
 var _wall_lock := 0.0
-var _invuln_until := 0.0
+## Restzeit der Unverwundbarkeit in Spielzeit (s): läuft im Physiktakt ab, steht also
+## in der Pause und in der Zeitlupe still (früher Wanduhr: Pause und Hitstop fraßen sie auf).
+var _invuln_left := 0.0
 var _hurt_left := 0.0
 var _was_on_floor := false
 var _ducking := false
@@ -104,7 +106,7 @@ var is_ducking: bool:
 	get: return _ducking
 
 var is_invulnerable: bool:
-	get: return Time.get_ticks_msec() / 1000.0 < _invuln_until
+	get: return _invuln_left > 0.0
 
 var is_sichtbar: bool:
 	get: return huelle.sichtbar if huelle_enabled else true
@@ -128,12 +130,9 @@ func _physics_process(delta: float) -> void:
 	if huelle_enabled:
 		huelle.tick(delta)
 	var on_floor := is_on_floor()
-	var now := Time.get_ticks_msec() / 1000.0
 	if on_floor:
-		_coyote = T.coyote
 		_can_double = true
-	else:
-		_coyote -= delta
+	_invuln_left = maxf(0.0, _invuln_left - delta)
 	_wall_lock = maxf(0.0, _wall_lock - delta)
 	_hurt_left = maxf(0.0, _hurt_left - delta)
 
@@ -154,10 +153,7 @@ func _physics_process(delta: float) -> void:
 			held = Input.is_action_pressed("jump")
 			wants_duck = on_floor and Input.is_action_pressed("move_down")
 	auto_jump = false
-	if jump_now:
-		_buffer = T.buffer
-	else:
-		_buffer -= delta
+	_sprung.schritt(delta, on_floor, jump_now)
 	_set_ducking(wants_duck)
 
 	# --- Horizontalbewegung (Celeste: gleiche Beschleunigung für Anlauf und Stopp,
@@ -182,8 +178,8 @@ func _physics_process(delta: float) -> void:
 			_wall_sliding = true
 
 	# --- Springen: Buffer + Coyote, Wandsprung, REZI-Schub ---
-	if _buffer > 0.0 and not _ducking and _hurt_left <= 0.0:
-		if _coyote > 0.0:
+	if _sprung.sprung_gewuenscht() and not _ducking and _hurt_left <= 0.0:
+		if _sprung.vom_boden():
 			_do_jump(T.jump_velocity)
 			velocity.x += T.jump_hboost * ax
 			jumped.emit()
@@ -196,7 +192,7 @@ func _physics_process(delta: float) -> void:
 			_wall_away = facing
 			brake = false
 			_wall_lock = T.wall_lock
-			_buffer = 0.0
+			_sprung.wunsch_verbraucht()
 			_can_double = true
 			visual.squash = Vector2(0.8, 1.22)
 			Sfx.play("jump", 1.15)
@@ -330,8 +326,7 @@ func _turn(dir: int, from_brake: bool) -> void:
 func _do_jump(v: float) -> void:
 	velocity.y = -v
 	_var_jump = T.var_jump_time
-	_buffer = 0.0
-	_coyote = 0.0
+	_sprung.bodensprung()
 	# Absprung-Streckung: Impuls hier, den Rest hält PaulVisual über die Steiggeschwindigkeit
 	visual.squash = Vector2(0.84, 1.16)
 	Sfx.play("jump")
@@ -388,12 +383,10 @@ const RESPAWN_GRACE := 0.6
 func respawn() -> void:
 	global_position = respawn_point
 	velocity = Vector2.ZERO
-	_coyote = 0.0
-	_buffer = 0.0
+	_sprung.zuruecksetzen()
 	visual.flash = 1.0
-	var now := Time.get_ticks_msec() / 1000.0
-	_invuln_until = maxf(_invuln_until, now + RESPAWN_GRACE)
-	visual.blink_until = _invuln_until
+	_invuln_left = maxf(_invuln_left, RESPAWN_GRACE)
+	visual.blink_left = _invuln_left
 	respawned.emit()
 
 
@@ -401,8 +394,7 @@ func respawn() -> void:
 func hurt(from_x: float) -> int:
 	if is_invulnerable or controls_locked:
 		return 0
-	var now := Time.get_ticks_msec() / 1000.0
-	_invuln_until = now + T.hurt_invuln
+	_invuln_left = T.hurt_invuln
 	_hurt_left = 0.35
 	var dir := -1 if global_position.x < from_x else 1
 	velocity = Vector2(dir * T.hurt_knockback, -420.0)
@@ -420,7 +412,7 @@ func hurt(from_x: float) -> int:
 	# Musik kurz und weich zurücknehmen, damit der Treffer Raum bekommt
 	Sfx.music_duck(-6.0, 0.3)
 	Fx.hitstop(get_tree(), T.hitstop)
-	visual.blink_until = _invuln_until
+	visual.blink_left = _invuln_left
 	visual.flash = 1.0
 	var lost := Game.lose_bits(T.hurt_bits)
 	if lost > 0:
