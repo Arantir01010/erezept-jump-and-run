@@ -203,8 +203,15 @@ class Level:
 
 # ------------------------------------------------------------ Erreichbarkeit
 
-MAX_DX = {0: 6, 1: 6, 2: 6, 3: 5}          # normale Level
-MAX_DX_HUELLE = {0: 5, 1: 5, 2: 4, 3: 4}   # verschlüsselt = 80 % Tempo
+# Sprungweite je Sprunghöhe 0–3 in Kacheln = Versatz Absprung → Landung, Kachelmitte zu
+# Kachelmitte (die Lücke dazwischen ist eine Kachel schmaler). Paul schafft physikalisch
+# ≈ 6,3 (src/player/Player.gd); der Check lässt bewusst weniger zu und lehnt Weiteres ab,
+# weil Messe-Neulinge jeden Pflichtsprung sicher schaffen sollen. Hülle-Level wie im
+# Phaser-Baukasten (tools/lib/compile.ts: 4), normale eine Spur strenger als dort
+# (6/5/5/5). Die zehn Level brauchen höchstens 3 (normal) bzw. 4 (Hülle: Rückweg 3 hoch)
+# — Auswertung: python godot/tools/build_levels.py --sprungweiten
+MAX_DX = {0: 5, 1: 5, 2: 5, 3: 5}          # normale Level
+MAX_DX_HUELLE = {0: 4, 1: 4, 2: 4, 3: 4}   # verschlüsselt = 80 % Tempo
 MAX_DROP_DX = 7
 SPRING_TOP = 8
 
@@ -534,6 +541,116 @@ def check(level: Level) -> tuple[list[str], dict]:
     info = {"jumps": jumps if jumps < INF else 0, "bits_easy": bits_easy, "bits_all": bits_all,
             "bonus": bonus_all, "einbahn": einbahn}
     return problems, info
+
+
+# ------------------------------------------------------------ Auswertung: Sprungweiten
+# Nur lesen — ändert weder Level noch Ausgabe:  python godot/tools/build_levels.py --sprungweiten
+
+KUER = ("Prüfsumme bei", "Bonus bei")   # check()-Probleme, die nur Bonuswege betreffen
+
+
+def sprungweiten(level: Level, wanted: int) -> dict:
+    """Wie weit muss Paul im fertigen Level wirklich springen? check() läuft mit einer
+    gemeinsamen Obergrenze K für alle Sprunghöhen (Fall, Feder und Pendel bleiben),
+    K sinkt, bis etwas kippt:
+      pflicht       kleinstes K, mit dem Tür, Ausgang, Fahnen und Stationsbausteine
+                    erreichbar bleiben, das Sammelziel samt 5er-Reserve (count_required)
+                    ohne Schub greifbar ist und kein Rückweg wegfällt (Einbahnstraße) =
+                    Weite des breitesten Pflichtsprungs (0 = keiner). None = das Level
+                    hat schon mit den Tabellen Probleme.
+      hoehen        Sprunghöhen, auf denen dieser Sprung liegt (leer = mehrere Wege, je
+                    einer davon reicht).
+      ohne_meldung  kleinstes K, mit dem check() gar nichts meldet, auch kein Bonusweg
+                    (Schub/Wandsprung) abreißt. Darunter liefe der Generator auf Fehler.
+    """
+    tab = dict(MAX_DX_HUELLE if level.huelle else MAX_DX)
+
+    def lauf(t: dict) -> tuple[list[str], dict]:
+        global MAX_DX, MAX_DX_HUELLE
+        alt = (MAX_DX, MAX_DX_HUELLE)
+        if level.huelle:
+            MAX_DX_HUELLE = t
+        else:
+            MAX_DX = t
+        try:
+            return check(level)
+        finally:
+            MAX_DX, MAX_DX_HUELLE = alt
+
+    probleme0, info0 = lauf(tab)
+    need = count_required(info0, wanted)
+    reserve = min(info0["bits_easy"], need + 5)
+
+    def pflicht_ok(probleme: list[str], info: dict) -> bool:
+        ein = info["einbahn"]
+        return (all(p.startswith(KUER) for p in probleme) and info["bits_easy"] >= reserve
+                and not (need > 0 and ein and ein[1] < need))
+
+    def grund(probleme: list[str], info: dict) -> str:
+        harte = [p for p in probleme if not p.startswith(KUER)]
+        if harte:
+            return harte[0] + (f" (+{len(harte) - 1} weitere)" if len(harte) > 1 else "")
+        if info["bits_easy"] < reserve:
+            return f"nur {info['bits_easy']} Prüfsummen ohne Schub greifbar, Ziel {need} + 5 Reserve"
+        ein = info["einbahn"]
+        return f"Einbahnstraße bei x={ein[0]}: ohne Rückweg nur {ein[1]} von {need} Prüfsummen"
+
+    def gedeckelt(k: int) -> dict:
+        return {r: min(v, k) for r, v in tab.items()}
+
+    out = {"tabelle": tab, "pflicht": None, "hoehen": [], "ohne_meldung": None, "darunter": "",
+           "probleme": probleme0}
+    if not pflicht_ok(probleme0, info0):
+        return out
+    oben = max(tab.values())
+    pflicht = oben
+    still = oben if not probleme0 else None
+    for k in range(oben - 1, -1, -1):
+        p, i = lauf(gedeckelt(k))
+        if not pflicht_ok(p, i):
+            out["darunter"] = grund(p, i)
+            break
+        pflicht = k
+        if still == k + 1 and not p:
+            still = k
+    for r in sorted(tab):
+        if pflicht > 0 and tab[r] >= pflicht:
+            t = gedeckelt(pflicht)
+            t[r] = pflicht - 1
+            if not pflicht_ok(*lauf(t)):
+                out["hoehen"].append(r)
+    out.update(pflicht=pflicht, ohne_meldung=still)
+    return out
+
+
+def sprungweiten_bericht() -> None:
+    """Tabelle aller Level: breitester Pflichtsprung je Level gegen die Grenze. Schreibt nichts."""
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    print("Weite = Versatz Absprung → Landung in Kacheln (wie MAX_DX), Höhe = Sprunghöhe 0–3;")
+    print("„ohne Meldung ab“ = kleinste Grenze, mit der auch alle Bonuswege bleiben\n")
+    print(f"  {'Level':22s} {'Art':6s} {'Grenze':9s} {'breitester Pflichtsprung':26s} ohne Meldung ab")
+    kaputt = False
+    for build in BUILDERS:
+        L, _, wanted = build()
+        add_checkpoints(L)
+        s = sprungweiten(L, wanted)
+        grenze = "/".join(str(s["tabelle"][r]) for r in sorted(s["tabelle"]))
+        art = "Hülle" if L.huelle else "normal"
+        if s["pflicht"] is None:
+            kaputt = True
+            print(f"✗ {L.id:22s} {art:6s} {grenze:9s} schon mit dieser Grenze nicht schaffbar:")
+            for p in s["probleme"]:
+                print("    !", p)
+            continue
+        hoehe = "/".join(str(r) for r in s["hoehen"]) or "mehrere Wege"
+        sprung = f"{s['pflicht']} weit, Höhe {hoehe}" if s["pflicht"] else "keiner"
+        still = "–" if s["ohne_meldung"] is None else s["ohne_meldung"]
+        print(f"✓ {L.id:22s} {art:6s} {grenze:9s} {sprung:26s} {still}")
+        if s["darunter"]:
+            print(f"      mit {s['pflicht'] - 1}: {s['darunter']}")
+    if kaputt:
+        raise SystemExit(1)
 
 
 # ------------------------------------------------------------ Par-Zeit & Sammelziel
@@ -1296,4 +1413,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if "--sprungweiten" in sys.argv[1:]:
+        sprungweiten_bericht()
+    else:
+        main()
