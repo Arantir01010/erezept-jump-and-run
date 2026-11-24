@@ -46,8 +46,9 @@ func _leser(lvl, karte: String) -> Variant:
 
 ## Was der Leser gerade zeigt und weiß — die einzige Stelle, die sein Inneres liest.
 func _zustand(k) -> Dictionary:
-	return {"led": k._led, "status": k._status, "steckt": k._seated, "anim": k._anim_kind,
-		"eingesteckt": k.inserted, "tor_gemerkt": k.opened, "rempler": k._shake, "nicken": k._nod}
+	var r: KartenleserRegel = k.regel
+	return {"led": r.led, "status": r.status, "steckt": r.steckt, "anim": r.anim,
+		"eingesteckt": r.eingesteckt, "tor_gemerkt": r.geoeffnet, "rempler": r.rempler, "nicken": r.nicken}
 
 
 func _erwarte(k, soll: Dictionary, wann: String) -> void:
