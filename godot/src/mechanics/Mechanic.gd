@@ -55,12 +55,75 @@ func param(key: String, fallback: Variant) -> Variant:
 	return data.param(obj, key, fallback)
 
 
-## Lokalisierter Parameter mit Fallback ({de,en} oder String).
+## Lokalisierter Parameter mit Fallback ({de,en} oder String). Knopfnamen wie
+## {action} setzt BriefingDaten.tasten passend zur Bedienung ein („Taste E",
+## „Knopf BLAU", „AKTION") — früher stand in den Stationstexten „Blauer Knopf",
+## am PC wusste niemand, welche Taste das ist (Team-Feedback 9/2026).
 func ltext(key: String, fallback: Variant) -> String:
 	var v = param(key, null)
 	if v == null:
-		return Game.t(fallback)
-	return Game.t(v)
+		return BriefingDaten.tasten(Game.t(fallback))
+	return BriefingDaten.tasten(Game.t(v))
+
+
+## Tastenkappe über dem Baustein, solange er auf die TI-Aktion wartet (Paul steht
+## davor): zeigt E, BLAU oder AKTION — je nach Bedienung. Ruhig: weich ein- und
+## ausblenden, leichtes Schweben, kein Blinken. Pro Frame aus tick() aufrufen.
+var _kappe: Kappe
+
+func kappe(pos: Vector2, zeigen: bool, delta: float) -> void:
+	if _kappe == null:
+		if not zeigen:
+			return
+		_kappe = Kappe.new()
+		add_child(_kappe)
+	_kappe.position = pos
+	_kappe.tick(delta, zeigen)
+
+
+class Kappe extends Node2D:
+	var a := 0.0
+	var text := ""
+	var _t := 0.0
+	static var _sb: StyleBoxFlat
+
+	func _ready() -> void:
+		z_as_relative = false
+		z_index = 40          # vor Paul (10) und REZI (12)
+		visible = false
+
+	func tick(delta: float, zeigen: bool) -> void:
+		var vorher := a
+		a = move_toward(a, 1.0 if zeigen else 0.0, delta * 5.0)
+		if a <= 0.0 and vorher <= 0.0:
+			return
+		_t += delta
+		text = Kiosk.label_action()
+		visible = a > 0.0
+		queue_redraw()
+
+	func _draw() -> void:
+		if _sb == null:
+			_sb = StyleBoxFlat.new()
+			_sb.anti_aliasing = true
+			_sb.set_corner_radius_all(9)
+		var font := Brand.sans("medium")
+		var size := 26
+		var tw := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		var w := maxf(48.0, tw + 28.0)
+		var h := 44.0
+		var y := sin(_t * TAU * 0.8) * 3.0 - (1.0 - a) * 10.0   # schwebt; taucht von unten auf
+		var r := Rect2(-w / 2.0, -h / 2.0 + y, w, h)
+		# dunkle Unterkante (Tastenhub), dann die helle Kappe
+		_sb.bg_color = Color(0.106, 0.141, 0.22, 0.92 * a)
+		draw_style_box(_sb, Rect2(r.position + Vector2(0, 5), r.size))
+		_sb.bg_color = Color(0.875, 0.902, 0.941, 0.97 * a)
+		draw_style_box(_sb, r)
+		var base := r.position.y + h / 2.0 + font.get_ascent(size) / 2.0 - 3.0
+		draw_string(font, Vector2(r.position.x, base), text, HORIZONTAL_ALIGNMENT_CENTER, w, size, Color(0.086, 0.137, 0.227, a))
+		# kleiner Zeiger nach unten: hier drücken
+		var s := r.end.y + 9.0
+		draw_colored_polygon(PackedVector2Array([Vector2(-7, s), Vector2(7, s), Vector2(0, s + 8)]), Color(0.875, 0.902, 0.941, 0.85 * a))
 
 
 ## Sensor-Zone (Area2D) auf dem Spieler-Layer; Callback bei Betreten/Verlassen.

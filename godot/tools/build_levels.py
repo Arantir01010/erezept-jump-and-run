@@ -594,6 +594,33 @@ def base_json(id_: str) -> dict:
     return json.loads((IMPORT / id_ / "level.json").read_text(encoding="utf-8"))
 
 
+# Knopfnamen: Die Phaser-Texte sprechen vom „blauen Knopf" (Arcade-Automat). Am PC
+# ist das die Taste E — niemand wusste das (Team-Feedback 9/2026). Der Platzhalter
+# {action} wird im Spiel je nach Bedienung zu „Taste E", „Knopf BLAU" oder „AKTION"
+# (BriefingDaten.tasten). Der Import aus design/ bleibt unverändert.
+KNOPF_DE = (("Blauer Knopf", "{action}"), ("blauer Knopf", "{action}"),
+            ("TI-Aktion drücken", "{action} drücken"),
+            ("TI-Aktion steckt die Karte, Shift wechselt", "{action} steckt die Karte, {toggle} wechselt"))
+KNOPF_EN = (("Blue button", "{action}"), ("blue button", "{action}"),
+            ("press the TI action", "press {action}"),
+            ("TI action inserts the card, Shift switches", "{action} inserts the card, {toggle} switches"))
+KNOPF = {"de": KNOPF_DE, "textDe": KNOPF_DE, "en": KNOPF_EN, "textEn": KNOPF_EN}
+
+
+def knopfnamen(v) -> None:
+    if isinstance(v, dict):
+        for k, x in v.items():
+            if isinstance(x, str) and k in KNOPF:
+                for alt, neu in KNOPF[k]:
+                    x = x.replace(alt, neu)
+                v[k] = x
+            else:
+                knopfnamen(x)
+    elif isinstance(v, list):
+        for x in v:
+            knopfnamen(x)
+
+
 BUILDERS = []
 
 
@@ -1173,6 +1200,7 @@ def main() -> None:
         j["objects"] = L.objects
         if callable(j.get("_finish")):      # Texte mit Sammelziel (z. B. „… Kacheln reichen") nachziehen
             j.pop("_finish")(j, need)
+        knopfnamen(j)
         d = OUT / L.id
         d.mkdir(parents=True, exist_ok=True)
         (d / "layout.txt").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")

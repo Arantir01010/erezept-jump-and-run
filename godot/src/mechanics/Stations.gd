@@ -58,6 +58,7 @@ class TimingGate extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(0, _light_y() - 58.0), not done and player_in_rect(rect), delta)
 		for i in steps:
 			_flash[i] = maxf(0.0, _flash[i] - delta * 3.0)
 		var win := running and (_t - _step_start) < _slow * window_ratio and _t >= _fail_until
@@ -603,6 +604,7 @@ class StampExit extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(100, rect.size.y / 2.0 - 130.0), not done and player_in_rect(rect), delta)
 		_light.position.y = _y - 10.0
 		_light.energy = (0.75 if stamp_up and not done else 0.3) + 0.1 * sin(_t * 5.0)
 		queue_redraw()
@@ -932,6 +934,7 @@ class KryptoDusche extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(0, -rect.size.y / 2.0 - 52.0), not done and player_in_rect(rect), delta)
 		queue_redraw()
 		if done or not player_in_rect(rect):
 			return
@@ -1225,6 +1228,7 @@ class Kartenleser extends Mechanic:
 		if _glow:
 			Fx.set_glow(_glow, lc, (0.9 if _led == "gruen" else 0.35) + _flash * 0.6)
 		queue_redraw()
+		kappe(Vector2(W / 2.0 + 36.0, _slot_y()), player_in_rect(rect) and inserted == "" and _anim_kind == "", delta)
 		if not player_in_rect(rect):
 			return
 		if Input.is_action_just_pressed("action") and inserted == "" and _anim_kind == "":

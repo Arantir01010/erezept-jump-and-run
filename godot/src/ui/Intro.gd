@@ -10,8 +10,11 @@ extends Vignette
 ##                     Akte (Hülle öffnet sich im geschützten Raum), Abruf in App
 ##                     und beim nächsten Arzt. Das ist die Erklärung, was sich
 ##                     mit der ePA geändert hat.
-##  Phase 3 „SO SPIELST DU": Paul führt die Steuerung vor — laufen, springen,
-##                     Datenbit, Hülle. Der echte Player läuft im Autopilot.
+##  Phase 3 „SO SPIELST DU": Paul führt die Steuerung vor — TI-Aktion am
+##                     Terminal, laufen, springen, Datenbit, Hülle. Der echte
+##                     Player läuft im Autopilot. Die TI-Aktion (Taste E) kommt
+##                     zuerst: Im Team-Test kannte niemand die Taste, und wer nach
+##                     der Mindestzeit weiterdrückt, hat sie so trotzdem gesehen.
 ##
 ## Jede Phase hat eine Mindest-Anzeigedauer (die Botschaft lässt sich nicht
 ## wegdrücken); danach blättert jeder Knopf weiter. Kein Blinken über 3 Hz.
@@ -44,11 +47,14 @@ const BODEN := 320.0
 const NETZ_Y := 351.0
 const ZYKLUS_HEUTE := 30.0
 # Probelauf
-const RUNDE := 13.0
+const VORLAUF := 2.4           # TI-Aktion am Terminal, bevor Paul losläuft
+const RUNDE := 13.0 + VORLAUF
 const POPUP_FENSTER := [[0.4, 3.1], [3.1, 4.6], [4.6, 6.2], [6.2, 9.4]]
 const TOGGLE_ZEITEN := [6.6, 7.8, 8.6, 9.4]
 const FUSS_Y := 290.0
 const LAUF := 0.6
+const TERMINAL_X := 178.0      # kleines Terminal rechts neben Pauls Start
+const TI_DRUCK := 1.1          # Rundenzeit, zu der Paul die TI-Aktion drückt
 
 var phase := 1
 var popups: Array = []
@@ -61,6 +67,8 @@ var _jump_t := -10.0
 var _bit_taken := false
 var _bit_t := -10.0
 var _toggles := [false, false, false, false]
+var _ti_t := -10.0             # Rundenzeit des TI-Drucks (−10 = noch nicht)
+var _ti_popup: Node2D
 
 
 func _init(p := 1) -> void:
@@ -575,29 +583,34 @@ func _build_tutorial() -> void:
 	# Popups mit Tastenkappen — Beschriftung je nach Hardware
 	var lauf: Array
 	var sprung: Array
-	var aktion: Array
+	var huelle: Array
+	var ti: Array
 	var lauf_hint: String
 	if Kiosk.touch_seen or Kiosk.touch_forced:
 		lauf = ["KNÜPPEL"]
 		sprung = ["SPRUNG"]
-		aktion = ["HÜLLE"]
+		huelle = ["HÜLLE"]
+		ti = ["AKTION"]
 		lauf_hint = "links am Bildschirm — nach unten: ducken"
 	elif Kiosk.has_gamepad():
 		lauf = ["JOYSTICK"]
 		sprung = ["ROT"]
-		aktion = ["HOCH"]
+		huelle = ["HOCH"]
+		ti = ["BLAU"]
 		lauf_hint = "nach unten: ducken"
 	else:
 		lauf = ["←", "→"]
 		sprung = ["LEERTASTE"]
-		aktion = ["SHIFT"]
+		huelle = ["SHIFT"]
+		ti = ["E"]
 		lauf_hint = "oder A / D — auch am Joystick"
 	popups = [
 		_popup("LAUFEN", lauf, lauf_hint),
 		_popup("SPRINGEN", sprung, "trägt dich über jede Lücke — 2× drücken: REZI-Schub"),
 		_popup("DATENBITS", [], "einfach durchlaufen — sie zählen für dein Rezept"),
-		_popup("HÜLLE", aktion, "an & aus — verschlüsselt bist du geschützt"),
+		_popup("HÜLLE", huelle, "an & aus — verschlüsselt bist du geschützt"),
 	]
+	_ti_popup = _popup("TI-AKTION", ti, "an Terminal und Kartenleser: Karte stecken, PIN, Stempel")
 	# Bühne: echter Grund, echte Grube
 	for r in [[0.0, 350.0, 316.0], [390.0, W, 316.0], [140.0, 350.0, 290.0], [390.0, 520.0, 290.0]]:
 		var body := StaticBody2D.new()
@@ -639,7 +652,8 @@ func _popup(titel: String, tasten: Array, hinweis: String) -> Node2D:
 
 
 func _tick_tutorial() -> void:
-	var td := fmod(tz, RUNDE)
+	var rz := fmod(tz, RUNDE)      # Rundenzeit
+	var td := rz - VORLAUF         # Zeit der Lauf-Choreografie (negativ: Vorlauf am Terminal)
 	var px := player.global_position.x / S
 	if td < _last_td:
 		# Neue Runde: Choreografie zurücksetzen, Paul notfalls an den Start
@@ -647,10 +661,19 @@ func _tick_tutorial() -> void:
 		_jumped2 = false
 		_bit_taken = false
 		_toggles = [false, false, false, false]
+		_ti_t = -10.0
 		if absf(px - 160) > 40 or player.global_position.y > FUSS_Y * S + 20:
 			player.global_position = Vector2(160 * S, FUSS_Y * S)
 			player.velocity = Vector2.ZERO
 	_last_td = td
+	# Vorlauf: Paul dreht sich zum Terminal und drückt die TI-Aktion
+	if td < 0.0:
+		player.facing = 1
+		if rz >= TI_DRUCK and _ti_t < 0.0:
+			_ti_t = rz
+			Sfx.play("ok", 1.1, -6.0)
+			rezi.happy()
+	_ti_popup.modulate.a = Pen.blende(rz, 0.2, VORLAUF + 0.2, 0.4)
 	# Popups folgen den Ereignissen: LAUFEN bis zum Absprung, SPRINGEN ab dem
 	# Absprung, DATENBITS nach dem Einsammeln, HÜLLE im Stand
 	var j1 := _jump_t if _jumped1 else 3.1
@@ -738,7 +761,9 @@ func _draw_tutorial_static(c: CanvasItem) -> void:
 
 func _draw_tutorial_life(c: CanvasItem) -> void:
 	var K := Pen.K
-	var td := fmod(tz, RUNDE)
+	var rz := fmod(tz, RUNDE)
+	var td := rz - VORLAUF
+	_terminal(c, rz)
 	# Datenbit auf Podest B — wird im Vorbeilaufen eingesammelt
 	if not _bit_taken:
 		var puls := 4.5 + sin(t * 2.4) * 0.5
@@ -752,6 +777,28 @@ func _draw_tutorial_life(c: CanvasItem) -> void:
 		for i in 4:
 			var a := (i / 4.0) * TAU + 0.6
 			Pen.circle(c, 450 + cos(a) * 9 * k, 268 + sin(a) * 7 * k, 1, Color(1, 1, 1, 0.9 * (1 - k)))
+
+
+## Kleines TI-Terminal neben Pauls Start: wartet (ruhige Punkte), nach der
+## TI-Aktion grün mit Haken und einem Ring — so sieht „Taste E" im Spiel aus.
+func _terminal(c: CanvasItem, rz: float) -> void:
+	var x := TERMINAL_X
+	Pen.rect(c, x - 1.5, 276, 3, 14, Pen.hex(0x39445e))
+	Pen.rect(c, x - 5, 288.6, 10, 1.6, Pen.hex(0x39445e))
+	Pen.rrect(c, x - 8, 261, 16, 16, 2.2, Pen.hex(0x1b2438))
+	Pen.srrect(c, x - 8, 261, 16, 16, 2.2, Pen.hex(0x7f8ba6, 0.9), 0.8)
+	var ok := _ti_t >= 0.0 and rz >= _ti_t
+	Pen.rect(c, x - 5.5, 263.5, 11, 7.5, Pen.hex(0x2fa88c, 0.95) if ok else Pen.hex(0x0a1220))
+	if ok:
+		Pen.polyline(c, PackedVector2Array([Vector2(x - 2.6, 267.2), Vector2(x - 0.6, 269.0), Vector2(x + 2.8, 265.2)]), Color(1, 1, 1, 0.95), 1.0)
+		var k := (rz - _ti_t) / 0.6
+		if k < 1.0:
+			Pen.scircle(c, x, 267, 6 + 10 * k, Pen.alpha(Pen.K, 0.9 * (1.0 - k)), 0.8)
+	else:
+		for i in 3:
+			Pen.circle(c, x - 3 + i * 3, 267.2, 0.8, Pen.alpha(Pen.K, 0.85))
+	# Kartenschlitz
+	Pen.rect(c, x - 4, 273, 8, 1, Pen.hex(0x0a1220))
 
 
 class _Popup extends Node2D:
