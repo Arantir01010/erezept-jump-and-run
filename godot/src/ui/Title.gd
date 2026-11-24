@@ -49,6 +49,7 @@ var player: Player
 var rezi: Rezi
 var _spruch := 0
 var _next_spruch := 5.0
+var _dreh_takt := 0                            # Paul dreht sich alle 6 s um (siehe _tick)
 ## Bedienungswahl: zwei Felder unten rechts (Tastatur/Arcade · Touch)
 var mode := "keyboard"
 var _pills: Array = []
@@ -509,9 +510,15 @@ func _tick(delta: float) -> void:
 	# Neon: das E-REZEPT der Apotheke atmet, das gematik-Schild zuckt selten
 	neon_label.modulate.a = 0.675 + 0.325 * sin(t * 4.19)
 	sign_label.modulate.a = 0.55 if fmod(t, 2.75) < 0.15 else 1.0
-	if fmod(t, 6.0) < 0.05 and player:
-		player.facing = -player.facing
-		rezi.happy()
+	# Alle 6 s genau einmal umdrehen, am Taktwechsel. Das alte 50-ms-Fenster traf je
+	# nach Bildrate 3, 6 oder 7–8 Bilder; bei einer geraden Zahl drehte sich Paul hin
+	# und gleich wieder zurück, man sah nichts.
+	var takt := int(t / 6.0)
+	if takt != _dreh_takt:
+		_dreh_takt = takt
+		if player:
+			player.facing = -player.facing
+			rezi.happy()
 	if tz > _next_spruch and rezi:
 		rezi.say(tr(REZI_SPRUECHE[_spruch % REZI_SPRUECHE.size()]), 3.2)
 		_spruch += 1
