@@ -56,7 +56,7 @@ const STATIONEN := {
 			"Am Terminal {action} im Takt der Lichter drücken — dann öffnet das Tor.",
 			"Feder = hoch hinaus · rotes Störfeld = kostet nur Bits · Fahne = dein Rücksetzpunkt.",
 		],
-		"tust": "{lauf} laufen · {jump} springen (2× = REZI-Schub) · {action} im Takt am Terminal · Tür öffnet ab 8 Prüfsummen",
+		"tust": "{lauf} laufen · {jump} springen (2× = REZI-Schub) · {action} im Takt am Terminal · Tür öffnet ab {n} {was}",
 		"schilder": [
 			[520, 177, "KRANKENKASSE", 5, WEISS, 0.8],
 			[150, 229, "ANMELDUNG", 3.6, MATT, 0.5],
@@ -327,10 +327,21 @@ static func tokens() -> Dictionary:
 
 
 static func text(s: String) -> String:
+	return tasten(_tr(s))
+
+
+## Knopfnamen ({lauf}, {jump}, {action}, {toggle}, {duck}, {hoch}) in einem schon
+## übersetzten Text einsetzen — ohne {…} bleibt der Text unverändert. Steht der
+## Knopf am Satzanfang, beginnt der Satz groß („touche E …" → „Touche E …").
+static func tasten(s: String) -> String:
+	if not "{" in s:
+		return s
 	var tk := tokens()
-	var out := _tr(s)
+	var out := s
 	for k in tk:
 		out = out.replace("{%s}" % k, str(tk[k]))
+	if s.begins_with("{") and out.length() > 0:
+		out = out.left(1).to_upper() + out.substr(1)
 	return out
 
 

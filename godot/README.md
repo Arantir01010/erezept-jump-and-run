@@ -43,8 +43,11 @@ F4 Töne · F11 Vollbild · F12 Screenshot.
 
 **Pause und Klang:** ESC, P, der START-Knopf am Gamepad oder der runde Pause-Knopf oben im
 HUD (Finger/Maus) halten das Level an. Das Pausenmenü (`src/ui/PauseMenu.gd`) bietet
-Weiter, Musik an/aus, Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion,
-Tipp oder Klick. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
+Weiter, **Station neu starten** (dieselbe Station ohne Briefing, Spielstand zurück auf den
+Stationsbeginn), **Steuerung** (Tastentafel der erkannten Bedienung), Musik an/aus,
+Töne an/aus und Zum Hauptmenü — Hoch/Runter + Sprung/Aktion, Tipp oder Klick. Weist die
+Tür Paul zum dritten Mal ab, nennt REZI diesen Ausweg; reichen die Prüfsummen, die noch
+in der Station liegen, nicht mehr für das Ziel, öffnet die Tür von selbst. Musik und Töne lassen sich auch im Hauptmenü oben links umschalten
 (zwei Pillen, F3/F4); die Wahl liegt in `user://einstellungen.cfg` und überlebt Neustart
 und Idle-Reset. In der Pause läuft der Idle-Reset weiter (Messe: wer weggeht, landet
 wieder im Hauptmenü). `--test-eingabe=-,-,-,-,ESC,-,F12,DOWN,DOWN,SPACE,-,F12,ESC` prüft
@@ -84,7 +87,7 @@ Hauptmenü (Klinikum, Bedienungswahl)  →  FRÜHER  →  HEUTE  →  SO SPIELST
 
 | Screen | Datei | Inhalt |
 |---|---|---|
-| Pause | `src/ui/PauseMenu.gd` | Overlay über dem Level (Baum angehalten): Weiter, Musik an/aus, Töne an/aus, Zum Hauptmenü; Idle-Reset läuft weiter. |
+| Pause | `src/ui/PauseMenu.gd` | Overlay über dem Level (Baum angehalten): Weiter, Station neu starten, Steuerung, Musik an/aus, Töne an/aus, Zum Hauptmenü; Idle-Reset läuft weiter (nur `--kiosk`). |
 | Stations-Briefing | `src/ui/Briefing.gd` + `src/ui/BriefingDaten.gd` | Vor jeder der zehn Stationen: was in der Wirklichkeit passiert, 4–5 laienverständliche Zeilen im Takt, animierte Mini-Szene der Mechanik, „Das tust du" mit den Knopfnamen der gewählten Bedienung, Leiste aller Bausteine des Levels (aus `level.json` + `layout.txt`). Oben die Reiseroute der zehn Stationen (Haken für geschaffte, die aktuelle pulsiert), Bühnenlicht auf der Szene, die Bausteine treten nacheinander hervor. Inhalte in `BriefingDaten.STATIONEN`; Prüfschalter `--shots=<dir> --shots-briefings` fotografiert alle zehn. |
 
 **Erzählband:** Alle Erzählzeilen (FRÜHER, HEUTE, ePA-Wissen, Briefings) stehen in einem
@@ -93,21 +96,36 @@ Grund, mehrzeilig, REZI als Erzähler mit Sprechwellen, Aufbau Zeichen für Zeic
 Zeilenpunkte, leiser Tick je Zeile (`Vignette.story_line`, Takt über `story_cycle`).
 Jeder Screen gleitet beim Öffnen ein (`Vignette._entrance`); zwischen den Screens fährt
 eine schräge Blende mit orangefarbenem Saum durchs Bild (`src/shaders/wipe.gdshader`,
-`Main._fade_out` / `_fade_in`). Die Stationskarte nach jedem Level hat den Farbverlauf
-der Zone, einen drehenden Strahlenkranz, den Stempel-Einschlag des Stationsnamens und
-Funkenregen bei drei Medaillen (`src/ui/LevelCard.gd`).
+`Main._fade_out` / `_fade_in`). Die Stationskarte nach jedem Level (`src/ui/LevelCard.gd`)
+folgt `brand/DESIGN-PROMPT.md` statt dem früheren Look aus Farbverlauf, drehendem
+Strahlenkranz, drei Sternkarten und Funkenregen: ruhige Fläche in der Farbe der Zone, links
+die Route der Stationen, Eyebrow, Stationsname in Charter und der Merksatz, rechts eine
+Ergebnis-Tafel mit drei Zeilen (Zeit, Prüfsummen, Lückenlos) und den Punkten, darunter der
+Weiter-Knopf in PwC-Orange, links unten die Zone als Fußnote. Die Zeilen bekommen
+nacheinander ihren Prüfvermerk (gelb mit Haken = geschafft, Strichring = offen), bei drei
+von drei landet ein „GEPRÜFT“-Stempel; nach 2,4 s steht das Bild still. Lange Namen werden
+passend gesetzt, zweizeilige Sätze ausgeglichen umbrochen. `tests/test_stationskarte.gd`
+prüft das in allen Stationen und Sprachen, `tests/kartenbild.gd` macht Bilder der Karte
+ohne Durchspielen (Xvfb).
 
 | Screen | Datei | Inhalt |
 |---|---|---|
 | Hauptmenü | `src/ui/Title.gd` | Das Klinikum im Puppenhaus-Schnitt (OP, Stationen, Flur, Empfang; im Keller Konnektor → VAU → Fachdienst ePA), Aufzug, Heli, Passanten, Datenpulse; Paul & REZI auf dem Apotheken-Dach; Steuerungstafel, Tages-Bestenliste. 1:1-Port des Web-Hauptmenüs. |
 | FRÜHER / HEUTE | `src/ui/Intro.gd` (Phase 1, 2) | Die Zeitreise: dieselbe Straße, zwei Zeiten. Papier, Boten, Fax, Warteschlangen — dann die TI als Lehrstück in fünf Schritten (Sprechzimmer, Konnektor legt die Hülle an, TI-Gateway, VAU schreibt die Akte, Abruf in App und beim nächsten Arzt). **Das ist die Erklärung, was sich mit ePA und TI geändert hat.** |
-| SO SPIELST DU | `src/ui/Intro.gd` (Phase 3) | Probelauf: der echte Paul läuft im Autopilot über eine Grube, sammelt ein Datenbit, schaltet die Hülle — Popups mit Tastenkappen (Tastatur, Arcade-Knöpfe oder Touch-Knöpfe, je nach erkannter Hardware). |
+| SO SPIELST DU | `src/ui/Intro.gd` (Phase 3) | Probelauf: zuerst drückt Paul am Terminal die TI-Aktion (Tafel „TI-AKTION“ mit Taste E / Knopf BLAU / AKTION), dann läuft der echte Paul im Autopilot über eine Grube, sammelt ein Datenbit, schaltet die Hülle — Popups mit Tastenkappen (Tastatur, Arcade-Knöpfe oder Touch-Knöpfe, je nach erkannter Hardware). |
 | ePA-Wissen | `src/ui/Wissen.gd` | Vier Lehrsequenzen („Deine Akte", „Die Medikationsliste", „Befugnis auf Zeit", „Deine Regeln") vor den vier ePA-Stationen, Zuordnung in `Wissen.VOR_LEVEL`. |
 
 Alle Info-Screens erben von `src/ui/Vignette.gd`: Bühne im 640×360-Design-Raum der
 Web-Fassung (Node2D ×3 → 1920×1080, Koordinaten der Originale gelten unverändert),
-Schriften unskaliert als Label, Mindest-Anzeigedauer mit Zeitbalken, danach blättert jeder
-Knopf/Tipp weiter. Zeichen-Vokabular in `src/ui/Pen.gd`. Kein Blinken über 3 Hz.
+Schriften unskaliert als Label. **Erzählzeilen blättert der Spieler selbst** (Team-Feedback
+9/2026): jeder Knopf zeigt erst die ganze Zeile, dann die nächste; ← / Steuerkreuz links
+blättert zurück; Knopf 1,2 s halten überspringt den Screen; Finger/Maus im linken Drittel
+zurück, sonst vor. Screens ohne Erzählzeilen und der Prüflauf (`--shots`) laufen weiter nach
+der Uhr mit Mindestdauer. Die Stationskarte wartet auf Knopf, Tipp oder Klick. REZIs
+Sätze (im Level in der Untertitelleiste, auf dem Titelbild als Blase) stehen nach Textlänge
+(2,5–9 s); neue Sätze warten kurz, statt laufende zu überschreiben. Stationstexte nennen Knöpfe über Platzhalter (`{action}`, `{toggle}` …,
+eingesetzt von `BriefingDaten.tasten`), über TI-Stationen schwebt eine Tastenkappe.
+Zeichen-Vokabular in `src/ui/Pen.gd`. Kein Blinken über 3 Hz.
 
 ## Touch-Steuerung (Tablet)
 
@@ -193,12 +211,36 @@ empfohlen.
 | `python godot/tools/gen_assets.py` | Klänge (WAV) und QR-Code erzeugen (`assets/`); braucht `numpy`, `qrcode`, `Pillow`. Die Musik kommt als MP3 von Pixabay, siehe `assets/audio/CREDITS.md` |
 | `powershell -ExecutionPolicy Bypass -File godot\tools\build.ps1` | Auslieferungspaket in `build/` (PCK + signierte Laufzeit + Verknüpfungen + EXE) |
 | `Godot … --headless --import` | Projekt-Cache aufbauen, Skriptfehler sehen (`SCRIPT ERROR`) |
+| `Godot --headless --path godot --fixed-fps 60 --script res://tests/lauf.gd` | **Testlauf** ohne Fenster (siehe „Tests"); `-- --nur=huelle` nur passende Dateien |
+| `Godot --headless --path godot --fixed-fps 60 --script res://tests/frame_messung.gd -- --level=<id>` | CPU-Zeit je Frame an mehreren Stellen einer Station (vorher/nachher vergleichen) |
+| `Godot --path godot --script res://tests/standbild.gd -- --level=<id> --an=vau-feld,0.42,pause --ziel=<ordner>` | Screenshots an gezielten Stellen (Baustein-Typ, Anteil der Breite, Pausemenü) |
 | `Godot … --headless --export-release "Windows" build/PaulUndRezi.exe` | Windows-Build (Preset in `export_presets.cfg`) |
 | `Godot … --quit-after 3600 -- --shots=<abs. Ordner>` | Screenshot-Prüflauf ohne Menschen am Rechner |
 | `Godot … --headless --export-release Web build-web/index.html` | Browser-Fassung nach `build-web/` (Preset „Web") |
 | `python godot/tools/serve_web.py [port]` | lokaler Server für die Browser-Fassung, öffnet den Browser |
 | `python godot/tools/gen_i18n_fonts.py` | Schrift-Untermengen für Chinesisch/Hindi aus den Übersetzungen neu bauen (`assets/i18n/`) |
 | `python godot/tools/deploy_web.py` | Web-Export neu bauen und als Branch `web` nach GitHub pushen — GitHub Pages veröffentlicht daraus: https://arantir01010.github.io/erezept-jump-and-run/ (`--no-export` nimmt `build-web/`, `--no-push` nur lokal) |
+
+### Tests
+
+`tests/lauf.gd` findet alle `tests/test_*.gd` und ruft jede Methode `test_*` auf. Gewertet
+werden die Prüfungen UND jede Fehlermeldung der Engine währenddessen (`tests/fehlerzaehler.gd`
+hängt sich als Logger an) — ein `SCRIPT ERROR` in einem Baustein lässt den Test durchfallen,
+auch wenn alle Prüfungen grün sind. Letzte Zeile: „N Tests, M fehlgeschlagen", Exit-Code 0/1.
+`--fixed-fps 60` macht die Spielzeit unabhängig vom Rechner. Inhalt: Hülle-Mechanik (Port der
+Phaser-Tests), Spielstand (Treffer kostet nur Bits dieser Station), Leveldaten aller Stationen,
+Übersetzungen (alle Sprachen, gleiche Platzhalter, jeder `tr("…")`-Text übersetzt), Kiosk
+(Idle-Reset nur mit `--kiosk`), Level-Mechanik (verstreute Prüfsummen, Zeichen-Culling), ein
+Rauchtest, der jede Station über die echte Hauptszene startet, spielt und abschließt,
+Bedienung (`test_bedienung.gd`: Pausemenü, Neustart, Tür-Sicherheitsnetz, Tastenkappe,
+Blättern, Stationskarte, REZI-Lesezeit) und Lesbarkeit (`test_lesbarkeit.gd`: HUD im Bild,
+Störfelder ruhig, Lauscher-Warnung, nichts blinkt über 3 Hz; `test_zielzeile.gd`: Zielzeile
+jeder Station; `test_untertitel.gd`: REZI-Untertitelleiste). `test_texte.gd` prüft außerdem
+Knopf-Platzhalter je Sprache und dass Chinesisch/Hindi nur Zeichen nutzen, die die
+Untermengen-Schriften in `assets/i18n/` haben (sonst Kästchen). Vignette, Intro und Tür
+rechnen mit der Uhr, nicht mit Frames — Tests warten dort in Echtzeit.
+`tests/` wird nicht exportiert. Ein fertiger GitHub-Workflow liegt in `tools/ci/godot-tests.yml`
+(Aktivieren nur durch Menschen: `.github/` gehört zum versiegelten Phaser-Kern).
 
 Alle Grafiken sind prozedural (Vektorzeichnung zur Laufzeit), alle Klänge synthetisiert —
 es gibt keine Binär-Assets mit Lizenzfragen. Wer gezeichnete Kunst einbauen will, ersetzt
@@ -228,7 +270,11 @@ Pendel-Plattformen über Gruben, schmale Podeste über Störfeldern, Wandsprung-
 (nur für Bonuswege), Lauscher an Ausstiegen; Station 01 bleibt sanft. Der Generator prüft
 per BFS, dass Pflichtwege ohne Treffer, ohne REZI-Schub und ohne Wandsprung lösbar sind
 (Hülle-Level mit kürzeren Sprungweiten), leitet Par-Zeit und Sammelziel ab und stellt
-sicher, dass die Prüflauf-Positionen 42/66/86 % freier Boden sind. Wer ein Level ändern
+sicher, dass die Prüflauf-Positionen 42/66/86 % freier Boden sind. Seit 24.11.2026 prüft er
+auch Hindernisse zwischen Absprung und Landung (kein „Sprung" mehr über einen 4 Kacheln hohen
+Turm) und **Einbahnstraßen**: Wo es keinen Rückweg zum Start gibt, müssen danach noch so viele
+Prüfsummen erreichbar sein, wie die Tür verlangt — sonst lehnt er das Level als Softlock ab
+(so entstand der Softlock am Kistenturm in Station 04). Wer ein Level ändern
 will, ändert die Bauanleitung im Generator und lässt ihn laufen — er lehnt unerreichbare
 Ziele ab. Aufruf: `python godot/tools/build_levels.py`. Runde 3 („etwas schwieriger"):
 Ketten-Lücken um eine Kachel weiter, das letzte Podest jeder Reihe eine Kachel breit,
@@ -252,6 +298,29 @@ Sonnenstrahlen, Blocktexturen mit Normal-Maps und Bevel-Kanten, Wind in Gras und
 gefärbte Schatten aller Lichter, Sonnendrift je Station, Paul mit Kapuzenzipfel
 (Kettensimulation), Schmierstreckung und Geisterspur beim REZI-Schub, REZI mit Mimik,
 VAU-Ring, Siegel-Burst. Im Browser ersetzen Glüh-Sprites das HDR-Glühen (`Fx.web_fallback`).
+
+**Lesbarkeit (Team-Feedback 9/2026):** Das HUD hat keine eigene Rand-Vignette mehr (die
+gestufte zeichnete ein Streifenraster); die Zähler hängen in einer Spalte an der rechten
+Bildkante, die Zeit ist unter Par PwC-Gelb. Störfelder sind deckend rot mit dunkler Kontur,
+rot-dunkel schraffiertem Sockel und rotem Bodenschein, der ruhig mit 1,2 Hz atmet — kein
+Orange, denn warm heißt „Klartext". Der Lauscher-Kegel ist nur warm mit Kontur, solange Paul
+im Klartext lesbar ist; verschlüsselt oder in der VAU wird er blass und neutral. Paul blinkt
+nach einem Treffer mit 2 Hz.
+
+**Zielzeile (Team-Feedback F15):** Unter dem Stationsnamen steht, was zu tun ist und was danach
+kommt, aus den Leveldaten: „Noch 4 Daten-Kacheln, dann zum Ausgang“, sobald die Tür offen ist
+„Ausgang offen: weiter nach rechts“; Station 02 nennt den Stempel samt Taste, Station 20 die
+letzte Tür (`HUD.ziel()`). Beim Schrittwechsel hellt die Zeile einmal auf, sie blinkt nicht.
+`tests/test_zielzeile.gd` prüft alle Stationen und Sprachen.
+
+**Untertitelleiste (Team-Feedback F4):** Im Level spricht REZI nicht mehr in einer Blase, die
+mit Figur und Kamera über die bewegte Kulisse wandert, sondern in einer festen Leiste unten in
+der Mitte, im Bodenstreifen unter Pauls Laufhöhe: deckendes PwC-Grau, links „REZI“ in REZIs
+Blau, rechts der Satz. Lange Sätze brechen ausgeglichen auf höchstens drei Zeilen um
+(`HUD.untertitel_breite()`), solange die Steuerungs-Hinweiszeile steht, sitzt die Leiste
+darüber. Mit Bildschirm-Steuerung (Tablet) bleibt sie schmaler, damit Knüppel und
+AKTION-Knopf frei bleiben. Lesezeit und Warteschlange bleiben bei REZI (`Rezi.say()`), auf dem Titelbild ohne
+HUD bleibt die Blase. `tests/test_untertitel.gd` prüft Lage, Ausblenden und alle Sprachen.
 
 ## Marke (PwC)
 
@@ -277,7 +346,7 @@ godot/
 │   ├── actors/    Rezi.gd
 │   ├── world/     Level.gd · Terrain.gd + terrain/ (Blocktexturen, Wind-Flora, Pfützen, Bodennebel)
 │   │              · Backdrop.gd + backdrop/ (Ebenen, Leben, Vordergrund, Partikel, Lichtstrahlen) · GameCamera.gd
-│   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays (.gdshader)
+│   ├── shaders/   wind · puddle · ground_fog · kulisse_blur · god_rays · hall_rays · vau_gitter (.gdshader)
 │   ├── mechanics/ Mechanic.gd · Basics.gd · Stations.gd (alle Bausteine)
 │   ├── state/     Huelle.gd (Kernmechanik)
 │   ├── fx/        Fx.gd (Partikel, Lichter, Hitstop, Stempel, Browser-Fallback) · PostFx.gd (Grading je Welt) · Weather.gd (Regen, Blitz)
@@ -289,7 +358,9 @@ godot/
 ├── brand/         Marken-README + Lizenzdokumente
 ├── docs/          Bewertung, Recherche, Konzept, Umfrage (Excel)
 ├── i18n/          Übersetzungen (ui, intro, briefing, levels) — Schlüssel = deutscher Text, Spalten en/fr/es/zh/hi
+├── tests/         lauf.gd (Testlauf) · test_*.gd · frame_messung.gd · standbild.gd — nicht im Export
 ├── tools/         sync_levels.py, gen_assets.py, build_levels.py, gen_i18n_fonts.py, build.ps1, serve_web.py, deploy_web.py, aufraeumen.py
+│                  · ci/godot-tests.yml (vorbereiteter GitHub-Workflow, nicht aktiv)
 ├── build/         Windows-Paket (generiert)      · build-web/  Browser-Fassung (generiert)
 └── shots/         Screenshot-Prüfläufe (generiert)
 ```

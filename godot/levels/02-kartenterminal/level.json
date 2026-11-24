@@ -42,8 +42,8 @@
       "steps": 4,
       "stepMs": 900,
       "hint": {
-        "de": "Blauer Knopf im Takt: Dr. Pixel gibt seine Arzt-PIN ein!",
-        "en": "Blue button on the beat: Dr. Pixel enters his doctor PIN!"
+        "de": "{action} im Takt: Dr. Pixel gibt seine Arzt-PIN ein!",
+        "en": "{action} on the beat: Dr. Pixel enters his doctor PIN!"
       }
     },
     "deny-enemy": {
@@ -55,8 +55,8 @@
     },
     "stamp-exit": {
       "hint": {
-        "de": "Blauer Knopf unter dem Stempel: Signatur annehmen!",
-        "en": "Blue button under the stamp: accept the signature!"
+        "de": "{action} unter dem Stempel: Signatur annehmen!",
+        "en": "{action} under the stamp: accept the signature!"
       }
     }
   },

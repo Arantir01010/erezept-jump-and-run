@@ -37,6 +37,7 @@ var _max_progress := 0.0
 var _last_progress := 0.0
 var _last_stuck_tip := -100.0
 var _started := false
+var _verstreut_unterwegs := 0   # beim Treffer verloren, aber noch nicht als ScatteredBit da (deferred)
 var sun: DirectionalLight2D
 var weather: Weather
 static var _world_cache := {}
@@ -211,6 +212,7 @@ func _process(delta: float) -> void:
 		level_time += delta
 		if data.huelle_enabled and Input.is_action_just_pressed("toggle"):
 			player.try_toggle_huelle()
+	_cull_mechanics()
 	for m in mechanics:
 		if is_instance_valid(m):
 			m.tick(delta)
@@ -218,6 +220,30 @@ func _process(delta: float) -> void:
 		_update_tube(delta)
 	if not finished:
 		_check_stuck(delta)
+
+
+## Zeichen-Culling: Bausteine außerhalb von Bild + CULL_RAND werden unsichtbar —
+## Godot überspringt dann ihr _draw (und das ihrer Kinder) ganz. tick() läuft für
+## alle weiter, damit Patrouillen, Tore und Sitzungen stimmen. Bis hierhin zeichnete
+## jede Station in jedem Frame ALLE Bausteine neu, auch weit außerhalb des Bildes.
+const CULL_RAND := Vector2(480.0, 360.0)
+
+func view_rect() -> Rect2:
+	var size := get_viewport().get_visible_rect().size
+	if camera == null:
+		return Rect2(Vector2.ZERO, size)
+	var z := camera.zoom
+	var welt := Vector2(size.x / maxf(z.x, 0.01), size.y / maxf(z.y, 0.01))
+	return Rect2(camera.get_screen_center_position() - welt / 2.0, welt)
+
+
+func _cull_mechanics() -> void:
+	var sicht := view_rect().grow_individual(CULL_RAND.x, CULL_RAND.y, CULL_RAND.x, CULL_RAND.y)
+	for m in mechanics:
+		if is_instance_valid(m):
+			var vis: bool = sicht.intersects(m.cull_rect())
+			if m.visible != vis:
+				m.visible = vis
 
 
 # ------------------------------------------------------------- Impact-Reaktionen
@@ -232,7 +258,8 @@ func _on_landed(impact: float) -> void:
 		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.8, 0.88, 1.0), 30.0 + 70.0 * impact, 1.5 + impact)
 
 
-func _on_hurt(_lost: int) -> void:
+func _on_hurt(lost: int) -> void:
+	_verstreut_unterwegs += lost
 	camera.kick(Vector2(player.facing * -60, -30))
 	rezi.scared()
 	Fx.flash(Palette.DENY, 0.28)
@@ -266,8 +293,22 @@ func on_collected(_c: Node) -> void:
 	pass
 
 
+## Prüfsummen, die noch in der Station liegen: nicht eingesammelte (auch Bonus)
+## plus verstreute. Für das Sicherheitsnetz der Tür (Basics.DoorExit).
+func remaining_bits() -> int:
+	var n := _verstreut_unterwegs
+	for m in mechanics:
+		if is_instance_valid(m) and m is Basics.Collectible and not m.taken:
+			n += 1
+	for c in get_children():
+		if c is ScatteredBit:
+			n += 1
+	return n
+
+
 ## Verstreute Bits sind ECHTE Objekte und wieder einsammelbar (Anti-Softlock).
 func _scatter_bits(pos: Vector2, count: int) -> void:
+	_verstreut_unterwegs = maxi(0, _verstreut_unterwegs - count)
 	for i in count:
 		var b := ScatteredBit.new()
 		b.global_position = pos
@@ -374,8 +415,15 @@ class ScatteredBit extends CharacterBody2D:
 				if absf(velocity.y) < 60.0:
 					velocity.y = 0.0
 		move_and_slide()
+		var lvl := get_parent() as Level
+		# In eine Grube gefallen (die Welt hat unten keinen Boden): am letzten
+		# Rücksetzpunkt wieder absetzen — verstreute Prüfsummen gehen nie verloren.
+		# Früher fielen sie endlos (Level 04, Team-Feedback 9/2026).
+		if lvl and lvl.player and global_position.y > lvl.data.world_height() + 64.0:
+			global_position = lvl.player.respawn_point + Vector2(randf_range(-24.0, 24.0), -90.0)
+			velocity = Vector2(0, -240.0)
+			_age = minf(_age, 0.4)
 		if _age > 0.7:
-			var lvl := get_parent() as Level
 			if lvl and lvl.player and global_position.distance_to(lvl.player.global_position + Vector2(0, -30)) < 40.0:
 				Game.bits += 1
 				Game.hud_changed.emit()

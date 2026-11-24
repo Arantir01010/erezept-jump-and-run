@@ -42,16 +42,16 @@
       "steps": 2,
       "stepMs": 1100,
       "hint": {
-        "de": "Aktualisierungs-Terminal: Blauer Knopf im Takt — die TI holt deine frischen Stammdaten!",
-        "en": "Update terminal: blue button on the beat — the TI fetches your fresh master data!"
+        "de": "Aktualisierungs-Terminal: {action} im Takt — die TI holt deine frischen Stammdaten!",
+        "en": "Update terminal: {action} on the beat — the TI fetches your fresh master data!"
       },
       "failHint": {
         "de": "Tipp: Drück genau dann, wenn das gelbe Licht groß aufleuchtet — ganz in Ruhe.",
         "en": "Tip: press right when the yellow light glows big — take your time."
       },
       "gateHint": {
-        "de": "Das Tor ist zu! Erst am Terminal die Daten aktualisieren: blauer Knopf im Takt der Lichter.",
-        "en": "The gate is locked! Update your data at the terminal first: blue button on the beat."
+        "de": "Das Tor ist zu! Erst am Terminal die Daten aktualisieren: {action} im Takt der Lichter.",
+        "en": "The gate is locked! Update your data at the terminal first: {action} on the beat."
       }
     }
   },

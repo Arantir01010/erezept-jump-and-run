@@ -3,12 +3,24 @@ extends CanvasLayer
 ## HUD — Stationsname, TI-Streckenkarte, Prüfsummen, Punkte, Zeit gegen Par,
 ## Hülle-Anzeige (Farbe UND Form UND Text — Barrierefreiheit), Karten,
 ## Titel-Einblendung beim Levelstart, Kombo-Anzeige.
+##
+## Optik-Analyse/Team-Feedback 9/2026: Die gestufte Rand-Vignette (zehn harte
+## Rechtecke je Rand, sichtbares Streifenraster) ist entfernt — PostFx hat schon
+## eine weiche. Die rechte Spalte hängt an der Bildkante (lief 6 px hinaus, die
+## Pillen überlappten), Zeit in PwC-Gelb statt Grün, Kombo mit dunkler Kontur.
+## Unter dem Stationsnamen steht die Zielzeile (Team-Feedback F15: „nicht immer
+## klar, was als Nächstes kommt“): was hier zu tun ist und was danach kommt.
+## REZIs Sätze stehen im Level als feste Untertitelleiste unten in der Mitte
+## (Team-Feedback F4: die Blase wanderte mit Figur und Kamera und war vor bewegtem
+## Hintergrund schwer lesbar).
 
 signal pause_requested
 
 var level: Level
 var pause_btn: _PauseButton
 var station: Label
+var ziel_box: PanelContainer
+var ziel_label: Label
 var route: _Route
 var bits_label: Label
 var score_label: Label
@@ -25,12 +37,27 @@ var sub_label: Label
 var combo_label: Label
 var hint_row: HBoxContainer
 var hint_label: Label
+var untertitel_box: PanelContainer
+var untertitel_label: Label
+var _unten: VBoxContainer
+var _untertitel_tw: Tween
+var _hinweis_tw: Tween
 var _combo_tw: Tween
 var _last_huelle := ""
 
+const RAND := 28.0            # Abstand der Pillen zum Bildrand, links wie rechts
 ## Karten-Fächer: rechte Kante bündig mit der Zeit-Pille, Zeile unten rechts
-const CARDS_RIGHT := 1890.0
+const CARDS_RIGHT := 1920.0 - RAND
 const CARDS_Y := 950.0
+## Untertitelleiste: Schriftgröße (Feedback: 26–28 px), größte Textbreite (≈ 80
+## Zeichen je Zeile), Abstand des Stapels zum unteren Bildrand, REZIs Farbe.
+const UNTERTITEL_GROESSE := 26
+const UNTERTITEL_MAX := 1040.0
+## Mit Bildschirm-Steuerung (Tablet) schmaler: rechts bleibt die Leiste links vom
+## AKTION-Knopf (TouchControls, Kreis um x = 1470, r = 66), links vom Knüppel frei.
+const UNTERTITEL_MAX_TOUCH := 720.0
+const UNTEN_RAND := 40.0
+const REZI_FARBE := Color(0.55, 0.85, 1.0)
 
 
 func _ready() -> void:
@@ -39,28 +66,74 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	# Vignette (hält den Blick in der Mitte, dunkelt Ränder ab)
-	var vig := _Vignette.new()
-	vig.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(vig)
-
-	station = _pill(root, Vector2(28, 22), 24)
+	# Oben links: Stationsname, darunter die Zielzeile (beide so breit wie ihr Text)
+	var links := VBoxContainer.new()
+	links.position = Vector2(RAND, 22)
+	links.add_theme_constant_override("separation", 10)
+	links.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(links)
+	station = _pill(links, Vector2.ZERO, 24)
+	(station.get_parent() as Control).size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	ziel_box = PanelContainer.new()
+	ziel_box.add_theme_stylebox_override("panel", _pill_style())
+	ziel_box.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	ziel_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ziel_zeile := HBoxContainer.new()
+	ziel_zeile.add_theme_constant_override("separation", 14)
+	ziel_zeile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var eyebrow := Label.new()
+	eyebrow.text = tr("ZIEL")
+	eyebrow.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	eyebrow.label_settings = Brand.label_settings(16, Brand.UI_EYEBROW, Brand.spaced(Brand.sans("bold"), 3))
+	eyebrow.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ziel_zeile.add_child(eyebrow)
+	ziel_label = Label.new()
+	ziel_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED   # Text kommt schon übersetzt
+	ziel_label.label_settings = Brand.label_settings(22, Brand.UI_TEXT, Brand.sans("medium"))
+	ziel_zeile.add_child(ziel_label)
+	ziel_box.add_child(ziel_zeile)
+	links.add_child(ziel_box)
+	ziel_box.visible = false
 	route = _Route.new()
 	route.position = Vector2(700, 30)
 	route.size = Vector2(520, 30)
 	root.add_child(route)
-	bits_label = _pill(root, Vector2(1560, 22), 24)
-	bits_label.custom_minimum_size = Vector2(150, 0)
-	score_label = _pill(root, Vector2(1740, 22), 24)
-	score_label.custom_minimum_size = Vector2(150, 0)
-	time_label = _pill(root, Vector2(1560, 78), 20)
-	time_label.custom_minimum_size = Vector2(330, 0)
-	# Pause-Knopf (Maus und Finger) zwischen Streckenkarte und Zählern
+
+	# Oben rechts, an der Bildkante verankert (wächst nach links, nie aus dem Bild):
+	# [Pause · Prüfsummen · Punkte] / Zeit / Kombo
+	var spalte := VBoxContainer.new()
+	spalte.anchor_left = 1.0
+	spalte.anchor_right = 1.0
+	spalte.offset_left = -RAND
+	spalte.offset_right = -RAND
+	spalte.offset_top = 18.0
+	spalte.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	spalte.add_theme_constant_override("separation", 10)
+	spalte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(spalte)
+	var zeile := HBoxContainer.new()
+	zeile.alignment = BoxContainer.ALIGNMENT_END
+	zeile.add_theme_constant_override("separation", 12)
+	zeile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spalte.add_child(zeile)
+	# Pause-Knopf (Maus und Finger) links neben den Zählern
 	pause_btn = _PauseButton.new()
-	pause_btn.position = Vector2(1478, 18)
 	pause_btn.pressed.connect(func(): pause_requested.emit())
-	root.add_child(pause_btn)
+	zeile.add_child(pause_btn)
+	var luecke := Control.new()      # etwas Luft zwischen Knopf und Zählern
+	luecke.custom_minimum_size = Vector2(4, 0)
+	luecke.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	zeile.add_child(luecke)
+	bits_label = _pill(zeile, Vector2.ZERO, 24)
+	bits_label.custom_minimum_size = Vector2(150, 0)
+	score_label = _pill(zeile, Vector2.ZERO, 24)
+	score_label.custom_minimum_size = Vector2(150, 0)
+	for l in [bits_label, score_label]:
+		(l.get_parent() as Control).size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Zeit so breit wie die beiden Zähler (2 × 186 + 12), rechtsbündig darunter
+	time_label = _pill(spalte, Vector2.ZERO, 20)
+	time_label.custom_minimum_size = Vector2(348, 0)
+	(time_label.get_parent() as Control).size_flags_horizontal = Control.SIZE_SHRINK_END
 
 	# Hülle-Anzeige unten links
 	huelle_box = PanelContainer.new()
@@ -123,18 +196,65 @@ func _ready() -> void:
 	root.add_child(title_box)
 	title_box.modulate.a = 0.0
 
+	# Kombo unter der Zeit, rechtsbündig, mit dunkler Kontur — ohne verschwand sie
+	# vor der warmen Archiv-Welt (Station 19/20)
 	combo_label = Label.new()
-	combo_label.position = Vector2(1560, 130)
-	combo_label.add_theme_font_size_override("font_size", 30)
-	combo_label.add_theme_font_override("font", Brand.sans("bold"))
-	combo_label.add_theme_color_override("font_color", Brand.UI_ACCENT)
+	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var lc := LabelSettings.new()
+	lc.font = Brand.sans("bold")
+	lc.font_size = 30
+	lc.font_color = Brand.UI_ACCENT
+	lc.outline_size = 9
+	lc.outline_color = Color(0.02, 0.04, 0.08, 0.9)
+	lc.shadow_color = Color(0, 0, 0, 0.45)
+	lc.shadow_size = 8
+	combo_label.label_settings = lc
 	combo_label.modulate.a = 0.0
-	root.add_child(combo_label)
+	spalte.add_child(combo_label)
 
-	# Hinweiszeile unten: Piktogramm „Glühbirne" (PwC-Werte-Set) + Text
+	# Unten in der Mitte ein Stapel, der nach oben wächst: REZIs Untertitelleiste,
+	# darunter (nur am Anfang von Station 1) die Hinweiszeile zur Steuerung. Er
+	# liegt im Bodenstreifen unter Pauls Laufhöhe, zwischen Hülle-Anzeige und Karten.
+	_unten = VBoxContainer.new()
+	_unten.anchor_left = 0.5
+	_unten.anchor_right = 0.5
+	_unten.anchor_top = 1.0
+	_unten.anchor_bottom = 1.0
+	_unten.offset_top = -UNTEN_RAND
+	_unten.offset_bottom = -UNTEN_RAND
+	_unten.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_unten.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_unten.add_theme_constant_override("separation", 10)
+	_unten.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_unten)
+	untertitel_box = PanelContainer.new()
+	untertitel_box.add_theme_stylebox_override("panel", Brand.panel_style(Brand.UI_RADIUS, Brand.UI_PANEL_SOLID, Brand.UI_BORDER, 1, 24, 12))
+	untertitel_box.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	untertitel_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var uz := HBoxContainer.new()
+	uz.add_theme_constant_override("separation", 16)
+	uz.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var wer := Label.new()
+	wer.text = "REZI"
+	wer.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	wer.label_settings = Brand.label_settings(16, REZI_FARBE, Brand.spaced(Brand.sans("bold"), 3))
+	wer.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	wer.custom_minimum_size.y = UNTERTITEL_GROESSE * 1.25     # mittig zur ersten Textzeile
+	wer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	uz.add_child(wer)
+	untertitel_label = Label.new()
+	untertitel_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED   # Sätze kommen übersetzt
+	untertitel_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	untertitel_label.label_settings = Brand.label_settings(UNTERTITEL_GROESSE, Brand.UI_TEXT, Brand.sans("medium"))
+	uz.add_child(untertitel_label)
+	untertitel_box.add_child(uz)
+	_unten.add_child(untertitel_box)
+	untertitel_box.visible = false
+	untertitel_box.modulate.a = 0.0
+
+	# Hinweiszeile: Piktogramm „Glühbirne" (PwC-Werte-Set) + Text
 	hint_row = HBoxContainer.new()
-	hint_row.position = Vector2(0, 996)
-	hint_row.size = Vector2(1920, 44)
+	hint_row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	hint_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	hint_row.add_theme_constant_override("separation", 12)
 	var bulb := Brand.pictogram("reimagine-the-possible", true)
@@ -150,8 +270,9 @@ func _ready() -> void:
 	hint_label.add_theme_font_size_override("font_size", 22)
 	hint_label.add_theme_color_override("font_color", Palette.with_alpha(Palette.WHITE, 0.8))
 	hint_row.add_child(hint_label)
-	root.add_child(hint_row)
+	_unten.add_child(hint_row)
 	hint_row.modulate.a = 0.0
+	hint_row.visible = false
 
 	Game.hud_changed.connect(refresh)
 	Game.combo_changed.connect(_on_combo)
@@ -183,6 +304,13 @@ func bind(lvl: Level) -> void:
 	huelle_hint.visible = lvl.data.huelle_enabled
 	huelle_hint.text = tr("%s: Hülle wechseln") % Kiosk.label_toggle()
 	_last_huelle = ""
+	_ziel_text = ""
+	_ziel_schritt = ""
+	_zeit_text = ""
+	_untertitel_leeren()
+	if lvl.rezi:
+		lvl.rezi.untertitel = self
+	_zeit_unter_par = -1
 	cards_view.reset()
 	refresh()
 	# Portal-Einblendung: Stationsname groß, ein Satz — dann weg
@@ -197,10 +325,15 @@ func bind(lvl: Level) -> void:
 		var lauf := tr("Knüppel") if (Kiosk.touch_seen or Kiosk.touch_forced) else (tr("Joystick") if Kiosk.has_gamepad() else tr("Pfeiltasten/WASD"))
 		hint_label.text = tr("%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion") % [
 			lauf, Kiosk.label_jump(), Kiosk.label_action()]
-		var tw2 := create_tween()
-		tw2.tween_property(hint_row, "modulate:a", 1.0, 0.5)
-		tw2.tween_interval(6.0)
-		tw2.tween_property(hint_row, "modulate:a", 0.0, 0.8)
+		if _hinweis_tw and _hinweis_tw.is_valid():
+			_hinweis_tw.kill()
+		hint_row.visible = true
+		hint_row.modulate.a = 0.0
+		_hinweis_tw = create_tween()
+		_hinweis_tw.tween_property(hint_row, "modulate:a", 1.0, 0.5)
+		_hinweis_tw.tween_interval(6.0)
+		_hinweis_tw.tween_property(hint_row, "modulate:a", 0.0, 0.8)
+		_hinweis_tw.tween_callback(func(): hint_row.visible = false)   # gibt den Platz frei
 
 
 func refresh() -> void:
@@ -213,14 +346,8 @@ func refresh() -> void:
 	route.done = Game.seals.size()
 	route.total = Game.playlist.size()
 	route.queue_redraw()
-	if level.data.huelle_enabled and level.player:
-		var s := level.player.huelle.state
-		huelle_label.text = Huelle.label_of(s)
-		huelle_label.add_theme_color_override("font_color", Huelle.color_of(s))
-		huelle_shape.state = s
-		huelle_shape.queue_redraw()
-		if level.player.huelle.vau_expires:
-			huelle_label.text = "VAU  %.1f s" % level.player.huelle.vau_left
+	_refresh_ziel()
+	_refresh_huelle()
 	var list := _level_cards()
 	if list.is_empty():
 		cards_box.visible = false
@@ -229,6 +356,116 @@ func refresh() -> void:
 		cards_view.layout(list)
 		cards_box.position = Vector2(CARDS_RIGHT - _Cards.width_for(list.size()) - 36.0, CARDS_Y)
 		cards_view.queue_redraw()
+
+
+## REZI spricht (Rezi.untertitel): Breite nach dem Satz, lange Sätze ausgeglichen
+## auf zwei Zeilen; weich ein- und ausgeblendet, die Leiste selbst bewegt sich nie.
+func untertitel_zeigen(text: String) -> void:
+	var max_b := UNTERTITEL_MAX_TOUCH if _touch_sichtbar() else UNTERTITEL_MAX
+	untertitel_label.custom_minimum_size.x = untertitel_breite(text, untertitel_label.label_settings.font, UNTERTITEL_GROESSE, max_b)
+	untertitel_label.text = text
+	untertitel_box.visible = true
+	untertitel_box.reset_size()
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	_untertitel_tw = create_tween()
+	_untertitel_tw.tween_property(untertitel_box, "modulate:a", 1.0, 0.2)
+
+
+func untertitel_aus() -> void:
+	if not untertitel_box.visible:
+		return
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	_untertitel_tw = create_tween()
+	_untertitel_tw.tween_property(untertitel_box, "modulate:a", 0.0, 0.25)
+	_untertitel_tw.tween_callback(func(): untertitel_box.visible = false)
+
+
+func _untertitel_leeren() -> void:
+	if _untertitel_tw and _untertitel_tw.is_valid():
+		_untertitel_tw.kill()
+	untertitel_label.text = ""
+	untertitel_box.visible = false
+	untertitel_box.modulate.a = 0.0
+
+
+## Textbreite der Leiste: kurze Sätze so breit wie sie sind, lange ausgeglichen
+## umbrochen (kein einzelnes Wort allein in der letzten Zeile), Zeilenumbrüche im
+## Satz bleiben.
+static func untertitel_breite(text: String, font: Font, groesse: int, max_breite := UNTERTITEL_MAX) -> float:
+	var breite := 0.0
+	for zeile in text.split("\n"):
+		var w := font.get_string_size(zeile, HORIZONTAL_ALIGNMENT_LEFT, -1, groesse).x
+		breite = maxf(breite, w if w <= max_breite else LevelCard.satzbreite(zeile, font, groesse, max_breite))
+	return ceilf(breite) + 2.0
+
+
+## Liegen Bildschirm-Knüppel und -Knöpfe gerade über dem Bild? (Main.touch)
+func _touch_sichtbar() -> bool:
+	var t: Variant = get_parent().get("touch") if get_parent() != null else null
+	return t is CanvasLayer and (t as CanvasLayer).visible
+
+
+## Zielzeile aus Leveldaten und Lage: Welcher Ausgang beendet die Station, wie
+## viele Prüfsummen fehlen noch, ist die Tür schon offen. Ein Text pro Schritt;
+## beim Wechsel des Schritts hellt die Pille einmal kurz auf (kein Blinken).
+var _ziel_text := ""
+var _ziel_schritt := ""
+
+func _refresh_ziel() -> void:
+	var tuer: Node = null
+	var typen: Array[String] = []
+	for m in level.mechanics:
+		if is_instance_valid(m):
+			typen.append(str(m.type))
+			if m.type == "door-exit" and tuer == null:
+				tuer = m
+	var z := ziel(typen, level.data.count_required - Game.bits_this_level(),
+		tuer != null and bool(tuer.unlocked), Game.t(level.data.collect_label), Kiosk.label_action())
+	var text := str(z.text)
+	if text == _ziel_text:
+		return
+	var wechsel := _ziel_schritt != "" and str(z.schritt) != _ziel_schritt
+	_ziel_text = text
+	_ziel_schritt = str(z.schritt)
+	ziel_label.text = text
+	ziel_box.visible = text != ""
+	if wechsel:
+		ziel_box.modulate = Color(1.35, 1.35, 1.35)
+		var tw := create_tween()
+		tw.tween_property(ziel_box, "modulate", Color.WHITE, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## Schritt und Text der Zielzeile. typen: Bausteine der Station; fehlt: noch zu
+## sammelnde Prüfsummen; tuer_offen: die Ausgangstür lässt Paul schon durch
+## (Ziel erreicht oder Sicherheitsnetz). Ausgang nach Vorrang: letzte Tür
+## (Station 20), Stempel (Station 02), sonst die Tür am Ende.
+static func ziel(typen: Array, fehlt: int, tuer_offen: bool, sammel: String, aktion: String) -> Dictionary:
+	if "letzte-tuer" in typen:
+		return {"schritt": "letzte-tuer", "text": Game.t("Weiter nach rechts zur letzten Tür")}
+	if "stamp-exit" in typen:
+		return {"schritt": "stempel", "text": Game.t("Am Ende signieren: %s am Stempel") % aktion}
+	if "door-exit" in typen:
+		if tuer_offen or fehlt <= 0:
+			return {"schritt": "tuer-offen", "text": Game.t("Ausgang offen: weiter nach rechts")}
+		return {"schritt": "sammeln", "text": Game.t("Noch %d %s, dann zum Ausgang") % [fehlt, sammel]}
+	return {"schritt": "", "text": ""}
+
+
+## Hülle-Anzeige: Farbe, Form und Text nur bei Wechsel neu setzen (ein Theme-
+## Override löst jedes Mal ein Neu-Layout aus); die VAU-Restzeit in 0,1-s-Schritten.
+func _refresh_huelle() -> void:
+	if not level.data.huelle_enabled or level.player == null:
+		return
+	var h := level.player.huelle
+	var s := h.state
+	if s != _last_huelle:
+		_last_huelle = s
+		huelle_label.add_theme_color_override("font_color", Huelle.color_of(s))
+		huelle_shape.state = s
+		huelle_shape.queue_redraw()
+	huelle_label.text = ("VAU  %.1f s" % h.vau_left) if h.vau_expires else Huelle.label_of(s)
 
 
 ## Welche Ausweise dieses Level kennt: die liegenden Karten des Levels (auch die
@@ -271,16 +508,29 @@ func card_pop(card: String) -> void:
 	tw.tween_property(cards_box, "modulate", Color.WHITE, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
+## Zeit gegen Par: Text nur bei Änderung (0,1-s-Schritte), Farbe nur beim Wechsel
+## über/unter Par. Früher setzte jeder Frame Text UND Farb-Override (Neu-Layout) und
+## lief in der VAU-Sitzung das komplette refresh() — Teil des Ruckelns in Station 15.
+var _zeit_text := ""
+var _zeit_unter_par := -1
+
 func _process(_delta: float) -> void:
 	if level == null or not is_instance_valid(level):
 		return
 	var t := level.level_time
 	var par := level.data.par_time
-	var c := Palette.OK if t <= par else Palette.WARM
-	time_label.text = tr("Zeit %5.1f s   ·   Ziel %.0f s") % [t, par]
-	time_label.add_theme_color_override("font_color", c)
+	var text := tr("Zeit %5.1f s   ·   Ziel %.0f s") % [t, par]
+	if text != _zeit_text:
+		_zeit_text = text
+		time_label.text = text
+	var unter := 1 if t <= par else 0
+	if unter != _zeit_unter_par:
+		_zeit_unter_par = unter
+		# unter Par: PwC-Gelb (Medaille noch drin), darüber ruhiges Grau — kein
+		# Grün (keine PwC-Farbe) und kein Warm (warm heißt im Spiel „Klartext")
+		time_label.add_theme_color_override("font_color", Brand.UI_HIGHLIGHT if unter == 1 else Brand.UI_TEXT_DIM)
 	if level.data.huelle_enabled and level.player and level.player.huelle.vau_expires:
-		refresh()
+		_refresh_huelle()
 
 
 func _on_combo(combo: int) -> void:
@@ -288,6 +538,7 @@ func _on_combo(combo: int) -> void:
 		return
 	combo_label.text = tr("Kombo ×%d") % combo
 	combo_label.modulate.a = 1.0
+	combo_label.pivot_offset = Vector2(combo_label.size.x, combo_label.size.y * 0.5)   # wächst aus der rechten Kante
 	combo_label.scale = Vector2(1.3, 1.3)
 	if _combo_tw:
 		_combo_tw.kill()
@@ -429,19 +680,3 @@ class _Shape extends Control:
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -16), center + Vector2(16, 0), center + Vector2(0, 16), center + Vector2(-16, 0)]), g)
 			_:
 				draw_circle(center, 15.0, g)
-
-
-class _Vignette extends Control:
-	func _draw() -> void:
-		var s := size
-		var steps := 10
-		for i in steps:
-			var t := float(i) / steps
-			var a := pow(t, 2.2) * 0.55
-			var inset := (1.0 - t) * 0.0
-			var band := s.y * 0.06
-			# vier Ränder
-			draw_rect(Rect2(0, i * band * 0.5, s.x, band * 0.5), Color(0, 0, 0, a * 0.35))
-			draw_rect(Rect2(0, s.y - (i + 1) * band * 0.5, s.x, band * 0.5), Color(0, 0, 0, a * 0.5))
-			draw_rect(Rect2(i * band * 0.5, 0, band * 0.5, s.y), Color(0, 0, 0, a * 0.4))
-			draw_rect(Rect2(s.x - (i + 1) * band * 0.5, 0, band * 0.5, s.y), Color(0, 0, 0, a * 0.4))

@@ -17,6 +17,15 @@ extends Node2D
 ## den Takt mit `story_cycle`; Alpha, Aufbau und Bandhöhe regelt die Basis.
 ## ENTRANCE: Überschriften und Schilder gleiten beim Öffnen des Screens ein,
 ## Bühne und Leben blenden auf (aus in Title, das eine eigene Choreografie hat).
+##
+## BLÄTTERN (Team-Feedback 9/2026: „Texte laufen von selbst, zu kurz sichtbar"):
+## Erzählzeilen laufen nicht mehr nach der Uhr — der Spieler blättert. Jeder Knopf
+## (→, Leertaste …) blättert vor; ein Druck, während die Zeile sich aufbaut, zeigt
+## erst die ganze Zeile. ← (A, Steuerkreuz links) blättert zurück. Knopf halten
+## (1,2 s) überspringt den Screen. Finger/Maus: linkes Drittel zurück, sonst vor.
+## Die Bühne läuft im Abschnitt der aktuellen Zeile in Schleife (story_u), damit
+## Szenen wie HEUTE zum Text passen. Ohne Erzählzeilen (Probelauf) und im Prüflauf
+## (--shots) gilt die alte Uhr mit Mindestdauer `sperre`.
 
 signal done
 
@@ -56,6 +65,17 @@ var _story_last := -1
 var _story_reveal := 1.0
 var _entrance_items: Array = []     # [label, zielposition, zielalpha, verzögerung]
 var _entrance_active := false
+# Blättern
+const HALTEN_S := 1.2           # so lange halten, um den Screen zu überspringen
+const UEBERGANG := 0.22         # alte Zeile blendet aus, dann kommt die neue
+var blaettern := true
+var seite := 0                  # aktuelle Erzählzeile
+var _seite_t := -0.3            # Sekunden auf der aktuellen Seite (Start nach dem Entrance)
+var _vorige := -1               # Zeile, die gerade ausblendet
+var _voll := false              # aktuelle Zeile ganz aufgebaut
+var _halten_seit := -1.0        # tz, seit ein Vor-Knopf gehalten wird (−1 = keiner)
+var _weiter_anzeige := ""
+var hinweis: Label              # „← zurück · halten: überspringen"
 static var _fonts := {}
 
 
@@ -84,10 +104,15 @@ func _ready() -> void:
 	add_child(vig)
 	textlayer = Node2D.new()
 	add_child(textlayer)
+	if Kiosk.shots_dir != "":
+		blaettern = false     # Prüflauf: Screenshots nach der Uhr
 	_build()
 	if weiter_text != "":
 		weiter = label(W - 12, 340, weiter_text, 10.5, {"color": Brand.UI_ACCENT, "spacing": 0.4, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
 		weiter.modulate.a = 0.0
+		_weiter_anzeige = weiter_text
+	if paging():
+		hinweis = label(W - 12, 328.5, _blaetter_hinweis(), 7.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 0.8})
 	if entrance:
 		_entrance()
 
@@ -148,7 +173,9 @@ func _process(delta: float) -> void:
 	if _anchor < 0.0:
 		_anchor = t
 	tz = maxf(0.0, t - _anchor)
-	if weiter:
+	if paging():
+		_blaettern_tick(delta)
+	elif weiter:
 		weiter.modulate.a = 0.0 if tz < sperre else 0.65 + 0.35 * sin(tz * 4.0)
 	_entrance_tick()
 	_tick(delta)
@@ -156,11 +183,47 @@ func _process(delta: float) -> void:
 	leben.queue_redraw()
 
 
+## Blättert der Spieler selbst? (Erzählzeilen vorhanden, kein Prüflauf)
+func paging() -> bool:
+	return blaettern and not story.is_empty()
+
+
+func _blaetter_hinweis() -> String:
+	if Kiosk.touch_seen or Kiosk.touch_forced:
+		return tr("links tippen: zurück · halten: überspringen")
+	return tr("%s zurück · %s halten: überspringen") % ["◀" if Kiosk.has_gamepad() else "←", Kiosk.label_confirm()]
+
+
+func _blaettern_tick(delta: float) -> void:
+	_seite_t += delta
+	# Halten überspringt — losgelassen (oder Ereignis verpasst) bricht ab
+	if _halten_seit >= 0.0:
+		if not Input.is_anything_pressed():
+			_halten_seit = -1.0
+		elif tz - _halten_seit >= HALTEN_S and not _done:
+			_advance()
+	if weiter:
+		var letzte := seite >= story.size() - 1
+		var text := weiter_text if letzte else tr("%s: weiter") % Kiosk.label_confirm()
+		if text != _weiter_anzeige:
+			_weiter_anzeige = text
+			weiter.text = text
+			weiter.reset_size()
+			weiter.position = (Vector2(W - 12, 340) * S - weiter.size * Vector2(1, 0.5)).round()
+		weiter.modulate.a = (0.65 + 0.35 * sin(tz * 4.0)) if _voll else 0.4
+
+
 func _draw_life_wrapper(c: CanvasItem) -> void:
 	_draw_life(c)
 	_draw_story_band(c)
-	# Weiter-Zeile erst nach der Mindestdauer; vorher ein feiner Zeitbalken
-	if sperre > 0.0 and tz < sperre:
+	# Weiter-Zeile erst nach der Mindestdauer; vorher ein feiner Zeitbalken.
+	# Beim Blättern zeigt derselbe Balken, wie lange der Knopf noch zu halten ist.
+	if paging():
+		var k := (tz - _halten_seit - 0.2) / (HALTEN_S - 0.2) if _halten_seit >= 0.0 else -1.0
+		if k > 0.0:
+			Pen.rect(c, W - 72, 346, 60, 1.6, Pen.alpha(Brand.UI_ACCENT, 0.25))
+			Pen.rect(c, W - 72, 346, 60.0 * minf(k, 1.0), 1.6, Pen.alpha(Brand.UI_ACCENT_STRONG, 0.9))
+	elif sperre > 0.0 and tz < sperre:
 		Pen.rect(c, W - 72, 339, 60, 1.6, Pen.alpha(Brand.UI_ACCENT, 0.25))
 		Pen.rect(c, W - 72, 339, 60.0 * tz / sperre, 1.6, Pen.alpha(Brand.UI_ACCENT_STRONG, 0.9))
 	for i in dots.size():
@@ -168,11 +231,71 @@ func _draw_life_wrapper(c: CanvasItem) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _done or not is_press(event):
+	if _done:
+		return
+	if paging():
+		_blaettern_input(event)
+		return
+	if not is_press(event):
 		return
 	if tz < sperre:
 		return
 	_advance()
+
+
+func _blaettern_input(event: InputEvent) -> void:
+	if is_release(event):
+		_halten_seit = -1.0
+		return
+	if not is_press(event) or tz < 0.25:   # 0,25 s Schonzeit gegen Doppeldruck vom Screen davor
+		return
+	if is_back(event):
+		zurueck()
+	else:
+		_halten_seit = tz
+		vor()
+
+
+## Vorblättern: erst die ganze Zeile zeigen, dann die nächste; nach der letzten weiter.
+func vor() -> void:
+	if not _voll:
+		_voll = true
+		return
+	if seite < story.size() - 1:
+		_seite_wechsel(seite + 1)
+	else:
+		_advance()
+
+
+func zurueck() -> void:
+	if seite > 0:
+		_seite_wechsel(seite - 1)
+		_voll = true
+
+
+func _seite_wechsel(i: int) -> void:
+	_vorige = seite
+	seite = i
+	_seite_t = 0.0
+	_voll = false
+	Sfx.play("tick", 1.35, -16.0)
+
+
+## Zurück-Knopf: ←/A/Steuerkreuz links, oder Finger/Maus im linken Drittel.
+func is_back(event: InputEvent) -> bool:
+	if event is InputEventKey or event is InputEventJoypadButton:
+		return event.is_action_pressed("move_left")
+	if event is InputEventScreenTouch or event is InputEventMouseButton:
+		return event.position.x < get_viewport().get_visible_rect().size.x / 3.0
+	return false
+
+
+static func is_release(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return not event.pressed and not event.echo
+	if event is InputEventJoypadButton or event is InputEventScreenTouch or event is InputEventMouseButton:
+		return not event.pressed
+	return false
 
 
 ## Zählt als „Knopf gedrückt": Taste, Gamepad-Knopf, echter Fingertipp, Mausklick.
@@ -292,13 +415,21 @@ func story_line(text: String, von: float, bis: float, opts := {}) -> Label:
 	return l
 
 
-## Zeit im Erzähltakt.
+## Zeit im Erzähltakt. Beim Blättern: Schleife im Zeitfenster der aktuellen Zeile.
 func story_u() -> float:
+	if paging():
+		var s: Dictionary = story[seite]
+		var von: float = s["von"]
+		var lang := maxf(0.1, float(s["bis"]) - von)
+		return von + fposmod(_seite_t, lang)
 	return fmod(tz, story_cycle) if story_cycle > 0.0 else tz
 
 
 func _story_tick() -> void:
 	if story.is_empty():
+		return
+	if paging():
+		_story_tick_blaettern()
 		return
 	var u := story_u()
 	var von0: float = story[0]["von"]
@@ -331,6 +462,38 @@ func _story_tick() -> void:
 		_story_last = aktiv
 		if aktiv >= 0 and tz > 0.4:
 			Sfx.play("tick", 1.35, -16.0)
+
+
+## Erzählband beim Blättern: die aktuelle Zeile blendet ein und baut sich auf,
+## die vorige blendet aus; die Bandhöhe gleitet zwischen beiden.
+func _story_tick_blaettern() -> void:
+	_story_band_a = clampf((tz - 0.1) / 0.35, 0.0, 1.0)
+	var ein_ab := UEBERGANG if _vorige >= 0 else 0.0
+	var k_aus := clampf(_seite_t / UEBERGANG, 0.0, 1.0)
+	for i in story.size():
+		var s: Dictionary = story[i]
+		var l: Label = s["label"]
+		var a := 0.0
+		var reveal := 0.0
+		if i == seite:
+			a = clampf((_seite_t - ein_ab) / 0.25, 0.0, 1.0)
+			var dauer := clampf((float(s["bis"]) - float(s["von"])) * 0.38, 0.5, 1.7)
+			reveal = 1.0 if _voll else clampf((_seite_t - ein_ab) / dauer, 0.0, 1.0)
+			if reveal >= 1.0:
+				_voll = true
+			_story_reveal = reveal
+		elif i == _vorige:
+			a = 1.0 - k_aus
+			reveal = 1.0
+		l.modulate.a = a
+		l.visible_ratio = reveal
+		l.position.y = roundi((BAND_Y + BAND_PAD) * S + (1.0 - a) * 2.0 * S)
+	var h_neu: float = story[seite]["h"]
+	if _vorige >= 0:
+		_story_h = lerpf(float(story[_vorige]["h"]), h_neu, clampf(_seite_t / (UEBERGANG + 0.25), 0.0, 1.0))
+	else:
+		_story_h = h_neu
+	_story_last = seite
 
 
 ## Das Band selbst: Schatten, Fläche, Akzentleiste, REZI als Erzähler mit

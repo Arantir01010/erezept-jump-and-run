@@ -66,8 +66,8 @@
   },
   "parTimeSeconds": 60,
   "stuckHint": {
-    "de": "Immer nach rechts! TI-Aktion steckt die Karte, Shift wechselt die Hülle.",
-    "en": "Keep heading right! TI action inserts the card, Shift switches your shell."
+    "de": "Immer nach rechts! {action} steckt die Karte, {toggle} wechselt die Hülle.",
+    "en": "Keep heading right! {action} inserts the card, {toggle} switches your shell."
   },
   "objects": [
     {
@@ -100,8 +100,8 @@
       ],
       "gate": "tor-anmeldung",
       "hint": {
-        "de": "Karte stecken: TI-Aktion drücken.",
-        "en": "Insert your card: press the TI action."
+        "de": "Karte stecken: {action} drücken.",
+        "en": "Insert your card: press {action}."
       }
     },
     {

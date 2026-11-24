@@ -19,6 +19,7 @@ var level: Level
 var pause_menu: PauseMenu
 var _current: Node
 var _level_index := 0
+var _neustart := false     # „Station neu starten" läuft (Blende) — kein zweites Pausemenü
 
 
 func _ready() -> void:
@@ -94,8 +95,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	# Idle-Reset: niemand spielt → zurück zum Titel (Attract)
-	if screen != Screen.TITLE and Kiosk.shots_dir == "" and Kiosk.idle_seconds() > Kiosk.idle_reset_seconds:
+	# Idle-Reset (nur Messe-Modus): niemand spielt → zurück zum Titel (Attract)
+	if screen != Screen.TITLE and Kiosk.consume_idle_reset():
 		Game.set_lang(Game.default_lang)   # nächster Besucher: wieder die Standardsprache
 		show_title()
 
@@ -111,11 +112,12 @@ func toggle_pause() -> void:
 	if pause_menu != null:
 		_resume()
 		return
-	if screen != Screen.LEVEL or not is_instance_valid(level):
+	if screen != Screen.LEVEL or not is_instance_valid(level) or _neustart:
 		return
 	pause_menu = PauseMenu.new()
 	pause_menu.station_name = level.data.name_text()
 	pause_menu.resumed.connect(_resume)
+	pause_menu.restart_requested.connect(restart_level)
 	pause_menu.quit_to_title.connect(func():
 		_resume()
 		show_title())
@@ -248,9 +250,26 @@ func go_level(index: int) -> void:
 		show_briefing(index)
 
 
-func _start_level(index: int) -> void:
+## Pausemenü „Station neu starten" (Team-Feedback 9/2026: wer festhing, konnte nur
+## zurück ins Hauptmenü): dieselbe Station von vorn, ohne Briefing. Während der
+## Blende steht das alte Level still, damit nichts mehr eingesammelt wird; danach
+## springt der Spielstand auf den Stand bei Stationsbeginn zurück.
+func restart_level() -> void:
+	_resume()
+	if screen != Screen.LEVEL or not is_instance_valid(level) or level.finished or _neustart:
+		return
+	_neustart = true
+	level.process_mode = Node.PROCESS_MODE_DISABLED
+	Sfx.play("ui")
+	_start_level(_level_index, true)
+
+
+func _start_level(index: int, neustart := false) -> void:
 	await _fade_out(0.25)
 	_clear()
+	if neustart:
+		Game.restore_level_start()
+		_neustart = false
 	_set_screen(Screen.LEVEL)
 	_level_index = index
 	Game.level_index = index

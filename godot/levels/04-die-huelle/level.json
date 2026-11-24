@@ -31,7 +31,7 @@
   "enemySkin": "lauscher-auge",
   "collectible": {
     "type": "datenbit",
-    "countRequired": 14,
+    "countRequired": 10,
     "label": {
       "de": "Prüfsummen",
       "en": "checksums"
@@ -135,7 +135,7 @@
     },
     {
       "type": "lauscher",
-      "tx": 62,
+      "tx": 65,
       "ty": 18,
       "patrol": 36,
       "speed": 27,

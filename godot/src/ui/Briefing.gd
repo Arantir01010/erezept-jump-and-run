@@ -38,6 +38,7 @@ var bausteine: Array = []
 var baustein_labels: Array = []
 var szene_zyklus := 16.0
 var text_zyklus := 20.0
+var ziel := {}             # {n}/{was} in „DAS TUST DU": Sammelziel dieser Station
 
 
 func _init(idx := 0) -> void:
@@ -57,6 +58,9 @@ func _init(idx := 0) -> void:
 		var ld := LevelData.load_level(id)
 		titel = ld.name_text().to_upper()
 		bausteine = BriefingDaten.inventar(ld)
+		# Zahl und Name aus level.json — früher stand „ab 8 Prüfsummen" fest im Text,
+		# Station 1 braucht aber 13 Daten-Kacheln (Team-Feedback 9/2026)
+		ziel = {"n": str(ld.count_required), "was": Game.t(ld.collect_label)}
 
 
 func _build() -> void:
@@ -82,11 +86,19 @@ func _build() -> void:
 		rufe.append([l, float(arr[5]), float(arr[6])])
 	# Tafel: Handgriffe und Bausteine dieses Levels
 	label(20, 276, "DAS TUST DU", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
-	label(LEISTE_X, 276, BriefingDaten.text(str(daten.get("tust", ""))), 7.2,
+	label(LEISTE_X, 276, tust_text(), 7.2,
 		{"color": Pen.hex(0xeef2f8), "bold": false, "origin": Vector2(0, 0.5)})
 	label(20, 306, "BAUSTEINE", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
 	for i in bausteine.size():
 		baustein_labels.append(label(_leiste_x(i), 318, BriefingDaten.name_of(str(bausteine[i])), 4.4, {"color": Pen.hex(0xcfd6e6), "bold": false}))
+
+
+## „DAS TUST DU" mit Knopfnamen und dem Sammelziel der Station.
+func tust_text() -> String:
+	var s := BriefingDaten.text(str(daten.get("tust", "")))
+	for k in ziel:
+		s = s.replace("{%s}" % k, str(ziel[k]))
+	return s
 
 
 func _leiste_x(i: int) -> float:

@@ -31,6 +31,7 @@ var player: Player
 var squash := Vector2.ONE
 var flash := 0.0
 var blink_until := 0.0
+const BLINK_S := 0.5        # Periode des Unverwundbar-Blinkens (2 Hz)
 
 ## Paul trägt Warm gegen die kühle Welt (Mario-Regel: Figur komplementär zur Umgebung).
 const SKIN := Color(0.96, 0.80, 0.66)
@@ -190,10 +191,11 @@ func _process(delta: float) -> void:
 	else:
 		_speed_ghost_timer = 0.0
 
-	# Unverwundbar: Blinken (deutlich unter 3 Hz, Barrierefreiheit)
+	# Unverwundbar: Blinken mit 2 Hz — deutlich unter der 3-Hz-Grenze (Barrierefreiheit).
+	# Früher 0,28 s je Periode, also 3,6 Hz, entgegen diesem Kommentar.
 	var now := Time.get_ticks_msec() / 1000.0
 	if now < blink_until:
-		modulate.a = 0.35 if fmod(now, 0.28) < 0.14 else 1.0
+		modulate.a = 0.35 if fmod(now, BLINK_S) < BLINK_S * 0.5 else 1.0
 	else:
 		modulate.a = 1.0
 	queue_redraw()

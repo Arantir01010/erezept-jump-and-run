@@ -63,5 +63,7 @@
   "MEDIKATIONSLISTE": {"en": "MEDICATION LIST", "fr": "LISTE DES MÉDICAMENTS", "es": "LISTA DE MEDICACIÓN", "zh": "用药清单", "hi": "दवा सूची"},
   "ZUGRIFFSPROTOKOLL": {"en": "ACCESS LOG", "fr": "JOURNAL D'ACCÈS", "es": "REGISTRO DE ACCESOS", "zh": "访问日志", "hi": "पहुँच लॉग"},
   "DEINE ePA": {"en": "YOUR ePA", "fr": "TON ePA", "es": "TU ePA", "zh": "你的 ePA", "hi": "तुम्हारा ePA"},
-  "ePA-WISSEN · TEIL %d / 4": {"en": "ePA KNOWLEDGE · PART %d / 4", "fr": "SAVOIR ePA · PARTIE %d / 4", "es": "SABER ePA · PARTE %d / 4", "zh": "ePA 知识 · 第 %d / 4 部分", "hi": "ePA ज्ञान · भाग %d / 4"}
+  "ePA-WISSEN · TEIL %d / 4": {"en": "ePA KNOWLEDGE · PART %d / 4", "fr": "SAVOIR ePA · PARTIE %d / 4", "es": "SABER ePA · PARTE %d / 4", "zh": "ePA 知识 · 第 %d / 4 部分", "hi": "ePA ज्ञान · भाग %d / 4"},
+  "TI-AKTION": {"en": "TI ACTION", "fr": "ACTION TI", "es": "ACCIÓN TI", "zh": "TI 操作", "hi": "TI एक्शन"},
+  "an Terminal und Kartenleser: Karte stecken, PIN, Stempel": {"en": "at terminals and card readers: insert card, PIN, stamp", "fr": "aux terminaux et lecteurs de carte : carte, PIN, tampon", "es": "en terminales y lectores de tarjetas: tarjeta, PIN, sello", "zh": "在终端和读卡器处：插卡、PIN、印章", "hi": "टर्मिनल और कार्ड रीडर पर: कार्ड लगाओ, PIN, स्टैम्प"}
 }

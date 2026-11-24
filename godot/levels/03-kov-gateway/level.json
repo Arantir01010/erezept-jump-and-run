@@ -54,8 +54,8 @@
     },
     "krypto-dusche": {
       "hint": {
-        "de": "Blauer Knopf: Verschlüsselung anlegen!",
-        "en": "Blue button: apply encryption!"
+        "de": "{action}: Verschlüsselung anlegen!",
+        "en": "{action}: apply encryption!"
       }
     }
   },

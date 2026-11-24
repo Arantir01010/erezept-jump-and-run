@@ -58,6 +58,7 @@ class TimingGate extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(0, _light_y() - 58.0), not done and player_in_rect(rect), delta)
 		for i in steps:
 			_flash[i] = maxf(0.0, _flash[i] - delta * 3.0)
 		var win := running and (_t - _step_start) < _slow * window_ratio and _t >= _fail_until
@@ -185,6 +186,12 @@ class Lauscher extends Mechanic:
 	var _blink_timer := 2.0
 	var _eye := Vector2.ZERO
 	var _cone_light: PointLight2D
+	## 1 = Paul ist im Klartext (lesbar): Kegel warm mit Kontur — 0 = verschlüsselt
+	## oder in der VAU: Kegel blass und neutral, der Lauscher scheitert (Feedback 9/2026:
+	## „Gefahren schlecht zu sehen"). Weicher Übergang, kein Blinken.
+	var _warn := 1.0
+	const NEUTRAL := Color(0.74, 0.78, 0.86)
+	static var _sclera_sb: StyleBoxFlat
 
 	func spawn() -> void:
 		z_index = 6
@@ -194,6 +201,7 @@ class Lauscher extends Mechanic:
 		spread = float(param("spread", 22)) * 3.0
 		pause = float(param("pauseMs", 600)) / 1000.0
 		patrol_to = base_x + float(param("patrol", 0)) * 3.0
+		draw_reach = Vector2(reach + 40.0, spread + 40.0)
 		_t = randf() * 3.0
 		# Der Blick als echtes Licht: Kegeltextur, in Blickrichtung gedreht
 		_cone_light = PointLight2D.new()
@@ -228,9 +236,10 @@ class Lauscher extends Mechanic:
 		if gesehen and _t - _last_hit >= 0.9:
 			_last_hit = _t
 			_erwischt()
+		_warn = move_toward(_warn, 1.0 if player.is_sichtbar else 0.0, delta * 4.0)
 		_cone_light.scale = Vector2(float(dir), 1.0)
-		_cone_light.color = Palette.DENY if gesehen else Palette.WARM
-		_cone_light.energy = (1.1 if gesehen else 0.65) + 0.08 * sin(_t * 7.0)
+		_cone_light.color = Palette.DENY if gesehen else NEUTRAL.lerp(Palette.WARM, _warn)
+		_cone_light.energy = (1.1 if gesehen else lerpf(0.3, 0.7, _warn)) + 0.08 * sin(_t * 7.0)
 		queue_redraw()
 
 	## Patrouille als reine Funktion der Zeit (deterministisch, lernbar).
@@ -274,9 +283,9 @@ class Lauscher extends Mechanic:
 		var lost := player.hurt(global_position.x)
 		Game.mark_seen(data.id, ltext("akteur", {"de": "Lauscher", "en": "Eavesdropper"}))
 		Fx.deny_stamp(level, global_position + Vector2(0, -60), ltext("seenText", {"de": "MITGELESEN!", "en": "READ!"}))
-		Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
 		if lost <= 0:
 			return
+		Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
 		_hits += 1
 		if _hits >= 2 and _t - _last_tip > 6.0:
 			_last_tip = _t
@@ -284,28 +293,37 @@ class Lauscher extends Mechanic:
 				"en": "Tip: encrypt — then nobody can read you!"}))
 
 	func _draw() -> void:
-		# Sichtkegel: gestaffeltes Volumen, warm; beim Erfassen rot und dichter
-		var c := Palette.DENY if _seen else Palette.WARM
-		var base_a := 0.30 if _seen else 0.12
+		# Sichtkegel: gestaffeltes Volumen. Klartext: warm und dichter, mit Kontur an
+		# den Rändern; verschlüsselt/VAU: blass und neutral; beim Erfassen rot
+		var c := Palette.DENY if _seen else NEUTRAL.lerp(Palette.WARM, _warn)
+		var base_a := 0.30 if _seen else lerpf(0.06, 0.17, _warn)
 		for k in 3:
 			var frac := 1.0 - k * 0.28
 			var pts := PackedVector2Array([Vector2.ZERO, Vector2(dir * reach * frac, -spread * frac), Vector2(dir * reach * frac, spread * frac)])
 			draw_colored_polygon(pts, Color(c.r, c.g, c.b, base_a * (0.5 + k * 0.25)))
+		var kontur := 0.7 if _seen else 0.6 * _warn
+		if kontur > 0.01:
+			for s in [-1.0, 1.0]:
+				draw_line(Vector2(dir * 26.0, s * spread * 26.0 / reach), Vector2(dir * reach, s * spread),
+					Color(c.r, c.g, c.b, kontur), 3.0, true)
+			draw_line(Vector2(dir * reach, -spread), Vector2(dir * reach, spread), Color(c.r, c.g, c.b, kontur * 0.45), 2.0, true)
 		# Scan-Linien im Kegel
+		var scan_a := 0.35 if _seen else lerpf(0.12, 0.4, _warn)
 		for i in 4:
 			var f := fmod(_t * 0.5 + i * 0.25, 1.0)
 			var x := dir * reach * f
-			draw_line(Vector2(x, -spread * f), Vector2(x, spread * f), Color(c.r, c.g, c.b, (1.0 - f) * 0.35), 2.0, true)
+			draw_line(Vector2(x, -spread * f), Vector2(x, spread * f), Color(c.r, c.g, c.b, (1.0 - f) * scan_a), 2.0, true)
 		# Das Auge
 		draw_circle(Vector2.ZERO, 30.0, Color(c.r, c.g, c.b, 0.15))
 		draw_circle(Vector2.ZERO, 22.0, Color(0.12, 0.09, 0.14))
 		var open := 0.12 if _blink > 0.0 else 1.0
 		var sclera := Rect2(-18, -12 * open, 36, 24 * open)
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.97, 0.95, 0.92)
-		sb.set_corner_radius_all(12)
-		sb.anti_aliasing = true
-		draw_style_box(sb, sclera)
+		if _sclera_sb == null:
+			_sclera_sb = StyleBoxFlat.new()
+			_sclera_sb.bg_color = Color(0.97, 0.95, 0.92)
+			_sclera_sb.set_corner_radius_all(12)
+			_sclera_sb.anti_aliasing = true
+		draw_style_box(_sclera_sb, sclera)
 		if open > 0.5:
 			draw_circle(_eye, 8.0, Palette.glow(c, 1.4))
 			draw_circle(_eye, 4.0, Color(0.05, 0.04, 0.06))
@@ -370,6 +388,7 @@ class AndockPlattform extends Mechanic:
 # ---------------------------------------------------------------- VAU-Feld
 
 class VauFeld extends Mechanic:
+	const GITTER_SHADER := preload("res://src/shaders/vau_gitter.gdshader")
 	var ttl := 0.0
 	var inside := false
 	var _hint := false
@@ -377,6 +396,10 @@ class VauFeld extends Mechanic:
 	var _light: PointLight2D
 	var _ring_tex: GradientTexture2D
 	var _ring_ratio := -1.0
+	var _gitter: _Gitter
+	var _gitter_mat: ShaderMaterial
+	var _feld_sb: StyleBoxFlat
+	var _gezeichnet := ""
 
 	func spawn() -> void:
 		z_index = 3
@@ -385,6 +408,19 @@ class VauFeld extends Mechanic:
 		_light = Fx.light(self, Vector2.ZERO, Palette.VAU, maxf(rect.size.x, rect.size.y) * 0.9, 0.35)
 		if ttl > 0.0:
 			_ring_tex = _make_ring_texture()
+		var c := Palette.VAU
+		_feld_sb = StyleBoxFlat.new()
+		_feld_sb.border_color = Palette.glow(Color(c.r, c.g, c.b, 0.9), 1.4)
+		_feld_sb.set_border_width_all(2)
+		_feld_sb.set_corner_radius_all(10)
+		_feld_sb.anti_aliasing = true
+		# Wabengitter: eigener Knoten, EINMAL gezeichnet; die Welle macht der Shader
+		_gitter = _Gitter.new()
+		_gitter.feld = local_rect()
+		_gitter_mat = ShaderMaterial.new()
+		_gitter_mat.shader = GITTER_SHADER
+		_gitter.material = _gitter_mat
+		add_child(_gitter)
 
 	## Sitzungsuhr: konische Füllung (GradientTexture2D.FILL_CONIC, Godot 4.7) —
 	## eine violette Scheibe, die im Uhrzeigersinn leerläuft. Start oben (12 Uhr).
@@ -430,37 +466,25 @@ class VauFeld extends Mechanic:
 	func tick(delta: float) -> void:
 		_t += delta
 		_light.energy = (0.7 if inside else 0.35) + 0.06 * sin(_t * 2.5)
-		queue_redraw()
+		if not visible:
+			return
+		_gitter_mat.set_shader_parameter("t", _t)
+		# Neu zeichnen nur, wenn sich etwas ändert: drinnen/draußen, laufende Sitzungsuhr
+		var draining := ttl > 0.0 and inside and player.huelle.vau_expires
+		var stand := "%s|%s" % [inside, draining]
+		if draining or stand != _gezeichnet:
+			_gezeichnet = stand
+			queue_redraw()
 
 	func _draw() -> void:
 		var r := local_rect()
 		var c := Palette.VAU
-		var a := 0.22 if inside else 0.13
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(c.r, c.g, c.b, a)
-		sb.border_color = Palette.glow(Color(c.r, c.g, c.b, 0.9), 1.4)
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(10)
-		sb.anti_aliasing = true
-		draw_style_box(sb, r)
-		# Hex-Gitter (Raum, kein Tunnel)
-		var y := r.position.y + 14
-		var row := 0
-		while y < r.end.y - 8:
-			var x := r.position.x + 14 + (10 if row % 2 else 0)
-			while x < r.end.x - 8:
-				var pts := PackedVector2Array()
-				for k in 6:
-					pts.append(Vector2(x, y) + Vector2(6, 0).rotated(k * PI / 3.0 + PI / 6.0))
-				pts.append(pts[0])
-				draw_polyline(pts, Color(c.r, c.g, c.b, 0.13 + 0.08 * sin(_t * 2.0 + x * 0.05 + y * 0.03)), 1.0, true)
-				x += 20
-			y += 18
-			row += 1
+		_feld_sb.bg_color = Color(c.r, c.g, c.b, 0.22 if inside else 0.13)
+		draw_style_box(_feld_sb, r)
 		# Schild
 		draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 8), "VAU", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 22, Palette.glow(c, 1.3))
 		# Sitzungsfrische: konischer Ring über dem Schild — voll, solange niemand drin
-		# ist; läuft ab, sobald Paul in der VAU arbeitet (Kontextschlüssel).
+		# ist; läuft ab, sobald Paul in der VAU arbeitet (Sitzung mit frischen Schlüsseln).
 		if ttl > 0.0:
 			var draining := inside and player.huelle.vau_expires
 			var ratio := player.huelle.vau_ratio if draining else 1.0
@@ -479,8 +503,34 @@ class VauFeld extends Mechanic:
 			if ratio > 0.005:
 				var a0 := -PI / 2.0
 				draw_arc(center, 17.0, a0, a0 + TAU * ratio, maxi(4, int(40 * ratio) + 2), Palette.glow(Color(c.r, c.g, c.b, alpha), 1.4), 5.0, true)
-			# Schlüsselmarke in der Mitte: das ist der Kontextschlüssel
+			# Marke in der Mitte: die Sitzung
 			draw_circle(center, 3.5, Palette.glow(Color(c.r, c.g, c.b, alpha), 1.3))
+
+	## Das Wabengitter als EINE Linienliste (draw_multiline) — gezeichnet beim
+	## Erzeugen, danach nie wieder; Helligkeitswelle im Shader (vau_gitter.gdshader).
+	class _Gitter extends Node2D:
+		var feld := Rect2()
+
+		func _draw() -> void:
+			var c := Palette.VAU
+			var punkte := PackedVector2Array()
+			var ecken: Array[Vector2] = []
+			for k in 6:
+				ecken.append(Vector2(6, 0).rotated(k * PI / 3.0 + PI / 6.0))
+			var y := feld.position.y + 14
+			var row := 0
+			while y < feld.end.y - 8:
+				var x := feld.position.x + 14 + (10 if row % 2 else 0)
+				while x < feld.end.x - 8:
+					var m := Vector2(x, y)
+					for k in 6:
+						punkte.append(m + ecken[k])
+						punkte.append(m + ecken[(k + 1) % 6])
+					x += 20
+				y += 18
+				row += 1
+			if punkte.size() > 0:
+				draw_multiline(punkte, Color(c.r, c.g, c.b, 1.0), 1.0, true)
 
 
 # ---------------------------------------------------------------- Kontext-Anker
@@ -568,6 +618,7 @@ class StampExit extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(100, rect.size.y / 2.0 - 130.0), not done and player_in_rect(rect), delta)
 		_light.position.y = _y - 10.0
 		_light.energy = (0.75 if stamp_up and not done else 0.3) + 0.1 * sin(_t * 5.0)
 		queue_redraw()
@@ -897,6 +948,7 @@ class KryptoDusche extends Mechanic:
 
 	func tick(delta: float) -> void:
 		_t += delta
+		kappe(Vector2(0, -rect.size.y / 2.0 - 52.0), not done and player_in_rect(rect), delta)
 		queue_redraw()
 		if done or not player_in_rect(rect):
 			return
@@ -1190,6 +1242,7 @@ class Kartenleser extends Mechanic:
 		if _glow:
 			Fx.set_glow(_glow, lc, (0.9 if _led == "gruen" else 0.35) + _flash * 0.6)
 		queue_redraw()
+		kappe(Vector2(W / 2.0 + 36.0, _slot_y()), player_in_rect(rect) and inserted == "" and _anim_kind == "", delta)
 		if not player_in_rect(rect):
 			return
 		if Input.is_action_just_pressed("action") and inserted == "" and _anim_kind == "":

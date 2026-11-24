@@ -198,6 +198,17 @@ func idle_seconds() -> float:
 	return (Time.get_ticks_msec() - last_input_ms) / 1000.0
 
 
+## Idle-Reset fällig? Nur im Messe-Modus (--kiosk bzw. ?kiosk=1) und nie im
+## Prüflauf. Am PC oder im Browser darf niemand nach einer Minute Fragebogen
+## wieder bei Station 1 landen (Team-Feedback 9/2026). Setzt den Zähler zurück,
+## damit der Reset genau einmal auslöst (die Blende zum Titel dauert ein paar Frames).
+func consume_idle_reset() -> bool:
+	if not kiosk_mode or shots_dir != "" or idle_seconds() <= idle_reset_seconds:
+		return false
+	note_input()
+	return true
+
+
 func note_input() -> void:
 	last_input_ms = Time.get_ticks_msec()
 
@@ -249,6 +260,13 @@ func label_action() -> String:
 	if touch_seen or touch_forced:
 		return tr("AKTION")
 	return tr("BLAU") if has_gamepad() else "E"
+
+
+## Pause: ESC (Tastatur), START (Arcade/Gamepad), Pause-Knopf oben (Touch).
+func label_pause() -> String:
+	if touch_seen or touch_forced:
+		return "❚❚"
+	return "START" if has_gamepad() else "ESC"
 
 
 func label_toggle() -> String:
