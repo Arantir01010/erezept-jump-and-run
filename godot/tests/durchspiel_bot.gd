@@ -184,7 +184,7 @@ func takt(lvl: Level) -> void:
 	_setze("action", false)
 	var z := _zustand()
 	if _plan != null:
-		if _plan_i < _plan.ax.size() and z.pos.distance_to(_plan.orte[_plan_i - 1]) <= ABWEICHUNG:
+		if _plan_i < _plan.ax.size() and _plan_i <= _plan.orte.size() and z.pos.distance_to(_plan.orte[_plan_i - 1]) <= ABWEICHUNG:
 			_ausfuehren()
 			return
 		_plan = null
@@ -341,7 +341,9 @@ func _luftplan(z: Zustand, doppel: int, rechts: int, danach: float) -> Plan:
 # ------------------------------------------------------------------ Vorausrechnung
 
 ## Rechnet `p` ab `start`. `bis_landung`: endet, sobald Paul nach einem Flug wieder
-## steht (die Eingaben werden dort abgeschnitten) — oder bei Ziel, Stoß, Grube.
+## steht — oder bei Ziel, Stoß, Grube, Mauer. Die Eingaben werden am Ende abgeschnitten,
+## damit ax, sprung und orte gleich lang sind (auch ein Plan mit Problem wird befolgt,
+## wenn in der Luft nichts Sicheres bleibt).
 func _rechnen(start: Zustand, p: Plan, bis_landung: bool) -> Plan:
 	var z := start.kopie()
 	var flog := not z.boden
@@ -364,11 +366,11 @@ func _rechnen(start: Zustand, p: Plan, bis_landung: bool) -> Plan:
 		if _trifft(koerper):
 			p.ausgang = "stoss"
 			p.problem_bei = i
-			return p
+			return _problem(p, z, i)
 		if z.pos.y > _grube_y:
 			p.ausgang = "grube"
 			p.problem_bei = abflug if abflug >= 0 else i
-			return p
+			return _problem(p, z, i)
 		if war_boden and not z.boden:
 			abflug = i
 		elif z.boden:
@@ -378,7 +380,7 @@ func _rechnen(start: Zustand, p: Plan, bis_landung: bool) -> Plan:
 			if mauer_seit >= 2:
 				p.ausgang = "mauer"
 				p.problem_bei = maxi(0, i - 1)
-				return p
+				return _problem(p, z, i)
 		else:
 			mauer_seit = 0
 		if bis_landung:
@@ -396,6 +398,12 @@ func _rechnen(start: Zustand, p: Plan, bis_landung: bool) -> Plan:
 func _kuerzen(p: Plan, n: int) -> void:
 	p.ax.resize(n)
 	p.sprung.resize(n)
+
+
+func _problem(p: Plan, z: Zustand, i: int) -> Plan:
+	p.ende = z.pos
+	_kuerzen(p, i + 1)
+	return p
 
 
 ## Ein Physikschritt wie Player._physics_process (ohne Ducken und Treffer).
