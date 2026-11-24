@@ -7,8 +7,9 @@ extends RefCounted
 ##
 ## Browser-Fallback: im Web-Build (Compatibility-Renderer) gibt es kein
 ## HDR-Glühen und keine Sub-Emitter. `web_fallback()` ist dort wahr (am Desktop
-## zum Testen mit `--webfx`); dann ersetzen additive Glüh-Sprites
+## zum Testen mit `--webfx` oder `--grafik=0`); dann ersetzen additive Glüh-Sprites
 ## (`glow_sprite`) das Glühen echter Lichtquellen, und Partikel laufen auf der CPU.
+## Entschieden wird das an einer Stelle: Grafik.gd (Grafikstufen 0…2).
 
 static var post: PostFx = null
 static var _hitstop_active := false
@@ -16,21 +17,18 @@ static var _slowmo_active := false
 static var _radial: GradientTexture2D
 static var _cone: ImageTexture
 static var _dot: ImageTexture
-static var _webfx := -1
 
 
 # ------------------------------------------------------------------ Umgebung
 
-## Browser-Fallback aktiv? Web-Build oder Desktop-Test mit `--webfx`.
+## Browser-Fallback aktiv? Grafikstufe 0: Web-Build, `--webfx` oder `--grafik=0`.
 static func web_fallback() -> bool:
-	if _webfx < 0:
-		_webfx = 1 if (OS.has_feature("web") or "--webfx" in OS.get_cmdline_user_args()) else 0
-	return _webfx == 1
+	return Grafik.glueh_sprites()
 
 
-## GPU-Partikel (Sub-Emitter, SDF-Kollision) nur außerhalb des Browser-Pfads.
+## GPU-Partikel (Sub-Emitter, SDF-Kollision) nur in Grafikstufe 2 (Desktop-Vorgabe).
 static func gpu_particles_ok() -> bool:
-	return not web_fallback()
+	return Grafik.gpu_partikel()
 
 
 # ------------------------------------------------------------------ Licht

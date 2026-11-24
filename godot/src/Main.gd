@@ -32,27 +32,10 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	# Markenschrift für alle Controls (Helvetica Neue; Fallback: Godot-Standard)
 	get_window().theme = Brand.theme()
-	var env := WorldEnvironment.new()
-	var e := Environment.new()
-	e.background_mode = Environment.BG_CANVAS
 	# Glühen nur für echte HDR-Lichtquellen (Prüfsummen, REZI, Lampen) — helle
 	# Pastellflächen bleiben unter der Schwelle, sonst überstrahlt der Tag.
-	e.glow_enabled = true
-	e.glow_intensity = 0.65
-	e.glow_strength = 1.0
-	e.glow_bloom = 0.03
-	e.glow_blend_mode = Environment.GLOW_BLEND_MODE_ADDITIVE
-	e.glow_hdr_threshold = 1.35
-	e.glow_hdr_scale = 2.4
-	# Mehrere Glühstufen: enger Kern plus weiter, weicher Hof
-	e.set_glow_level(0, 0.0)
-	e.set_glow_level(1, 0.85)
-	e.set_glow_level(2, 0.6)
-	e.set_glow_level(3, 0.9)
-	e.set_glow_level(4, 0.4)
-	e.set_glow_level(5, 0.55)
-	env.environment = e
-	add_child(env)
+	# Werte, Vergleichsvariante B (--glow=b, F7) und Grafikstufen: src/core/Grafik.gd
+	Grafik.umgebung_einrichten(self)
 
 	var post := PostFx.new()
 	add_child(post)
@@ -89,6 +72,9 @@ func _ready() -> void:
 	_wipe.set_shader_parameter("direction", 1.0)
 	fade.material = _wipe
 	fade_layer.add_child(fade)
+	# Shader und Partikel einmal unter der geschlossenen Blende zeichnen (kein
+	# Ruckler beim ersten Effekt) — Grafik.vorwaermen
+	Grafik.vorwaermen(self)
 
 	if Kiosk.shots_dir != "":
 		show_title()
