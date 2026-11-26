@@ -13,23 +13,23 @@ Du gestaltest [ANWENDUNG] für [ZIELGRUPPE] im Erscheinungsbild von PwC. Halte d
 diese Vorgaben; weiche nur ab, wenn ich es ausdrücklich verlange.
 
 FARBEN — nur diese Werte, keine freien Hex-Codes, keine Verläufe als Dekoration
-- Marke, Primäraktion, Fortschritt: Orange #D04A02
-- Aufforderung, Hervorhebung, aktiver Zustand, Links: Tangerine #EB8C00
+- Marke, Primäraktion, Fortschritt: Orange 500 #FD5108 (Text darauf Weiß)
+- Aufforderung, Hervorhebung, aktiver Zustand, Links: Orange 300 #FFAA72
   (auf dunklem Grund statt Orange, dort besser lesbar)
-- Erfolg, Auszeichnung, Bestwert: Yellow #FFB600
-- Fehler, Warnung, „verweigert": Red #E0301E — nie dekorativ
-- Zweitfarben sparsam: Rose #D93954, Maroon #822720
-- Neutral: Schwarz #000000, Dunkelgrau #2D2D2D, Grau #464646, Mittelgrau #7D7D7D,
-  Hellgrau #DEDEDE, Blassgrau #F2F2F2, Weiß #FFFFFF
+- Auszeichnung, Bestwert: Tangerine 400 #FFC21B · Erfolg: Success 400 #18AE80 · Info: Blue 300 #6797FF
+- Fehler, „verweigert": Red 400 #ED4242 · Warnung: Warning 300 #E9B01F — nie dekorativ
+- Sekundärfarbe für Illustration und Piktogramme: Tangerine 500 #FF9F00
+- Neutral (Grey): 1000 #111113, 975 #202124, 950 #303236, 800 #4C5056, 700 #787E8A, 600 #8E95A2,
+  300 #CBD1D6, 50 #F5F7F8, Weiß #FFFFFF
 - Verteilung 60/30/10: neutrale Fläche, dunkle Struktur, ein scharfer Orange-Akzent.
   Eine dominante Farbe, ein Akzent — kein Regenbogen, kein „bunt".
-- Flächen: #2D2D2D mit 86 % Deckung, 1-px-Kante Weiß 16 %, Rundung 6 px.
-  Helle Variante: Grund #F2F2F2, Text #2D2D2D, Akzent Orange. Kein Glas-Effekt.
+- Flächen: Grey 975 #202124 auf Grund Grey 1000, 1-px-Kante Grey 700, Ecken eckig (höchstens 2 px).
+  Helle Variante: Grund Weiß/Grey 50, Text Grey 1000, Akzent Orange 500. Kein Glas-Effekt.
 
 SCHRIFT — zwei Familien, sonst nichts
 - Überschriften: ITC Charter Bold (Serif). Groß, enge Zeilenhöhe, leichte Laufweite.
 - Lesetext: Helvetica Neue Roman. Eyebrows, Pillen, Tastenkappen, Schilder:
-  Helvetica Neue Medium in Versalien, gesperrt. Stempel, Knöpfe, Alarm: Helvetica Neue
+  Helvetica Neue Medium in normaler Groß-/Kleinschreibung (keine Versalien). Stempel, Knöpfe, Alarm: Helvetica Neue
   Bold/Heavy.
 - Kontrast statt Einheitsbrei: Charter groß gegen Helvetica klein, Light gegen Heavy,
   nicht 400 gegen 600.
@@ -37,7 +37,7 @@ SCHRIFT — zwei Familien, sonst nichts
   Helvetica/Arial für Helvetica Neue. Kein Inter, Roboto, Space Grotesk, keine Systemschrift.
 
 LAYOUT UND BAUSTEINE
-- Hierarchie pro Screen: Eyebrow (Versalien, Tangerine oder Yellow, gesperrt), darunter
+- Hierarchie pro Screen: Eyebrow (Orange 300, klein, keine Versalien), darunter
   eine große Charter-Überschrift, darunter ein Satz in Helvetica.
 - Primärknopf: Orange gefüllt, weiße Schrift. Sekundär: transparent mit Kante.
   Segment-Schalter: ein Rahmen, das aktive Feld orange gefüllt.
@@ -70,11 +70,11 @@ ARBEITSWEISE
 ## Kurzfassung für den Projektkontext
 
 ```text
-PwC-Look. Farben nur: Orange #D04A02 (Primär), Tangerine #EB8C00 (Akzent auf dunkel),
-Yellow #FFB600 (Erfolg), Red #E0301E (Fehler), Neutral #000000 #2D2D2D #464646 #7D7D7D
-#DEDEDE #F2F2F2 #FFFFFF. 60/30/10, ein Akzent. Flächen #2D2D2D 86 %, Kante Weiß 16 %,
-Rundung 6 px. Schrift: ITC Charter Bold für Überschriften, Helvetica Neue Roman für Text,
-Medium versal gesperrt für Eyebrows/Pillen, Bold/Heavy für Knöpfe. Verboten: Verläufe,
+PwC-Look (Digital Colour System, Dark mode). Farben nur: Orange 500 #FD5108 (Primär),
+Orange 300 #FFAA72 (Akzent auf dunkel), Tangerine 400 #FFC21B (Auszeichnung), Success #18AE80,
+Info #6797FF, Warning #E9B01F, Error #ED4242, Grey #111113 #202124 #303236 #787E8A #CBD1D6
+#F5F7F8. 60/30/10, ein Akzent. Flächen Grey 975, Kante Grey 700, Ecken eckig. Keine Versalien. Schrift: ITC Charter Bold für Überschriften, Helvetica Neue Roman für Text,
+Medium für Eyebrows/Pillen, Bold/Heavy für Knöpfe. Verboten: Verläufe,
 Inter/Roboto/Arial, Emojis als Icons, drei gleiche Karten, Karte in Karte, Glassmorphism,
 Blinken über 3 Hz, rotes Kreuz. Tokens zuerst, Komponenten nur aus Tokens.
 ```
@@ -85,28 +85,28 @@ Blinken über 3 Hz, rotes Kreuz. Tokens zuerst, Komponenten nur aus Tokens.
 Design [APP] for [AUDIENCE] in the PwC visual identity. Follow these rules strictly.
 
 COLOURS — only these values, no ad-hoc hex codes, no decorative gradients
-- Brand, primary action, progress: Orange #D04A02
-- Call to action, highlight, active state, links: Tangerine #EB8C00 (use instead of
+- Brand, primary action, progress: Orange 500 #FD5108 (white text on it)
+- Call to action, highlight, active state, links: Orange 300 #FFAA72 (use instead of
   Orange on dark backgrounds)
-- Success, award, best score: Yellow #FFB600
-- Error, warning, "denied": Red #E0301E — never decorative
-- Secondary, sparingly: Rose #D93954, Maroon #822720
-- Neutrals: #000000 #2D2D2D #464646 #7D7D7D #DEDEDE #F2F2F2 #FFFFFF
+- Award, best score: Tangerine 400 #FFC21B · Success 400 #18AE80 · Info Blue 300 #6797FF
+- Error, "denied": Red 400 #ED4242 · Warning 300 #E9B01F — never decorative
+- Secondary colour for illustration and pictograms: Tangerine 500 #FF9F00
+- Neutrals (Grey): #111113 #202124 #303236 #4C5056 #787E8A #8E95A2 #CBD1D6 #F5F7F8 #FFFFFF
 - 60/30/10: neutral ground, dark structure, one sharp orange accent. One dominant colour,
   one accent, never a rainbow.
-- Surfaces: #2D2D2D at 86 % opacity, 1 px border white 16 %, radius 6 px. Light variant:
-  ground #F2F2F2, text #2D2D2D, accent Orange. No glassmorphism.
+- Surfaces: Grey 975 #202124 on Grey 1000, 1 px border Grey 700, square corners (2 px max).
+  Light variant: ground white/Grey 50, text Grey 1000, accent Orange 500. No glassmorphism.
 
 TYPE — two families, nothing else
 - Headlines: ITC Charter Bold (serif), large, tight leading, slight tracking.
 - Body: Helvetica Neue Roman. Eyebrows, pills, keycaps, signs: Helvetica Neue Medium,
-  uppercase, tracked. Stamps, buttons, alerts: Helvetica Neue Bold/Heavy.
+  sentence case (never all caps). Stamps, buttons, alerts: Helvetica Neue Bold/Heavy.
 - Contrast over sameness: Charter large against Helvetica small, Light against Heavy.
 - Declare technical fallbacks only (Georgia; Helvetica, Arial). Never Inter, Roboto,
   Space Grotesk or system fonts as a design choice.
 
 LAYOUT AND COMPONENTS
-- Per screen: eyebrow (uppercase, Tangerine or Yellow, tracked), large Charter headline,
+- Per screen: eyebrow (Orange 300, small, never all caps), large Charter headline,
   one Helvetica sentence.
 - Primary button: filled Orange, white text. Secondary: transparent with border.
   Segmented control: one frame, active segment filled Orange.

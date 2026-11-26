@@ -11,74 +11,83 @@ extends RefCounted
 ##
 ## Fachlich fest (KAPSEL 2.2): warm = offen/sichtbar, kühl = verschlüsselt, violett = VAU.
 
-const WARM := Color(1.0, 0.60, 0.22)
-const COOL := Color(0.16, 0.74, 0.88)
-const VAU := Color(0.58, 0.44, 0.96)
-const DENY := Color(0.93, 0.31, 0.26)
-const OK := Color(0.30, 0.74, 0.42)
-const GOLD := Color(1.0, 0.78, 0.30)
-const WHITE := Color(0.98, 0.98, 1.0)
+# Funktionsfarben: Werte aus dem PwC Digital Colour System (Brand.gd).
+const WARM := Color("#FF9F00")    # Tangerine 500 — Klartext, offen, sichtbar
+const COOL := Color("#356FEC")    # Blue 400 — verschlüsselt (leuchtet mit Faktor 1,5 zu Blue 300 auf)
+const VAU := Color("#9470F5")     # Violett — einzige Farbe außerhalb des Farbsystems (KAPSEL 2.2)
+const VAU_HELL := Color("#C9BBFA")
+const VAU_TIEF := Color("#5B3FB8")
+const VAU_NACHT := Color("#2A1F5C")
+const DENY := Color("#ED4242")    # Red 400 (Error)
+const OK := Color("#18AE80")      # Success 400
+const GOLD := Color("#FFC21B")    # Tangerine 400
+const WHITE := Color("#F5F7F8")   # Grey 50 (Text Primary)
 
-## Die Welten. sun_pos in Bildschirmanteilen (x rechts, y unten), Energie 0–1.
+## Die Welten — jede Farbe ist eine Stufe des PwC-Farbsystems (11/2026).
+## Bauprinzip: Grey trägt die Struktur (Gelände, Berge, Nebel), der Himmel kommt
+## aus Blue, Orange und Tangerine, der eine Akzent je Welt aus Orange, Tangerine
+## oder Blue, Pflanzen aus Success. Die Stimmung (Morgen, Abend, Regen, Halle,
+## Archiv) entsteht aus der Stufenwahl und der Farbstimmung im Post-Effekt.
+## sun_pos in Bildschirmanteilen (x rechts, y unten), Energie 0–1.
 ## sun_drift: Verschiebung des Sonnenstands je weiterer Station derselben Welt
 ## (Morgen: steigt und wandert; Abend: sinkt). grade_*: Farbstimmung im Post-Effekt —
 ## Tönung (RGB-Faktoren um 1,0) für Schatten/Mitten/Lichter, Kontrast, Sättigung,
 ## Farbe und Stärke der Vignette. Regel: Schatten kühl, Lichter warm, Paletten bleiben.
 const WORLDS := {
 	"praxis-morgen": {
-		"sky_top": "#8ec1e6", "sky_bottom": "#f3e3cb", "sun": "#fff1c9", "sun_pos": [0.70, 0.24],
-		"far": "#c2d3e2", "mid": "#93adc4", "near": "#5c7b95",
-		"fill": "#45566b", "fill_dark": "#34435a", "cap": "#7c96a6", "cap_light": "#d9e8ea",
-		"shadow": "#2b3547", "outline": "#202b3a", "accent": "#ff9d3b", "detail": "#22b3a3",
-		"fog": "#e6edf3", "plant": "#63b56f", "plant_dark": "#3f8f52", "lamp": "#ffd88a",
+		"sky_top": "#A9C8FC", "sky_bottom": "#FFE8D4", "sun": "#FFF4C6", "sun_pos": [0.70, 0.24],
+		"far": "#DCE7FD", "mid": "#A9C8FC", "near": "#787E8A",
+		"fill": "#4C5056", "fill_dark": "#303236", "cap": "#8E95A2", "cap_light": "#EEEFF1",
+		"shadow": "#202124", "outline": "#111113", "accent": "#FE7C39", "detail": "#18AE80",
+		"fog": "#F5F7F8", "plant": "#4FD3A1", "plant_dark": "#07966A", "lamp": "#FFD646",
 		"sun_drift": [0.06, -0.035],
-		"grade_shadows": [0.86, 0.90, 1.02], "grade_mids": [1.0, 1.0, 1.0], "grade_lights": [1.03, 1.0, 0.94],
+		"grade_shadows": [0.86, 0.90, 1.04], "grade_mids": [1.0, 1.0, 1.0], "grade_lights": [1.03, 1.0, 0.94],
 		"grade_contrast": 1.04, "grade_saturation": 1.06, "grade_vignette": [0.60, 0.66, 0.80], "grade_vignette_strength": 0.30,
-		"ambient": "#ffffff", "rezi_energy": 0.55, "sun_energy": 0.42, "sun_shadow": 0.22, "weather": "klar",
+		"ambient": "#FFFFFF", "rezi_energy": 0.55, "sun_energy": 0.42, "sun_shadow": 0.22, "weather": "klar",
 	},
 	"praxis-abend": {
-		"sky_top": "#7f9ec8", "sky_bottom": "#ffd6a8", "sun": "#ffe0a0", "sun_pos": [0.2, 0.3],
-		"far": "#d3b9c4", "mid": "#a58ba0", "near": "#6b5670",
-		"fill": "#4a3f52", "fill_dark": "#352c3d", "cap": "#8d7a8a", "cap_light": "#f1d9c6",
-		"shadow": "#2c2434", "outline": "#211b28", "accent": "#ffb347", "detail": "#e0705a",
-		"fog": "#f3dccb", "plant": "#6fae64", "plant_dark": "#48804a", "lamp": "#ffc97a",
+		"sky_top": "#A1A8B3", "sky_bottom": "#FFCDA8", "sun": "#FFE8D4", "sun_pos": [0.2, 0.3],
+		"far": "#FFE8D4", "mid": "#8E95A2", "near": "#626771",
+		"fill": "#4C5056", "fill_dark": "#303236", "cap": "#787E8A", "cap_light": "#FFE8D4",
+		"shadow": "#202124", "outline": "#111113", "accent": "#FF9F00", "detail": "#FE7C39",
+		"fog": "#FFE8D4", "plant": "#18AE80", "plant_dark": "#067C59", "lamp": "#FFCDA8",
 		"sun_drift": [-0.06, 0.04],
-		"grade_shadows": [0.88, 0.85, 1.0], "grade_mids": [1.0, 0.99, 0.98], "grade_lights": [1.05, 0.98, 0.90],
-		"grade_contrast": 1.05, "grade_saturation": 1.08, "grade_vignette": [0.62, 0.54, 0.68], "grade_vignette_strength": 0.32,
-		"ambient": "#fff4ea", "rezi_energy": 0.7, "sun_energy": 0.5, "sun_shadow": 0.25, "weather": "klar",
+		"grade_shadows": [0.90, 0.86, 1.02], "grade_mids": [1.0, 0.99, 0.98], "grade_lights": [1.05, 0.98, 0.90],
+		"grade_contrast": 1.05, "grade_saturation": 1.04, "grade_vignette": [0.62, 0.54, 0.68], "grade_vignette_strength": 0.32,
+		"ambient": "#FFF5ED", "rezi_energy": 0.7, "sun_energy": 0.5, "sun_shadow": 0.25, "weather": "klar",
 	},
 	"netz-regen": {
-		"sky_top": "#5d6f8a", "sky_bottom": "#b0bccb", "sun": "#dfe8f2", "sun_pos": [0.5, 0.08],
-		"far": "#9daabb", "mid": "#71829a", "near": "#4a5a72",
-		"fill": "#333f52", "fill_dark": "#262f3f", "cap": "#6d8199", "cap_light": "#c5d3df",
-		"shadow": "#1f2735", "outline": "#171d29", "accent": "#4fd3ff", "detail": "#86a0c0",
-		"fog": "#c9d3de", "plant": "#4f8a70", "plant_dark": "#356650", "lamp": "#cfe6ff",
+		"sky_top": "#626771", "sky_bottom": "#B5BCC4", "sun": "#DFE3E6", "sun_pos": [0.5, 0.08],
+		"far": "#A1A8B3", "mid": "#787E8A", "near": "#4C5056",
+		"fill": "#303236", "fill_dark": "#202124", "cap": "#787E8A", "cap_light": "#CBD1D6",
+		"shadow": "#111113", "outline": "#111113", "accent": "#6797FF", "detail": "#A9C8FC",
+		"fog": "#CBD1D6", "plant": "#07966A", "plant_dark": "#086B4F", "lamp": "#DCE7FD",
 		"sun_drift": [0.06, 0.0],
-		"grade_shadows": [0.84, 0.90, 1.03], "grade_mids": [0.97, 1.0, 1.03], "grade_lights": [0.98, 1.0, 1.02],
-		"grade_contrast": 1.03, "grade_saturation": 0.94, "grade_vignette": [0.50, 0.56, 0.68], "grade_vignette_strength": 0.42,
-		"ambient": "#e8edf5", "rezi_energy": 0.9, "sun_energy": 0.15, "sun_shadow": 0.12, "weather": "regen",
+		"grade_shadows": [0.84, 0.90, 1.05], "grade_mids": [0.97, 1.0, 1.04], "grade_lights": [0.98, 1.0, 1.02],
+		"grade_contrast": 1.03, "grade_saturation": 0.96, "grade_vignette": [0.50, 0.56, 0.68], "grade_vignette_strength": 0.42,
+		"ambient": "#EEEFF1", "rezi_energy": 0.9, "sun_energy": 0.15, "sun_shadow": 0.12, "weather": "regen",
 	},
 	"rz-hell": {
-		"sky_top": "#dfe8f0", "sky_bottom": "#f6f8fb", "sun": "#ffffff", "sun_pos": [0.5, 0.0],
-		"far": "#c9d6e1", "mid": "#a8bccb", "near": "#7f97a8",
-		"fill": "#3f4d5c", "fill_dark": "#2f3a47", "cap": "#6e8493", "cap_light": "#e5f2f5",
-		"shadow": "#26303b", "outline": "#1c2530", "accent": "#1fb1c9", "detail": "#5fd0ae",
-		"fog": "#eef3f7", "plant": "#58b39a", "plant_dark": "#3a8a75", "lamp": "#d8f4ff",
+		"sky_top": "#DFE3E6", "sky_bottom": "#F5F7F8", "sun": "#FFFFFF", "sun_pos": [0.5, 0.0],
+		"far": "#CBD1D6", "mid": "#B5BCC4", "near": "#8E95A2",
+		"fill": "#4C5056", "fill_dark": "#303236", "cap": "#787E8A", "cap_light": "#F5F7F8",
+		"shadow": "#202124", "outline": "#111113", "accent": "#356FEC", "detail": "#4FD3A1",
+		"fog": "#EEEFF1", "plant": "#18AE80", "plant_dark": "#067C59", "lamp": "#DCE7FD",
 		"sun_drift": [0.06, 0.0],
-		"grade_shadows": [0.90, 0.94, 1.0], "grade_mids": [1.0, 1.0, 1.0], "grade_lights": [1.0, 1.0, 1.0],
+		"grade_shadows": [0.90, 0.94, 1.02], "grade_mids": [1.0, 1.0, 1.0], "grade_lights": [1.0, 1.0, 1.0],
 		"grade_contrast": 1.03, "grade_saturation": 1.02, "grade_vignette": [0.74, 0.80, 0.88], "grade_vignette_strength": 0.22,
-		"ambient": "#ffffff", "rezi_energy": 0.5, "sun_energy": 0.32, "sun_shadow": 0.16, "weather": "innen",
+		"ambient": "#FFFFFF", "rezi_energy": 0.5, "sun_energy": 0.32, "sun_shadow": 0.16, "weather": "innen",
 	},
 	"archiv-abend": {
-		"sky_top": "#b98a7a", "sky_bottom": "#f2cfa6", "sun": "#ffd9a3", "sun_pos": [0.15, 0.25],
-		"far": "#c9a894", "mid": "#9c7d70", "near": "#5f4a45",
-		"fill": "#4a3b3a", "fill_dark": "#37292a", "cap": "#8b7167", "cap_light": "#f0d6b8",
-		"shadow": "#2b2021", "outline": "#221a1a", "accent": "#ffb86b", "detail": "#d9a066",
-		"fog": "#efd8c1", "plant": "#7fa86a", "plant_dark": "#557a48", "lamp": "#ffcf8c",
+		"sky_top": "#FFAA72", "sky_bottom": "#FFE8D4", "sun": "#FFF4C6", "sun_pos": [0.15, 0.25],
+		"far": "#FFE8D4", "mid": "#8E95A2", "near": "#626771",
+		"fill": "#4C5056", "fill_dark": "#303236", "cap": "#8E95A2", "cap_light": "#FFE8D4",
+		"shadow": "#202124", "outline": "#111113", "accent": "#FFC21B", "detail": "#FF9F00",
+		"fog": "#FFE8D4", "plant": "#18AE80", "plant_dark": "#067C59", "lamp": "#FFD646",
 		"sun_drift": [-0.06, 0.04],
-		"grade_shadows": [0.90, 0.86, 0.97], "grade_mids": [1.0, 0.99, 0.97], "grade_lights": [1.03, 1.0, 0.93],
-		"grade_contrast": 1.05, "grade_saturation": 1.06, "grade_vignette": [0.66, 0.55, 0.50], "grade_vignette_strength": 0.32,
-		"ambient": "#fff2e6", "rezi_energy": 0.75, "sun_energy": 0.45, "sun_shadow": 0.25, "weather": "klar",
+		"grade_shadows": [0.92, 0.86, 0.97], "grade_mids": [1.0, 0.99, 0.97], "grade_lights": [1.03, 1.0, 0.93],
+		"grade_contrast": 1.05, "grade_saturation": 1.04, "grade_vignette": [0.66, 0.55, 0.50], "grade_vignette_strength": 0.32,
+		"ambient": "#FFF5ED", "rezi_energy": 0.75, "sun_energy": 0.45, "sun_shadow": 0.25, "weather": "klar",
 	},
 }
 
@@ -121,7 +130,7 @@ var grade_mids := Color(1.0, 1.0, 1.0)
 var grade_lights := Color(1.03, 1.0, 0.94)
 var grade_contrast := 1.04
 var grade_saturation := 1.06
-var grade_vignette := Color(0.60, 0.66, 0.80)
+var grade_vignette := Color(0.631, 0.659, 0.702)
 var grade_vignette_strength := 0.28
 var motiv := "praxis"
 var zone_name := ""
@@ -202,7 +211,7 @@ func apply_world(name: String) -> void:
 	ground = near
 	ground_top = cap
 	text = WHITE
-	text_dim = Color(0.80, 0.85, 0.94)
+	text_dim = Color("#CBD1D6")   # Grey 300 (Text Secondary)
 
 
 ## HDR-Leuchtfarbe: nur für echte Lichtquellen (Prüfsummen, REZI, Lampen, VAU).

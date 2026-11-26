@@ -38,7 +38,7 @@ func _ready() -> void:
 	root.gui_input.connect(_on_root_input)
 	add_child(root)
 	var dim := ColorRect.new()
-	dim.color = Color(0.01, 0.02, 0.05, 0.64)
+	dim.color = Color(0.067, 0.067, 0.075, 0.64)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(dim)
@@ -56,7 +56,7 @@ func _ready() -> void:
 	_panel.add_child(col)
 
 	var titel := Label.new()
-	titel.text = "PAUSE"
+	titel.text = "Pause"
 	titel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	titel.label_settings = Brand.label_settings(64, Palette.WHITE, Brand.headline())
 	col.add_child(titel)
@@ -95,16 +95,16 @@ func _ready() -> void:
 ## Tastentafel zur erkannten Bedienung: [Taste, was sie tut].
 static func steuerung_zeilen() -> Array:
 	if Kiosk.touch_seen or Kiosk.touch_forced:
-		return [[tr_s("KNÜPPEL"), tr_s("laufen & ducken")], [tr_s("SPRUNG"), tr_s("springen · 2× REZI-Schub")],
-			[tr_s("AKTION"), tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], [tr_s("HÜLLE"), tr_s("Hülle an / aus")],
+		return [[tr_s("Knüppel"), tr_s("laufen & ducken")], [tr_s("Sprung"), tr_s("springen · 2× Rezi-Schub")],
+			[tr_s("Aktion"), tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], [tr_s("Hülle"), tr_s("Hülle an / aus")],
 			["❚❚", tr_s("Pause")]]
 	if Kiosk.has_gamepad():
-		return [[tr_s("JOYSTICK"), tr_s("laufen & ducken")], [tr_s("ROT"), tr_s("springen · 2× REZI-Schub")],
-			[tr_s("BLAU"), tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], [tr_s("HOCH"), tr_s("Hülle an / aus")],
-			["START", tr_s("Pause")]]
-	return [[tr_s("PFEILE / WASD"), tr_s("laufen & ducken")], [tr_s("LEERTASTE"), tr_s("springen · 2× REZI-Schub")],
-		["E", tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], ["SHIFT", tr_s("Hülle an / aus")],
-		["ESC / P", tr_s("Pause")]]
+		return [[tr_s("Joystick"), tr_s("laufen & ducken")], [tr_s("Rot"), tr_s("springen · 2× Rezi-Schub")],
+			[tr_s("Blau"), tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], [tr_s("Hoch"), tr_s("Hülle an / aus")],
+			["Start", tr_s("Pause")]]
+	return [[tr_s("Pfeile / WASD"), tr_s("laufen & ducken")], [tr_s("Leertaste"), tr_s("springen · 2× Rezi-Schub")],
+		["E", tr_s("TI-Aktion an Terminal, Kartenleser und Stempel")], ["Shift", tr_s("Hülle an / aus")],
+		["Esc / P", tr_s("Pause")]]
 
 
 static func tr_s(s: String) -> String:
@@ -131,9 +131,9 @@ func _baue_steuerung() -> VBoxContainer:
 		taste.custom_minimum_size = Vector2(190, 48)
 		taste.add_theme_font_size_override("font_size", 24)
 		taste.add_theme_font_override("font", Brand.sans("medium"))
-		taste.add_theme_color_override("font_color", Color(0.086, 0.137, 0.227))
+		taste.add_theme_color_override("font_color", Color(0.125, 0.129, 0.141))
 		# Tastenkappe: hell, dunkle Unterkante — wie die Kappen im Probelauf
-		var kappe := Brand.panel_style(8, Color(0.875, 0.902, 0.941, 0.95), Color(0.106, 0.141, 0.22, 0.9), 0, 14, 4)
+		var kappe := Brand.panel_style(8, Color(0.875, 0.89, 0.902, 0.95), Color(0.125, 0.129, 0.141, 0.9), 0, 14, 4)
 		kappe.border_width_bottom = 4
 		taste.add_theme_stylebox_override("normal", kappe)
 		grid.add_child(taste)
@@ -169,10 +169,10 @@ func _refresh() -> void:
 			Color(1, 1, 1, 0.07) if an else Color(0, 0, 0, 0), Brand.UI_ACCENT if an else Color(0, 0, 0, 0), 1, 18, 6))
 	_steuerung.visible = zeigt_steuerung
 	if zeigt_steuerung:
-		_hint.text = tr("%s oder ESC: zurück") % Kiosk.label_confirm()
+		_hint.text = tr("%s oder Esc: zurück") % Kiosk.label_confirm()
 	else:
 		var nav := tr("Knüppel") if (Kiosk.touch_seen or Kiosk.touch_forced) else (tr("Joystick") if Kiosk.has_gamepad() else tr("Pfeiltasten"))
-		_hint.text = tr("%s: wählen · %s: bestätigen · ESC: weiter") % [nav, Kiosk.label_confirm()]
+		_hint.text = tr("%s: wählen · %s: bestätigen · Esc: weiter") % [nav, Kiosk.label_confirm()]
 
 
 func _process(delta: float) -> void:

@@ -116,10 +116,10 @@ func _build_input_map() -> void:
 	var gp: Dictionary = Game.bindings.get("gamepad", {})
 	var deadzone := float(gp.get("axisDeadzone", 0.4))
 	var key_map := {
-		"move_left": kb.get("left", ["LEFT", "A"]), "move_right": kb.get("right", ["RIGHT", "D"]),
-		"move_up": kb.get("up", ["UP", "W"]), "move_down": kb.get("down", ["DOWN", "S"]),
-		"jump": kb.get("jump", ["SPACE"]), "action": kb.get("action", ["E", "ENTER"]),
-		"toggle": kb.get("toggle", ["SHIFT", "Q"]),
+		"move_left": kb.get("left", ["Left", "A"]), "move_right": kb.get("right", ["Right", "D"]),
+		"move_up": kb.get("up", ["Up", "W"]), "move_down": kb.get("down", ["Down", "S"]),
+		"jump": kb.get("jump", ["Space"]), "action": kb.get("action", ["E", "Enter"]),
+		"toggle": kb.get("toggle", ["Shift", "Q"]),
 	}
 	for action in ACTIONS:
 		if InputMap.has_action(action):
@@ -335,8 +335,8 @@ func suggested_input_mode() -> String:
 ## „Weiter"-Knopf je nach Bedienung: Tippen, roter Knopf oder Leertaste.
 func label_confirm() -> String:
 	if touch_seen or touch_forced:
-		return tr("TIPPEN")
-	return tr("ROT") if has_gamepad() else tr("LEERTASTE")
+		return tr("Tippen")
+	return tr("Rot") if has_gamepad() else tr("Leertaste")
 
 
 func label_press_start() -> String:
@@ -345,7 +345,7 @@ func label_press_start() -> String:
 		return tr("Tippe zum Start!")
 	if has_gamepad():
 		return Game.t(cfg.get("pressStart", {"de": "Drück den roten Knopf!"}))
-	return Game.t(cfg.get("pressStartKeyboard", {"de": "Drück LEERTASTE!"}))
+	return Game.t(cfg.get("pressStartKeyboard", {"de": "Drück Leertaste!"}))
 
 
 func has_gamepad() -> bool:
@@ -355,27 +355,27 @@ func has_gamepad() -> bool:
 ## Beschriftung der Knöpfe je nach erkannter Hardware.
 func label_jump() -> String:
 	if touch_seen or touch_forced:
-		return tr("SPRUNG")
-	return tr("ROT") if has_gamepad() else tr("LEERTASTE")
+		return tr("Sprung")
+	return tr("Rot") if has_gamepad() else tr("Leertaste")
 
 
 func label_action() -> String:
 	if touch_seen or touch_forced:
-		return tr("AKTION")
-	return tr("BLAU") if has_gamepad() else "E"
+		return tr("Aktion")
+	return tr("Blau") if has_gamepad() else "E"
 
 
 ## Pause: ESC (Tastatur), START (Arcade/Gamepad), Pause-Knopf oben (Touch).
 func label_pause() -> String:
 	if touch_seen or touch_forced:
 		return "❚❚"
-	return "START" if has_gamepad() else "ESC"
+	return "Start" if has_gamepad() else "Esc"
 
 
 func label_toggle() -> String:
 	if touch_seen or touch_forced:
-		return tr("HÜLLE")
-	return tr("Joystick HOCH") if has_gamepad() else "SHIFT"
+		return tr("Hülle")
+	return tr("Joystick hoch") if has_gamepad() else "Shift"
 
 
 ## Laufende Screenshots im Hintergrund (Kennungen im WorkerThreadPool).

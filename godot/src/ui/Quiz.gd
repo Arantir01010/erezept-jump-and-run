@@ -141,7 +141,7 @@ func _zeige_frage() -> void:
 	var f: Dictionary = fragen[index]
 	_antwort = ""
 	_seit = 0.0
-	_kopf.text = tr("WISSEN · Frage %d / %d") % [index + 1, fragen.size()]
+	_kopf.text = tr("Wissen · Frage %d / %d") % [index + 1, fragen.size()]
 	_frage.text = tr(str(f["frage"]))
 	for seite in ["links", "rechts"]:
 		(_texte[seite] as Label).text = tr(str(f[seite]))

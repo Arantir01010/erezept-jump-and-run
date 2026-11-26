@@ -16,7 +16,7 @@ uniform float depth_px = 8.0;
 // Gestauchter Spiegel: der schmale Streifen zeigt die mirror_scale-fache Höhe
 // darüber (Wet-Floor-Trick) — so erscheint Paul, nicht nur seine Schuhsohlen.
 uniform float mirror_scale = 5.0;
-uniform vec4 tint : source_color = vec4(0.75, 0.82, 0.92, 1.0);
+uniform vec4 tint : source_color = vec4(0.796, 0.820, 0.839, 1.0);
 
 varying vec2 v_uv;
 varying vec4 v_color;

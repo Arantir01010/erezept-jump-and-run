@@ -756,7 +756,7 @@ def lvl_01():
     # Ki — Laufen und Springen
     L.sign(5, "Willkommen im Daten-Check! Lauf nach rechts — Joystick oder Pfeiltasten.", "Welcome to the data check! Head right — joystick or arrow keys.")
     L.bits((8, 19), (10, 19))
-    L.sign(12, "Springen: roter Knopf oder LEERTASTE. Hol dir die leuchtenden Daten-Kacheln!", "Jump: red button or SPACE. Grab the glowing data tiles!", tw=2)
+    L.sign(12, "Springen: roter Knopf oder Leertaste. Hol dir die leuchtenden Daten-Kacheln!", "Jump: red button or Space. Grab the glowing data tiles!", tw=2)
     L.step(16, 19); L.bits((14, 18), (16, 17))
     L.fill(21, 22, 18, 19, "A"); L.bits((21, 16), (25, 18))
     L.cp(28)
@@ -765,7 +765,7 @@ def lvl_01():
     L.plat(39, 42, 16); L.bits((40, 14), (41, 14))
     L.pit(44, 46)
     L.plat(44, 47, 14); L.bits((45, 12), (46, 12)); L.bonus(46, 10)
-    L.sign(45, "In der Luft nochmal springen: REZI trägt dich! Die goldene Kachel oben ist ein Bonus.", "Jump again in the air: REZI carries you! The golden tile up there is a bonus.", ty=12, th=8)
+    L.sign(45, "In der Luft nochmal springen: Rezi trägt dich! Die goldene Kachel oben ist ein Bonus.", "Jump again in the air: Rezi carries you! The golden tile up there is a bonus.", ty=12, th=8)
     L.plat(51, 54, 17); L.bits((52, 15), (53, 15))
     L.spikes(55, 55); L.bits((57, 19), (59, 18)); L.cp(60)
     # Pendel-Plattform über dem Graben: Fahrt oder gezielter Sprung
@@ -918,7 +918,7 @@ def lvl_04():
     L.player(3)
     # Ki — Hülle wechseln, der erste Lauscher
     L.bits((8, 19), (10, 19)); L.cp(14)
-    L.sign(5, "Joystick HOCH (oder Shift) wechselt deine Hülle. Probier es aus!", "Joystick UP (or Shift) switches your shell. Try it!")
+    L.sign(5, "Joystick hoch (oder Shift) wechselt deine Hülle. Probier es aus!", "Joystick up (or Shift) switches your shell. Try it!")
     L.sign(18, "Achtung, Lauscher! Er sieht nur unverschlüsselte Daten.", "Careful, an eavesdropper! He only sees unencrypted data.")
     L.lauscher(26, patrol=44, speed=26, reach=96, spread=20)
     L.plat(30, 33, 17); L.bits((31, 15), (32, 15))
@@ -995,7 +995,7 @@ def lvl_05():
     L.sign(56, "Noch ein Terminal — oben. Probier deine Karte ruhig aus.", "Another terminal — up there. Go ahead and try your card.")
     L.plat(58, 62, 17)
     L.obj("kartenleser", 59, 13.9, tw=3, th=3, karten=["smcb"], hint={"de": "Dieses Terminal will den Praxisausweis sehen.", "en": "This terminal wants to see the practice card."},
-          **{"falsche-karteHint": {"de": "ZUGRIFF VERWEIGERT — die eGK weist DICH aus, nicht die Praxis. Hier braucht es die SMC-B.", "en": "ACCESS DENIED — the eGK identifies YOU, not the practice. This needs the SMC-B."}})
+          **{"falsche-karteHint": {"de": "Zugriff verweigert — die eGK weist dich aus, nicht die Praxis. Hier braucht es die SMC-B.", "en": "Access denied — the eGK identifies you, not the practice. This needs the SMC-B."}})
     L.bits((63, 15), (65, 16)); L.bonus(61, 12)
     L.spring(68)
     L.plat(70, 73, 12); L.bits((71, 10), (72, 10)); L.bonus(75, 9)
@@ -1055,7 +1055,7 @@ def lvl_13():
     L.lauscher(60, patrol=30, speed=30, reach=92, spread=18)
     L.cp(64)
     # Ten — das echte Terminal, Pendel-Grube, Bonus-Schacht, Lauscher am Ausstieg
-    L.obj("kartenleser", 68, 16.9, tw=3, th=3, karten=["egk"], gate="tor-apotheke", gateHint={"de": "Die Apotheke braucht deine Freigabe — eGK am ECHTEN Terminal stecken.", "en": "The pharmacy needs your release — insert the eGK at the REAL terminal."})
+    L.obj("kartenleser", 68, 16.9, tw=3, th=3, karten=["egk"], gate="tor-apotheke", gateHint={"de": "Die Apotheke braucht deine Freigabe — eGK am echten Terminal stecken.", "en": "The pharmacy needs your release — insert the eGK at the real terminal."})
     L.obj("gate", 76, 14, th=6, name="tor-apotheke")
     L.cp(80)
     L.pit(83, 86)
@@ -1139,7 +1139,7 @@ def lvl_14():
     L.lauscher(153, patrol=-22, speed=30, reach=92, spread=18)
     L.bits((155, 19), (158, 18), (161, 19))
     L.cp(159)
-    L.sign(166, "Drinnen schnell UND unsichtbar. Das kann sonst nichts.", "Inside fast AND invisible. Nothing else can do that.")
+    L.sign(166, "Drinnen schnell und unsichtbar. Das kann sonst nichts.", "Inside fast and invisible. Nothing else can do that.")
     L.door(174)
     j = base_json(L.id)
     return L, j, 14
@@ -1203,7 +1203,7 @@ def lvl_19():
     """Berechtigungen (Archiv): drei Türen, nur DEINE Karte öffnet — Schacht, Podeste, Wachen."""
     L = Level("19-berechtigungen", 176, huelle=True)
     L.player(3)
-    L.sign(5, "Drei Türen. Alle drei öffnen nur mit DEINER Karte — keine Praxiskarte hilft hier.", "Three doors. All three open only with YOUR card — no practice card helps here.")
+    L.sign(5, "Drei Türen. Alle drei öffnen nur mit deiner Karte — keine Praxiskarte hilft hier.", "Three doors. All three open only with your card — no practice card helps here.")
     L.bits((7, 19), (9, 18))
     L.obj("karte", 12, 18.2, karte="egk")
     L.cp(20)

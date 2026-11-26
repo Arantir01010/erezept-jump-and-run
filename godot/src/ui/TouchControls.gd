@@ -32,9 +32,9 @@ func _ready() -> void:
 	layer = 30
 	process_mode = Node.PROCESS_MODE_ALWAYS   # Testeinspielung läuft auch in der Pause
 	buttons = [
-		{"action": "jump", "label": "SPRUNG", "pos": Vector2(1700, 860), "r": 96.0, "color": Color(0.98, 0.36, 0.32), "finger": -1},
-		{"action": "action", "label": "AKTION", "pos": Vector2(1470, 920), "r": 66.0, "color": Color(0.36, 0.64, 0.98), "finger": -1},
-		{"action": "toggle", "label": "HÜLLE", "pos": Vector2(1740, 630), "r": 66.0, "color": Pen.K, "finger": -1},
+		{"action": "jump", "label": "Sprung", "pos": Vector2(1700, 860), "r": 96.0, "color": Color(0.961, 0.435, 0.439), "finger": -1},
+		{"action": "action", "label": "Aktion", "pos": Vector2(1470, 920), "r": 66.0, "color": Color(0.404, 0.592, 1.0), "finger": -1},
+		{"action": "toggle", "label": "Hülle", "pos": Vector2(1740, 630), "r": 66.0, "color": Pen.K, "finger": -1},
 	]
 	enabled = Kiosk.touch_forced
 	_overlay = _Overlay.new()
@@ -220,10 +220,10 @@ func _process(delta: float) -> void:
 
 class _Overlay extends Node2D:
 	var tc: TouchControls
-	const GLAS := Color(0.016, 0.035, 0.06, 0.42)
+	const GLAS := Color(0.067, 0.067, 0.075, 0.42)
 	const KANTE := Color(1, 1, 1, 0.14)
-	const GRAU := Color(0.62, 0.70, 0.78)
-	const AN := Color(0.5, 0.91, 1.0)
+	const GRAU := Color(0.631, 0.659, 0.702)
+	const AN := Color(0.663, 0.784, 0.988)
 
 	func _draw() -> void:
 		var font := Brand.sans("bold")
@@ -250,10 +250,10 @@ class _Overlay extends Node2D:
 		var kn := p + tc.knob
 		var kr := r * 0.44
 		var aktiv := tc.held.values().has(true)
-		draw_circle(kn, kr, Color(0.5, 0.91, 1.0, 0.22) if aktiv else Color(0.62, 0.70, 0.78, 0.14 * a))
-		draw_arc(kn, kr, 0, TAU, 48, Color(0.5, 0.91, 1.0, 0.85) if aktiv else Color(0.62, 0.70, 0.78, 0.45 * a), 2.0, true)
+		draw_circle(kn, kr, Color(0.663, 0.784, 0.988, 0.22) if aktiv else Color(0.631, 0.659, 0.702, 0.14 * a))
+		draw_arc(kn, kr, 0, TAU, 48, Color(0.663, 0.784, 0.988, 0.85) if aktiv else Color(0.631, 0.659, 0.702, 0.45 * a), 2.0, true)
 		if aktiv:
-			draw_arc(kn, kr + 5, 0, TAU, 48, Color(0.3, 0.89, 1.0, 0.25), 6.0, true)
+			draw_arc(kn, kr + 5, 0, TAU, 48, Color(0.404, 0.592, 1.0, 0.25), 6.0, true)
 		# ---- Knöpfe ----
 		for b in tc.buttons:
 			var bp: Vector2 = b["pos"]

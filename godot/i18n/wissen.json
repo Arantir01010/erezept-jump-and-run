@@ -1,8 +1,8 @@
 {
-  "WISSEN · Frage %d / %d": {
-    "en": "KNOWLEDGE · Question %d / %d",
-    "fr": "SAVOIR · Question %d / %d",
-    "es": "SABER · Pregunta %d / %d",
+  "Wissen · Frage %d / %d": {
+    "en": "Knowledge · Question %d / %d",
+    "fr": "Savoir · Question %d / %d",
+    "es": "Saber · Pregunta %d / %d",
     "zh": "知识 · 问题 %d / %d",
     "hi": "ज्ञान · प्रश्न %d / %d"
   },

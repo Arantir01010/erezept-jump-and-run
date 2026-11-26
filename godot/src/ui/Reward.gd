@@ -91,7 +91,7 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	box.position = Vector2(1400, 240)
 	var head := Label.new()
-	head.text = "TAGES-BESTENLISTE"
+	head.text = "Tages-Bestenliste"
 	head.add_theme_font_size_override("font_size", 22)
 	head.add_theme_font_override("font", Brand.spaced(Brand.sans("medium"), 3))
 	head.add_theme_color_override("font_color", Brand.UI_HIGHLIGHT)
@@ -178,7 +178,7 @@ func _label(text: String, size: int, pos: Vector2, color: Color, outline := fals
 	ls.font_color = color
 	if outline:
 		ls.outline_size = 10
-		ls.outline_color = Color(0.02, 0.04, 0.08, 0.9)
+		ls.outline_color = Color(0.067, 0.067, 0.075, 0.9)
 	l.label_settings = ls
 	add_child(l)
 	return l

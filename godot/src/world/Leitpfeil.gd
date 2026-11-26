@@ -40,7 +40,7 @@ func _draw() -> void:
 	var atmen := 0.85 + 0.15 * sin(_t * TAU * 0.8)
 	var c := Palette.COOL
 	var schaft := PackedVector2Array([Vector2(-26, -7), Vector2(10, -7), Vector2(10, -18), Vector2(38, 0), Vector2(10, 18), Vector2(10, 7), Vector2(-26, 7)])
-	draw_colored_polygon(schaft, Color(0.02, 0.04, 0.08, 0.55 * atmen))
+	draw_colored_polygon(schaft, Color(0.067, 0.067, 0.075, 0.55 * atmen))
 	var innen := PackedVector2Array()
 	for p in schaft:
 		innen.append(p * 0.8 + Vector2(2, 0))

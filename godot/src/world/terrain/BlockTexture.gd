@@ -57,7 +57,7 @@ static func _edge(n_edge: Vector3, col: Color, alpha: float, side: int, wet: boo
 	var t := CanvasTexture.new()
 	t.diffuse_texture = ImageTexture.create_from_image(diff)
 	t.normal_texture = ImageTexture.create_from_image(norm)
-	t.specular_color = Color(0.95, 0.95, 1.0) if wet else Color(0.7, 0.7, 0.7)
+	t.specular_color = Color(0.937, 0.965, 1.0) if wet else Color(0.71, 0.737, 0.769)
 	t.specular_shininess = 0.7 if wet else 0.35
 	return t
 
@@ -182,16 +182,16 @@ static func _make(pal: Palette) -> CanvasTexture:
 	tex.normal_texture = ImageTexture.create_from_image(norm)
 	match kind:
 		"metall":
-			tex.specular_color = Color(0.9, 0.95, 1.0)
+			tex.specular_color = Color(0.937, 0.965, 1.0)
 			tex.specular_shininess = 0.6
 		"rack":
-			tex.specular_color = Color(0.75, 0.8, 0.85)
+			tex.specular_color = Color(0.796, 0.82, 0.839)
 			tex.specular_shininess = 0.45
 		"stein":
-			tex.specular_color = Color(0.5, 0.45, 0.4)
+			tex.specular_color = Color(0.471, 0.494, 0.541)
 			tex.specular_shininess = 0.15
 		_:
-			tex.specular_color = Color(0.6, 0.6, 0.6)
+			tex.specular_color = Color(0.557, 0.584, 0.635)
 			tex.specular_shininess = 0.2
 	return tex
 

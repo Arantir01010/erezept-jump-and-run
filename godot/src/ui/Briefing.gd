@@ -53,10 +53,10 @@ func _init(idx := 0) -> void:
 	sperre = 6.0
 	weiter_text = tr("%s: Los geht's!") % Kiosk.label_confirm()
 	dots = []
-	titel = id.to_upper()
+	titel = id
 	if id != "":
 		var ld := LevelData.load_level(id)
-		titel = ld.name_text().to_upper()
+		titel = ld.name_text()
 		bausteine = BriefingDaten.inventar(ld)
 		# Zahl und Name aus level.json — früher stand „ab 8 Prüfsummen" fest im Text,
 		# Station 1 braucht aber 13 Daten-Kacheln (Team-Feedback 9/2026)
@@ -64,8 +64,8 @@ func _init(idx := 0) -> void:
 
 
 func _build() -> void:
-	var stroke := Pen.hex(0x0a1730)
-	label(W / 2, 22, tr("STATION %d / %d") % [index + 1, Game.playlist.size()], 5.5,
+	var stroke := Pen.hex(0x04163a)
+	label(W / 2, 22, tr("Station %d / %d") % [index + 1, Game.playlist.size()], 5.5,
 		{"color": Brand.UI_EYEBROW, "spacing": 1.6, "stroke": stroke, "stroke_w": 1.0})
 	header(titel, str(daten.get("untertitel", "")))
 	story_cycle = text_zyklus
@@ -85,12 +85,12 @@ func _build() -> void:
 			{"color": Pen.hex(int(arr[4])), "spacing": 0.4, "stroke": stroke, "stroke_w": 0.9, "alpha": 0.0})
 		rufe.append([l, float(arr[5]), float(arr[6])])
 	# Tafel: Handgriffe und Bausteine dieses Levels
-	label(20, 276, "DAS TUST DU", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
+	label(20, 276, "Das tust du", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
 	label(LEISTE_X, 276, tust_text(), 7.2,
-		{"color": Pen.hex(0xeef2f8), "bold": false, "origin": Vector2(0, 0.5)})
-	label(20, 306, "BAUSTEINE", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
+		{"color": Pen.hex(0xeeeff1), "bold": false, "origin": Vector2(0, 0.5)})
+	label(20, 306, "Bausteine", 5, {"color": Brand.UI_EYEBROW, "spacing": 1.0, "origin": Vector2(0, 0.5)})
 	for i in bausteine.size():
-		baustein_labels.append(label(_leiste_x(i), 318, BriefingDaten.name_of(str(bausteine[i])), 4.4, {"color": Pen.hex(0xcfd6e6), "bold": false}))
+		baustein_labels.append(label(_leiste_x(i), 318, BriefingDaten.name_of(str(bausteine[i])), 4.4, {"color": Pen.hex(0xcbd1d6), "bold": false}))
 
 
 ## „DAS TUST DU" mit Knopfnamen und dem Sammelziel der Station.
@@ -131,7 +131,7 @@ func _tick(_delta: float) -> void:
 		var hi := _baustein_aktiv()
 		for i in baustein_labels.size():
 			var l: Label = baustein_labels[i]
-			l.modulate = Color(1, 1, 1, 1) if i == hi else Color(0.82, 0.86, 0.92, 0.8)
+			l.modulate = Color(1, 1, 1, 1) if i == hi else Color(0.875, 0.89, 0.902, 0.8)
 	var u := fmod(tz, szene_zyklus)
 	for r in rufe:
 		var arr: Array = r
@@ -173,7 +173,7 @@ func _draw_glow(c: CanvasItem) -> void:
 	_szene_an(c)
 	match key:
 		"01":
-			Pen.glow(c, 520, 236, Pen.hex(0xffd9a0), 22, 0.10)
+			Pen.glow(c, 520, 236, Pen.hex(0xffcda8), 22, 0.10)
 		"02":
 			Pen.glow(c, 440, 220, Pen.GOLD_COL, 22, 0.10)
 		"03":
@@ -183,10 +183,10 @@ func _draw_glow(c: CanvasItem) -> void:
 			Pen.glow(c, 466, 232, Pen.VAU_COL, 30, 0.12)
 			Pen.glow(c, 355, 242, Pen.GOLD_COL, 18, 0.08)
 		"05":
-			Pen.glow(c, 150, 236, Pen.hex(0xffd9a0), 12, 0.08)
-			Pen.glow(c, 330, 236, Pen.hex(0xffd9a0), 12, 0.08)
+			Pen.glow(c, 150, 236, Pen.hex(0xffcda8), 12, 0.08)
+			Pen.glow(c, 330, 236, Pen.hex(0xffcda8), 12, 0.08)
 		"13":
-			Pen.glow(c, 390, 230, Pen.hex(0xffd9a0), 22, 0.10)
+			Pen.glow(c, 390, 230, Pen.hex(0xffcda8), 22, 0.10)
 			Pen.glow(c, 480, 228, K, 22, 0.08)
 		"14":
 			Pen.glow(c, 360, 222, Pen.VAU_COL, 46, 0.12)
@@ -194,7 +194,7 @@ func _draw_glow(c: CanvasItem) -> void:
 			Pen.glow(c, 320, 224, Pen.VAU_COL, 60, 0.11)
 		"19":
 			for gx in [200.0, 330.0, 460.0]:
-				Pen.glow(c, gx, 232, Pen.hex(0xffd9a0), 14, 0.07)
+				Pen.glow(c, gx, 232, Pen.hex(0xffcda8), 14, 0.07)
 		"20":
 			Pen.glow(c, 430, 226, Pen.GOLD_COL, 30, 0.10)
 			Pen.glow(c, 225, 234, Pen.VAU_COL, 22, 0.10)
@@ -238,14 +238,14 @@ func _route(c: CanvasItem) -> void:
 		var x := x0 + i * step
 		if i < index:
 			Pen.circle(c, x, y, 2.3, Brand.UI_HIGHLIGHT)
-			Pen.polyline(c, PackedVector2Array([Vector2(x - 1.1, y), Vector2(x - 0.2, y + 0.9), Vector2(x + 1.2, y - 1.0)]), Pen.hex(0x0a1730, 0.9), 0.5)
+			Pen.polyline(c, PackedVector2Array([Vector2(x - 1.1, y), Vector2(x - 0.2, y + 0.9), Vector2(x + 1.2, y - 1.0)]), Pen.hex(0x04163a, 0.9), 0.5)
 		elif i == index:
 			var puls := 0.5 + 0.5 * sin(t * 3.0)
 			Pen.circle(c, x, y, 4.4 + puls * 1.2, Pen.alpha(Brand.UI_ACCENT, 0.18))
 			Pen.circle(c, x, y, 3.0, Brand.UI_ACCENT)
-			Pen.circle(c, x, y, 1.2, Pen.hex(0x0a1730, 0.9))
+			Pen.circle(c, x, y, 1.2, Pen.hex(0x04163a, 0.9))
 		else:
-			Pen.circle(c, x, y, 2.0, Pen.hex(0x0e1a2c, 0.95))
+			Pen.circle(c, x, y, 2.0, Pen.hex(0x04163a, 0.95))
 			Pen.scircle(c, x, y, 2.0, Color(1, 1, 1, 0.35), 0.6)
 
 
@@ -297,7 +297,7 @@ func _block(c: CanvasItem, x: float, y: float, w: float, h: float) -> void:
 
 ## Tafel unter der Bühne: Handgriffe und Bausteine.
 func _panel(c: CanvasItem) -> void:
-	Pen.rrect(c, 12, PANEL_Y, 616, PANEL_H, 4, Pen.hex(0x060d16, 0.82))
+	Pen.rrect(c, 12, PANEL_Y, 616, PANEL_H, 4, Pen.hex(0x111113, 0.82))
 	Pen.srrect(c, 12, PANEL_Y, 616, PANEL_H, 4, Color(1, 1, 1, 0.16), 0.7)
 	Pen.rect(c, 18, PANEL_Y + 25, 604, 0.6, Color(1, 1, 1, 0.14))
 
@@ -306,15 +306,15 @@ func _panel(c: CanvasItem) -> void:
 func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 	var K := Pen.K
 	var detail: Color = theme["detail"]
-	var metall := Pen.hex(0x39445e)
+	var metall := Pen.hex(0x4c5056)
 	match typ:
 		"collectible":
 			Pen.circle(c, x, y, 5.5, Pen.alpha(K, 0.15))
-			Pen.circle(c, x, y, 3.4, Pen.hex(0x1f2a3c))
+			Pen.circle(c, x, y, 3.4, Pen.hex(0x303236))
 			Pen.circle(c, x, y, 2.6, K)
 			Pen.circle(c, x - 0.9, y - 0.9, 0.8, Color(1, 1, 1, 0.9))
 		"bonus":
-			Pen.circle(c, x, y, 3.4, Pen.hex(0x1f2a3c))
+			Pen.circle(c, x, y, 3.4, Pen.hex(0x303236))
 			Pen.circle(c, x, y, 2.6, Pen.GOLD_COL)
 			Pen.circle(c, x - 0.9, y - 0.9, 0.8, Color(1, 1, 1, 0.9))
 			var pts := PackedVector2Array()
@@ -325,14 +325,14 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 			Pen.rect(c, x - 3, y - 7, 1.2, 14, metall)
 			Pen.tri(c, x - 1.8, y - 7, x + 5, y - 4.5, x - 1.8, y - 2, Pen.OK_COL)
 		"door-exit":
-			Pen.rrect(c, x - 4, y - 7, 8, 14, 1.5, Pen.hex(0x1b2438))
+			Pen.rrect(c, x - 4, y - 7, 8, 14, 1.5, Pen.hex(0x202124))
 			Pen.srrect(c, x - 4, y - 7, 8, 14, 1.5, Pen.GOLD_COL, 0.7)
 			Pen.rect(c, x - 2.4, y - 5.4, 4.8, 11, Pen.alpha(Pen.GOLD_COL, 0.3))
 		"spring":
 			Pen.rect(c, x - 5, y + 4, 10, 2, metall)
-			Pen.line(c, x - 3.5, y + 3, x + 3.5, y + 1.5, Pen.hex(0x6f7d99), 0.9)
-			Pen.line(c, x - 3.5, y, x + 3.5, y - 1.5, Pen.hex(0x6f7d99), 0.9)
-			Pen.rect(c, x - 5.5, y - 5, 11, 2.4, Pen.hex(0xff9d3b))
+			Pen.line(c, x - 3.5, y + 3, x + 3.5, y + 1.5, Pen.hex(0x787e8a), 0.9)
+			Pen.line(c, x - 3.5, y, x + 3.5, y - 1.5, Pen.hex(0x787e8a), 0.9)
+			Pen.rect(c, x - 5.5, y - 5, 11, 2.4, Pen.hex(0xff9f00))
 		"spike":
 			Pen.rect(c, x - 6, y + 3, 12, 2, metall)
 			for i in 3:
@@ -341,11 +341,11 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 		"gate":
 			Pen.rect(c, x - 5, y - 7, 1.6, 14, metall)
 			Pen.rect(c, x + 3.4, y - 7, 1.6, 14, metall)
-			Pen.rect(c, x - 2.2, y - 7, 4.4, 14, Pen.hex(0x1b2438))
+			Pen.rect(c, x - 2.2, y - 7, 4.4, 14, Pen.hex(0x202124))
 			Pen.circle(c, x, y - 4, 1.5, Pen.DENY_COL)
 		"timing-gate":
 			Pen.rrect(c, x - 6, y + 1, 12, 5, 1, metall)
-			var cols := [Pen.OK_COL, Pen.hex(0xffd75e), Pen.hex(0x4a5468)]
+			var cols := [Pen.OK_COL, Pen.hex(0xffd646), Pen.hex(0x4c5056)]
 			for i in 3:
 				var lx := x - 4 + i * 4
 				Pen.circle(c, lx, y - 2.5, 2.6 if i == 1 else 1.7, cols[i])
@@ -354,7 +354,7 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 			Pen.rrect(c, x - 6, y - 1.5, 12, 5, 1.5, Pen.GOLD_COL)
 			Pen.rect(c, x - 5, y + 5, 10, 1.6, metall)
 		"deny-enemy":
-			var grau := Pen.hex(0x8a80a0)
+			var grau := Pen.hex(0x787e8a)
 			Pen.rect(c, x - 7, y - 1.2, 8, 2.4, grau)
 			Pen.circle(c, x + 1, y, 2.2, grau)
 			Pen.line(c, x + 1, y, x + 6, y - 3.5, grau, 1.4)
@@ -381,12 +381,12 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 			Pen.sellipse(c, x, y, 16, 11, Pen.alpha(K, 0.8), 0.7)
 		"lauscher":
 			Pen.tri(c, x - 2, y, x + 8, y - 4.5, x + 8, y + 4.5, Pen.alpha(Pen.WARM, 0.25))
-			Pen.circle(c, x - 2, y, 4.2, Pen.hex(0x1f1724))
-			Pen.ellipse(c, x - 2, y, 6.4, 4, Pen.hex(0xf7f2eb))
+			Pen.circle(c, x - 2, y, 4.2, Pen.hex(0x202124))
+			Pen.ellipse(c, x - 2, y, 6.4, 4, Pen.hex(0xfff5ed))
 			Pen.circle(c, x - 1, y, 1.5, Pen.WARM)
-			Pen.circle(c, x - 1, y, 0.7, Pen.hex(0x0d0a0f))
+			Pen.circle(c, x - 1, y, 0.7, Pen.hex(0x111113))
 		"andock-plattform":
-			Pen.rrect(c, x - 7, y + 1, 14, 3.4, 1, Pen.hex(0x5a4a2c))
+			Pen.rrect(c, x - 7, y + 1, 14, 3.4, 1, Pen.hex(0x623e00))
 			Pen.rect(c, x - 6, y + 0.4, 12, 1, Pen.GOLD_COL)
 			Pen.scircle(c, x, y - 4, 2.6, Pen.alpha(Pen.GOLD_COL, 0.9), 0.8)
 		"vau-feld":
@@ -398,45 +398,45 @@ func _icon(c: CanvasItem, typ: String, x: float, y: float) -> void:
 			Pen.polyline(c, hp, Pen.alpha(Pen.VAU_COL, 0.8), 0.7)
 		"kontext-anker":
 			Pen.circle(c, x, y - 3, 2.8, Pen.VAU_COL)
-			Pen.circle(c, x, y - 3, 1.1, Pen.hex(0x0a1220))
+			Pen.circle(c, x, y - 3, 1.1, Pen.hex(0x111113))
 			Pen.rect(c, x - 1, y - 1, 2, 7, Pen.VAU_COL)
 			Pen.rect(c, x + 1, y + 3, 2.4, 1.6, Pen.VAU_COL)
 		"karte":
 			Pen.rrect(c, x - 7, y - 4.5, 14, 9, 1.4, KartenFx.koerper("egk"))
-			Pen.rrect(c, x - 4.8, y - 2.2, 3.2, 4, 0.7, Pen.hex(0xffd75e))
+			Pen.rrect(c, x - 4.8, y - 2.2, 3.2, 4, 0.7, Pen.hex(0xffd646))
 			Pen.rect(c, x - 7, y - 4.5, 14, 0.9, Color(1, 1, 1, 0.2))
 		"kartenleser":
-			Pen.rrect(c, x - 5, y - 7, 10, 14, 1.2, Pen.hex(0x2f3a52))
+			Pen.rrect(c, x - 5, y - 7, 10, 14, 1.2, Pen.hex(0x303236))
 			Pen.srrect(c, x - 5, y - 7, 10, 14, 1.2, Pen.alpha(detail, 0.8), 0.6)
-			Pen.rect(c, x - 3.4, y - 5.4, 6.8, 3.6, Pen.hex(0x0a1220))
-			Pen.rect(c, x - 3.4, y + 0.4, 6.8, 1.2, Pen.hex(0x0a1220))
+			Pen.rect(c, x - 3.4, y - 5.4, 6.8, 3.6, Pen.hex(0x111113))
+			Pen.rect(c, x - 3.4, y + 0.4, 6.8, 1.2, Pen.hex(0x111113))
 			Pen.circle(c, x, y + 4.4, 1.2, Pen.OK_COL)
 		"letzte-tuer":
-			Pen.rrect(c, x - 4.5, y - 7, 9, 14, 1.5, Pen.hex(0x2a2a3a))
+			Pen.rrect(c, x - 4.5, y - 7, 9, 14, 1.5, Pen.hex(0x303236))
 			Pen.srrect(c, x - 4.5, y - 7, 9, 14, 1.5, Pen.GOLD_COL, 0.8)
 			Pen.circle(c, x + 2, y + 0.5, 1.1, Pen.GOLD_COL)
 		"moving-platform":
 			Pen.rrect(c, x - 6, y - 1, 12, 3.4, 1, metall)
-			Pen.rect(c, x - 5, y - 1.6, 10, 1, Pen.hex(0x9fb0cc))
-			Pen.tri(c, x - 7, y + 5, x - 4, y + 3, x - 4, y + 7, Pen.hex(0x9fb0cc))
-			Pen.tri(c, x + 7, y + 5, x + 4, y + 3, x + 4, y + 7, Pen.hex(0x9fb0cc))
+			Pen.rect(c, x - 5, y - 1.6, 10, 1, Pen.hex(0xa1a8b3))
+			Pen.tri(c, x - 7, y + 5, x - 4, y + 3, x - 4, y + 7, Pen.hex(0xa1a8b3))
+			Pen.tri(c, x + 7, y + 5, x + 4, y + 3, x + 4, y + 7, Pen.hex(0xa1a8b3))
 		"hazard":
 			Pen.rect(c, x - 6, y - 5, 12, 10, Pen.alpha(Pen.DENY_COL, 0.25))
 			Pen.srect(c, x - 6, y - 5, 12, 10, Pen.DENY_COL, 0.8)
 			for i in 3:
 				Pen.line(c, x - 6 + i * 4, y + 5, x - 2 + i * 4, y - 5, Pen.alpha(Pen.DENY_COL, 0.6), 0.6)
 		_:
-			Pen.circle(c, x, y, 4, Pen.hex(0x39445e))
+			Pen.circle(c, x, y, 4, Pen.hex(0x4c5056))
 
 
 # ------------------------------------------------------------ Bau-Vokabular
 
 func _terminal(c: CanvasItem, x: float, y_basis: float, w: float, h: float, licht: Color, a := 1.0) -> void:
 	var detail: Color = theme["detail"]
-	Pen.rrect(c, x - w / 2, y_basis - h, w, h, 1.5, Pen.hex(0x2f3a52, a))
+	Pen.rrect(c, x - w / 2, y_basis - h, w, h, 1.5, Pen.hex(0x303236, a))
 	Pen.srrect(c, x - w / 2, y_basis - h, w, h, 1.5, Pen.alpha(detail, 0.8 * a), 0.6)
-	Pen.rect(c, x - w / 2 + 2, y_basis - h + 2.5, w - 4, 6, Pen.hex(0x0a1220, a))
-	Pen.rect(c, x - w / 2 + 2.5, y_basis - h + 11.5, w - 5, 1.5, Pen.hex(0x0a1220, a))
+	Pen.rect(c, x - w / 2 + 2, y_basis - h + 2.5, w - 4, 6, Pen.hex(0x111113, a))
+	Pen.rect(c, x - w / 2 + 2.5, y_basis - h + 11.5, w - 5, 1.5, Pen.hex(0x111113, a))
 	Pen.circle(c, x, y_basis - 3.2, 1.4, Pen.alpha(licht, a))
 
 
@@ -444,28 +444,28 @@ func _terminal(c: CanvasItem, x: float, y_basis: float, w: float, h: float, lich
 func _takt(c: CanvasItem, x: float, y: float, n: int, progress: int, aktiv: int, frac := -1.0) -> void:
 	for i in n:
 		var lx := x - (n - 1) * 4.5 + i * 9
-		var col := Pen.hex(0x4a5468)
+		var col := Pen.hex(0x4c5056)
 		var r := 1.9
 		if i < progress:
-			col = Pen.hex(0x7fd07f)
+			col = Pen.hex(0x4fd3a1)
 		elif i == aktiv:
-			col = Pen.hex(0xffd75e)
+			col = Pen.hex(0xffd646)
 			r = 3.2
-		Pen.circle(c, lx, y, r + 0.8, Pen.hex(0x0a1220, 0.85))
+		Pen.circle(c, lx, y, r + 0.8, Pen.hex(0x111113, 0.85))
 		Pen.circle(c, lx, y, r, col)
 	if frac >= 0.0:
 		var w := (n - 1) * 9.0 + 8.0
 		Pen.rect(c, x - w / 2, y + 5, w, 1.2, Color(1, 1, 1, 0.15))
-		Pen.rect(c, x - w / 2, y + 5, w * (1.0 - frac), 1.2, Pen.hex(0xffd75e, 0.9))
+		Pen.rect(c, x - w / 2, y + 5, w * (1.0 - frac), 1.2, Pen.hex(0xffd646, 0.9))
 
 
 ## Tor auf dem Boden: rot = zu, grün = offen; der Balken fährt hoch.
 func _tor(c: CanvasItem, x: float, h: float, offen: float, a := 1.0) -> void:
 	var detail: Color = theme["detail"]
-	Pen.rect(c, x - 5, GY - h - 3, 2.2, h + 3, Pen.hex(0x39445e, a))
-	Pen.rect(c, x + 2.8, GY - h - 3, 2.2, h + 3, Pen.hex(0x39445e, a))
+	Pen.rect(c, x - 5, GY - h - 3, 2.2, h + 3, Pen.hex(0x4c5056, a))
+	Pen.rect(c, x + 2.8, GY - h - 3, 2.2, h + 3, Pen.hex(0x4c5056, a))
 	var lift := (h - 3) * clampf(offen, 0.0, 1.0)
-	Pen.rect(c, x - 2.4, GY - h - lift, 4.8, h, Pen.hex(0x1b2438, a))
+	Pen.rect(c, x - 2.4, GY - h - lift, 4.8, h, Pen.hex(0x202124, a))
 	Pen.rect(c, x - 2.4, GY - h - lift, 4.8, 1, Pen.alpha(detail, 0.6 * a))
 	var lc := Pen.OK_COL if offen >= 0.999 else Pen.DENY_COL
 	Pen.circle(c, x, GY - h - lift + 3.2, 1.6, Pen.alpha(lc, a))
@@ -484,16 +484,16 @@ func _lauscher(c: CanvasItem, x: float, y: float, dir: int, reach: float, spread
 		var sx := x + dir * reach * f
 		Pen.line(c, sx, y - spread * f, sx, y + spread * f, Pen.alpha(col, (1.0 - f) * 0.35 * a), 0.7)
 	Pen.circle(c, x, y, 7, Pen.alpha(col, 0.15 * a))
-	Pen.circle(c, x, y, 5, Pen.hex(0x1f1724, a))
+	Pen.circle(c, x, y, 5, Pen.hex(0x202124, a))
 	var blink := fmod(t * 0.37 + x * 0.013, 1.0) < 0.05
 	if blink:
-		Pen.rect(c, x - 3.5, y - 0.5, 7, 1, Pen.hex(0xf7f2eb, a))
+		Pen.rect(c, x - 3.5, y - 0.5, 7, 1, Pen.hex(0xfff5ed, a))
 	else:
-		Pen.ellipse(c, x, y, 8, 5.2, Pen.hex(0xf7f2eb, a))
+		Pen.ellipse(c, x, y, 8, 5.2, Pen.hex(0xfff5ed, a))
 		var ex := x + dir * 1.6
 		Pen.circle(c, ex, y, 1.9, Pen.alpha(col, a))
-		Pen.circle(c, ex, y, 0.9, Pen.hex(0x0d0a0f, a))
-	Pen.line(c, x, y - 5, x, y - 8.5, Pen.hex(0x4d4052, a), 0.8)
+		Pen.circle(c, ex, y, 0.9, Pen.hex(0x111113, a))
+	Pen.line(c, x, y - 5, x, y - 8.5, Pen.hex(0x4c5056, a), 0.8)
 	Pen.circle(c, x, y - 9, 1.1, Pen.alpha(col, a))
 
 
@@ -503,8 +503,8 @@ func _uhr(c: CanvasItem, x: float, y: float, anteil: float, a := 1.0) -> void:
 	var farbe := Pen.VAU_COL
 	if warn:
 		farbe = Pen.alpha(Pen.DENY_COL, 0.7 + 0.3 * sin(t * TAU * 2.0))
-	Pen.circle(c, x, y, 8, Pen.hex(0x0e1a2c, 0.95 * a))
-	Pen.scircle(c, x, y, 8, Pen.hex(0x9fb3c8, 0.6 * a), 1.0)
+	Pen.circle(c, x, y, 8, Pen.hex(0x04163a, 0.95 * a))
+	Pen.scircle(c, x, y, 8, Pen.hex(0xa1a8b3, 0.6 * a), 1.0)
 	Pen.arc(c, x, y, 5.6, -PI / 2, -PI / 2 + TAU * maxf(0.02, anteil), Pen.alpha(farbe, 0.95 * a), 2.0)
 	Pen.circle(c, x, y, 1.4, Pen.alpha(Pen.VAU_COL, a))
 
@@ -520,23 +520,23 @@ func _haus(c: CanvasItem, x: float, y: float, w: float, h: float) -> void:
 		var fx := x - w / 2 + 7
 		while fx < x + w / 2 - 8:
 			var an := int(round(fx * 7 + fy * 13)) % 4 < 2
-			Pen.rect(c, fx, fy, 6, 8, Pen.hex(0xffd9a0, 0.8) if an else Pen.alpha(Pen.darken(theme["sky_bottom"], 0.3), 0.5))
+			Pen.rect(c, fx, fy, 6, 8, Pen.hex(0xffcda8, 0.8) if an else Pen.alpha(Pen.darken(theme["sky_bottom"], 0.3), 0.5))
 			fx += 13
 		fy += 14
-	Pen.rect(c, x - 7, y - 16, 14, 16, Pen.hex(0x0d1a2c))
-	Pen.rect(c, x - 5.5, y - 14.5, 11, 1, Pen.hex(0xffd9a0, 0.5))
+	Pen.rect(c, x - 7, y - 16, 14, 16, Pen.hex(0x04163a))
+	Pen.rect(c, x - 5.5, y - 14.5, 11, 1, Pen.hex(0xffcda8, 0.5))
 
 
 ## ePA-Akte: Karte mit Kreuz und Dokumentzeilen; `voll` = neue Zeile eingetragen.
 func _akte(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0, voll := 0.0) -> void:
-	Pen.rrect(c, x - 11 * s, y - 14 * s, 22 * s, 28 * s, 3 * s, Pen.hex(0x0d1a2c, a))
+	Pen.rrect(c, x - 11 * s, y - 14 * s, 22 * s, 28 * s, 3 * s, Pen.hex(0x04163a, a))
 	Pen.srrect(c, x - 11 * s, y - 14 * s, 22 * s, 28 * s, 3 * s, Pen.alpha(Pen.K, 0.85 * a), 1.0)
-	Pen.rect(c, x - 1.4 * s, y - 10 * s, 2.8 * s, 7 * s, Pen.hex(0x2fa88c, 0.95 * a))
-	Pen.rect(c, x - 3.5 * s, y - 7.9 * s, 7 * s, 2.8 * s, Pen.hex(0x2fa88c, 0.95 * a))
+	Pen.rect(c, x - 1.4 * s, y - 10 * s, 2.8 * s, 7 * s, Pen.hex(0x18ae80, 0.95 * a))
+	Pen.rect(c, x - 3.5 * s, y - 7.9 * s, 7 * s, 2.8 * s, Pen.hex(0x18ae80, 0.95 * a))
 	for i in 3:
-		Pen.rect(c, x - 7 * s, y + 2 * s + i * 3.4 * s, 14 * s, 1.1 * s, Pen.hex(0x9aa6bc, 0.8 * a))
+		Pen.rect(c, x - 7 * s, y + 2 * s + i * 3.4 * s, 14 * s, 1.1 * s, Pen.hex(0xa1a8b3, 0.8 * a))
 	if voll > 0.0:
-		Pen.rect(c, x - 7 * s, y + 2 * s + 3 * 3.4 * s, 14 * s * voll, 1.1 * s, Pen.hex(0x7fd07f, 0.95 * a))
+		Pen.rect(c, x - 7 * s, y + 2 * s + 3 * 3.4 * s, 14 * s * voll, 1.1 * s, Pen.hex(0x4fd3a1, 0.95 * a))
 
 
 ## Ausweis: eGK grün, HBA orange, SMC-B blau — immer mit goldenem Chip. Die
@@ -544,7 +544,7 @@ func _akte(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0, voll := 0.0) -
 ## auch die eingesteckten Karten in den Mini-Szenen nehmen KartenFx.koerper().
 func _karte(c: CanvasItem, x: float, y: float, typ := "egk", s := 1.0, a := 1.0) -> void:
 	Pen.rrect(c, x - 8 * s, y - 5 * s, 16 * s, 10 * s, 1.6 * s, Pen.alpha(KartenFx.koerper(typ), a))
-	Pen.rrect(c, x - 5.5 * s, y - 2.4 * s, 3.6 * s, 4.4 * s, 0.8 * s, Pen.hex(0xffd75e, 0.95 * a))
+	Pen.rrect(c, x - 5.5 * s, y - 2.4 * s, 3.6 * s, 4.4 * s, 0.8 * s, Pen.hex(0xffd646, 0.95 * a))
 	Pen.rect(c, x - 8 * s, y - 5 * s, 16 * s, 1 * s, Color(1, 1, 1, 0.2 * a))
 
 
@@ -553,7 +553,7 @@ func _orb(c: CanvasItem, x: float, y: float, bonus := false, a := 1.0) -> void:
 	var col := Pen.GOLD_COL if bonus else Pen.K
 	var r := 3.2 if bonus else 2.6
 	Pen.circle(c, x, y, r * 2.2, Pen.alpha(col, 0.12 * a))
-	Pen.circle(c, x, y, r + 0.9, Pen.hex(0x1f2a3c, a))
+	Pen.circle(c, x, y, r + 0.9, Pen.hex(0x303236, a))
 	Pen.circle(c, x, y, r, Pen.alpha(col, a))
 	Pen.circle(c, x - r * 0.3, y - r * 0.35, r * 0.35, Color(1, 1, 1, 0.9 * a))
 	if bonus:
@@ -566,39 +566,39 @@ func _orb(c: CanvasItem, x: float, y: float, bonus := false, a := 1.0) -> void:
 ## Sprungfeder auf dem Boden; `press` 0..1 drückt sie zusammen.
 func _feder(c: CanvasItem, x: float, press := 0.0) -> void:
 	var comp := 3.5 * press
-	Pen.rect(c, x - 6, GY - 2.4, 12, 2.4, Pen.hex(0x39445e))
+	Pen.rect(c, x - 6, GY - 2.4, 12, 2.4, Pen.hex(0x4c5056))
 	for i in 3:
 		var y := GY - 3.4 - i * (2.2 - comp / 3.0)
-		Pen.line(c, x - 4.5, y, x + 4.5, y - 1, Pen.hex(0x6f7d99), 0.9)
-	Pen.rect(c, x - 7, GY - 10 + comp, 14, 2.6, Pen.hex(0xff9d3b))
-	Pen.rect(c, x - 6, GY - 10 + comp, 12, 0.7, Pen.hex(0xffd1a0, 0.7))
+		Pen.line(c, x - 4.5, y, x + 4.5, y - 1, Pen.hex(0x787e8a), 0.9)
+	Pen.rect(c, x - 7, GY - 10 + comp, 14, 2.6, Pen.hex(0xff9f00))
+	Pen.rect(c, x - 6, GY - 10 + comp, 12, 0.7, Pen.hex(0xffcda8, 0.7))
 
 
 ## Störfeld: rote Zacken, weiches Flackern (deutlich unter 3 Hz).
 func _stoer(c: CanvasItem, x0: float, x1: float) -> void:
-	Pen.rect(c, x0, GY - 2.4, x1 - x0, 2.4, Pen.hex(0x39445e))
+	Pen.rect(c, x0, GY - 2.4, x1 - x0, 2.4, Pen.hex(0x4c5056))
 	var n := int((x1 - x0) / 5.5)
 	for i in n:
 		var sx := x0 + 2.75 + i * 5.5
 		var flick := 0.65 + 0.35 * sin(t * 2.6 + i * 1.7)
-		Pen.tri(c, sx - 2.2, GY - 2.4, sx + 2.2, GY - 2.4, sx, GY - 8, Pen.hex(0x1f2a3c))
+		Pen.tri(c, sx - 2.2, GY - 2.4, sx + 2.2, GY - 2.4, sx, GY - 8, Pen.hex(0x303236))
 		Pen.tri(c, sx - 1.4, GY - 3, sx + 1.4, GY - 3, sx, GY - 7, Pen.alpha(Pen.DENY_COL, flick))
 
 
 ## Fahne (Rücksetzpunkt): grün und wehend, sobald sie aktiv ist.
 func _fahne(c: CanvasItem, x: float, aktiv: bool) -> void:
-	Pen.rect(c, x - 0.8, GY - 22, 1.6, 22, Pen.hex(0x39445e))
+	Pen.rect(c, x - 0.8, GY - 22, 1.6, 22, Pen.hex(0x4c5056))
 	var wave := sin(t * 5.0) * 1.2 if aktiv else sin(t * 1.5) * 0.5
-	var col := Pen.OK_COL if aktiv else Pen.hex(0xff9d3b)
+	var col := Pen.OK_COL if aktiv else Pen.hex(0xff9f00)
 	Pen.tri(c, x + 0.8, GY - 22, x + 9 + wave, GY - 18.5, x + 0.8, GY - 15, col)
-	Pen.circle(c, x, GY, 2, Pen.hex(0x39445e))
+	Pen.circle(c, x, GY, 2, Pen.hex(0x4c5056))
 
 
 ## Prüf-Podest: Plattform mit Scan-Balken; `frac` = Fortschritt des Scans.
 func _podest(c: CanvasItem, x: float, w: float, frac: float, scanning: bool, done: bool) -> void:
 	var col: Color = Pen.OK_COL if done else (Palette.COOL if scanning else theme["detail"])
-	Pen.rect(c, x - 1.2, GY - 6, 2.4, 6, Pen.hex(0x39445e))
-	Pen.rrect(c, x - w / 2, GY - 8, w, 3.4, 1, Pen.hex(0x39445e))
+	Pen.rect(c, x - 1.2, GY - 6, 2.4, 6, Pen.hex(0x4c5056))
+	Pen.rrect(c, x - w / 2, GY - 8, w, 3.4, 1, Pen.hex(0x4c5056))
 	Pen.rect(c, x - w / 2 + 1, GY - 8.4, w - 2, 1, Pen.alpha(col, 0.9))
 	Pen.rect(c, x - w / 2 + 2, GY - 16, w - 4, 3, Color(0, 0, 0, 0.5))
 	Pen.srect(c, x - w / 2 + 2, GY - 16, w - 4, 3, Pen.alpha(col, 0.8), 0.5)
@@ -611,7 +611,7 @@ func _podest(c: CanvasItem, x: float, w: float, frac: float, scanning: bool, don
 ## Krypto-Dusche: Duschkopf, Regen aus kühlen Tropfen, solange sie aktiv ist.
 func _dusche(c: CanvasItem, x: float, w: float, aktiv: bool) -> void:
 	var K := Pen.K
-	Pen.rrect(c, x - w / 2, GY - 40, w, 6, 1.5, Pen.hex(0x39445e))
+	Pen.rrect(c, x - w / 2, GY - 40, w, 6, 1.5, Pen.hex(0x4c5056))
 	Pen.srrect(c, x - w / 2, GY - 40, w, 6, 1.5, Pen.alpha(K, 0.7), 0.6)
 	for i in int((w - 6) / 4.4):
 		Pen.circle(c, x - w / 2 + 5 + i * 4.4, GY - 34, 0.8, Pen.alpha(K, 0.9))
@@ -625,11 +625,11 @@ func _dusche(c: CanvasItem, x: float, w: float, aktiv: bool) -> void:
 
 ## Signatur-Stempel: Führung, Podest, Stempelkopf auf Höhe `sy` (gold, wenn er oben wartet).
 func _stempel(c: CanvasItem, x: float, sy: float, oben: bool, done: bool) -> void:
-	Pen.rect(c, x - 2, GY - 48, 4, 44, Pen.hex(0x39445e, 0.8))
-	Pen.rrect(c, x - 14, GY - 4, 28, 4, 1, Pen.hex(0x39445e))
-	Pen.rect(c, x - 3, sy - 14, 6, 10, Pen.hex(0x39445e))
+	Pen.rect(c, x - 2, GY - 48, 4, 44, Pen.hex(0x4c5056, 0.8))
+	Pen.rrect(c, x - 14, GY - 4, 28, 4, 1, Pen.hex(0x4c5056))
+	Pen.rect(c, x - 3, sy - 14, 6, 10, Pen.hex(0x4c5056))
 	var col := Pen.GOLD_COL
-	Pen.rrect(c, x - 12, sy - 6, 24, 8, 2, Pen.hex(0x2a2a3a))
+	Pen.rrect(c, x - 12, sy - 6, 24, 8, 2, Pen.hex(0x303236))
 	Pen.srrect(c, x - 12, sy - 6, 24, 8, 2, Pen.alpha(col, 0.95 if (oben or done) else 0.5), 0.9)
 	Pen.rect(c, x - 6, sy - 3, 12, 1.4, Pen.alpha(col, 0.95))
 	if oben and not done:
@@ -641,10 +641,10 @@ func _stempel(c: CanvasItem, x: float, sy: float, oben: bool, done: bool) -> voi
 ## Sperre grau und eingeklemmt. `dir` = Greifrichtung.
 func _kralle(c: CanvasItem, x: float, y: float, ext: float, open: bool, blocked: bool, shake: float, dir: int) -> void:
 	var sx := sin(t * 60.0) * 1.0 * shake
-	var col := Pen.hex(0x8a80a0) if not blocked else Pen.hex(0x707588)
-	Pen.rrect(c, x - 6 + sx, y - 6, 12, 12, 1.5, Pen.hex(0x332a3a))
+	var col := Pen.hex(0x787e8a) if not blocked else Pen.hex(0x787E8A)
+	Pen.rrect(c, x - 6 + sx, y - 6, 12, 12, 1.5, Pen.hex(0x303236))
 	Pen.srrect(c, x - 6 + sx, y - 6, 12, 12, 1.5, col, 0.6)
-	Pen.rect(c, x - 3 + sx, y + 2, 6, 1.4, Pen.DENY_COL if not blocked else Pen.hex(0x4a4a55))
+	Pen.rect(c, x - 3 + sx, y + 2, 6, 1.4, Pen.DENY_COL if not blocked else Pen.hex(0x4c5056))
 	var kx := x + dir * (6 + ext) + sx
 	Pen.line(c, x + dir * 5 + sx, y, kx, y, col.darkened(0.2), 3.2)
 	Pen.line(c, x + dir * 5 + sx, y, x + dir * (6 + ext * 0.6) + sx, y, col, 4.2)
@@ -659,7 +659,7 @@ func _kralle(c: CanvasItem, x: float, y: float, ext: float, open: bool, blocked:
 
 ## Zulassungs-Blende: fährt herunter und klemmt die Kralle ein (Text: Rufe).
 func _blende(c: CanvasItem, x: float, y: float, a := 1.0) -> void:
-	Pen.rrect(c, x - 9, y - 12, 18, 12, 1.5, Pen.hex(0x0d1f1a, a))
+	Pen.rrect(c, x - 9, y - 12, 18, 12, 1.5, Pen.hex(0x012116, a))
 	Pen.srrect(c, x - 9, y - 12, 18, 12, 1.5, Pen.alpha(Pen.OK_COL, 0.9 * a), 0.8)
 	Pen.scircle(c, x, y - 6, 2.6, Pen.alpha(Pen.OK_COL, a), 0.7)
 	Pen.polyline(c, PackedVector2Array([Vector2(x - 1.4, y - 6), Vector2(x - 0.3, y - 4.8), Vector2(x + 1.6, y - 7.4)]), Pen.alpha(Pen.OK_COL, a), 0.8)
@@ -698,7 +698,7 @@ func _anker(c: CanvasItem, x: float, y: float, puls := 0.0) -> void:
 ## Server-Rack (statisch); die LEDs kommen aus _rack_leds.
 func _rack(c: CanvasItem, x: float, y_top: float, w: float, h: float) -> void:
 	var detail: Color = theme["detail"]
-	Pen.rect(c, x - w / 2, y_top, w, h, Pen.hex(0x141c2e))
+	Pen.rect(c, x - w / 2, y_top, w, h, Pen.hex(0x202124))
 	Pen.srect(c, x - w / 2, y_top, w, h, Pen.alpha(detail, 0.7), 0.6)
 	var y := y_top + 4
 	while y < y_top + h - 3:
@@ -711,18 +711,18 @@ func _rack_leds(c: CanvasItem, x: float, y_top: float, w: float, h: float, tempo
 	for reihe in reihen:
 		for sp in 2:
 			var an := (reihe * 13 + sp * 5 + int(floor(t * tempo)) * 29) % 11 < 4
-			Pen.rect(c, x - w / 2 + 2.5 + sp * 3.4, y_top + 5 + reihe * 4.0, 1.6, 1.2, Pen.alpha(Pen.K, 0.9) if an else Pen.hex(0x333c4e, 0.3))
+			Pen.rect(c, x - w / 2 + 2.5 + sp * 3.4, y_top + 5 + reihe * 4.0, 1.6, 1.2, Pen.alpha(Pen.K, 0.9) if an else Pen.hex(0x303236, 0.3))
 
 
 ## Die letzte Tür: hebt sich um `rise` (0..1); gold, wenn sie freigegeben ist.
 func _tuer(c: CanvasItem, x: float, h: float, rise: float, gold: bool) -> void:
 	var detail: Color = theme["detail"]
 	var col := Pen.GOLD_COL if gold else Pen.alpha(detail, 0.9)
-	Pen.rect(c, x - 10, GY - h - 3, 3, h + 3, Pen.hex(0x2a2a3a))
-	Pen.rect(c, x + 7, GY - h - 3, 3, h + 3, Pen.hex(0x2a2a3a))
-	Pen.rect(c, x - 10, GY - h - 3, 20, 3, Pen.hex(0x2a2a3a))
+	Pen.rect(c, x - 10, GY - h - 3, 3, h + 3, Pen.hex(0x303236))
+	Pen.rect(c, x + 7, GY - h - 3, 3, h + 3, Pen.hex(0x303236))
+	Pen.rect(c, x - 10, GY - h - 3, 20, 3, Pen.hex(0x303236))
 	var lift := (h - 4) * clampf(rise, 0.0, 1.0)
-	Pen.rrect(c, x - 7, GY - h - lift, 14, h, 2, Pen.hex(0x1b1a26))
+	Pen.rrect(c, x - 7, GY - h - lift, 14, h, 2, Pen.hex(0x202124))
 	Pen.srrect(c, x - 7, GY - h - lift, 14, h, 2, col, 0.9)
 	Pen.circle(c, x + 3, GY - h / 2 - lift, 1.4, col)
 	if rise > 0.0:
@@ -731,19 +731,19 @@ func _tuer(c: CanvasItem, x: float, h: float, rise: float, gold: bool) -> void:
 
 ## Datenkrake: purpurner Kopf, Knopfaugen, wedelnde Arme — will greifen, scheitert.
 func _krake(c: CanvasItem, x: float, y: float, s := 1.0, a := 1.0) -> void:
-	var body := Pen.hex(0x8a4d9e, a)
+	var body := Pen.hex(0x5b3fb8, a)
 	for i in 5:
 		var pts := PackedVector2Array()
 		for k in 6:
 			var f := k / 5.0
 			pts.append(Vector2(x + (-6 + i * 3) * s + sin(t * 2.5 + i + f * 3.0) * 2.5 * s * f, y + 3 * s + f * 9 * s))
-		Pen.polyline(c, pts, Pen.hex(0x5a2f6a, a), 1.6 * s)
-	Pen.circle(c, x, y, 6.5 * s, Pen.hex(0x3a2144, a))
+		Pen.polyline(c, pts, Pen.hex(0x2a1f5c, a), 1.6 * s)
+	Pen.circle(c, x, y, 6.5 * s, Pen.hex(0x2a1f5c, a))
 	Pen.circle(c, x, y, 5.6 * s, body)
-	Pen.circle(c, x - 2 * s, y - 1 * s, 1.6 * s, Color(0.97, 0.95, 1.0, a))
-	Pen.circle(c, x + 2 * s, y - 1 * s, 1.6 * s, Color(0.97, 0.95, 1.0, a))
-	Pen.circle(c, x - 1.6 * s, y - 0.8 * s, 0.7 * s, Pen.hex(0x1a1020, a))
-	Pen.circle(c, x + 2.4 * s, y - 0.8 * s, 0.7 * s, Pen.hex(0x1a1020, a))
+	Pen.circle(c, x - 2 * s, y - 1 * s, 1.6 * s, Color(0.937, 0.965, 1.0, a))
+	Pen.circle(c, x + 2 * s, y - 1 * s, 1.6 * s, Color(0.937, 0.965, 1.0, a))
+	Pen.circle(c, x - 1.6 * s, y - 0.8 * s, 0.7 * s, Pen.hex(0x111113, a))
+	Pen.circle(c, x + 2.4 * s, y - 0.8 * s, 0.7 * s, Pen.hex(0x111113, a))
 
 
 ## Datenpuls auf einer Leitung.
@@ -768,18 +768,18 @@ func _sterne(c: CanvasItem, x: float, y: float, k: float) -> void:
 		var ang := i * TAU / 4.0 + k * 2.0
 		var px := x + cos(ang) * (4 + 6 * k)
 		var py := y + sin(ang) * (3 + 4 * k)
-		Pen.circle(c, px, py, 1.0, Pen.hex(0xffd75e, 0.95 * (1.0 - k)))
+		Pen.circle(c, px, py, 1.0, Pen.hex(0xffd646, 0.95 * (1.0 - k)))
 
 
 ## Smartphone mit Schalter (ePA-App): `kipp` 0 = grün/an, 1 = rot/aus.
 func _handy(c: CanvasItem, x: float, y: float, h: float, a: float, kipp: float) -> void:
 	var w := h * 0.52
-	Pen.rrect(c, x - w / 2, y - h / 2, w, h, 2.5, Pen.hex(0x0a1220, a))
-	Pen.srrect(c, x - w / 2, y - h / 2, w, h, 2.5, Pen.hex(0x9fb3c8, 0.8 * a), 0.8)
-	Pen.rect(c, x - 2, y - h / 2 + 1.4, 4, 0.8, Pen.hex(0x9fb3c8, 0.7 * a))
-	Pen.rect(c, x - w / 2 + 2, y - 5, w - 4, 1.2, Pen.hex(0x9aa6bc, 0.85 * a))
-	Pen.rrect(c, x - 5, y - 1, 10, 4.4, 2.2, Pen.hex(0xb3403e if kipp > 0.5 else 0x2fa88c, 0.95 * a))
-	Pen.circle(c, x - 2.6 + 5.2 * kipp, y + 1.2, 1.7, Pen.hex(0xeef2f8, 0.95 * a))
+	Pen.rrect(c, x - w / 2, y - h / 2, w, h, 2.5, Pen.hex(0x111113, a))
+	Pen.srrect(c, x - w / 2, y - h / 2, w, h, 2.5, Pen.hex(0xa1a8b3, 0.8 * a), 0.8)
+	Pen.rect(c, x - 2, y - h / 2 + 1.4, 4, 0.8, Pen.hex(0xa1a8b3, 0.7 * a))
+	Pen.rect(c, x - w / 2 + 2, y - 5, w - 4, 1.2, Pen.hex(0xa1a8b3, 0.85 * a))
+	Pen.rrect(c, x - 5, y - 1, 10, 4.4, 2.2, Pen.hex(0xba221d if kipp > 0.5 else 0x18ae80, 0.95 * a))
+	Pen.circle(c, x - 2.6 + 5.2 * kipp, y + 1.2, 1.7, Pen.hex(0xeeeff1, 0.95 * a))
 
 
 ## Paul mit Hülle (Ring hinter der Figur); Füße auf y_fuss.
@@ -792,13 +792,13 @@ func _paul(c: CanvasItem, x: float, y_fuss: float, schritt: float, dir: int, zus
 
 ## Dokument (Rezept/Befund): weißes Blatt, Zeilen, optional grüner Eintrag.
 func _doc(c: CanvasItem, x: float, y: float, a := 1.0, zeile := 0.0, rot := false) -> void:
-	Pen.rect(c, x - 4, y - 5, 8, 10, Pen.hex(0xeef2f8, 0.95 * a))
-	Pen.rect(c, x - 2.8, y - 3.2, 5.6, 0.8, Pen.hex(0x9aa6bc, 0.8 * a))
-	Pen.rect(c, x - 2.8, y - 1.2, 4, 0.8, Pen.hex(0x9aa6bc, 0.8 * a))
+	Pen.rect(c, x - 4, y - 5, 8, 10, Pen.hex(0xeeeff1, 0.95 * a))
+	Pen.rect(c, x - 2.8, y - 3.2, 5.6, 0.8, Pen.hex(0xa1a8b3, 0.8 * a))
+	Pen.rect(c, x - 2.8, y - 1.2, 4, 0.8, Pen.hex(0xa1a8b3, 0.8 * a))
 	if rot:
-		Pen.rect(c, x - 2.8, y + 1.2, 3, 1.4, Pen.hex(0xb3403e, 0.9 * a))
+		Pen.rect(c, x - 2.8, y + 1.2, 3, 1.4, Pen.hex(0xba221d, 0.9 * a))
 	if zeile > 0.0:
-		Pen.rect(c, x - 2.8, y + 2.6, 5.6 * clampf(zeile, 0.0, 1.0), 0.9, Pen.hex(0x2fa88c, 0.95 * a))
+		Pen.rect(c, x - 2.8, y + 2.6, 5.6 * clampf(zeile, 0.0, 1.0), 0.9, Pen.hex(0x18ae80, 0.95 * a))
 
 
 # ================================================================ 01 Stammdaten
@@ -807,21 +807,21 @@ func _doc(c: CanvasItem, x: float, y: float, a := 1.0, zeile := 0.0, rot := fals
 # Störfeld, Fahne. REZI wird geboren, sobald die Daten stimmen.
 
 func _statik_01(c: CanvasItem) -> void:
-	Pen.rect(c, 130, GY - 14, 70, 14, Pen.hex(0x2f3a52))
-	Pen.rect(c, 128, GY - 15.5, 74, 2, Pen.hex(0x39445e))
+	Pen.rect(c, 130, GY - 14, 70, 14, Pen.hex(0x303236))
+	Pen.rect(c, 128, GY - 15.5, 74, 2, Pen.hex(0x4c5056))
 	Pen.rect(c, 128, GY - 15.5, 74, 0.6, Color(1, 1, 1, 0.12))
 	Pen.pfad_linie(c, PFAD_01, Pen.alpha(Pen.K, 0.22), 0.6)
 	_haus(c, 520, GY, 72, 64)
 	# Prüf-Display der Kasse über der Tür (mit Platz für das Schild)
-	Pen.rect(c, 503, GY - 48, 34, 30, Pen.hex(0x0a1220))
+	Pen.rect(c, 503, GY - 48, 34, 30, Pen.hex(0x111113))
 	Pen.srect(c, 503, GY - 48, 34, 30, Pen.alpha(theme["detail"], 0.7), 0.6)
 	# Bonus außer Reichweite: die goldene Kachel oben lockt zum Sprung
-	Pen.rect(c, 300, GY - 62, 40, 2.4, Pen.hex(0x39445e))
+	Pen.rect(c, 300, GY - 62, 40, 2.4, Pen.hex(0x4c5056))
 
 
 func _leben_01(c: CanvasItem, u: float) -> void:
 	var K := Pen.K
-	var G := Pen.hex(0x7fd07f)
+	var G := Pen.hex(0x4fd3a1)
 	# Paul
 	var px := 96.0
 	var schritt := 0.0
@@ -843,7 +843,7 @@ func _leben_01(c: CanvasItem, u: float) -> void:
 	else:
 		a = 0.0
 	# Terminal auf dem Tresen, Licht je nach Phase
-	var licht := Pen.hex(0x4a5468)
+	var licht := Pen.hex(0x4c5056)
 	if u >= 7.3:
 		licht = G
 	elif u >= 2.5:
@@ -930,11 +930,11 @@ func _leben_01(c: CanvasItem, u: float) -> void:
 
 func _statik_02(c: CanvasItem) -> void:
 	_block(c, 96, GY - 30, 94, 18)
-	Pen.rect(c, 198, GY - 22, 2.4, 22, Pen.hex(0x39445e))
+	Pen.rect(c, 198, GY - 22, 2.4, 22, Pen.hex(0x4c5056))
 
 
 func _leben_02(c: CanvasItem, u: float) -> void:
-	var G := Pen.hex(0x7fd07f)
+	var G := Pen.hex(0x4fd3a1)
 	# Paul: Weg und Haltung
 	var px := 60.0
 	var schritt := 0.0
@@ -983,11 +983,11 @@ func _leben_02(c: CanvasItem, u: float) -> void:
 		_blende(c, 196, by)
 		_sterne(c, 176, GY - 22, (u - 4.9) / 1.0)
 	# PIN-Terminal mit Dr. Pixel
-	var licht := Pen.hex(0x4a5468)
+	var licht := Pen.hex(0x4c5056)
 	if u >= 10.9:
 		licht = G
 	elif u >= 7.2:
-		licht = Pen.alpha(Pen.hex(0xffd75e), 0.6 + 0.4 * sin(t * 3.0))
+		licht = Pen.alpha(Pen.hex(0xffd646), 0.6 + 0.4 * sin(t * 3.0))
 	_terminal(c, 290, GY, 14, 22, licht)
 	if u >= 6.4 and u < 7.2:
 		var k := (u - 6.4) / 0.8
@@ -1174,8 +1174,8 @@ func _tunnel_y(px: float) -> float:
 # der Anker frischt die Sitzung auf.
 
 func _statik_04(c: CanvasItem) -> void:
-	Pen.rect(c, 330, GY - 1, 50, 14, Pen.hex(0x040810, 0.92))
-	Pen.rrect(c, 333, GY - 9, 44, 3.4, 1, Pen.hex(0x5a4a2c))
+	Pen.rect(c, 330, GY - 1, 50, 14, Pen.hex(0x111113, 0.92))
+	Pen.rrect(c, 333, GY - 9, 44, 3.4, 1, Pen.hex(0x623e00))
 
 
 func _leben_04(c: CanvasItem, u: float) -> void:
@@ -1265,13 +1265,13 @@ func _leben_04(c: CanvasItem, u: float) -> void:
 # eGK abgewiesen — hier zählt die SMC-B der Einrichtung. Karten sind Schlüssel.
 
 func _statik_05(c: CanvasItem) -> void:
-	Pen.rrect(c, 278, GY - 24, 24, 3, 1, Pen.hex(0x39445e))
+	Pen.rrect(c, 278, GY - 24, 24, 3, 1, Pen.hex(0x4c5056))
 	Pen.rect(c, 279, GY - 24.4, 22, 1, Pen.alpha(theme["detail"], 0.8))
 
 
 func _leben_05(c: CanvasItem, u: float) -> void:
-	var G := Pen.hex(0x7fd07f)
-	var S := Pen.hex(0x8ca6f2)
+	var G := Pen.hex(0x4fd3a1)
+	var S := Pen.hex(0x6797ff)
 	var px := 70.0
 	var jy := 0.0
 	var dir := 1
@@ -1326,7 +1326,7 @@ func _leben_05(c: CanvasItem, u: float) -> void:
 	else:
 		_ring(c, 290, GY - 30, (u - 10.2) / 0.5, S)
 	# Terminal A (eGK) und Tor
-	var lichtA := G if u >= 2.4 else Pen.hex(0x4a5468)
+	var lichtA := G if u >= 2.4 else Pen.hex(0x4c5056)
 	_terminal(c, 150, GY, 14, 22, lichtA)
 	if u >= 2.4:
 		Pen.rrect(c, 145, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("egk"))
@@ -1339,7 +1339,7 @@ func _leben_05(c: CanvasItem, u: float) -> void:
 	_lauscher(c, 250, GY - 28, -1, 50, 13, sichtbar and px >= 200 and px <= 250)
 	_ring(c, px, GY - 7, (u - 4.0) / 0.5, Pen.K)
 	# Terminal B (SMC-B): erst Abweisung der eGK, dann Erfolg mit der SMC-B
-	var lichtB := Pen.hex(0x4a5468)
+	var lichtB := Pen.hex(0x4c5056)
 	if u >= 11.4:
 		lichtB = G
 	elif u >= 6.8 and u < 7.8:
@@ -1369,11 +1369,11 @@ func _leben_05(c: CanvasItem, u: float) -> void:
 func _statik_13(c: CanvasItem) -> void:
 	var accent: Color = theme["accent"]
 	_block(c, 104, GY - 30, 66, 18)
-	Pen.rect(c, 178, GY - 22, 2.4, 22, Pen.hex(0x39445e))
+	Pen.rect(c, 178, GY - 22, 2.4, 22, Pen.hex(0x4c5056))
 	Pen.pfad_linie(c, PFAD_13, Pen.alpha(Pen.K, 0.22), 0.6)
 	_haus(c, 390, GY, 64, 60)
-	Pen.rect(c, 362, GY - 46, 5, 1.6, Pen.hex(0x39445e))
-	Pen.rect(c, 356, GY - 44.4, 11, 11, Pen.hex(0x0d2440, 0.95))
+	Pen.rect(c, 362, GY - 46, 5, 1.6, Pen.hex(0x4c5056))
+	Pen.rect(c, 356, GY - 44.4, 11, 11, Pen.hex(0x04163a, 0.95))
 	Pen.polyline(c, PackedVector2Array([Vector2(358, GY - 35.4), Vector2(361.5, GY - 42.4), Vector2(365, GY - 35.4)]), Pen.alpha(accent, 0.95), 1.1)
 	Pen.line(c, 359.6, GY - 38, 363.4, GY - 38, Pen.alpha(accent, 0.95), 1.1)
 	_rack(c, 480, GY - 44, 36, 44)
@@ -1381,7 +1381,7 @@ func _statik_13(c: CanvasItem) -> void:
 
 func _leben_13(c: CanvasItem, u: float) -> void:
 	var K := Pen.K
-	var G := Pen.hex(0x7fd07f)
+	var G := Pen.hex(0x4fd3a1)
 	var px := 60.0
 	var schritt := 0.0
 	var duck := false
@@ -1435,7 +1435,7 @@ func _leben_13(c: CanvasItem, u: float) -> void:
 	_lauscher(c, 235, GY - 28, -1, 40, 11, st == "" and a > 0.0 and px >= 195 and px <= 235)
 	_ring(c, px, GY - 7, (u - 5.0) / 0.5, K)
 	# Echtes Terminal, Tor zur Apotheke
-	var licht := G if u >= 6.8 else Pen.hex(0x4a5468)
+	var licht := G if u >= 6.8 else Pen.hex(0x4c5056)
 	_terminal(c, 290, GY, 14, 22, licht)
 	if u >= 6.8:
 		Pen.rrect(c, 285, GY - 12.5, 10, 2.4, 0.8, KartenFx.koerper("egk"))
@@ -1482,8 +1482,8 @@ func _statik_14(c: CanvasItem) -> void:
 	Pen.rect(c, 250, GY - 70, 220, 70, Pen.darken(sky_top, 0.45))
 	Pen.srect(c, 250, GY - 70, 220, 70, Pen.alpha(detail, 0.7), 0.8)
 	Pen.rect(c, 248, GY - 72, 224, 2, Pen.alpha(detail, 0.7))
-	Pen.rect(c, 250, GY - 16, 8, 16, Pen.hex(0x0d1a2c))
-	Pen.rect(c, 462, GY - 16, 8, 16, Pen.hex(0x0d1a2c))
+	Pen.rect(c, 250, GY - 16, 8, 16, Pen.hex(0x04163a))
+	Pen.rect(c, 462, GY - 16, 8, 16, Pen.hex(0x04163a))
 	_rack(c, 434, GY - 46, 12, 42)
 	_rack(c, 450, GY - 46, 12, 42)
 
@@ -1543,7 +1543,7 @@ func _leben_14(c: CanvasItem, u: float) -> void:
 		var zeile := clampf((u - 5.0) / 1.4, 0.0, 1.0)
 		_doc(c, px - 9, GY - 32 + sin(t * 2.0) * 1.0, da, zeile, false)
 		if u >= 6.6:
-			Pen.polyline(c, PackedVector2Array([Vector2(px - 5, GY - 30), Vector2(px - 3.5, GY - 28.5), Vector2(px - 1, GY - 32)]), Pen.hex(0x7fd07f, 0.95 * da), 0.9)
+			Pen.polyline(c, PackedVector2Array([Vector2(px - 5, GY - 30), Vector2(px - 3.5, GY - 28.5), Vector2(px - 1, GY - 32)]), Pen.hex(0x4fd3a1, 0.95 * da), 0.9)
 	_lauscher(c, 565, GY - 28, -1, 60, 14, sichtbar and px >= 505 and px <= 565)
 	Pen.rezi(c, px - 9, GY - 17 + sin(t * 3.0) * 1.5, a, 1.0, st == "verschluesselt", false)
 	_paul(c, px, GY, schritt, 1, st, a)
@@ -1646,17 +1646,17 @@ func _leben_15(c: CanvasItem, u: float) -> void:
 func _statik_19(c: CanvasItem) -> void:
 	var detail: Color = theme["detail"]
 	for sx in [100.0, 548.0]:
-		Pen.rect(c, sx - 22, GY - 50, 44, 50, Pen.hex(0x141c2e))
+		Pen.rect(c, sx - 22, GY - 50, 44, 50, Pen.hex(0x202124))
 		Pen.srect(c, sx - 22, GY - 50, 44, 50, Pen.alpha(detail, 0.5), 0.6)
 		for i in 4:
 			Pen.rect(c, sx - 19, GY - 44 + i * 11, 38, 0.8, Pen.alpha(detail, 0.35))
 			for j in 6:
-				Pen.rect(c, sx - 18 + j * 6.2, GY - 51 + i * 11 + 4, 4.4, 6, Pen.hex(0x2a3550 if (i + j) % 3 != 0 else 0x3a4a6a))
+				Pen.rect(c, sx - 18 + j * 6.2, GY - 51 + i * 11 + 4, 4.4, 6, Pen.hex(0x303236 if (i + j) % 3 != 0 else 0x4c5056))
 
 
 func _leben_19(c: CanvasItem, u: float) -> void:
 	var K := Pen.K
-	var G := Pen.hex(0x7fd07f)
+	var G := Pen.hex(0x4fd3a1)
 	var px := 60.0
 	var schritt := 0.0
 	var st := ""
@@ -1713,7 +1713,7 @@ func _leben_19(c: CanvasItem, u: float) -> void:
 	for i in 3:
 		var tx: float = terminals[i]
 		var tp: float = pressed[i]
-		var licht := G if u >= tp else Pen.hex(0x4a5468)
+		var licht := G if u >= tp else Pen.hex(0x4c5056)
 		if i == 1 and u >= 2.6 and u < 3.6:
 			licht = Pen.alpha(Pen.DENY_COL, 0.6 + 0.4 * sin(t * 6.0))
 		_terminal(c, tx, GY, 14, 22, licht)
@@ -1757,12 +1757,12 @@ func _leben_19(c: CanvasItem, u: float) -> void:
 func _statik_20(c: CanvasItem) -> void:
 	var detail: Color = theme["detail"]
 	for sx in [90.0, 118.0]:
-		Pen.rect(c, sx - 12, GY - 46, 24, 46, Pen.hex(0x141c2e))
+		Pen.rect(c, sx - 12, GY - 46, 24, 46, Pen.hex(0x202124))
 		Pen.srect(c, sx - 12, GY - 46, 24, 46, Pen.alpha(detail, 0.5), 0.6)
 		for i in 4:
 			Pen.rect(c, sx - 10, GY - 40 + i * 10, 20, 0.8, Pen.alpha(detail, 0.35))
 			for j in 3:
-				Pen.rect(c, sx - 9 + j * 6.4, GY - 46 + i * 10 + 3, 4.6, 6, Pen.hex(0x2a3550 if (i + j) % 2 != 0 else 0x3a4a6a))
+				Pen.rect(c, sx - 9 + j * 6.4, GY - 46 + i * 10 + 3, 4.6, 6, Pen.hex(0x303236 if (i + j) % 2 != 0 else 0x4c5056))
 
 
 func _leben_20(c: CanvasItem, u: float) -> void:
@@ -1810,14 +1810,14 @@ func _leben_20(c: CanvasItem, u: float) -> void:
 		rise = clampf((u - 13.4) / 0.6, 0.0, 1.0)
 	_tuer(c, 430, 40, rise, u >= 13.4)
 	if u >= 7.2 and u < 7.8:
-		Pen.scircle(c, 430, GY - 20, 8 + 6 * (u - 7.2), Pen.hex(0x9fb0cc, 0.8 * (1.0 - (u - 7.2) / 0.6)), 0.8)
+		Pen.scircle(c, 430, GY - 20, 8 + 6 * (u - 7.2), Pen.hex(0xa1a8b3, 0.8 * (1.0 - (u - 7.2) / 0.6)), 0.8)
 	if u >= 9.6 and u < 13.4:
 		for i in 3:
 			var von := 10.2 + i * 0.6
 			if u >= von:
 				var la := clampf((u - von) / 0.3, 0.0, 1.0) * Pen.blende(u, 9.6, 13.4, 0.3)
 				var w: float = [40.0, 30.0, 36.0][i]
-				Pen.rect(c, 430 - w / 2, GY - 71 + i * 4.4, w, 1.4, Pen.hex(0xffb070 if i == 1 else 0x9aa6bc, 0.85 * la))
+				Pen.rect(c, 430 - w / 2, GY - 71 + i * 4.4, w, 1.4, Pen.hex(0xffaa72 if i == 1 else 0xa1a8b3, 0.85 * la))
 	if u >= 13.4:
 		_ring(c, 430, GY - 20, (u - 13.4) / 0.8, Pen.GOLD_COL)
 		Pen.glow(c, 430, GY - 22, Pen.GOLD_COL, 26, 0.10 * rise)

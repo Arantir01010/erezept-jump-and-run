@@ -4,8 +4,8 @@ shader_type canvas_item;
 // direction +1: die Kante wandert von links nach rechts, -1: von rechts nach links.
 uniform float progress : hint_range(0.0, 1.0) = 1.0;
 uniform float direction = 1.0;
-uniform vec4 farbe : source_color = vec4(0.02, 0.03, 0.06, 1.0);
-uniform vec4 saum : source_color = vec4(0.816, 0.290, 0.008, 1.0);
+uniform vec4 farbe : source_color = vec4(0.067, 0.067, 0.075, 1.0);
+uniform vec4 saum : source_color = vec4(0.992, 0.318, 0.031, 1.0);
 uniform float schraege = 0.22;
 uniform float saum_breite = 0.06;
 

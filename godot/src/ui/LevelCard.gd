@@ -68,7 +68,7 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	links.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(links)
 	_spalte = links
-	_text(links, tr("STATION %d / %d") % [_idx + 1, _n], 22,
+	_text(links, tr("Station %d / %d") % [_idx + 1, _n], 22,
 		Brand.UI_EYEBROW, Brand.spaced(Brand.sans("medium"), 4))
 	_luft(links, 12)
 	var stationsname := data.name_text()
@@ -98,14 +98,14 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	liste.add_theme_constant_override("separation", 0)
 	liste.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tafel.add_child(liste)
-	_text(liste, tr("DEIN ERGEBNIS"), 20, Brand.UI_EYEBROW, Brand.spaced(Brand.sans("medium"), 3))
+	_text(liste, tr("Dein Ergebnis"), 20, Brand.UI_EYEBROW, Brand.spaced(Brand.sans("medium"), 3))
 	_luft(liste, 22)
 	var zeilen := [
-		[tr("ZEIT"), tr("%.1f s / Ziel %.0f s") % [result.get("time", 0.0), result.get("par", 0.0)]],
-		[tr("PRÜFSUMMEN"), "%d / %d" % [result.get("bits", 0), result.get("bits_total", 0)]],
+		[tr("Zeit"), tr("%.1f s / Ziel %.0f s") % [result.get("time", 0.0), result.get("par", 0.0)]],
+		[tr("Prüfsummen"), "%d / %d" % [result.get("bits", 0), result.get("bits_total", 0)]],
 	]
 	if mit_lauschern:
-		zeilen.append([tr("LÜCKENLOS"), tr("nie mitgelesen") if got[2] else tr("im Klartext mitgelesen: %d×") % int(result.get("seen", 0))])
+		zeilen.append([tr("Lückenlos"), tr("nie mitgelesen") if got[2] else tr("im Klartext mitgelesen: %d×") % int(result.get("seen", 0))])
 	for i in zeilen.size():
 		liste.add_child(_regel())
 		liste.add_child(_zeile(str(zeilen[i][0]), str(zeilen[i][1]), got[i]))
@@ -129,7 +129,7 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 	add_child(fuss)
 	_fuss = fuss
 	if _pal.zone_name != "":
-		_text(fuss, _pal.zone_name.to_upper(), 18, Color(Brand.GREY_LIGHT, 0.72), Brand.spaced(Brand.sans("medium"), 3))
+		_text(fuss, _pal.zone_name, 18, Color(Brand.GREY_300, 0.72), Brand.spaced(Brand.sans("medium"), 3))
 	if _pal.zone_fact != "":
 		_text(fuss, _pal.zone_fact, 24, Brand.UI_TEXT_DIM, Brand.sans("roman"), satzbreite(_pal.zone_fact, Brand.sans("roman"), 24, LW))
 	# An der Grundlinie des Knopfs verankert und nach oben wachsend: Umbrechende
@@ -143,7 +143,7 @@ func setup(data: LevelData, result: Dictionary, has_next: bool) -> void:
 
 	var alle := got.all(func(v): return v)
 	if alle:
-		stempel = _stempel(tr("GEPRÜFT"))
+		stempel = _stempel(tr("Geprüft"))
 		add_child(stempel)
 		var g := stempel.get_combined_minimum_size()
 		stempel.size = g
@@ -393,10 +393,10 @@ func _route() -> void:
 				var s := clampf((_t - ROUTE_GELB) / 0.2, 0.0, 1.0)
 				r *= 1.0 + 0.4 * (1.0 - s) * (1.0 - s)
 			draw_circle(p, r, Brand.UI_HIGHLIGHT)
-			haken(self, p, r * 0.5, Brand.GREY_DARK, 2.2)
+			haken(self, p, r * 0.5, Brand.GREY_1000, 2.2)
 		elif i == idx:
 			draw_circle(p, 9.0, Brand.UI_ACCENT)
-			draw_circle(p, 3.5, Brand.GREY_DARK)
+			draw_circle(p, 3.5, Brand.GREY_1000)
 		else:
 			draw_circle(p, 7.0, _pal.fill_dark.darkened(0.25))
 			draw_arc(p, 7.0, 0.0, TAU, 24, Color(1, 1, 1, 0.4), 1.5, true)
@@ -441,7 +441,7 @@ class Vermerk extends Control:
 		var r := minf(size.x, size.y) * 0.5
 		if ok:
 			draw_circle(c, r, Brand.UI_HIGHLIGHT)
-			LevelCard.haken(self, c, r * 0.46, Brand.GREY_DARK, 5.0)
+			LevelCard.haken(self, c, r * 0.46, Brand.GREY_1000, 5.0)
 		else:
 			var n := 20
 			for i in n:

@@ -42,7 +42,7 @@ const BAND_TEXT_W := 506.0
 
 var theme := {}
 var sperre := 0.0
-var weiter_text := "LEERTASTE: Weiter!"
+var weiter_text := "Leertaste: Weiter!"
 var dots: Array = []
 var tz := 0.0
 var t := 0.0
@@ -111,11 +111,11 @@ func _ready() -> void:
 		blaettern = false     # Prüflauf: Screenshots nach der Uhr
 	_build()
 	if weiter_text != "":
-		weiter = label(W - 12, 340, weiter_text, 10.5, {"color": Brand.UI_ACCENT, "spacing": 0.4, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+		weiter = label(W - 12, 340, weiter_text, 10.5, {"color": Brand.UI_ACCENT, "spacing": 0.4, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x04163a), "stroke_w": 1.0})
 		weiter.modulate.a = 0.0
 		_weiter_anzeige = weiter_text
 	if paging():
-		hinweis = label(W - 12, 327.5, _blaetter_hinweis(), 9.0, {"color": Brand.UI_TEXT_DIM, "bold": false, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 0.8})
+		hinweis = label(W - 12, 327.5, _blaetter_hinweis(), 9.0, {"color": Brand.UI_TEXT_DIM, "bold": false, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x04163a), "stroke_w": 0.8})
 	if entrance:
 		_entrance()
 
@@ -127,16 +127,17 @@ func _canvas(painter: Callable) -> Canvas:
 	return c
 
 
-## Farbwelt „city" der Web-Fassung — die Nacht, in der alle Screens spielen.
+## Die Nacht, in der alle Info-Screens spielen — aus dem PwC-Farbsystem:
+## Himmel Grey 1000 → Blue 950, Boden Grey, Licht Tangerine. (Die Farbwerte der
+## Farbwelt „city" aus themes.json der Web-Fassung gelten hier nicht mehr.)
 static func city_theme() -> Dictionary:
-	var th: Dictionary = Game.theme("city")
 	var d := {
-		"sky_top": Pen.html(str(th.get("skyTop", "#2a3550"))),
-		"sky_bottom": Pen.html(str(th.get("skyBottom", "#4a5b82"))),
-		"ground": Pen.html(str(th.get("ground", "#3a3f4a"))),
-		"ground_top": Pen.html(str(th.get("groundTop", "#565d6e"))),
-		"accent": Pen.html(str(th.get("accent", "#ffd75e"))),
-		"detail": Pen.html(str(th.get("detail", "#7f8ba6"))),
+		"sky_top": Pen.hex(0x111113),
+		"sky_bottom": Pen.hex(0x0a245f),
+		"ground": Pen.hex(0x303236),
+		"ground_top": Pen.hex(0x626771),
+		"accent": Pen.hex(0xffc21b),
+		"detail": Pen.hex(0x8e95a2),
 	}
 	d["fog"] = Pen.fog_of(d["sky_bottom"])
 	return d
@@ -384,8 +385,8 @@ static func font_serif(spacing: float) -> Font:
 
 ## Titel + Untertitel wie auf allen Info-Screens.
 func header(titel: String, untertitel: String) -> void:
-	label(W / 2, 44, titel, 26, {"serif": true, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.2, "spacing": 1.2})
-	label(W / 2, 72, untertitel, 10.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	label(W / 2, 44, titel, 26, {"serif": true, "stroke": Pen.hex(0x04163a), "stroke_w": 1.2, "spacing": 1.2})
+	label(W / 2, 72, untertitel, 10.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x04163a), "stroke_w": 1.0})
 
 
 # ---------------------------------------------------------------- Erzählband
@@ -400,7 +401,7 @@ func story_line(text: String, von: float, bis: float, opts := {}) -> Label:
 	var ls := LabelSettings.new()
 	ls.font = font(bool(opts.get("bold", true)), 0.0)
 	ls.font_size = roundi(float(opts.get("size", 11.0)) * S)
-	ls.font_color = opts.get("color", Pen.hex(0xf6f8ff))
+	ls.font_color = opts.get("color", Pen.hex(0xf5f7f8))
 	ls.line_spacing = 3.0
 	l.label_settings = ls
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -511,7 +512,7 @@ func _draw_story_band(c: CanvasItem) -> void:
 	var h := maxf(_story_h, BAND_PAD * 2.0 + 12.0)
 	var y := BAND_Y
 	Pen.rrect(c, BAND_X + 1.5, y + 2.5, BAND_W, h, 6, Color(0, 0, 0, 0.35 * a))
-	Pen.rrect(c, BAND_X, y, BAND_W, h, 6, Pen.hex(0x070f1c, 0.88 * a))
+	Pen.rrect(c, BAND_X, y, BAND_W, h, 6, Pen.hex(0x111113, 0.88 * a))
 	Pen.vgradient(c, BAND_X + 6, y + 0.5, BAND_W - 12, h * 0.45, Color(1, 1, 1, 0.05 * a), Color(1, 1, 1, 0.0))
 	Pen.srrect(c, BAND_X, y, BAND_W, h, 6, Color(1, 1, 1, 0.16 * a), 0.8)
 	Pen.rrect(c, BAND_X + 3.5, y + 5, 2.4, h - 10, 1.2, Pen.alpha(Brand.UI_ACCENT, 0.95 * a))
@@ -594,7 +595,7 @@ func _draw_sky(c: CanvasItem) -> void:
 		var sx := rng.randf() * W
 		var sy := rng.randf() * 170.0
 		var a := 0.12 + rng.randf() * 0.4
-		Pen.circle(c, sx, sy, 0.45 + rng.randf() * 0.6, Color(0.9, 0.94, 1.0, a))
+		Pen.circle(c, sx, sy, 0.45 + rng.randf() * 0.6, Color(0.933, 0.937, 0.945, a))
 	# fernes Himmelslicht: kühle Kuppel über dem Horizont
 	Pen.ellipse(c, 320, 330, 1000, 300, Pen.alpha(fog, 0.10))
 	# Fern-Silhouette: Türme in Dunstfarbe
@@ -616,7 +617,7 @@ func _draw_sky(c: CanvasItem) -> void:
 	Pen.vgradient(c, 0, 86, W, 68, Pen.alpha(fog, 0.0), Pen.alpha(fog, 0.34))
 	Pen.vgradient(c, 0, 154, W, 70, Pen.alpha(fog, 0.34), Pen.alpha(fog, 0.0))
 	# Horizontglühen: warmes Licht knapp über der Spielebene
-	Pen.vgradient(c, 0, 236, W, 84, Pen.hex(0xffb070, 0.0), Pen.hex(0xffb070, 0.11))
+	Pen.vgradient(c, 0, 236, W, 84, Pen.hex(0xffaa72, 0.0), Pen.hex(0xffaa72, 0.11))
 
 
 func _motes() -> void:
@@ -634,7 +635,7 @@ func _motes() -> void:
 	m.initial_velocity_max = 4.0
 	m.scale_amount_min = 0.5
 	m.scale_amount_max = 1.1
-	m.color = Color(1.0, 0.96, 0.88, 0.22)
+	m.color = Color(0.988, 0.98, 0.922, 0.22)
 	m.texture = Fx.radial_texture()
 	m.scale_amount_min = 0.006
 	m.scale_amount_max = 0.014

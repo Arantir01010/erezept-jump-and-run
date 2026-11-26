@@ -48,8 +48,8 @@
         "en": "Stand still: the gateway checks you!"
       },
       "denyText": {
-        "de": "ZUGRIFF VERWEIGERT",
-        "en": "ACCESS DENIED"
+        "de": "Zugriff verweigert",
+        "en": "Access denied"
       }
     },
     "krypto-dusche": {

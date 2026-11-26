@@ -77,11 +77,11 @@ func _succeed() -> void:
 	if g:
 		g.open()
 	Fx.ring(level, global_position, Palette.OK, 100.0)
-	Fx.float_text(level, global_position + Vector2(0, -110), "GEPRÜFT ✓", Palette.OK, 26)
+	Fx.float_text(level, global_position + Vector2(0, -110), "Geprüft ✓", Palette.OK, 26)
 	# Der Gag: Die Datenkrake hinter Paul bekommt das Tor vor die Nase
 	get_tree().create_timer(0.8).timeout.connect(func():
 		if g and is_inside_tree():
-			Fx.deny_stamp(level, g.global_position + Vector2(-90, -120), ltext("denyText", {"de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED"})))
+			Fx.deny_stamp(level, g.global_position + Vector2(-90, -120), ltext("denyText", {"de": "Zugriff verweigert", "en": "Access denied"})))
 
 func _draw() -> void:
 	var r := Rect2(-rect.size.x / 2.0, -rect.size.y / 2.0, rect.size.x, 18.0)
@@ -96,4 +96,4 @@ func _draw() -> void:
 	if _scanning and not done:
 		var y := r.position.y - 90 + fmod(_t * 160.0, 90.0)
 		draw_rect(Rect2(r.position.x, y, r.size.x, 3), Palette.glow(Color(c.r, c.g, c.b, 0.7), 1.6))
-	draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 34), "SCAN" if not done else "OK", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 16, Palette.glow(c, 1.2))
+	draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 34), "Scan" if not done else "OK", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 16, Palette.glow(c, 1.2))

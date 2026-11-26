@@ -21,7 +21,7 @@ var _cone_light: PointLight2D
 ## oder in der VAU: Kegel blass und neutral, der Lauscher scheitert (Feedback 9/2026:
 ## „Gefahren schlecht zu sehen"). Weicher Übergang, kein Blinken.
 var _warn := 1.0
-const NEUTRAL := Color(0.74, 0.78, 0.86)
+const NEUTRAL := Color(0.796, 0.82, 0.839)
 static var _sclera_sb: StyleBoxFlat
 
 func spawn() -> void:
@@ -113,7 +113,7 @@ func _sees(p: Vector2) -> bool:
 func _erwischt() -> void:
 	var lost := player.hurt(global_position.x)
 	Game.mark_seen(data.id, ltext("akteur", {"de": "Lauscher", "en": "Eavesdropper"}))
-	Fx.deny_stamp(level, global_position + Vector2(0, -60), ltext("seenText", {"de": "MITGELESEN!", "en": "READ!"}))
+	Fx.deny_stamp(level, global_position + Vector2(0, -60), ltext("seenText", {"de": "Mitgelesen!", "en": "Read!"}))
 	if lost <= 0:
 		return
 	Fx.float_text(level, player.global_position + Vector2(0, -90), tr("−%d Bits") % lost, Palette.DENY, 22)
@@ -146,19 +146,19 @@ func _draw() -> void:
 		draw_line(Vector2(x, -spread * f), Vector2(x, spread * f), Color(c.r, c.g, c.b, (1.0 - f) * scan_a), 2.0, true)
 	# Das Auge
 	draw_circle(Vector2.ZERO, 30.0, Color(c.r, c.g, c.b, 0.15))
-	draw_circle(Vector2.ZERO, 22.0, Color(0.12, 0.09, 0.14))
+	draw_circle(Vector2.ZERO, 22.0, Color(0.125, 0.129, 0.141))
 	var open := 0.12 if _blink > 0.0 else 1.0
 	var sclera := Rect2(-18, -12 * open, 36, 24 * open)
 	if _sclera_sb == null:
 		_sclera_sb = StyleBoxFlat.new()
-		_sclera_sb.bg_color = Color(0.97, 0.95, 0.92)
+		_sclera_sb.bg_color = Color(1.0, 0.961, 0.929)
 		_sclera_sb.set_corner_radius_all(12)
 		_sclera_sb.anti_aliasing = true
 	draw_style_box(_sclera_sb, sclera)
 	if open > 0.5:
 		draw_circle(_eye, 8.0, Palette.glow(c, 1.4))
-		draw_circle(_eye, 4.0, Color(0.05, 0.04, 0.06))
+		draw_circle(_eye, 4.0, Color(0.067, 0.067, 0.075))
 		draw_circle(_eye + Vector2(-2, -2), 1.5, Color(1, 1, 1, 0.9))
 	# Antenne
-	draw_line(Vector2(0, -22), Vector2(0, -36), Color(0.3, 0.25, 0.32), 3.0, true)
+	draw_line(Vector2(0, -22), Vector2(0, -36), Color(0.298, 0.314, 0.337), 3.0, true)
 	draw_circle(Vector2(0, -38), 4.0, Palette.glow(c, 1.6 if _seen else 1.0))

@@ -82,7 +82,7 @@ func _draw() -> void:
 	if _ground < INF:
 		var k := 1.0 - (bob + 5.0) / 10.0 * 0.35
 		draw_set_transform(Vector2(0, _ground - 2.0), 0.0, Vector2(k, 0.28 * k))
-		draw_circle(Vector2.ZERO, 30.0, Color(0.05, 0.05, 0.08, 0.22 * k))
+		draw_circle(Vector2.ZERO, 30.0, Color(0.067, 0.067, 0.075, 0.22 * k))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# leiser Hof: Fundstück im Abendlicht
 	draw_circle(Vector2(0, bob - 8.0), 46.0, Color(c.r, c.g, c.b, 0.08))
@@ -94,5 +94,5 @@ func _draw() -> void:
 	var nc := Palette.tint(c, 0.45)
 	var y := bob + 34.0
 	var kname := str(TranslationServer.translate(str(inf["name"])))
-	draw_string_outline(Brand.sans("medium"), Vector2(-80, y), kname, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, 4, Color(0.05, 0.06, 0.09, 0.85))
+	draw_string_outline(Brand.sans("medium"), Vector2(-80, y), kname, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, 4, Color(0.067, 0.067, 0.075, 0.85))
 	draw_string(Brand.sans("medium"), Vector2(-80, y), kname, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, nc)

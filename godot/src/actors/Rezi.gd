@@ -54,7 +54,7 @@ var _ribbon_pts := PackedVector2Array()  # Weltpositionen, neueste zuerst
 func _ready() -> void:
 	z_index = 12
 	# Leitlicht der Szene — wirft weiche Schatten von Plattformen und Wänden
-	light = Fx.light(self, Vector2.ZERO, Color(0.75, 0.92, 1.0), 720.0, 1.05, true)
+	light = Fx.light(self, Vector2.ZERO, Color(0.863, 0.906, 0.992), 720.0, 1.05, true)
 	# Datenspur: kleine Funken hinter REZI, sobald sie sich bewegt (etwas dichter als früher)
 	trail = CPUParticles2D.new()
 	trail.amount = 40
@@ -67,10 +67,10 @@ func _ready() -> void:
 	trail.gravity = Vector2(0, -30)
 	trail.scale_amount_min = 1.5
 	trail.scale_amount_max = 3.5
-	trail.color = Palette.glow(Color(0.55, 0.9, 1.0, 0.7), 1.5)
+	trail.color = Palette.glow(Color(0.404, 0.592, 1.0, 0.7), 1.5)
 	var ramp := Gradient.new()
-	ramp.set_color(0, Color(0.55, 0.9, 1.0, 0.7))
-	ramp.set_color(1, Color(0.55, 0.9, 1.0, 0.0))
+	ramp.set_color(0, Color(0.404, 0.592, 1.0, 0.7))
+	ramp.set_color(1, Color(0.404, 0.592, 1.0, 0.0))
 	trail.color_ramp = ramp
 	trail.emitting = false
 	trail.z_index = -1
@@ -78,8 +78,8 @@ func _ready() -> void:
 	# Sprechblase (Control im Weltraum, oberhalb von REZI)
 	bubble = PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.05, 0.08, 0.13, 0.86)
-	sb.border_color = Color(0.55, 0.85, 1.0, 0.7)
+	sb.bg_color = Color(0.067, 0.067, 0.075, 0.86)
+	sb.border_color = Color(0.404, 0.592, 1.0, 0.7)
 	sb.set_border_width_all(1)
 	sb.set_corner_radius_all(12)
 	sb.content_margin_left = 14
@@ -242,7 +242,7 @@ func add_seal(seal_id: String) -> void:
 
 func set_encrypted(on: bool) -> void:
 	encrypted = on
-	_color = Palette.COOL if not on else Color(0.62, 0.95, 1.0)
+	_color = Palette.COOL if not on else Color(0.863, 0.906, 0.992)
 
 
 func swoop() -> void:
@@ -283,7 +283,7 @@ func _draw() -> void:
 			loc.append(_ribbon_pts[i] - global_position)
 			var k := 1.0 - float(i) / float(n - 1)
 			soft.append(Color(_color.r, _color.g, _color.b, 0.18 * k * _ribbon_a))
-			core.append(Color(0.86, 0.97, 1.0, 0.30 * k * _ribbon_a))
+			core.append(Color(0.937, 0.965, 1.0, 0.30 * k * _ribbon_a))
 		draw_polyline_colors(loc, soft, 12.0, true)
 		draw_polyline_colors(loc, core, 4.0, true)
 	# Squash/Stretch und Banken gelten für den ganzen Körper
@@ -294,25 +294,25 @@ func _draw() -> void:
 	var ant_base := Vector2(0.0, -h / 2.0 + 2.0)
 	var ant_dir := Vector2(sin(_ant), -cos(_ant))
 	var ant_tip := ant_base + ant_dir * 13.0
-	draw_line(ant_base, ant_tip, Color(0.12, 0.20, 0.27), 4.5, true)
-	draw_line(ant_base, ant_tip, Color(0.86, 0.97, 1.0), 2.0, true)
-	draw_circle(ant_tip, 4.2, Color(0.12, 0.20, 0.27))
+	draw_line(ant_base, ant_tip, Color(0.188, 0.196, 0.212), 4.5, true)
+	draw_line(ant_base, ant_tip, Color(0.937, 0.965, 1.0), 2.0, true)
+	draw_circle(ant_tip, 4.2, Color(0.188, 0.196, 0.212))
 	draw_circle(ant_tip, 3.0, Palette.glow(_color, 1.5 + maxf(mood, 0.0) * 0.4))
 	# Körper: helle Kapsel mit dunkler Kontur und leuchtendem Innenrand
 	var ob := StyleBoxFlat.new()
-	ob.bg_color = Color(0.12, 0.20, 0.27)
+	ob.bg_color = Color(0.188, 0.196, 0.212)
 	ob.set_corner_radius_all(15)
 	ob.anti_aliasing = true
 	draw_style_box(ob, Rect2(body.position - Vector2(3, 3), body.size + Vector2(6, 6)))
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.86, 0.97, 1.0)
+	sb.bg_color = Color(0.937, 0.965, 1.0)
 	sb.set_corner_radius_all(13)
 	sb.border_color = Palette.glow(_color, 1.5)
 	sb.set_border_width_all(3)
 	sb.anti_aliasing = true
 	draw_style_box(sb, body)
 	# Schattenseite (Licht von oben links)
-	draw_rect(Rect2(body.position.x + body.size.x * 0.55, body.position.y + 4, body.size.x * 0.45 - 4, body.size.y - 8), Color(0.55, 0.78, 0.88, 0.35))
+	draw_rect(Rect2(body.position.x + body.size.x * 0.55, body.position.y + 4, body.size.x * 0.45 - 4, body.size.y - 8), Color(0.404, 0.592, 1.0, 0.35))
 	# Verschlüsselt: Hex-Muster statt Klartext
 	if encrypted:
 		for i in 3:
@@ -325,20 +325,20 @@ func _draw() -> void:
 	var cy := 8.0
 	var blatt := Rect2(cx - 7.0, cy - 8.5, 14.0, 17.0)
 	var sbz := StyleBoxFlat.new()
-	sbz.bg_color = Color(0.99, 0.98, 0.96)
+	sbz.bg_color = Color(0.988, 0.98, 0.922)
 	sbz.set_corner_radius_all(2)
-	sbz.border_color = Color(0.55, 0.62, 0.72, 0.9)
+	sbz.border_color = Color(0.557, 0.584, 0.635, 0.9)
 	sbz.set_border_width_all(1)
 	sbz.anti_aliasing = true
 	draw_style_box(sbz, blatt)
-	draw_rect(Rect2(cx - 5.5, cy - 7.0, 11.0, 3.2), Color(0.93, 0.45, 0.55))
+	draw_rect(Rect2(cx - 5.5, cy - 7.0, 11.0, 3.2), Color(0.961, 0.435, 0.439))
 	for i in 3:
-		draw_rect(Rect2(cx - 5.0, cy - 2.2 + i * 3.0, 10.0 - (3.0 if i == 2 else 0.0), 1.4), Color(0.45, 0.52, 0.62))
+		draw_rect(Rect2(cx - 5.0, cy - 2.2 + i * 3.0, 10.0 - (3.0 if i == 2 else 0.0), 1.4), Color(0.471, 0.494, 0.541))
 	# Augen (schauen zu Paul), Freude = Lach-Augen, Schreck = weit offen
 	var ex := _look.x * 3.0
 	var ey := -8.0 + _look.y * 2.0
 	var open := 0.15 if _blink > 0.0 else 1.0
-	var ink := Color(0.12, 0.16, 0.24)
+	var ink := Color(0.188, 0.196, 0.212)
 	var joy := mood > 0.3
 	var fear := mood < -0.3
 	for side in [-1.0, 1.0]:
@@ -362,7 +362,7 @@ func _draw() -> void:
 	# Siegel als kleine goldene Marken unter dem Körper
 	for i in seals.size():
 		var p := Vector2(-(seals.size() - 1) * 6.0 + i * 12.0, h / 2.0 + 8.0)
-		draw_circle(p, 5.0, Color(0.12, 0.16, 0.24))
+		draw_circle(p, 5.0, Color(0.188, 0.196, 0.212))
 		draw_circle(p, 3.6, Palette.GOLD)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 

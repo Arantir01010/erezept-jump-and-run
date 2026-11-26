@@ -52,8 +52,8 @@ func tick(delta: float) -> void:
 				_hits += 1
 				if _hits >= 2 and _t - _last_tip > 7.0:
 					_last_tip = _t
-					say(ltext("duckHint", {"de": "Tipp: Nach UNTEN drücken zum Ducken — die Kralle greift über dich hinweg!",
-						"en": "Tip: press DOWN to duck — the claw grabs right over you!"}))
+					say(ltext("duckHint", {"de": "Tipp: Nach unten drücken zum Ducken — die Kralle greift über dich hinweg!",
+						"en": "Tip: press down to duck — the claw grabs right over you!"}))
 	queue_redraw()
 
 func _schedule() -> void:
@@ -100,13 +100,13 @@ func _block() -> void:
 	tw.tween_property(self, "_blende_y", -6.0, 0.4).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(func():
 		_open = false
-		Fx.deny_stamp(level, global_position + Vector2(_dir * 40, -70), ltext("denyText", {"de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED"}))
+		Fx.deny_stamp(level, global_position + Vector2(_dir * 40, -70), ltext("denyText", {"de": "Zugriff verweigert", "en": "Access denied"}))
 		level.camera.kick(Vector2(0, 30))
 		Fx.dust(level, global_position, 6, 1.2))
 
 func _draw() -> void:
 	var sx := sin(_t * 70.0) * 3.0 * _shake
-	var c := Color(0.55, 0.5, 0.6) if not blocked else Color(0.45, 0.45, 0.55)
+	var c := Color(0.471, 0.494, 0.541) if not blocked else Color(0.471, 0.494, 0.541)
 	# Arm (Teleskop)
 	draw_line(Vector2(-_dir * 20 + sx, 0), Vector2(_claw_x + sx, 0), c.darkened(0.2), 12.0, true)
 	draw_line(Vector2(-_dir * 20 + sx, 0), Vector2(_claw_x * 0.6 + sx, 0), c, 16.0, true)
@@ -119,13 +119,13 @@ func _draw() -> void:
 	draw_circle(Vector2(kx + _dir * 22, -spread), 3.5, Palette.DENY if not blocked else c)
 	draw_circle(Vector2(kx + _dir * 22, spread), 3.5, Palette.DENY if not blocked else c)
 	# Fake-Leser-Gehäuse
-	draw_panel(Rect2(-_dir * 20 - 22 + sx, -22, 44, 44), Color(0.2, 0.16, 0.2), c, 6)
-	draw_rect(Rect2(-_dir * 20 - 12 + sx, -6, 24, 4), Palette.DENY if not blocked else Color(0.3, 0.3, 0.3))
+	draw_panel(Rect2(-_dir * 20 - 22 + sx, -22, 44, 44), Color(0.188, 0.196, 0.212), c, 6)
+	draw_rect(Rect2(-_dir * 20 - 12 + sx, -6, 24, 4), Palette.DENY if not blocked else Color(0.298, 0.314, 0.337))
 	# gematik-Siegel-Blende: fährt herunter und klemmt die Kralle ein
 	if _blende_y > -900.0:
 		var b := Rect2(-_dir * 20 - 34, _blende_y - 60, 68, 60)
-		draw_panel(b, Color(0.05, 0.12, 0.10), Palette.OK, 6, 0.8, 3)
-		draw_string(ThemeDB.fallback_font, Vector2(b.position.x, b.position.y + 26), "ZUGELASSEN", HORIZONTAL_ALIGNMENT_CENTER, b.size.x, 12, Palette.glow(Palette.OK, 1.3))
+		draw_panel(b, Color(0.004, 0.129, 0.086), Palette.OK, 6, 0.8, 3)
+		draw_string(ThemeDB.fallback_font, Vector2(b.position.x, b.position.y + 26), "Zugelassen", HORIZONTAL_ALIGNMENT_CENTER, b.size.x, 12, Palette.glow(Palette.OK, 1.3))
 		draw_arc(Vector2(b.get_center().x, b.position.y + 42), 9.0, 0, TAU, 16, Palette.glow(Palette.OK, 1.4), 2.0, true)
 		draw_line(Vector2(b.get_center().x - 5, b.position.y + 42), Vector2(b.get_center().x - 1, b.position.y + 46), Palette.OK, 2.0, true)
 		draw_line(Vector2(b.get_center().x - 1, b.position.y + 46), Vector2(b.get_center().x + 6, b.position.y + 38), Palette.OK, 2.0, true)

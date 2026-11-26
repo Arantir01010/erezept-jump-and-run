@@ -105,8 +105,8 @@ func _draw() -> void:
 		var alpha := 1.0 if draining else 0.55
 		var warn := draining and ratio < 0.3
 		# Grundscheibe und Restring (unter 30 %: rot, langsam pulsierend — 2 Hz)
-		draw_circle(center, 20.0, Color(0.04, 0.05, 0.10, 0.40 * alpha))
-		var back := Color(0.06, 0.07, 0.14, 0.55)
+		draw_circle(center, 20.0, Color(0.067, 0.067, 0.075, 0.40 * alpha))
+		var back := Color(0.067, 0.067, 0.075, 0.55)
 		if warn:
 			back = Color(Palette.DENY.r, Palette.DENY.g, Palette.DENY.b, 0.3 + 0.15 * sin(_t * TAU * 2.0))
 		draw_arc(center, 17.0, 0, TAU, 40, back, 5.0, true)
