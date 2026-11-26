@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",
@@ -78,8 +78,8 @@
   },
   "parTimeSeconds": 90,
   "stuckHint": {
-    "de": "Immer nach rechts! Hülle wechseln mit Joystick HOCH (oder Shift).",
-    "en": "Keep heading right! Switch your shell with joystick UP (or Shift)."
+    "de": "Immer nach rechts! Hülle wechseln mit Joystick hoch (oder Shift).",
+    "en": "Keep heading right! Switch your shell with joystick up (or Shift)."
   },
   "objects": [
     {
@@ -88,8 +88,8 @@
       "ty": 16,
       "tw": 3,
       "th": 4,
-      "textDe": "Joystick HOCH (oder Shift) wechselt deine Hülle. Probier es aus!",
-      "textEn": "Joystick UP (or Shift) switches your shell. Try it!"
+      "textDe": "Joystick hoch (oder Shift) wechselt deine Hülle. Probier es aus!",
+      "textEn": "Joystick up (or Shift) switches your shell. Try it!"
     },
     {
       "type": "lauscher",

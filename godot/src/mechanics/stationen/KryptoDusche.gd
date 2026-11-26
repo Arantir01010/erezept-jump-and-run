@@ -51,7 +51,7 @@ func tick(delta: float) -> void:
 		Sfx.play("toggle_on")
 		Fx.ring(level, player.global_position + Vector2(0, -32), Palette.COOL, 140.0)
 		Fx.sparkle(level, player.global_position + Vector2(0, -32), Palette.COOL, 30, 320.0)
-		Fx.float_text(level, player.global_position + Vector2(0, -100), "VERSCHLÜSSELT", Palette.COOL, 30)
+		Fx.float_text(level, player.global_position + Vector2(0, -100), "Verschlüsselt", Palette.COOL, 30)
 		_rain.emitting = false
 		say(Game.t(data.station.get("reziText", "")), 3.5)
 		var g = linked_gate()
@@ -69,4 +69,4 @@ func _draw() -> void:
 	# Zone
 	var a := 0.05 + 0.03 * sin(_t * 2.0)
 	draw_rect(Rect2(r.position.x + 6, r.position.y + 22, r.size.x - 12, r.size.y - 22), Color(c.r, c.g, c.b, a if not done else 0.02))
-	draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 6), "KRYPTO", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 18, Palette.glow(c, 1.2))
+	draw_string(ThemeDB.fallback_font, Vector2(r.position.x, r.position.y - 6), "Krypto", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 18, Palette.glow(c, 1.2))

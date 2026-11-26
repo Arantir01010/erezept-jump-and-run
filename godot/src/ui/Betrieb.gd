@@ -27,7 +27,7 @@ func _ready() -> void:
 	root.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	add_child(root)
 	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.04, 0.08, 0.94)
+	bg.color = Color(0.067, 0.067, 0.075, 0.94)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(bg)
 	var box := VBoxContainer.new()
@@ -35,7 +35,7 @@ func _ready() -> void:
 	box.size = Vector2(1640, 940)
 	box.add_theme_constant_override("separation", 10)
 	root.add_child(box)
-	box.add_child(_text("BETRIEB — nur fürs Standpersonal", 40, Brand.UI_HIGHLIGHT))
+	box.add_child(_text("Betrieb — nur fürs Standpersonal", 40, Brand.UI_HIGHLIGHT))
 	box.add_child(_text(_ueberblick(), 26, Palette.WHITE))
 	box.add_child(_tabelle())
 	var abstand := Control.new()
@@ -46,7 +46,7 @@ func _ready() -> void:
 	if not OS.has_feature("web"):
 		_zeile(box, "beenden")
 	_zeile(box, "schliessen")
-	_info = _text("◀ ▶ Lautstärke · ▲ ▼ wählen · SPRUNG/AKTION/Enter ausführen · ESC schließen", 22, Brand.UI_TEXT_DIM)
+	_info = _text("◀ ▶ Lautstärke · ▲ ▼ wählen · Sprung/Aktion/Enter ausführen · Esc schließen", 22, Brand.UI_TEXT_DIM)
 	box.add_child(_info)
 	_auffrischen()
 

@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",
@@ -166,8 +166,8 @@
       "ty": 16,
       "tw": 3,
       "th": 4,
-      "textDe": "Drinnen schnell UND unsichtbar. Das kann sonst nichts.",
-      "textEn": "Inside fast AND invisible. Nothing else can do that."
+      "textDe": "Drinnen schnell und unsichtbar. Das kann sonst nichts.",
+      "textEn": "Inside fast and invisible. Nothing else can do that."
     }
   ]
 }

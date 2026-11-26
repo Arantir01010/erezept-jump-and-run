@@ -143,6 +143,6 @@ static func color_of(s: String) -> Color:
 
 static func label_of(s: String) -> String:
 	match s:
-		VERSCHLUESSELT: return str(TranslationServer.translate("VERSCHLÜSSELT"))
+		VERSCHLUESSELT: return str(TranslationServer.translate("Verschlüsselt"))
 		VAU: return "VAU"
-		_: return str(TranslationServer.translate("KLARTEXT"))
+		_: return str(TranslationServer.translate("Klartext"))

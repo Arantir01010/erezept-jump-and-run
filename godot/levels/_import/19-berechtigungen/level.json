@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",
@@ -72,8 +72,8 @@
       "ty": 16,
       "tw": 3,
       "th": 4,
-      "textDe": "Drei Türen. Alle drei öffnen nur mit DEINER Karte — keine Praxiskarte hilft hier.",
-      "textEn": "Three doors. All three open only with YOUR card — no practice card helps here."
+      "textDe": "Drei Türen. Alle drei öffnen nur mit deiner Karte — keine Praxiskarte hilft hier.",
+      "textEn": "Three doors. All three open only with your card — no practice card helps here."
     },
     {
       "type": "karte",

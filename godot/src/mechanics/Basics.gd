@@ -68,7 +68,7 @@ class Collectible extends Mechanic:
 		var r := 9.0 if bonus else 7.5
 		var p := Vector2(0, bob)
 		draw_circle(p, r * 2.4, Color(c.r, c.g, c.b, 0.12))
-		draw_circle(p, r + 2.5, Color(0.12, 0.16, 0.24))
+		draw_circle(p, r + 2.5, Color(0.188, 0.196, 0.212))
 		draw_circle(p, r, Palette.glow(c, 1.5))
 		draw_circle(p + Vector2(-r * 0.3, -r * 0.35), r * 0.35, Color(1, 1, 1, 0.9))
 		if bonus:
@@ -307,7 +307,7 @@ class Spike extends Mechanic:
 			draw_colored_polygon(PackedVector2Array([Vector2(x0 - 1.5, boden + 1), Vector2(m, spitze - 3.0), Vector2(x0 + w + 1.5, boden + 1)]), pal.outline)
 			draw_colored_polygon(PackedVector2Array([Vector2(x0 + 1.5, boden), Vector2(m, spitze), Vector2(m, boden)]), hell)
 			draw_colored_polygon(PackedVector2Array([Vector2(m, boden), Vector2(m, spitze), Vector2(x0 + w - 1.5, boden)]), dunkel)
-			draw_line(Vector2(m, spitze + 1.0), Vector2(m - w * 0.18, boden - 6.0), Color(1, 0.9, 0.85, 0.55), 1.5, true)
+			draw_line(Vector2(m, spitze + 1.0), Vector2(m - w * 0.18, boden - 6.0), Color(1.0, 0.91, 0.831, 0.55), 1.5, true)
 		# Sockel mit Warnschraffur (rot/dunkel) und dunkler Kante
 		draw_rect(Rect2(r.position.x, boden, r.size.x, SOCKEL_H), pal.outline)
 		for s in _schraffur:
@@ -544,11 +544,11 @@ class Deco extends Mechanic:
 			draw_circle(off, 12.0, pal.cap)
 
 	func _krake(off: Vector2) -> void:
-		var body_c := Color(0.52, 0.30, 0.60)
+		var body_c := Color(0.357, 0.247, 0.722)
 		draw_circle(off, 29.0, pal.outline)
 		draw_circle(off, 26.0, body_c)
-		draw_circle(off + Vector2(-8, -4), 6.0, Color(0.97, 0.95, 1.0))
-		draw_circle(off + Vector2(8, -4), 6.0, Color(0.97, 0.95, 1.0))
+		draw_circle(off + Vector2(-8, -4), 6.0, Color(0.937, 0.965, 1.0))
+		draw_circle(off + Vector2(8, -4), 6.0, Color(0.937, 0.965, 1.0))
 		draw_circle(off + Vector2(-7, -3), 2.5, pal.outline)
 		draw_circle(off + Vector2(9, -3), 2.5, pal.outline)
 		for i in 6:

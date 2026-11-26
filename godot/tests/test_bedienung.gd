@@ -103,7 +103,7 @@ func test_steuerung_nennt_die_tasten_der_bedienung() -> void:
 	for z in PauseMenu.steuerung_zeilen():
 		if str(z[1]) == _tr("TI-Aktion an Terminal, Kartenleser und Stempel"):
 			ti = str(z[0])
-	gleich(ti, _tr("AKTION"), "am Touch-Gerät: AKTION")
+	gleich(ti, _tr("Aktion"), "am Touch-Gerät: Aktion")
 	Kiosk.touch_seen = touch
 	Kiosk.touch_forced = forced
 

@@ -1,5 +1,5 @@
 {
-  "_hinweis": "ENTWURF — Fragen und Erklärungen vor der Messe von der gematik fachlich prüfen lassen. Solange \"entwurf\" true ist, zeigt das Spiel am Quiz einen kleinen Entwurf-Vermerk. Abschalten: \"wissensabfrage\": false in game-config.json.",
+  "_hinweis": "Entwurf — Fragen und Erklärungen vor der Messe von der gematik fachlich prüfen lassen. Solange \"entwurf\" true ist, zeigt das Spiel am Quiz einen kleinen Entwurf-Vermerk. Abschalten: \"wissensabfrage\": false in game-config.json.",
   "entwurf": true,
   "fragen": [
     {

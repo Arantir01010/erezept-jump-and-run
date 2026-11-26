@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",

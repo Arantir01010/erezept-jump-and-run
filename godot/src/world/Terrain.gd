@@ -114,7 +114,7 @@ func _make_cap_texture() -> void:
 		_cap_tex.specular_color = Color(1.0, 1.0, 1.0)
 		_cap_tex.specular_shininess = 0.85
 	else:
-		_cap_tex.specular_color = Color(0.9, 0.85, 0.7)
+		_cap_tex.specular_color = Color(1.0, 0.804, 0.659)
 		_cap_tex.specular_shininess = 0.35
 
 

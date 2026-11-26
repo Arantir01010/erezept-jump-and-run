@@ -49,8 +49,8 @@
     "deny-enemy": {
       "grabsBeforeBlock": 2,
       "denyText": {
-        "de": "ZUGRIFF VERWEIGERT",
-        "en": "ACCESS DENIED"
+        "de": "Zugriff verweigert",
+        "en": "Access denied"
       }
     },
     "stamp-exit": {

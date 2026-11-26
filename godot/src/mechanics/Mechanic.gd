@@ -115,15 +115,15 @@ class Kappe extends Node2D:
 		var y := sin(_t * TAU * 0.8) * 3.0 - (1.0 - a) * 10.0   # schwebt; taucht von unten auf
 		var r := Rect2(-w / 2.0, -h / 2.0 + y, w, h)
 		# dunkle Unterkante (Tastenhub), dann die helle Kappe
-		_sb.bg_color = Color(0.106, 0.141, 0.22, 0.92 * a)
+		_sb.bg_color = Color(0.125, 0.129, 0.141, 0.92 * a)
 		draw_style_box(_sb, Rect2(r.position + Vector2(0, 5), r.size))
-		_sb.bg_color = Color(0.875, 0.902, 0.941, 0.97 * a)
+		_sb.bg_color = Color(0.875, 0.89, 0.902, 0.97 * a)
 		draw_style_box(_sb, r)
 		var base := r.position.y + h / 2.0 + font.get_ascent(size) / 2.0 - 3.0
-		draw_string(font, Vector2(r.position.x, base), text, HORIZONTAL_ALIGNMENT_CENTER, w, size, Color(0.086, 0.137, 0.227, a))
+		draw_string(font, Vector2(r.position.x, base), text, HORIZONTAL_ALIGNMENT_CENTER, w, size, Color(0.125, 0.129, 0.141, a))
 		# kleiner Zeiger nach unten: hier drücken
 		var s := r.end.y + 9.0
-		draw_colored_polygon(PackedVector2Array([Vector2(-7, s), Vector2(7, s), Vector2(0, s + 8)]), Color(0.875, 0.902, 0.941, 0.85 * a))
+		draw_colored_polygon(PackedVector2Array([Vector2(-7, s), Vector2(7, s), Vector2(0, s + 8)]), Color(0.875, 0.89, 0.902, 0.85 * a))
 
 
 ## Sensor-Zone (Area2D) auf dem Spieler-Layer; Callback bei Betreten/Verlassen.

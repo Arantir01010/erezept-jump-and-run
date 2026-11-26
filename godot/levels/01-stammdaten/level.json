@@ -76,8 +76,8 @@
       "ty": 16,
       "tw": 2,
       "th": 4,
-      "textDe": "Springen: roter Knopf oder LEERTASTE. Hol dir die leuchtenden Daten-Kacheln!",
-      "textEn": "Jump: red button or SPACE. Grab the glowing data tiles!"
+      "textDe": "Springen: roter Knopf oder Leertaste. Hol dir die leuchtenden Daten-Kacheln!",
+      "textEn": "Jump: red button or Space. Grab the glowing data tiles!"
     },
     {
       "type": "info-sign",
@@ -85,8 +85,8 @@
       "ty": 12,
       "tw": 3,
       "th": 8,
-      "textDe": "In der Luft nochmal springen: REZI trägt dich! Die goldene Kachel oben ist ein Bonus.",
-      "textEn": "Jump again in the air: REZI carries you! The golden tile up there is a bonus."
+      "textDe": "In der Luft nochmal springen: Rezi trägt dich! Die goldene Kachel oben ist ein Bonus.",
+      "textEn": "Jump again in the air: Rezi carries you! The golden tile up there is a bonus."
     },
     {
       "type": "moving-platform",

@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",
@@ -66,8 +66,8 @@
     "deny-enemy": {
       "grabsBeforeBlock": 2,
       "denyText": {
-        "de": "ZUGRIFF VERWEIGERT",
-        "en": "ACCESS DENIED"
+        "de": "Zugriff verweigert",
+        "en": "Access denied"
       },
       "duckHint": {
         "de": "Ein falscher Kartenleser! Duck dich unter der Kralle durch.",
@@ -143,8 +143,8 @@
       ],
       "gate": "tor-apotheke",
       "gateHint": {
-        "de": "Die Apotheke braucht deine Freigabe — eGK am ECHTEN Terminal stecken.",
-        "en": "The pharmacy needs your release — insert the eGK at the REAL terminal."
+        "de": "Die Apotheke braucht deine Freigabe — eGK am echten Terminal stecken.",
+        "en": "The pharmacy needs your release — insert the eGK at the real terminal."
       }
     },
     {

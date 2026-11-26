@@ -58,8 +58,8 @@ func tick(delta: float) -> void:
 			Sfx.play("deny", 1.4, -8.0)
 			if Game.assist_fail_count("stamp") >= 2 and _t - _last_tip > 6.0:
 				_last_tip = _t
-				say(ltext("failHint", {"de": "Tipp: Warte, bis der Stempel OBEN kurz stehen bleibt — dann %s!" % Kiosk.label_action(),
-					"en": "Tip: wait until the stamp rests at the TOP — then press the action!"}))
+				say(ltext("failHint", {"de": "Tipp: Warte, bis der Stempel oben kurz stehen bleibt — dann %s!" % Kiosk.label_action(),
+					"en": "Tip: wait until the stamp rests at the top — then press the action!"}))
 
 func _succeed() -> void:
 	done = true
@@ -74,7 +74,7 @@ func _succeed() -> void:
 		level.camera.kick(Vector2(0, 70))
 		Fx.sparkle(level, Vector2(global_position.x, global_position.y + rect.size.y / 2.0 - 20), Palette.GOLD, 26, 340.0)
 		Fx.ring(level, Vector2(global_position.x, global_position.y + rect.size.y / 2.0 - 20), Palette.GOLD, 120.0)
-		Fx.float_text(level, global_position + Vector2(0, -90), "SIGNIERT", Palette.GOLD, 36)
+		Fx.float_text(level, global_position + Vector2(0, -90), "Signiert", Palette.GOLD, 36)
 		if Game.assist_clean("stamp"):
 			Game.add_security_bonus()
 		player.visual.squash = Vector2(1.3, 0.7))

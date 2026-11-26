@@ -37,17 +37,17 @@ var _blink_t := 0.0
 const BLINK_S := 0.5        # Periode des Unverwundbar-Blinkens (2 Hz)
 
 ## Paul trägt Warm gegen die kühle Welt (Mario-Regel: Figur komplementär zur Umgebung).
-const SKIN := Color(0.96, 0.80, 0.66)
-const HAIR := Color(0.32, 0.20, 0.14)
-const HOODIE := Color(0.92, 0.38, 0.26)
-const HOODIE_DARK := Color(0.68, 0.24, 0.22)
-const PANTS := Color(0.24, 0.28, 0.42)
-const SHOE := Color(0.97, 0.96, 0.93)
-const OUTLINE := Color(0.17, 0.14, 0.20)
-const EYE := Color(0.14, 0.12, 0.18)
+const SKIN := Color(1.0, 0.804, 0.659)
+const HAIR := Color(0.416, 0.216, 0.094)
+const HOODIE := Color("#FD5108")        # Orange 500 — Paul trägt die Markenfarbe
+const HOODIE_DARK := Color("#C52A08")   # Orange 700
+const PANTS := Color(0.118, 0.231, 0.545)
+const SHOE := Color(1.0, 0.961, 0.929)
+const OUTLINE := Color(0.125, 0.129, 0.141)
+const EYE := Color(0.125, 0.129, 0.141)
 ## Nachbilder: neutral-hell mit dunkler Kante, damit sie auf hellem UND dunklem Grund lesen.
-const GHOST_FILL := Color(0.94, 0.91, 0.87)
-const GHOST_EDGE := Color(0.30, 0.25, 0.30)
+const GHOST_FILL := Color(1.0, 0.91, 0.831)
+const GHOST_EDGE := Color(0.298, 0.314, 0.337)
 const GHOST_LIFE := 0.25
 
 ## Beugerichtung der Zwei-Knochen-IK (siehe _ik): Knie nach vorn, Ellbogen nach hinten
@@ -556,7 +556,7 @@ func _draw() -> void:
 	# Kopf mit Schattenseite
 	var head: Rect2 = p["head"]
 	_draw_round(head, SKIN, 8.0)
-	draw_rect(Rect2(head.position.x + head.size.x * 0.6, head.position.y + 6.0, head.size.x * 0.4 - 3.0, head.size.y - 9.0), Color(0.75, 0.50, 0.42, 0.35))
+	draw_rect(Rect2(head.position.x + head.size.x * 0.6, head.position.y + 6.0, head.size.x * 0.4 - 3.0, head.size.y - 9.0), Color(0.702, 0.471, 0.078, 0.35))
 	# Haare
 	var hx := head.position.x
 	var hy := head.position.y

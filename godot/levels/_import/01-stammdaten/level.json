@@ -76,8 +76,8 @@
       "ty": 16,
       "tw": 2,
       "th": 4,
-      "textDe": "Springen: roter Knopf oder LEERTASTE. Hol dir die leuchtenden Daten-Kacheln!",
-      "textEn": "Jump: red button or SPACE. Grab the glowing data tiles!"
+      "textDe": "Springen: roter Knopf oder Leertaste. Hol dir die leuchtenden Daten-Kacheln!",
+      "textEn": "Jump: red button or Space. Grab the glowing data tiles!"
     },
     {
       "type": "timing-gate",

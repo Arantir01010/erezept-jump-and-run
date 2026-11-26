@@ -154,7 +154,7 @@ func _process(delta: float) -> void:
 func _bolt() -> void:
 	_last_bolt = _t
 	_next_bolt = _t + (4.0 if _test else randf_range(25.0, 45.0))
-	var c := Color(0.86, 0.91, 1.0)
+	var c := Color(0.863, 0.906, 0.992)
 	Fx.lightning(c, 0.20, 24 if _test else 2)
 	if sun:
 		sun.energy = _sun_energy + 0.4

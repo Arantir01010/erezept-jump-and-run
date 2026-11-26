@@ -1,8 +1,18 @@
 # Marke: PwC-Erscheinungsbild im Spiel
 
-Das Spiel bleibt inhaltlich das gematik-/TI-Lernspiel „Paul & REZI". **Markenkonform
-werden Schrift und Bedienelemente** — nicht die Spielgrafik (Welten, Paul, REZI, Klinikum)
-und nicht die fachlichen Farben der Hülle (warm = offen, kühl = verschlüsselt, violett = VAU).
+Das Spiel bleibt inhaltlich das gematik-/TI-Lernspiel „Paul & Rezi". **Markenkonform sind
+Schrift, Schreibweise und Farben** — seit 11/2026 auch die Spielgrafik (Welten, Kulissen,
+Bausteine, Info-Screens). Grundlage: das PwC Digital Colour System (brand.pwc.com › Colour
+system, Light/Dark mode und volle Palette) und die Referenz-Präsentationen im PwC-Stil.
+
+Drei Regeln, die Tests absichern (`tests/test_marke.gd`):
+
+1. **Jede feste Farbe ist eine Stufe des Farbsystems.** Einzige Ausnahme ist das Violett der
+   VAU (`Palette.VAU…`): fachliche Kodierung, das Farbsystem kennt kein Violett. Zeilen mit
+   Landesfarben (Sprachflaggen) tragen den Kommentar `# farbe-frei`.
+2. **Kein Text in durchgehenden Großbuchstaben** — in keiner der sechs Sprachen. Abkürzungen
+   bleiben, was sie sind (TI, VAU, PIN, SMC-B, eGK, ePA). Der Begleiter heißt im Text „Rezi".
+3. **Zwei Schriftfamilien:** ITC Charter für Überschriften, Helvetica Neue für alles andere.
 
 Alles Marken-Wissen sitzt an einer Stelle: [`src/core/Brand.gd`](../src/core/Brand.gd).
 
@@ -29,30 +39,51 @@ Build ein — auch in die Browser-Fassung.
 
 | Rolle | Schrift | Wo |
 |---|---|---|
-| Große Überschriften | **ITC Charter Bold** | Titel „Das e-Rezept", Screen-Header (FRÜHER, HEUTE, SO SPIELST DU, ePA-Wissen), Stationsname beim Levelstart und auf der Stationskarte, „Dein e-Rezept ist da!" |
+| Große Überschriften | **ITC Charter Bold** | Titel „Das e-Rezept", Screen-Überschriften (Früher, Heute, So spielst du, ePA-Wissen), Stationsname beim Levelstart und auf der Stationskarte, „Dein e-Rezept ist da!" |
 | Alles Lesbare | **Helvetica Neue Roman** | Fließtext, Erzählzeilen, Hinweise, Sprechblasen |
-| Betonung, Schilder, Pillen | **Helvetica Neue Medium** | HUD-Pillen, Eyebrows („STATION 3 / 10", „TAGES-BESTENLISTE"), Tastenkappen, Schilder der Kulisse |
-| Stempel, Knöpfe | **Helvetica Neue Bold / Heavy** | „ZUGRIFF VERWEIGERT", Hülle-Anzeige, Touch-Knöpfe, Kombo |
+| Betonung, Schilder, Pillen | **Helvetica Neue Medium** | HUD-Pillen, Eyebrows („Station 3 / 10", „Tages-Bestenliste"), Tastenkappen, Schilder der Kulisse |
+| Stempel, Knöpfe | **Helvetica Neue Bold / Heavy** | „Zugriff verweigert", Hülle-Anzeige, Touch-Knöpfe, Kombo |
+
+Geschrieben wird in normaler Groß-/Kleinschreibung. Weil gemischte Schreibung keine weite
+Sperrung verträgt, dämpft `Brand.spaced()` den Buchstabenabstand (höchstens 2 px).
 
 Die Info-Screens (`src/ui/Vignette.gd`) bilden das Original der Web-Fassung nach, das mit
 Schriftgewicht 600 lief — deshalb steht dort „bold" für Helvetica Neue *Medium*, nicht Bold.
 
-## Farben (UI-Rollen)
+## Farben
 
-PwC-Palette in `Brand.gd`: Orange `#D04A02`, Tangerine `#EB8C00`, Yellow `#FFB600`,
-Red `#E0301E`, Rose `#D93954`, Maroon `#822720`, Schwarz, Graustufen `#2D2D2D`, `#464646`,
-`#7D7D7D`, `#DEDEDE`, `#F2F2F2`, Weiß.
+Die volle Palette steht in `Brand.gd` (Orange, Grey, Blue, Success, Warning, Red, Tangerine,
+je Stufe 50–1000). Stufen, die die Referenz-Präsentationen als Token führen, sind von dort
+übernommen; die übrigen sind aus der Farbsystem-Übersicht abgelesen (±1–2 je Farbkanal) und
+sollten vor einer formalen Abnahme gegen brand.pwc.com geprüft werden.
+
+**UI (Dark mode des Farbsystems)**
 
 | Rolle | Farbe |
 |---|---|
-| Aufforderung / Hervorhebung (`UI_ACCENT`) | Tangerine — auf dunklem Grund lesbarer als Orange |
-| Primär / Fortschritt (`UI_ACCENT_STRONG`) | Orange |
-| Erfolg, Medaillen, Bestwert (`UI_HIGHLIGHT`) | Yellow |
-| Flächen (`UI_PANEL`) | Dunkelgrau `#2D2D2D` mit 86 % Deckung, feine weiße Kante, Rundung 6 px |
-| Text | Weiß, gedämpft `#DEDEDE`, stumm `#7D7D7D` |
+| Primär / Fortschritt (`UI_ACCENT_STRONG`) | Orange 500 `#FD5108`, Text darauf Weiß |
+| Aufforderung / Hervorhebung / Eyebrow (`UI_ACCENT`) | Orange 300 `#FFAA72` (Brand Variant) |
+| Auszeichnung, Medaillen, Bestwert (`UI_HIGHLIGHT`) | Tangerine 400 `#FFC21B` |
+| Status | Info Blue 300 · Success 400 · Warning 300 · Error Red 400 |
+| Flächen (`UI_PANEL`) | Grey 975 `#202124`, Kante Grey 700, Rundung 2 px |
+| Text | Grey 50, gedämpft Grey 300, stumm Grey 600 |
 
-Nicht angetastet: Hülle-Farben (`Palette.WARM/COOL/VAU`), Welten-Paletten, das
-Nacht-Blau des Hauptmenüs, Gold der Prüfsummen/Siegel im Spielfeld.
+**Spielwelt** (`src/core/Palette.gd`)
+
+| Bedeutung | Farbe |
+|---|---|
+| Klartext, offen (`WARM`) | Tangerine 500 `#FF9F00` |
+| Verschlüsselt (`COOL`), Prüfsummen, Rezi | Blue 400 `#356FEC` / Blue 300 |
+| VAU | Violett `#9470F5` — die eine Ausnahme |
+| Verweigert, Störfeld (`DENY`) | Red 400 `#ED4242` |
+| Erlaubt, geprüft (`OK`) | Success 400 `#18AE80` |
+| Bonus, Siegel (`GOLD`) | Tangerine 400 `#FFC21B` |
+| Paul | Hoodie Orange 500 |
+
+Bauprinzip der fünf Welten: **Grey trägt die Struktur** (Gelände, Häuser, Nebel), der Himmel
+kommt aus Blue, Orange und Tangerine, je Welt gibt es einen Akzent. Die Stimmung (Morgen,
+Abend, Regen, Halle, Archiv) entsteht aus der Stufenwahl und der Farbstimmung im Post-Effekt,
+nicht aus freien Farbtönen. Die Info-Screens spielen in einer Nacht aus Grey 1000 → Blue 950.
 
 ## Piktogramme
 

@@ -73,7 +73,7 @@ func test_stempel_nur_bei_drei_von_drei() -> void:
 	if not pruefe(alle.stempel != null, "Stempel bei drei von drei"):
 		return
 	var texte := _labels(alle.stempel).map(func(l): return l.text)
-	pruefe(str(TranslationServer.translate("GEPRÜFT")) in texte, "Stempel sagt „GEPRÜFT“: %s" % [texte])
+	pruefe(str(TranslationServer.translate("Geprüft")) in texte, "Stempel sagt „GEPRÜFT“: %s" % [texte])
 	gleich(alle.stempel.modulate.a, 0.0, "Stempel kommt erst nach den Vermerken")
 	await frames(int(2.1 * 60))
 	pruefe(alle.stempel.modulate.a > 0.99 and alle.stempel.scale.is_equal_approx(Vector2.ONE), "Stempel sitzt nach 2,1 s")

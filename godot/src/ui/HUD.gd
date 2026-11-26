@@ -131,7 +131,7 @@ func _ready() -> void:
 	ls.font_size = 74
 	ls.font_color = Palette.WHITE
 	ls.outline_size = 10
-	ls.outline_color = Color(0.02, 0.04, 0.08, 0.85)
+	ls.outline_color = Color(0.067, 0.067, 0.075, 0.85)
 	ls.shadow_color = Color(0, 0, 0, 0.5)
 	ls.shadow_size = 12
 	title_label.label_settings = ls
@@ -142,7 +142,7 @@ func _ready() -> void:
 	ls2.font_size = 30
 	ls2.font_color = Brand.UI_TEXT_DIM
 	ls2.outline_size = 8
-	ls2.outline_color = Color(0.02, 0.04, 0.08, 0.85)
+	ls2.outline_color = Color(0.067, 0.067, 0.075, 0.85)
 	sub_label.label_settings = ls2
 	title_box.add_child(sub_label)
 	root.add_child(title_box)
@@ -157,7 +157,7 @@ func _ready() -> void:
 	lc.font_size = 30
 	lc.font_color = Brand.UI_ACCENT
 	lc.outline_size = 9
-	lc.outline_color = Color(0.02, 0.04, 0.08, 0.9)
+	lc.outline_color = Color(0.067, 0.067, 0.075, 0.9)
 	lc.shadow_color = Color(0, 0, 0, 0.45)
 	lc.shadow_size = 8
 	combo_label.label_settings = lc
@@ -230,7 +230,7 @@ func bind(lvl: Level) -> void:
 	tw.tween_property(title_box, "modulate:a", 0.0, 0.6)
 	if Game.level_index == 0:
 		var lauf := tr("Knüppel") if (Kiosk.touch_seen or Kiosk.touch_forced) else (tr("Joystick") if Kiosk.has_gamepad() else tr("Pfeiltasten/WASD"))
-		hint_label.text = tr("%s laufen · %s springen (in der Luft nochmal = REZI-Schub) · %s TI-Aktion") % [
+		hint_label.text = tr("%s laufen · %s springen (in der Luft nochmal = Rezi-Schub) · %s TI-Aktion") % [
 			lauf, Kiosk.label_jump(), Kiosk.label_action()]
 		var tw2 := create_tween()
 		tw2.tween_property(hint_row, "modulate:a", 1.0, 0.5)
@@ -456,17 +456,17 @@ class _Route extends Control:
 		if total <= 0:
 			return
 		var step := size.x / maxf(total - 1, 1)
-		draw_line(Vector2(0, 15), Vector2(size.x, 15), Color(0.6, 0.8, 1.0, 0.25), 3.0, true)
+		draw_line(Vector2(0, 15), Vector2(size.x, 15), Color(0.663, 0.784, 0.988, 0.25), 3.0, true)
 		for i in total:
 			var p := Vector2(i * step, 15)
 			if i < done:
 				draw_circle(p, 9.0, Palette.glow(Palette.GOLD, 1.4))
 			elif i == current:
-				draw_circle(p, 10.0, Color(0.03, 0.06, 0.10))
+				draw_circle(p, 10.0, Color(0.067, 0.067, 0.075))
 				draw_arc(p, 10.0, 0, TAU, 20, Palette.glow(Palette.COOL, 1.5), 3.0, true)
 				draw_circle(p, 4.0, Palette.glow(Palette.COOL, 1.5))
 			else:
-				draw_circle(p, 6.0, Color(0.5, 0.65, 0.85, 0.45))
+				draw_circle(p, 6.0, Color(0.631, 0.659, 0.702, 0.45))
 
 
 class _Shape extends Control:

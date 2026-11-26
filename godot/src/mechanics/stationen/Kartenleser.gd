@@ -151,10 +151,10 @@ func _versuch() -> void:
 ## Der Abweis-Moment (falsche Karte): Rempler, LED rot und Anzeige setzt die Regel;
 ## hier der Stempel — nur die echte Zurückweisung durch die TI bekommt ihn.
 func _reject_beat() -> void:
-	Fx.deny_stamp(level, _above(), ltext("denyText", {"de": "ZUGRIFF VERWEIGERT", "en": "ACCESS DENIED"}))
+	Fx.deny_stamp(level, _above(), ltext("denyText", {"de": "Zugriff verweigert", "en": "Access denied"}))
 	# REZIs Hinweis erst, wenn der Stempel verblasst — sonst überlagern sich beide
-	var hint := ltext("falsche-karteHint", {"de": "ZUGRIFF VERWEIGERT — diese Karte gehört hier nicht hin.",
-		"en": "ACCESS DENIED — this card does not belong here."})
+	var hint := ltext("falsche-karteHint", {"de": "Zugriff verweigert — diese Karte gehört hier nicht hin.",
+		"en": "Access denied — this card does not belong here."})
 	get_tree().create_timer(1.3).timeout.connect(func():
 		if is_inside_tree():
 			say(hint, 3.5))
@@ -268,7 +268,7 @@ func _draw() -> void:
 	draw_panel(shell, pal.metall, pal.detail, 8, 0.25)
 	# Display: dunkel, erwartete Karte(n) als Umriss, darunter die Statuszeile
 	var disp := Rect2(-44, by + 8 + o.y, 88, 48)
-	draw_rect(disp, Color(0.02, 0.05, 0.08, 0.93))
+	draw_rect(disp, Color(0.067, 0.067, 0.075, 0.93))
 	draw_rect(disp, Color(pal.detail.r, pal.detail.g, pal.detail.b, 0.45), false, 1.0)
 	var gx := -40.0
 	for a in accepted:
@@ -308,7 +308,7 @@ func _draw() -> void:
 	draw_style_box(fsb, front)
 	draw_rect(Rect2(front.position.x + 6, front.end.y - 6, front.size.x - 12, 4), Palette.shade(pal.metall, 0.35))
 	# Schlitz mit Licht: atmet in der Farbe der erwarteten Karte, gesteckt = grün
-	draw_rect(Rect2(SLOT_X - 34, sy - 2, 68, 7), Color(0.02, 0.04, 0.08))
+	draw_rect(Rect2(SLOT_X - 34, sy - 2, 68, 7), Color(0.067, 0.067, 0.075))
 	var slot_c := KartenFx.color_of(str(accepted[0]))
 	var slot_a := 0.45 + 0.25 * sin(regel.uhr * PI)   # 0,5 Hz
 	if regel.steckt != "":
@@ -327,7 +327,7 @@ func _draw() -> void:
 		_:
 			k = 1.5 if regel.led_bis > 0.0 else 1.0
 	k *= 0.86 + 0.14 * sin(regel.uhr * PI)
-	draw_circle(lp, 9.5, Color(0.03, 0.05, 0.08, 0.95))
+	draw_circle(lp, 9.5, Color(0.067, 0.067, 0.075, 0.95))
 	var led_draw := Palette.glow(lc, k) if not Fx.web_fallback() else lc.lightened(clampf(0.25 * (k - 1.0), 0.0, 0.3))
 	draw_circle(lp, 6.5 + regel.blitz * 3.0, led_draw)
 	draw_circle(lp + Vector2(-2, -2), 1.8, Color(1, 1, 1, 0.35))

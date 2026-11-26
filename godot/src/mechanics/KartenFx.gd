@@ -13,9 +13,9 @@ extends RefCounted
 ## mit Kartenfarben — auch das Briefing (Briefing._karte) zeichnet daraus, über
 ## koerper(). Keine Markenfarben: Karten sind Spielgrafik (brand/README.md).
 const INFO := {
-	"egk": {"kurz": "eGK", "name": "Gesundheitskarte", "rolle": "Versicherte", "color": Color(0.35, 0.80, 0.55)},
-	"hba": {"kurz": "HBA", "name": "Heilberufsausweis", "rolle": "Heilberuf", "color": Color(0.85, 0.55, 0.30)},
-	"smcb": {"kurz": "SMC-B", "name": "Praxisausweis", "rolle": "Einrichtung", "color": Color(0.55, 0.65, 0.95)},
+	"egk": {"kurz": "eGK", "name": "Gesundheitskarte", "rolle": "Versicherte", "color": Color(0.31, 0.827, 0.631)},
+	"hba": {"kurz": "HBA", "name": "Heilberufsausweis", "rolle": "Heilberuf", "color": Color(0.882, 0.467, 0.004)},
+	"smcb": {"kurz": "SMC-B", "name": "Praxisausweis", "rolle": "Einrichtung", "color": Color(0.404, 0.592, 1.0)},
 }
 
 ## Grundmaß der Karte in der Welt (Seitenverhältnis wie eine Chipkarte, ~1,58).
@@ -82,7 +82,7 @@ static func draw_card(ci: CanvasItem, r: Rect2, card: String, mode := "voll", gl
 			HORIZONTAL_ALIGNMENT_CENTER, two, fso, Color(c.r, c.g, c.b, 0.75 * alpha))
 		return
 	# Kontur (dunkel, nicht schwarz) und Körper: Kartenfarbe dunkel und kühl, Kappe oben hell
-	var outline := Color(0.08, 0.10, 0.14, 0.9 * alpha)
+	var outline := Color(0.125, 0.129, 0.141, 0.9 * alpha)
 	var body := koerper(card)
 	body.a = alpha
 	var sb := StyleBoxFlat.new()
@@ -108,8 +108,8 @@ static func draw_card(ci: CanvasItem, r: Rect2, card: String, mode := "voll", gl
 	var peak := 0.0
 	if glint >= 0.0:
 		peak = sin(clampf(glint, 0.0, 1.0) * PI)
-	var gold := Color(0.86, 0.66, 0.26, alpha)
-	var gold_dark := Color(0.55, 0.40, 0.14, alpha)
+	var gold := Color(0.914, 0.69, 0.122, alpha)
+	var gold_dark := Color(0.624, 0.376, 0.063, alpha)
 	var chip_c := gold.lerp(Palette.tint(gold, 0.6), peak * 0.8)
 	if peak > 0.0 and not Fx.web_fallback():
 		chip_c = Palette.glow(chip_c, 1.0 + 0.5 * peak)
@@ -127,8 +127,8 @@ static func draw_card(ci: CanvasItem, r: Rect2, card: String, mode := "voll", gl
 	var tw := r.end.x - w * 0.07 - x0
 	var fs := fit_font(Brand.sans("heavy"), kurz, tw, maxi(7, int(h * (0.30 if with_name else 0.36))))
 	var ty := r.position.y + (h * 0.42 if with_name else h * 0.5) + fs * 0.36
-	var white := Color(0.98, 0.98, 1.0, alpha)
-	ci.draw_string_outline(Brand.sans("heavy"), Vector2(x0, ty), kurz, HORIZONTAL_ALIGNMENT_CENTER, tw, fs, maxi(1, int(fs * 0.18)), Color(0.05, 0.07, 0.10, 0.7 * alpha))
+	var white := Color(0.961, 0.969, 0.973, alpha)
+	ci.draw_string_outline(Brand.sans("heavy"), Vector2(x0, ty), kurz, HORIZONTAL_ALIGNMENT_CENTER, tw, fs, maxi(1, int(fs * 0.18)), Color(0.067, 0.067, 0.075, 0.7 * alpha))
 	ci.draw_string(Brand.sans("heavy"), Vector2(x0, ty), kurz, HORIZONTAL_ALIGNMENT_CENTER, tw, fs, white)
 	if with_name:
 		var fn := maxi(6, int(h * 0.15))

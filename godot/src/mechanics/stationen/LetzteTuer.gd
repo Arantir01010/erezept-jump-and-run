@@ -70,7 +70,7 @@ func _start_protokoll() -> void:
 	phase = "protokoll"
 	var entries := Game.protokoll.duplicate()
 	var lines: Array = []
-	lines.append("ZUGRIFFSPROTOKOLL")
+	lines.append("Zugriffsprotokoll")
 	if entries.is_empty():
 		lines.append("— keine Einträge —")
 	for e in entries.slice(0, 6):
@@ -93,7 +93,7 @@ func _freigabe(lueckenlos: bool) -> void:
 	if not is_inside_tree() or phase != "protokoll":
 		return
 	phase = "freigabe"
-	_ok_line = ltext("freigabeZeile", {"de": "✓ FREIGABE · durch die Inhaberin der Akte", "en": "✓ RELEASED · by the owner of the record"})
+	_ok_line = ltext("freigabeZeile", {"de": "✓ Freigabe · durch die Inhaberin der Akte", "en": "✓ Released · by the owner of the record"})
 	Sfx.play("ok", 0.9)
 	var tw := create_tween()
 	tw.tween_property(self, "_lock", 1.0, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -127,7 +127,7 @@ func _oeffnen(lueckenlos: bool) -> void:
 	if _glow:
 		Fx.set_glow(_glow, Palette.GOLD, 1.0)
 	Fx.ring(level, global_position, Palette.GOLD, 160.0)
-	Fx.flash(Color(1, 0.95, 0.85), 0.25)
+	Fx.flash(Color(1.0, 0.91, 0.831), 0.25)
 
 func _draw() -> void:
 	var h := rect.size.y
@@ -140,7 +140,7 @@ func _draw() -> void:
 	draw_rect(Rect2(-30, -h / 2.0 - 8, 6, h + 8), pal.fels)
 	draw_rect(Rect2(24, -h / 2.0 - 8, 6, h + 8), pal.fels)
 	# Schild auf der Tür: wessen Akte
-	draw_string(Brand.spaced(Brand.sans("medium"), 1), Vector2(-24, door.position.y + 30), ltext("tuerSchild", {"de": "AKTE", "en": "RECORD"}),
+	draw_string(Brand.spaced(Brand.sans("medium"), 1), Vector2(-24, door.position.y + 30), ltext("tuerSchild", {"de": "Akte", "en": "Record"}),
 		HORIZONTAL_ALIGNMENT_CENTER, 48, 11, Color(pal.cap_light.r, pal.cap_light.g, pal.cap_light.b, 0.6))
 	# Vorhängeschloss: Körper, Bügel (hebt und schwenkt beim Öffnen), Schlüsselloch → Haken
 	var lp := Vector2(0, 6.0 - lift)
@@ -155,8 +155,8 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	draw_panel(lb, Palette.shade(pal.metall, 0.2), lcg, 4, 0.6 * _lock, 2)
 	if _lock < 0.5:
-		draw_circle(lp + Vector2(0, 6), 2.5, Color(0.05, 0.05, 0.08))
-		draw_rect(Rect2(lp.x - 1, lp.y + 6, 2, 6), Color(0.05, 0.05, 0.08))
+		draw_circle(lp + Vector2(0, 6), 2.5, Color(0.067, 0.067, 0.075))
+		draw_rect(Rect2(lp.x - 1, lp.y + 6, 2, 6), Color(0.067, 0.067, 0.075))
 	else:
 		draw_polyline(PackedVector2Array([lp + Vector2(-5, 7), lp + Vector2(-1.5, 10.5), lp + Vector2(5, 3)]), Palette.OK, 2.5, true)
 	# Zugriffsprotokoll über der Tür: Panel, Kopfzeile, Einträge (warm = offen
@@ -167,7 +167,7 @@ func _draw() -> void:
 		var y0 := -h / 2.0 - 46.0 - n * row
 		var panel := Rect2(-236, y0 - 20, 472, n * row + 30)
 		var pe := Color(Palette.WARM.r, Palette.WARM.g, Palette.WARM.b, 0.55).lerp(Palette.OK, _ok_t)
-		draw_panel(panel, Color(0.03, 0.05, 0.08, 0.80), pe, 8, 0.5 * _ok_t, 2)
+		draw_panel(panel, Color(0.067, 0.067, 0.075, 0.80), pe, 8, 0.5 * _ok_t, 2)
 		for i in _lines.size():
 			var yy := y0 + i * row
 			if i == 0:

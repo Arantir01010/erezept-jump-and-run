@@ -73,7 +73,7 @@ var _flash := 0.0
 var _flash_color := Color.WHITE
 var _bolt_frames := 0
 var _bolt_amount := 0.0
-var _bolt_color := Color(0.86, 0.91, 1.0)
+var _bolt_color := Color(0.863, 0.906, 0.992)
 var _t := 0.0
 
 

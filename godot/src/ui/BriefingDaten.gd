@@ -15,15 +15,15 @@ class_name BriefingDaten
 
 const TAKT := 4.6
 
-const WEISS := 0xeef2f8
-const GRUEN := 0x7fd07f
-const ROT := 0xff6b5e
-const GOLD := 0xffd75e
-const KUEHL := 0x4de3ff
-const VIOLETT := 0xb9a6ff
-const WARM := 0xffb070
-const MATT := 0x9fb0cc
-const SMCB := 0x8ca6f2
+const WEISS := 0xeeeff1
+const GRUEN := 0x4fd3a1
+const ROT := 0xf56f70
+const GOLD := 0xffd646
+const KUEHL := 0x6797ff
+const VIOLETT := 0xc9bbfa
+const WARM := 0xffaa72
+const MATT := 0xa1a8b3
+const SMCB := 0x6797ff
 
 ## Reihenfolge der Bausteine in der Leiste (Kernmechanik zuerst, Grundbausteine zuletzt).
 const REIHENFOLGE := [
@@ -55,15 +55,15 @@ const STATIONEN := {
 			"Am Terminal {action} im Takt der Lichter drücken — dann öffnet das Tor.",
 			"Feder = hoch hinaus · rotes Störfeld = kostet nur Bits · Fahne = dein Rücksetzpunkt.",
 		],
-		"tust": "{lauf} laufen · {jump} springen (2× = REZI-Schub) · {action} im Takt am Terminal · Tür öffnet ab {n} {was}",
+		"tust": "{lauf} laufen · {jump} springen (2× = Rezi-Schub) · {action} im Takt am Terminal · Tür öffnet ab {n} {was}",
 		"schilder": [
-			[520, 177, "KRANKENKASSE", 5, WEISS, 0.8],
-			[150, 229, "ANMELDUNG", 3.6, MATT, 0.5],
+			[520, 177, "Krankenkasse", 5, WEISS, 0.8],
+			[150, 229, "Anmeldung", 3.6, MATT, 0.5],
 		],
 		"rufe": [
-			[520, 208, "KASSE PRÜFT", 3.8, KUEHL, 4.2, 5.9],
-			[178, 200, "DATEN AKTUELL", 4.6, GRUEN, 7.3, 10.4],
-			[445, 214, "FAHNE = RÜCKSETZPUNKT", 3.4, GRUEN, 12.9, 14.4],
+			[520, 208, "Kasse prüft", 3.8, KUEHL, 4.2, 5.9],
+			[178, 200, "Daten aktuell", 4.6, GRUEN, 7.3, 10.4],
+			[445, 214, "Fahne = Rücksetzpunkt", 3.4, GRUEN, 12.9, 14.4],
 		],
 	},
 	"02-kartenterminal": {
@@ -74,20 +74,20 @@ const STATIONEN := {
 			"Das ergibt die qualifizierte Signatur: Beweis der Echtheit — nicht Verschlüsselung.",
 			"Im Spiel: {action} im Takt der Lichter = PIN-Prüfung. Zu früh? Einfach wiederholen.",
 			"Die Kralle greift auf Kopfhöhe: {duck} = ducken. Die TI sperrt den Fake-Leser aus.",
-			"Zum Schluss der Stempel: warten, bis er OBEN kurz steht — dann {action}. Signiert!",
+			"Zum Schluss der Stempel: warten, bis er oben kurz steht — dann {action}. Signiert!",
 		],
 		"tust": "{duck} ducken unter der Kralle · {action} im Takt der PIN-Lichter · unter dem Stempel warten, oben: {action}",
 		"schilder": [
-			[143, 217, "KRIECHGANG", 3.4, MATT, 0.5],
-			[290, 205, "ARZT-PIN", 3.8, MATT, 0.6],
-			[318, 229, "DR. PIXEL", 3.4, MATT, 0.4],
-			[440, 196, "SIGNATUR-STEMPEL", 3.8, GOLD, 0.6],
+			[143, 217, "Kriechgang", 3.4, MATT, 0.5],
+			[290, 205, "Arzt-PIN", 3.8, MATT, 0.6],
+			[318, 229, "Dr. Pixel", 3.4, MATT, 0.4],
+			[440, 196, "Signatur-Stempel", 3.8, GOLD, 0.6],
 		],
 		"rufe": [
-			[196, 219, "ZUGELASSEN", 3.4, GRUEN, 4.9, 7.6],
-			[160, 205, "ZUGRIFF VERWEIGERT", 4.4, ROT, 5.1, 7.4],
+			[196, 219, "Zugelassen", 3.4, GRUEN, 4.9, 7.6],
+			[160, 205, "Zugriff verweigert", 4.4, ROT, 5.1, 7.4],
 			[290, 196, "PIN OK", 4.6, GRUEN, 10.9, 12.8],
-			[440, 184, "SIGNIERT", 6, GOLD, 13.9, 16.2],
+			[440, 184, "Signiert", 6, GOLD, 13.9, 16.2],
 		],
 	},
 	"03-kov-gateway": {
@@ -102,14 +102,14 @@ const STATIONEN := {
 		],
 		"tust": "Podest: {lauf} loslassen und warten · Krypto-Dusche: {action} · Tunnel: {hoch} · Prüfsummen sammeln",
 		"schilder": [
-			[190, 203, "TI-ZUGANG", 4, KUEHL, 0.8],
-			[270, 203, "KRYPTO-DUSCHE", 3.6, KUEHL, 0.5],
-			[445, 203, "VPN-TUNNEL", 4, KUEHL, 0.8],
+			[190, 203, "TI-Zugang", 4, KUEHL, 0.8],
+			[270, 203, "Krypto-Dusche", 3.6, KUEHL, 0.5],
+			[445, 203, "VPN-Tunnel", 4, KUEHL, 0.8],
 		],
 		"rufe": [
-			[150, 226, "GEPRÜFT", 4, GRUEN, 2.7, 4.4],
-			[128, 211, "ZUGRIFF VERWEIGERT", 4.2, ROT, 4.0, 6.2],
-			[270, 195, "VERSCHLÜSSELT", 4.6, KUEHL, 5.7, 7.8],
+			[150, 226, "Geprüft", 4, GRUEN, 2.7, 4.4],
+			[128, 211, "Zugriff verweigert", 4.2, ROT, 4.0, 6.2],
+			[270, 195, "Verschlüsselt", 4.6, KUEHL, 5.7, 7.8],
 		],
 	},
 	"04-die-huelle": {
@@ -120,19 +120,19 @@ const STATIONEN := {
 			"Verschlüsselt sieht er das Paket zwar — aber nur Zeichensalat. Er scheitert.",
 			"{toggle} = Hülle wechseln. Klartext: schnell, sichtbar. Verschlüsselt: langsam, unsichtbar.",
 			"Die goldene Andock-Plattform trägt nur Klartext: kurz sichtbar werden, schnell rüber.",
-			"Violettes VAU-Feld: drinnen Klartext UND unsichtbar. Der Anker hält die Sitzung frisch.",
+			"Violettes VAU-Feld: drinnen Klartext und unsichtbar. Der Anker hält die Sitzung frisch.",
 		],
 		"tust": "{toggle} Hülle an/aus · vor dem Lauscher verschlüsseln · auf der Plattform Klartext · {jump} springen",
 		"schilder": [
 			[466, 207, "VAU", 5.5, VIOLETT, 1.0],
-			[355, 253.5, "ANDOCK-PLATTFORM", 3.2, GOLD, 0.4],
+			[355, 253.5, "Andock-Plattform", 3.2, GOLD, 0.4],
 		],
 		"rufe": [
-			[172, 206, "MITGELESEN!", 4.8, ROT, 1.1, 2.6],
+			[172, 206, "Mitgelesen!", 4.8, ROT, 1.1, 2.6],
 			[210, 205, "?", 6, WEISS, 2.7, 3.9],
 			[315, 205, "?", 6, WEISS, 4.0, 5.2],
-			[355, 224, "TRÄGT NUR KLARTEXT", 3.4, GOLD, 5.3, 6.1],
-			[475, 199, "SITZUNG FRISCH", 4, VIOLETT, 9.7, 11.0],
+			[355, 224, "Trägt nur Klartext", 3.4, GOLD, 5.3, 6.1],
+			[475, 199, "Sitzung frisch", 4, VIOLETT, 9.7, 11.0],
 			[560, 205, "?", 6, WEISS, 10.6, 11.8],
 		],
 	},
@@ -150,16 +150,16 @@ const STATIONEN := {
 		"schilder": [
 			[150, 233.5, "eGK", 3.2, GRUEN, 0.3],
 			[330, 233.5, "SMC-B", 3.0, SMCB, 0.2],
-			[290, 211, "PRAXIS", 3.4, MATT, 0.5],
+			[290, 211, "Praxis", 3.4, MATT, 0.5],
 		],
 		"rufe": [
 			[110, 226, "eGK ✓", 4.2, GRUEN, 1.2, 2.6],
-			[150, 200, "eGK GESTECKT", 4.2, GRUEN, 2.5, 4.0],
+			[150, 200, "eGK gesteckt", 4.2, GRUEN, 2.5, 4.0],
 			[250, 205, "?", 6, WEISS, 4.8, 6.2],
-			[330, 198, "ZUGRIFF VERWEIGERT", 4.6, ROT, 6.9, 8.6],
-			[330, 206, "die eGK weist DICH aus — nicht die Praxis", 3.4, MATT, 7.2, 8.8],
+			[330, 198, "Zugriff verweigert", 4.6, ROT, 6.9, 8.6],
+			[330, 206, "die eGK weist dich aus — nicht die Praxis", 3.4, MATT, 7.2, 8.8],
 			[290, 203, "SMC-B ✓", 4.2, SMCB, 10.2, 11.4],
-			[330, 198, "SMC-B GESTECKT", 4.2, SMCB, 11.5, 13.0],
+			[330, 198, "SMC-B gesteckt", 4.2, SMCB, 11.5, 13.0],
 		],
 	},
 	"13-e-rezept": {
@@ -168,26 +168,26 @@ const STATIONEN := {
 		"zeilen": [
 			"Apotheke: Du steckst die eGK. Das Rezept liegt im Fachdienst der TI — nie auf der Karte.",
 			"Die Karte gibt nur frei: Die Apotheke holt das Rezept, der Eintrag landet in deiner ePA.",
-			"Im Spiel: eGK aufsammeln, am ECHTEN Terminal {action} — das Tor zur Apotheke öffnet.",
+			"Im Spiel: eGK aufsammeln, am echten Terminal {action} — das Tor zur Apotheke öffnet.",
 			"Der falsche Leser hat eine Kralle: {duck} = ducken. Die TI lässt nur echte Geräte zu.",
 			"Lauscher unterwegs: {toggle} verschlüsselt. Die Andock-Plattform trägt nur Klartext.",
 		],
 		"tust": "eGK einsammeln · echtes Terminal: {action} · Kralle: {duck} · {toggle} Hülle",
 		"schilder": [
-			[140, 217, "FAKE-LESER", 3.4, ROT, 0.5],
+			[140, 217, "Fake-Leser", 3.4, ROT, 0.5],
 			[290, 233.5, "eGK", 3.2, GRUEN, 0.3],
-			[390, 181, "APOTHEKE", 5, GOLD, 1.0],
-			[480, 197, "E-REZEPT-FACHDIENST", 3.4, KUEHL, 0.4],
-			[548, 197, "DEINE ePA", 3.8, KUEHL, 0.5],
+			[390, 181, "Apotheke", 5, GOLD, 1.0],
+			[480, 197, "E-Rezept-Fachdienst", 3.4, KUEHL, 0.4],
+			[548, 197, "Deine ePA", 3.8, KUEHL, 0.5],
 		],
 		"rufe": [
 			[100, 226, "eGK ✓", 4.2, GRUEN, 1.0, 2.4],
-			[150, 205, "ZUGRIFF VERWEIGERT", 4.4, ROT, 5.0, 6.8],
+			[150, 205, "Zugriff verweigert", 4.4, ROT, 5.0, 6.8],
 			[235, 205, "?", 6, WEISS, 5.4, 6.4],
-			[290, 200, "eGK GESTECKT", 4.2, GRUEN, 6.9, 8.4],
-			[480, 190, "GIBT FREI", 3.6, GRUEN, 8.4, 9.6],
-			[390, 173, "REZEPT ABGERUFEN", 4.2, GRUEN, 10.9, 12.6],
-			[548, 190, "EINTRAG IN DER ePA", 3.8, GRUEN, 13.6, 16.4],
+			[290, 200, "eGK gesteckt", 4.2, GRUEN, 6.9, 8.4],
+			[480, 190, "Gibt frei", 3.6, GRUEN, 8.4, 9.6],
+			[390, 173, "Rezept abgerufen", 4.2, GRUEN, 10.9, 12.6],
+			[548, 190, "Eintrag in der ePA", 3.8, GRUEN, 13.6, 16.4],
 		],
 	},
 	"14-die-vau": {
@@ -196,19 +196,19 @@ const STATIONEN := {
 		"zeilen": [
 			"Die VAU ist ein versiegelter Raum im Rechenzentrum. Drinnen wird im Klartext gearbeitet.",
 			"Trotzdem sieht niemand hinein — auch nicht der Betreiber des Rechenzentrums.",
-			"Im Spiel: Das violette Feld betreten. Drinnen bist du schnell UND unsichtbar.",
+			"Im Spiel: Das violette Feld betreten. Drinnen bist du schnell und unsichtbar.",
 			"Zwischen den Feldern zählt deine eigene Hülle: {toggle}. Lauscher sehen nur Klartext.",
 			"Feld mit Uhr? Läuft sie ab, bist du wieder Klartext. Der Anker frischt die Sitzung auf.",
 		],
 		"tust": "VAU-Feld einfach betreten · draußen {toggle} Hülle · Anker berühren · {jump} springen",
 		"schilder": [
-			[360, 171, "RECHENZENTRUM", 4.6, MATT, 0.8],
+			[360, 171, "Rechenzentrum", 4.6, MATT, 0.8],
 			[360, 188, "VAU", 5.5, VIOLETT, 1.2],
-			[278, 222, "BETREIBER", 3.2, MATT, 0.4],
+			[278, 222, "Betreiber", 3.2, MATT, 0.4],
 		],
 		"rufe": [
 			[150, 205, "?", 6, WEISS, 2.0, 3.0],
-			[360, 160, "DRINNEN KLARTEXT — NIEMAND SIEHT HINEIN", 3.8, VIOLETT, 4.6, 7.6],
+			[360, 160, "Drinnen Klartext — niemand sieht hinein", 3.8, VIOLETT, 4.6, 7.6],
 			[278, 199, "?", 6, WEISS, 5.0, 6.6],
 			[565, 205, "?", 6, WEISS, 10.8, 11.8],
 		],
@@ -229,10 +229,10 @@ const STATIONEN := {
 		],
 		"rufe": [
 			[150, 205, "?", 6, WEISS, 2.0, 3.0],
-			[320, 170, "SITZUNG ABGELAUFEN", 4.6, WARM, 6.4, 8.4],
-			[450, 206, "MITGELESEN!", 4.8, ROT, 7.1, 8.4],
+			[320, 170, "Sitzung abgelaufen", 4.6, WARM, 6.4, 8.4],
+			[450, 206, "Mitgelesen!", 4.8, ROT, 7.1, 8.4],
 			[150, 205, "?", 6, WEISS, 11.4, 12.4],
-			[330, 170, "SITZUNG AUFGEFRISCHT", 4.6, VIOLETT, 14.9, 16.6],
+			[330, 170, "Sitzung aufgefrischt", 4.6, VIOLETT, 14.9, 16.6],
 			[470, 205, "?", 6, WEISS, 17.0, 18.2],
 		],
 	},
@@ -243,14 +243,14 @@ const STATIONEN := {
 			"Diese Türen öffnet nur deine Gesundheitskarte — kein Praxisausweis, nichts anderes.",
 			"Karte gesteckt = Befugnis auf Zeit. In der ePA-App verlängerst oder entziehst du sie.",
 			"Im Spiel: eGK aufsammeln, an jedem Terminal {action}. Drei Tore, dreimal dein Ja.",
-			"Falsche Karte? ZUGRIFF VERWEIGERT — ohne Schaden. Lauscher: {toggle} verschlüsselt dich.",
+			"Falsche Karte? Zugriff verweigert — ohne Schaden. Lauscher: {toggle} verschlüsselt dich.",
 		],
 		"tust": "eGK einsammeln · an jedem Terminal {action} · {toggle} Hülle · Andock-Plattform im Klartext",
 		"schilder": [
-			[330, 196, "AKTENSYSTEM", 4.6, MATT, 0.8],
-			[200, 212, "TÜR 1", 3.4, MATT, 0.5],
-			[330, 212, "TÜR 2", 3.4, MATT, 0.5],
-			[460, 212, "TÜR 3", 3.4, MATT, 0.5],
+			[330, 196, "Aktensystem", 4.6, MATT, 0.8],
+			[200, 212, "Tür 1", 3.4, MATT, 0.5],
+			[330, 212, "Tür 2", 3.4, MATT, 0.5],
+			[460, 212, "Tür 3", 3.4, MATT, 0.5],
 			[172, 233.5, "eGK", 3.0, GRUEN, 0.2],
 			[302, 233.5, "eGK", 3.0, GRUEN, 0.2],
 			[432, 233.5, "eGK", 3.0, GRUEN, 0.2],
@@ -258,12 +258,12 @@ const STATIONEN := {
 		"rufe": [
 			[100, 226, "eGK ✓", 4.2, GRUEN, 1.0, 2.4],
 			[286, 229, "SMC-B", 3.0, SMCB, 1.6, 2.8],
-			[302, 204, "ZUGRIFF VERWEIGERT", 4.2, ROT, 2.7, 4.6],
-			[200, 204, "DEINE KARTE", 4, GRUEN, 3.0, 4.6],
+			[302, 204, "Zugriff verweigert", 4.2, ROT, 2.7, 4.6],
+			[200, 204, "Deine Karte", 4, GRUEN, 3.0, 4.6],
 			[265, 205, "?", 6, WEISS, 5.0, 6.0],
-			[330, 204, "NUR DEINE KARTE", 4, GRUEN, 6.9, 8.4],
-			[540, 196, "ePA-APP", 3.6, KUEHL, 12.2, 15.4],
-			[460, 204, "BEFUGNIS ENTZOGEN", 4.2, ROT, 13.2, 15.4],
+			[330, 204, "Nur deine Karte", 4, GRUEN, 6.9, 8.4],
+			[540, 196, "ePA-App", 3.6, KUEHL, 12.2, 15.4],
+			[460, 204, "Befugnis entzogen", 4.2, ROT, 13.2, 15.4],
 		],
 	},
 	"20-souveraenitaet": {
@@ -277,22 +277,22 @@ const STATIONEN := {
 		],
 		"tust": "{lauf} laufen · {jump} springen · an der Tür warten — die Versicherte öffnet sie für dich",
 		"schilder": [
-			[430, 202, "DEINE AKTE", 5, GOLD, 1.0],
-			[480, 228, "DIE VERSICHERTE", 3.2, MATT, 0.4],
+			[430, 202, "Deine Akte", 5, GOLD, 1.0],
+			[480, 228, "Die Versicherte", 3.2, MATT, 0.4],
 			[225, 209, "VAU", 4.4, VIOLETT, 1.0],
-			[104, 192, "ARCHIV", 3.4, MATT, 0.6],
+			[104, 192, "Archiv", 3.4, MATT, 0.6],
 		],
 		"rufe": [
-			[430, 188, "SIE GEHÖRT NICHT DIR", 4, MATT, 7.3, 9.4],
-			[430, 170, "ZUGRIFFSPROTOKOLL", 4, WEISS, 9.6, 13.4],
-			[430, 188, "FREIGEGEBEN — VON IHR", 4.6, GOLD, 13.4, 17.4],
+			[430, 188, "Sie gehört nicht dir", 4, MATT, 7.3, 9.4],
+			[430, 170, "Zugriffsprotokoll", 4, WEISS, 9.6, 13.4],
+			[430, 188, "Freigegeben — von ihr", 4.6, GOLD, 13.4, 17.4],
 		],
 	},
 }
 
 const FALLBACK := {
 	"key": "", "szene": 10.0,
-	"untertitel": "Gleich geht es weiter — Paul und REZI sind bereit.",
+	"untertitel": "Gleich geht es weiter — Paul und Rezi sind bereit.",
 	"zeilen": ["Lauf nach rechts, sammle Prüfsummen und lass dich von der TI schützen."],
 	"tust": "{lauf} laufen · {jump} springen · {action} TI-Aktion · {toggle} Hülle",
 	"schilder": [], "rufe": [],
@@ -316,13 +316,13 @@ static func _tr(s: String) -> String:
 ## Knopfnamen je nach Hardware — Quelle sind die Kiosk-Beschriftungen.
 static func tokens() -> Dictionary:
 	if Kiosk.touch_seen or Kiosk.touch_forced:
-		return {"lauf": _tr("Knüppel"), "jump": _tr("SPRUNG"), "action": _tr("AKTION"), "toggle": _tr("HÜLLE"),
+		return {"lauf": _tr("Knüppel"), "jump": _tr("Sprung"), "action": _tr("Aktion"), "toggle": _tr("Hülle"),
 			"duck": _tr("Knüppel runter"), "hoch": _tr("Knüppel hoch/runter")}
 	if Kiosk.has_gamepad():
 		return {"lauf": _tr("Joystick"), "jump": _tr("Knopf %s") % Kiosk.label_jump(), "action": _tr("Knopf %s") % Kiosk.label_action(),
-			"toggle": Kiosk.label_toggle(), "duck": _tr("Joystick RUNTER"), "hoch": _tr("Joystick HOCH/RUNTER")}
+			"toggle": Kiosk.label_toggle(), "duck": _tr("Joystick runter"), "hoch": _tr("Joystick hoch/runter")}
 	return {"lauf": _tr("Pfeiltasten"), "jump": Kiosk.label_jump(), "action": _tr("Taste %s") % Kiosk.label_action(),
-		"toggle": Kiosk.label_toggle(), "duck": _tr("Pfeil RUNTER"), "hoch": _tr("Pfeil HOCH/RUNTER")}
+		"toggle": Kiosk.label_toggle(), "duck": _tr("Pfeil runter"), "hoch": _tr("Pfeil hoch/runter")}
 
 
 static func text(s: String) -> String:

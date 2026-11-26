@@ -5,8 +5,8 @@ class_name Pen
 ## der Originale gelten deshalb unverändert. Farben sind Integer-Hex wie im
 ## Original (0xRRGGBB), Alpha kommt als eigener Parameter.
 
-const K := Color(0.302, 0.890, 1.0)        # KUEHL_GESCHUETZT 0x4de3ff
-const WARM := Color(1.0, 0.541, 0.227)     # WARM_OFFEN 0xff8a3a
+const K := Color(0.404, 0.592, 1.0)        # KUEHL_GESCHUETZT 0x6797ff
+const WARM := Color(0.996, 0.486, 0.224)     # WARM_OFFEN 0xfe7c39
 const DUNST_AUFHELLUNG := 0.34
 
 # ---------------------------------------------------------------- Farben
@@ -134,26 +134,26 @@ static func glow(c: CanvasItem, x: float, y: float, col: Color, radius: float, a
 
 ## Flacher Lichtschein am Boden: zwei gestufte Ellipsen (statt schwebendem Ball).
 static func bodenschein(c: CanvasItem, x: float, y: float, breite: float, a := 0.09) -> void:
-	ellipse(c, x, y, breite * 1.7, breite * 0.16, hex(0xffd9a0, a * 0.6))
-	ellipse(c, x, y, breite, breite * 0.11, hex(0xffd9a0, a))
+	ellipse(c, x, y, breite * 1.7, breite * 0.16, hex(0xffcda8, a * 0.6))
+	ellipse(c, x, y, breite, breite * 0.11, hex(0xffcda8, a))
 
 
 # ---------------------------------------------------------------- Menschen
 # Figuren-Paletten aus krankenhaus.ts — dieselben Gesichter auf allen Screens.
 
-const HAUT := [0xeec39a, 0xc98850, 0x8a5a3b]
-const P_ARZT := {"haut": 0xeec39a, "oben": 0x5c7ba8, "unten": 0x33405c, "haar": 0x2b2530, "kittel": true}
-const P_AERZTIN := {"haut": 0x8a5a3b, "oben": 0x8a5f9e, "unten": 0x33405c, "haar": 0x14101a, "kittel": true}
-const P_PFLEGE := {"haut": 0xc98850, "oben": 0x5fc4b8, "unten": 0x3d5a74, "haar": 0x6b4326}
-const P_OP := {"haut": 0xeec39a, "oben": 0x69b894, "unten": 0x4d8a70, "haar": 0x69b894}
-const P_PATIENT := {"haut": 0xc98850, "oben": 0xa9b9d6, "unten": 0xa9b9d6, "haar": 0xcfd4de}
-const P_BESUCH := {"haut": 0xeec39a, "oben": 0xc07a4f, "unten": 0x2e3a50, "haar": 0x8a5a33}
-const P_TECHNIK := {"haut": 0x8a5a3b, "oben": 0x4d6a8f, "unten": 0x2e3a50, "haar": 0x2b2530}
-const P_BOTE := {"haut": 0x8a5a3b, "oben": 0xa0764d, "unten": 0x2e3a50, "haar": 0x14101a}
-const P_OMA := {"haut": 0xeec39a, "oben": 0x8a5f9e, "unten": 0x4a3a5c, "haar": 0xcfd4de}
-const P_GRUEN := {"haut": 0xc98850, "oben": 0x6a8f4d, "unten": 0x2e3a50, "haar": 0x2b2530}
-const P_GELB := {"haut": 0x8a5a3b, "oben": 0xd0a04a, "unten": 0x33405c, "haar": 0x14101a}
-const P_KIND := {"haut": 0xeec39a, "oben": 0xd06a6a, "unten": 0x3d5a74, "haar": 0x8a5a33}
+const HAUT := [0xffcda8, 0xe17701, 0x9f6010]
+const P_ARZT := {"haut": 0xffcda8, "oben": 0x787e8a, "unten": 0x4c5056, "haar": 0x202124, "kittel": true}
+const P_AERZTIN := {"haut": 0x9f6010, "oben": 0x5b3fb8, "unten": 0x4c5056, "haar": 0x111113, "kittel": true}
+const P_PFLEGE := {"haut": 0xe17701, "oben": 0x4fd3a1, "unten": 0x4c5056, "haar": 0x6a3718}
+const P_OP := {"haut": 0xffcda8, "oben": 0x18ae80, "unten": 0x07966a, "haar": 0x18ae80}
+const P_PATIENT := {"haut": 0xe17701, "oben": 0xb5bcc4, "unten": 0xb5bcc4, "haar": 0xcbd1d6}
+const P_BESUCH := {"haut": 0xffcda8, "oben": 0xb37814, "unten": 0x303236, "haar": 0x9f6010}
+const P_TECHNIK := {"haut": 0x9f6010, "oben": 0x626771, "unten": 0x303236, "haar": 0x202124}
+const P_BOTE := {"haut": 0x9f6010, "oben": 0xb37814, "unten": 0x303236, "haar": 0x111113}
+const P_OMA := {"haut": 0xffcda8, "oben": 0x5b3fb8, "unten": 0x4c5056, "haar": 0xcbd1d6}
+const P_GRUEN := {"haut": 0xe17701, "oben": 0x07966a, "unten": 0x303236, "haar": 0x202124}
+const P_GELB := {"haut": 0x9f6010, "oben": 0xd5981b, "unten": 0x4c5056, "haar": 0x111113}
+const P_KIND := {"haut": 0xffcda8, "oben": 0xf56f70, "unten": 0x4c5056, "haar": 0x9f6010}
 
 
 ## Pixel-Figur, ~13 px hoch, Füße auf (x, y_fuss). `schritt` = Laufzyklus
@@ -164,7 +164,7 @@ static func figur(c: CanvasItem, x: float, y_fuss: float, p: Dictionary, schritt
 	var y := y_fuss - bob
 	var kittel: bool = p.get("kittel", false)
 	var unten := hex(p["unten"], a)
-	var oben := hex(0xe9eef8 if kittel else p["oben"], a)
+	var oben := hex(0xeeeff1 if kittel else p["oben"], a)
 	rect(c, x - 2 + bein, y - 4, 1.8, 4 + bob, unten)
 	rect(c, x + 0.2 - bein, y - 4, 1.8, 4 + bob, unten)
 	rect(c, x - 2.6, y - 9.2, 5.2, 5.4, oben)
@@ -188,7 +188,7 @@ static func sitzend(c: CanvasItem, x: float, y_sitz: float, p: Dictionary, bein_
 	rect(c, x - 2.4, y_sitz - 1.6, 4.6, 1.6, unten)
 	rect(c, x + 1 + bein_schwung, y_sitz, 1.6, 3.4, unten)
 	rect(c, x - 1.6 - bein_schwung, y_sitz, 1.6, 3.4, unten)
-	rect(c, x - 2.4, y_sitz - 6.8, 4.8, 5.2, hex(0xe9eef8 if kittel else p["oben"], a))
+	rect(c, x - 2.4, y_sitz - 6.8, 4.8, 5.2, hex(0xeeeff1 if kittel else p["oben"], a))
 	rect(c, x - 1.7, y_sitz - 10.4, 3.4, 3.6, hex(p["haut"], a))
 	rect(c, x - 1.7, y_sitz - 10.4, 3.4, 1.2, hex(p["haar"], a))
 
@@ -262,12 +262,12 @@ static func blende(u: float, von: float, bis: float, rampe := 0.5) -> float:
 # Kapuzenpulli, REZI als kleine leuchtende Kapsel, die Hülle als Ring um die Figur.
 # Fachliche Farben bleiben: kühl = verschlüsselt, violett = VAU, Klartext = kein Ring.
 
-const P_PAUL := {"haut": 0xf5cca8, "oben": 0xeb6142, "unten": 0x3d4769, "haar": 0x52332b}
-const KAPUZE := 0xad3d37
+const P_PAUL := {"haut": 0xffcda8, "oben": 0xfd5108, "unten": 0x4c5056, "haar": 0x6a3718}
+const KAPUZE := 0xba221d
 const VAU_COL := Color(0.58, 0.44, 0.96)    # Palette.VAU
-const DENY_COL := Color(0.93, 0.31, 0.26)   # Palette.DENY
-const OK_COL := Color(0.30, 0.74, 0.42)     # Palette.OK
-const GOLD_COL := Color(1.0, 0.78, 0.30)    # Palette.GOLD
+const DENY_COL := Color(0.929, 0.259, 0.259)   # Palette.DENY
+const OK_COL := Color(0.094, 0.682, 0.502)     # Palette.OK
+const GOLD_COL := Color(1.0, 0.761, 0.106)    # Palette.GOLD
 
 
 ## Paul (~13 px hoch, Füße auf y_fuss). `duck` = geduckt: kompakter Ball, Kopf vorn (~10 px).
@@ -289,7 +289,7 @@ static func paul(c: CanvasItem, x: float, y_fuss: float, schritt := 0.0, dir := 
 	var y := y_fuss - bob
 	var kx := x - 2.8 if dir == 1 else x + 1.8
 	rect(c, kx, y - 13.2, 1.0, 4.2, hex(KAPUZE, a))
-	rect(c, kx - (0.5 if dir == 1 else -0.5), y - 9.2, 1.0, 1.0, hex(0xeef2f8, 0.9 * a))
+	rect(c, kx - (0.5 if dir == 1 else -0.5), y - 9.2, 1.0, 1.0, hex(0xeeeff1, 0.9 * a))
 
 
 ## Hülle als Ring um die Figur (Füße auf y_fuss): kühl = verschlüsselt, violett = VAU.
@@ -312,8 +312,8 @@ static func rezi(c: CanvasItem, x: float, y: float, a := 1.0, s := 1.0, verschlu
 	rect(c, x - 3.0 * s, y - 3.0 * s, 6.0 * s, 1.0 * s, Color(1, 1, 1, 0.25 * a))
 	rect(c, x - 2.7 * s, y - 1.7 * s, 1.7 * s, 2.0 * s, Color(1, 1, 1, 0.95 * a))
 	rect(c, x + 0.9 * s, y - 1.7 * s, 1.7 * s, 2.0 * s, Color(1, 1, 1, 0.95 * a))
-	rect(c, x - 2.0 * s, y - 1.2 * s, 0.8 * s, 1.1 * s, hex(0x0a1220, a))
-	rect(c, x + 1.6 * s, y - 1.2 * s, 0.8 * s, 1.1 * s, hex(0x0a1220, a))
+	rect(c, x - 2.0 * s, y - 1.2 * s, 0.8 * s, 1.1 * s, hex(0x111113, a))
+	rect(c, x + 1.6 * s, y - 1.2 * s, 0.8 * s, 1.1 * s, hex(0x111113, a))
 	line(c, x, y - 3.0 * s, x + 0.8 * s, y - 5.6 * s, alpha(col, 0.9 * a), 0.7)
 	circle(c, x + 0.9 * s, y - 5.9 * s, 0.9 * s, Color(1, 1, 1, 0.95 * a))
 	if verschluesselt:

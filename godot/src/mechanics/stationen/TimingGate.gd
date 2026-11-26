@@ -83,7 +83,7 @@ func _fail() -> void:
 	_fail_until = _t + 0.45
 	_step_start = _t + 0.45
 	Sfx.play("deny", 1.2, -4.0)
-	Fx.float_text(level, global_position + Vector2(0, -60), "PRÜFUNG WIEDERHOLEN", Palette.DENY, 22)
+	Fx.float_text(level, global_position + Vector2(0, -60), "Prüfung wiederholen", Palette.DENY, 22)
 	if Game.assist_fail_count(key) >= 2 and _t - _last_tip > 6.0:
 		_last_tip = _t
 		say(ltext("failHint", {"de": "Tipp: Drück %s genau dann, wenn das gelbe Licht groß aufleuchtet!" % Kiosk.label_action(),
@@ -94,7 +94,7 @@ func _succeed() -> void:
 	running = false
 	if Game.assist_clean("timing-" + str(rect.position.x)):
 		Game.add_security_bonus()
-		Fx.float_text(level, global_position + Vector2(0, -70), "+250 SICHERHEITS-BONUS", Palette.GOLD, 22)
+		Fx.float_text(level, global_position + Vector2(0, -70), "+250 Sicherheits-Bonus", Palette.GOLD, 22)
 	var g = linked_gate()
 	if g:
 		g.open()
@@ -112,7 +112,7 @@ func _draw() -> void:
 	# Terminal-Sockel
 	var base := Rect2(-70, r.end.y - 70, 140, 70)
 	draw_panel(base, pal.metall, pal.detail, 8, 0.4)
-	draw_rect(Rect2(-56, r.end.y - 58, 112, 30), Color(0.02, 0.05, 0.08, 0.9))
+	draw_rect(Rect2(-56, r.end.y - 58, 112, 30), Color(0.067, 0.067, 0.075, 0.9))
 	var txt := "PIN" if not done else "OK"
 	draw_string(ThemeDB.fallback_font, Vector2(-56, r.end.y - 36), txt, HORIZONTAL_ALIGNMENT_CENTER, 112, 22, Palette.glow(Palette.OK if done else pal.accent, 1.3))
 	# Lichter
@@ -120,7 +120,7 @@ func _draw() -> void:
 	var in_window := running and elapsed < _slow * window_ratio and _t >= _fail_until
 	for i in steps:
 		var p := Vector2(_light_x(i), _light_y())
-		var c := Color(0.25, 0.28, 0.35)
+		var c := Color(0.298, 0.314, 0.337)
 		var rad := 11.0
 		if _t < _fail_until:
 			c = Palette.DENY
@@ -129,7 +129,7 @@ func _draw() -> void:
 		elif i == progress and in_window:
 			c = pal.accent
 			rad = 16.0  # größer, nicht nur andersfarbig
-		draw_circle(p, rad + 4.0, Color(0.02, 0.04, 0.08, 0.8))
+		draw_circle(p, rad + 4.0, Color(0.067, 0.067, 0.075, 0.8))
 		draw_circle(p, rad, Palette.glow(c, 1.6 if (i == progress and in_window) or i < progress else 1.0))
 		if _flash[i] > 0.0:
 			draw_arc(p, rad + 8.0 + (1.0 - _flash[i]) * 14.0, 0, TAU, 20, Color(1, 1, 1, _flash[i]), 2.0, true)

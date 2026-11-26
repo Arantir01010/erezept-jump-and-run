@@ -10,8 +10,8 @@ render_mode blend_mix, unshaded;
 
 uniform vec2 rect_origin = vec2(-200.0, -200.0);
 uniform vec2 rect_size = vec2(6000.0, 1500.0);
-uniform vec4 lamp_color : source_color = vec4(0.85, 0.96, 1.0, 1.0);
-uniform vec4 shade_color : source_color = vec4(0.15, 0.19, 0.23, 1.0);
+uniform vec4 lamp_color : source_color = vec4(0.863, 0.906, 0.992, 1.0);
+uniform vec4 shade_color : source_color = vec4(0.188, 0.196, 0.212, 1.0);
 uniform float strength : hint_range(0.0, 0.5) = 0.10;
 uniform float gap_dark : hint_range(0.0, 0.3) = 0.075;
 uniform float speed = 0.04;

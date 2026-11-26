@@ -380,7 +380,7 @@ class _Umschalter extends CanvasLayer:
 		ls.font_size = 22
 		ls.font_color = Color(1, 1, 1)
 		ls.outline_size = 6
-		ls.outline_color = Color(0.03, 0.05, 0.08, 0.9)
+		ls.outline_color = Color(0.067, 0.067, 0.075, 0.9)
 		hinweis.label_settings = ls
 		hinweis.position = Vector2(24, 20)
 		hinweis.mouse_filter = Control.MOUSE_FILTER_IGNORE

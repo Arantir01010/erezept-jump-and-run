@@ -45,8 +45,8 @@
   "mechanics": {
     "lauscher": {
       "seenText": {
-        "de": "MITGELESEN!",
-        "en": "READ ALONG!"
+        "de": "Mitgelesen!",
+        "en": "Read along!"
       },
       "akteur": {
         "de": "Lauscher",
@@ -152,8 +152,8 @@
         "en": "This terminal wants to see the practice card."
       },
       "falsche-karteHint": {
-        "de": "ZUGRIFF VERWEIGERT — die eGK weist DICH aus, nicht die Praxis. Hier braucht es die SMC-B.",
-        "en": "ACCESS DENIED — the eGK identifies YOU, not the practice. This needs the SMC-B."
+        "de": "Zugriff verweigert — die eGK weist dich aus, nicht die Praxis. Hier braucht es die SMC-B.",
+        "en": "Access denied — the eGK identifies you, not the practice. This needs the SMC-B."
       }
     },
     {

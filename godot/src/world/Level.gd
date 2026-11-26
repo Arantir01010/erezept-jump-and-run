@@ -126,7 +126,7 @@ func setup(level_data: LevelData) -> void:
 		rezi.light.shadow_color = pal.shadow_for_light(0.42)
 	# Browser: kein HDR-Glühen — additiver Hof ersetzt das Leuchten der Kapsel
 	if Fx.web_fallback():
-		Fx.glow_sprite(rezi, Color(0.62, 0.90, 1.0), 64.0, 0.9)
+		Fx.glow_sprite(rezi, Color(0.863, 0.906, 0.992), 64.0, 0.9)
 
 	var objs: Array = []
 	for m in data.markers:
@@ -266,7 +266,7 @@ func _on_landed(impact: float) -> void:
 		camera.kick(Vector2(0, 90.0 * impact))
 		Fx.impact(impact * 0.5)
 		# Flacher, breiter Ring am Boden statt Kreis um die Füße
-		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.8, 0.88, 1.0), 30.0 + 70.0 * impact, 1.5 + impact)
+		Fx.ring(self, player.global_position + Vector2(0, -4), Color(0.863, 0.906, 0.992), 30.0 + 70.0 * impact, 1.5 + impact)
 
 
 ## Sturz → Fahne: kurz aus dem Dunkeln aufblenden, Kamera sitzt sofort auf Paul.
@@ -274,7 +274,7 @@ func _on_respawned() -> void:
 	Statistik.sturz()
 	if camera:
 		camera.snap()
-	Fx.flash(Color(0.03, 0.05, 0.09), 0.9)
+	Fx.flash(Color(0.067, 0.067, 0.075), 0.9)
 	Sfx.play("land", 0.8, -4.0)
 
 
@@ -295,7 +295,7 @@ func _on_huelle_changed(_from: String, to: String, reason: String) -> void:
 	Fx.light_burst(self, player.global_position + Vector2(0, -32), c, 300.0, 1.3, 0.5)
 	Fx.impact(0.3)
 	if reason == "session-expired":
-		Fx.float_text(self, player.global_position + Vector2(0, -80), "SITZUNG ABGELAUFEN", Palette.WARM, 24)
+		Fx.float_text(self, player.global_position + Vector2(0, -80), "Sitzung abgelaufen", Palette.WARM, 24)
 		Sfx.play("deny", 0.9, -4.0)
 		Fx.flash(Palette.WARM, 0.15)
 	elif reason == "enter-vau":
@@ -349,7 +349,7 @@ func complete_level() -> void:
 	Sfx.play("seal")
 	Sfx.music_duck()
 	# Der große Moment: Blitz, Zeitlupe, Zoom, Lichtwelle
-	Fx.flash(Color(1, 0.96, 0.85), 0.5)
+	Fx.flash(Color(0.988, 0.98, 0.922), 0.5)
 	Fx.slowmo(get_tree(), 0.25, 0.5)
 	camera.punch(0.12)
 	camera.kick(Vector2(0, -90))

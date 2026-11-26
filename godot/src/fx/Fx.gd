@@ -194,8 +194,8 @@ static func dust(parent: Node, pos: Vector2, count := 4, strength := 1.0) -> voi
 	p.gravity = Vector2(0, -70)
 	p.scale_amount_min = 2.5
 	p.scale_amount_max = 5.5
-	p.color = Color(0.8, 0.88, 1.0, 0.45)
-	p.color_ramp = _fade_ramp(Color(0.8, 0.88, 1.0, 0.5))
+	p.color = Color(0.863, 0.906, 0.992, 0.45)
+	p.color_ramp = _fade_ramp(Color(0.863, 0.906, 0.992, 0.5))
 	p.z_index = 9
 	parent.add_child(p)
 	p.emitting = true
@@ -223,8 +223,8 @@ static func land_dust(parent: Node, pos: Vector2, impact: float) -> void:
 		p.gravity = Vector2(0, -50)
 		p.scale_amount_min = 2.0 + 1.5 * k
 		p.scale_amount_max = 4.0 + 4.0 * k
-		p.color = Color(0.8, 0.88, 1.0, 0.35 + 0.2 * k)
-		p.color_ramp = _fade_ramp(Color(0.8, 0.88, 1.0, 0.4 + 0.2 * k))
+		p.color = Color(0.863, 0.906, 0.992, 0.35 + 0.2 * k)
+		p.color_ramp = _fade_ramp(Color(0.863, 0.906, 0.992, 0.4 + 0.2 * k))
 		p.z_index = 9
 		parent.add_child(p)
 		p.emitting = true
@@ -340,7 +340,7 @@ static func light_burst(parent: Node, pos: Vector2, color: Color, radius := 240.
 
 
 ## Stempel „ZUGRIFF VERWEIGERT" (Markenregel: Angreifer scheitern sichtbar und komisch).
-static func deny_stamp(parent: Node, pos: Vector2, text := "ZUGRIFF VERWEIGERT") -> void:
+static func deny_stamp(parent: Node, pos: Vector2, text := "Zugriff verweigert") -> void:
 	var l := _stamp_label(text, Palette.DENY, 34)
 	l.position = pos - Vector2(l.size.x / 2.0, 20.0)
 	l.rotation = deg_to_rad(-8)
@@ -378,7 +378,7 @@ static func _stamp_label(text: String, color: Color, size: int) -> Label:
 	ls.font_size = size
 	ls.font_color = color
 	ls.outline_size = 8
-	ls.outline_color = Color(0.03, 0.05, 0.08, 0.9)
+	ls.outline_color = Color(0.067, 0.067, 0.075, 0.9)
 	l.label_settings = ls
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.size = Vector2(text.length() * size * 0.66 + 20, size + 12)

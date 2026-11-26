@@ -38,7 +38,7 @@ const LEITUNG_B := [Vector2(128, 340), Vector2(240, 340), Vector2(240, 344), Vec
 const HALTE := [288.0, 224.0, 186.0, 148.0, 186.0, 224.0]
 const WARTE := 2.2
 const TEMPO := 34.0
-const REZI_SPRUECHE := ["Drück den Knopf — los geht's!", "Ich bin REZI, dein e-Rezept.", "Unten im Keller wohnt die TI …", "Hülle an, Lauscher aus!"]
+const REZI_SPRUECHE := ["Drück den Knopf — los geht's!", "Ich bin Rezi, dein e-Rezept.", "Unten im Keller wohnt die TI …", "Hülle an, Lauscher aus!"]
 
 var _fahrplan: Array = []
 var _fahrplan_dauer := 0.0
@@ -84,31 +84,31 @@ func _build() -> void:
 
 	# ---- Schriften der Kulisse (Wortmarken als Easter Eggs) ----
 	sign_label = label(140, 123, "gematik", 9, {"spacing": 0.4})
-	label(140, 133, "KLINIKUM", 4.6, {"color": Pen.hex(0x9fc4e8), "spacing": 1.3, "bold": false})
-	label(121, 259, "NOTAUFNAHME", 4.6, {"color": Pen.hex(0xffb367), "spacing": 0.7})
-	label(406, 280.5, "Kein Notfall?", 3.6, {"color": Pen.hex(0xb8c6e0), "bold": false})
-	label(406, 285.5, "116 117", 4.6, {"color": Pen.hex(0xffd75e)})
-	label(237, 288, "E-REZEPT", 3.8, {"color": Pen.hex(0x4de3ff), "bold": false})
-	label(328, 150, "KIM", 5, {"color": Pen.hex(0x8fd6c8), "spacing": 0.8})
-	label(100, 147.5, "OP 1", 4.2, {"color": Pen.hex(0x9fb0cc), "bold": false})
-	label(434, 221, "TIM", 4.4, {"color": Pen.hex(0x8fd6c8), "spacing": 0.6})
-	label(245, 330, "VAU", 6.5, {"color": Pen.hex(0x4de3ff), "spacing": 1.0})
-	label(118, 345.5, "KONNEKTOR", 4, {"color": Pen.hex(0x9fb0cc), "spacing": 0.5, "bold": false})
-	label(345, 326.5, "FACHDIENST ePA", 4, {"color": Pen.hex(0x9fb0cc), "spacing": 0.3, "bold": false})
-	label(570, 267, "APOTHEKE", 5.5, {"color": Pen.hex(0xffd75e), "spacing": 1.2})
-	neon_label = label(564, 304, "E-REZEPT", 4.4, {"color": Pen.hex(0x4de3ff), "spacing": 0.5})
+	label(140, 133, "Klinikum", 4.6, {"color": Pen.hex(0xa9c8fc), "spacing": 1.3, "bold": false})
+	label(121, 259, "Notaufnahme", 4.6, {"color": Pen.hex(0xffaa72), "spacing": 0.7})
+	label(406, 280.5, "Kein Notfall?", 3.6, {"color": Pen.hex(0xa9c8fc), "bold": false})
+	label(406, 285.5, "116 117", 4.6, {"color": Pen.hex(0xffd646)})
+	label(237, 288, "E-Rezept", 3.8, {"color": Pen.hex(0x6797ff), "bold": false})
+	label(328, 150, "KIM", 5, {"color": Pen.hex(0x8bf1ca), "spacing": 0.8})
+	label(100, 147.5, "OP 1", 4.2, {"color": Pen.hex(0xa1a8b3), "bold": false})
+	label(434, 221, "TIM", 4.4, {"color": Pen.hex(0x8bf1ca), "spacing": 0.6})
+	label(245, 330, "VAU", 6.5, {"color": Pen.hex(0x6797ff), "spacing": 1.0})
+	label(118, 345.5, "Konnektor", 4, {"color": Pen.hex(0xa1a8b3), "spacing": 0.5, "bold": false})
+	label(345, 326.5, "Fachdienst ePA", 4, {"color": Pen.hex(0xa1a8b3), "spacing": 0.3, "bold": false})
+	label(570, 267, "Apotheke", 5.5, {"color": Pen.hex(0xffd646), "spacing": 1.2})
+	neon_label = label(564, 304, "E-Rezept", 4.4, {"color": Pen.hex(0x6797ff), "spacing": 0.5})
 
 	# ---- Titel, Subline, Start-Zeile ----
 	var cfg: Dictionary = Game.config.get("titleScreen", {})
-	label(W / 2, 52, "PAUL & REZI", 8, {"color": Brand.UI_EYEBROW, "spacing": 2.4, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
-	label(W / 2, 76, Game.t(cfg.get("headline", {"de": "Das e-Rezept"})), 36, {"serif": true, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.6, "spacing": 0.6})
-	label(W / 2, 101, Game.t(cfg.get("subline", {"de": "Spiele dich durch die TI und erhalte dein e-Rezept!"})), 11.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
-	press = label(W - 12, 340, "", 12, {"color": Brand.UI_ACCENT, "spacing": 0.5, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x0a1730), "stroke_w": 1.0})
+	label(W / 2, 52, "Paul & Rezi", 8, {"color": Brand.UI_EYEBROW, "spacing": 2.4, "stroke": Pen.hex(0x04163a), "stroke_w": 1.0})
+	label(W / 2, 76, Game.t(cfg.get("headline", {"de": "Das e-Rezept"})), 36, {"serif": true, "stroke": Pen.hex(0x04163a), "stroke_w": 1.6, "spacing": 0.6})
+	label(W / 2, 101, Game.t(cfg.get("subline", {"de": "Spiele dich durch die TI und erhalte dein e-Rezept!"})), 11.5, {"color": Brand.UI_TEXT_DIM, "bold": false, "stroke": Pen.hex(0x04163a), "stroke_w": 1.0})
+	press = label(W - 12, 340, "", 12, {"color": Brand.UI_ACCENT, "spacing": 0.5, "origin": Vector2(1, 0.5), "stroke": Pen.hex(0x04163a), "stroke_w": 1.0})
 
 	# ---- Bedienungswahl: zwei Felder über der Start-Zeile ----
 	# Felder so breit wie ihr (übersetzter) Text + Symbol, der Rahmen mittig am oberen Rand
-	var lk := label(0, PILL_Y + PILL_H / 2, "TASTATUR · ARCADE", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
-	var lt := label(0, PILL_Y + PILL_H / 2, "TOUCH", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
+	var lk := label(0, PILL_Y + PILL_H / 2, "Tastatur · Arcade", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
+	var lt := label(0, PILL_Y + PILL_H / 2, "Touch", 4.4, {"spacing": 0.5, "origin": Vector2(0, 0.5)})
 	var wk := 19.0 + lk.size.x / S + 8.0
 	var wt := 19.0 + lt.size.x / S + 8.0
 	var x0 := roundf(320.0 - (wk + wt) / 2.0)
@@ -120,14 +120,14 @@ func _build() -> void:
 	for p in _pills:
 		var r: Rect2 = p["rect"]
 		_place(p["label"], r.position.x + 19.0, PILL_Y + PILL_H / 2)
-	label(320, PILL_Y + PILL_H + 5.5, "BEDIENUNG · ◀ ▶ WECHSELN", 3.6, {"color": Brand.UI_EYEBROW, "spacing": 1.2})
+	label(320, PILL_Y + PILL_H + 5.5, "Bedienung · ◀ ▶ wechseln", 3.6, {"color": Brand.UI_EYEBROW, "spacing": 1.2})
 	mode = Kiosk.suggested_input_mode()
 	_seg = 1.0 if mode == "touch" else 0.0
 	_lang_label = label(FLAG_X0 + 6 * FLAG_STEP - 4.0, 23.5, str(Game.LANG_NAMES.get(Game.lang, "Deutsch")), 3.8,
 		{"color": Brand.UI_TEXT_DIM, "spacing": 0.3, "origin": Vector2(1, 0.5)})
 	_snd_labels = [
-		label(0, SND_Y + SND_H / 2, "MUSIK", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
-		label(0, SND_Y + SND_H / 2, "TÖNE", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+		label(0, SND_Y + SND_H / 2, "Musik", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
+		label(0, SND_Y + SND_H / 2, "Töne", 3.6, {"spacing": 0.5, "origin": Vector2(0, 0.5)}),
 	]
 	_snd_rects = []
 	var sx := SND_X0
@@ -157,7 +157,7 @@ func _build() -> void:
 	# ---- Tages-Bestenliste rechts oben (im Himmel, neben der Antenne) ----
 	var hs := Game.highscores()
 	if not hs.is_empty():
-		label(570, 152, "TAGES-BESTENLISTE", 4.6, {"color": Brand.UI_HIGHLIGHT, "spacing": 1.0})
+		label(570, 152, "Tages-Bestenliste", 4.6, {"color": Brand.UI_HIGHLIGHT, "spacing": 1.0})
 		for i in mini(5, hs.size()):
 			var e: Dictionary = hs[i]
 			var txt := "%d.  %s   %d P" % [i + 1, Reward.AVATARS[int(e.get("avatar", 0)) % Reward.AVATARS.size()], int(e.get("score", 0))]
@@ -193,14 +193,14 @@ func _apply_mode() -> void:
 	var start := ""
 	var cfg: Dictionary = Game.config.get("titleScreen", {})
 	if mode == "touch":
-		zeilen = [[tr("KNÜPPEL"), tr("laufen & ducken")], [tr("SPRUNG"), tr("springen · 2× REZI-Schub")], [tr("AKTION"), tr("TI-Aktion")], [tr("HÜLLE"), tr("Hülle an / aus")]]
-		start = tr("Tippe auf TOUCH zum Start!")
+		zeilen = [[tr("Knüppel"), tr("laufen & ducken")], [tr("Sprung"), tr("springen · 2× Rezi-Schub")], [tr("Aktion"), tr("TI-Aktion")], [tr("Hülle"), tr("Hülle an / aus")]]
+		start = tr("Tippe auf Touch zum Start!")
 	elif Kiosk.has_gamepad():
-		zeilen = [[tr("JOYSTICK"), tr("laufen & ducken")], [tr("ROT"), tr("springen · 2× REZI-Schub")], [tr("BLAU"), tr("TI-Aktion")], [tr("HOCH"), tr("Hülle an / aus")]]
+		zeilen = [[tr("Joystick"), tr("laufen & ducken")], [tr("Rot"), tr("springen · 2× Rezi-Schub")], [tr("Blau"), tr("TI-Aktion")], [tr("Hoch"), tr("Hülle an / aus")]]
 		start = Game.t(cfg.get("pressStart", {"de": "Drück den roten Knopf!"}))
 	else:
-		zeilen = [[tr("PFEILE / WASD"), tr("laufen & ducken")], [tr("LEERTASTE"), tr("springen · 2× REZI-Schub")], ["E", tr("TI-Aktion")], ["SHIFT", tr("Hülle an / aus")]]
-		start = Game.t(cfg.get("pressStartKeyboard", {"de": "Drück LEERTASTE!"}))
+		zeilen = [[tr("Pfeile / WASD"), tr("laufen & ducken")], [tr("Leertaste"), tr("springen · 2× Rezi-Schub")], ["E", tr("TI-Aktion")], ["Shift", tr("Hülle an / aus")]]
+		start = Game.t(cfg.get("pressStartKeyboard", {"de": "Drück Leertaste!"}))
 	for i in _legend.size():
 		_relabel(_legend[i][0], str(zeilen[i][0]))
 		_relabel(_legend[i][1], str(zeilen[i][1]))
@@ -350,7 +350,7 @@ func _draw_sound(c: CanvasItem) -> void:
 	for i in 2:
 		var r := _snd_rect(i)
 		var an: bool = Sfx.music_on if i == 0 else Sfx.sound_on
-		Pen.rrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Color(0.176, 0.176, 0.176, 0.9 if an else 0.65))
+		Pen.rrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Color(0.188, 0.196, 0.212, 0.9 if an else 0.65))
 		Pen.srrect(c, r.position.x, r.position.y, r.size.x, r.size.y, 3, Brand.UI_ACCENT if an else Color(1, 1, 1, 0.18), 1.0 if an else 0.7)
 		var ix := r.position.x + 6.5
 		var iy := r.position.y + r.size.y / 2
@@ -419,38 +419,38 @@ func _flag(c: CanvasItem, code: String, r: Rect2, a: float) -> void:
 	var h := r.size.y
 	match code:
 		"de":
-			Pen.rect(c, x, y, w, h / 3, Color(0.05, 0.05, 0.05, a))
-			Pen.rect(c, x, y + h / 3, w, h / 3, Color(0.86, 0.09, 0.09, a))
-			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(1.0, 0.80, 0.0, a))
+			Pen.rect(c, x, y, w, h / 3, Color(0.067, 0.067, 0.075, a))
+			Pen.rect(c, x, y + h / 3, w, h / 3, Color(0.839, 0.133, 0.137, a))
+			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(1.0, 0.761, 0.106, a))
 		"en":
-			Pen.rect(c, x, y, w, h, Color(0.0, 0.14, 0.49, a))
+			Pen.rect(c, x, y, w, h, Color(0.039, 0.141, 0.373, a))
 			Pen.line(c, x, y, x + w, y + h, Color(1, 1, 1, a), 1.8)
 			Pen.line(c, x + w, y, x, y + h, Color(1, 1, 1, a), 1.8)
-			Pen.line(c, x, y, x + w, y + h, Color(0.78, 0.06, 0.18, a), 0.7)
-			Pen.line(c, x + w, y, x, y + h, Color(0.78, 0.06, 0.18, a), 0.7)
+			Pen.line(c, x, y, x + w, y + h, Color(0.82, 0.129, 0.122, a), 0.7)
+			Pen.line(c, x + w, y, x, y + h, Color(0.82, 0.129, 0.122, a), 0.7)
 			Pen.rect(c, x + w / 2 - 1.5, y, 3.0, h, Color(1, 1, 1, a))
 			Pen.rect(c, x, y + h / 2 - 1.5, w, 3.0, Color(1, 1, 1, a))
-			Pen.rect(c, x + w / 2 - 0.9, y, 1.8, h, Color(0.78, 0.06, 0.18, a))
-			Pen.rect(c, x, y + h / 2 - 0.9, w, 1.8, Color(0.78, 0.06, 0.18, a))
+			Pen.rect(c, x + w / 2 - 0.9, y, 1.8, h, Color(0.82, 0.129, 0.122, a))
+			Pen.rect(c, x, y + h / 2 - 0.9, w, 1.8, Color(0.82, 0.129, 0.122, a))
 		"fr":
-			Pen.rect(c, x, y, w / 3, h, Color(0.0, 0.14, 0.58, a))
+			Pen.rect(c, x, y, w / 3, h, Color(0.118, 0.231, 0.545, a))
 			Pen.rect(c, x + w / 3, y, w / 3, h, Color(1, 1, 1, a))
-			Pen.rect(c, x + 2 * w / 3, y, w / 3, h, Color(0.93, 0.16, 0.22, a))
+			Pen.rect(c, x + 2 * w / 3, y, w / 3, h, Color(0.929, 0.259, 0.259, a))
 		"es":
-			Pen.rect(c, x, y, w, h, Color(0.98, 0.76, 0.05, a))
-			Pen.rect(c, x, y, w, h / 4, Color(0.77, 0.07, 0.11, a))
-			Pen.rect(c, x, y + 3 * h / 4, w, h / 4, Color(0.77, 0.07, 0.11, a))
+			Pen.rect(c, x, y, w, h, Color(1.0, 0.761, 0.106, a))
+			Pen.rect(c, x, y, w, h / 4, Color(0.729, 0.133, 0.114, a))
+			Pen.rect(c, x, y + 3 * h / 4, w, h / 4, Color(0.729, 0.133, 0.114, a))
 		"zh":
-			Pen.rect(c, x, y, w, h, Color(0.87, 0.16, 0.06, a))
-			_star(c, x + 2.6, y + 2.7, 1.7, Color(1.0, 0.87, 0.0, a))
+			Pen.rect(c, x, y, w, h, Color(0.839, 0.133, 0.137, a))
+			_star(c, x + 2.6, y + 2.7, 1.7, Color(1.0, 0.839, 0.275, a))
 			for p in [Vector2(5.4, 0.9), Vector2(6.4, 2.1), Vector2(6.4, 3.6), Vector2(5.4, 4.7)]:
-				_star(c, x + p.x, y + p.y, 0.55, Color(1.0, 0.87, 0.0, a))
+				_star(c, x + p.x, y + p.y, 0.55, Color(1.0, 0.839, 0.275, a))
 		"hi":
-			Pen.rect(c, x, y, w, h / 3, Color(1.0, 0.60, 0.20, a))
+			Pen.rect(c, x, y, w, h / 3, Color(1.0, 0.624, 0.0, a))
 			Pen.rect(c, x, y + h / 3, w, h / 3, Color(1, 1, 1, a))
-			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(0.07, 0.53, 0.03, a))
-			Pen.scircle(c, x + w / 2, y + h / 2, 1.35, Color(0.0, 0.2, 0.5, a), 0.5)
-			Pen.circle(c, x + w / 2, y + h / 2, 0.35, Color(0.0, 0.2, 0.5, a))
+			Pen.rect(c, x, y + 2 * h / 3, w, h / 3, Color(0.024, 0.486, 0.349, a))
+			Pen.scircle(c, x + w / 2, y + h / 2, 1.35, Color(0.118, 0.231, 0.545, a), 0.5)
+			Pen.circle(c, x + w / 2, y + h / 2, 0.35, Color(0.118, 0.231, 0.545, a))
 
 
 static func _star(c: CanvasItem, cx: float, cy: float, r: float, col: Color) -> void:
@@ -472,7 +472,7 @@ func _draw_pills(c: CanvasItem) -> void:
 	var rk: Rect2 = _pills[0]["rect"]
 	var rt: Rect2 = _pills[1]["rect"]
 	Pen.rrect(c, b.position.x + 0.6, b.position.y + 1.0, b.size.x, b.size.y, 4, Color(0, 0, 0, 0.35))
-	Pen.rrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(0.05, 0.07, 0.12, 0.92))
+	Pen.rrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(0.067, 0.067, 0.075, 0.92))
 	Pen.srrect(c, b.position.x, b.position.y, b.size.x, b.size.y, 4, Color(1, 1, 1, 0.16), 0.7)
 	# gleitende Füllung
 	var sx := lerpf(rk.position.x, rt.position.x, _seg)
@@ -540,7 +540,7 @@ func _aufzug_y(tt: float) -> float:
 # ------------------------------------------------------------------ Statik
 
 func _tree(c: CanvasItem, tx: float, s: float, laub: Color) -> void:
-	Pen.rect(c, tx - 1, BODEN - 10 * s, 2, 10 * s, Pen.hex(0x3a2f28))
+	Pen.rect(c, tx - 1, BODEN - 10 * s, 2, 10 * s, Pen.hex(0x303236))
 	Pen.rect(c, tx - 6 * s, BODEN - 20 * s, 12 * s, 9 * s, laub)
 	Pen.rect(c, tx - 4 * s, BODEN - 24 * s, 8 * s, 6 * s, laub)
 	Pen.rect(c, tx - 6 * s, BODEN - 20 * s, 12 * s, 1, Color(1, 1, 1, 0.06))
@@ -570,18 +570,18 @@ func _draw_static(c: CanvasItem) -> void:
 		sx += 16.0
 	for i in 4:
 		Pen.rect(c, 190, 328 + i * 6, 34, 3, Color(1, 1, 1, 0.26 - i * 0.04))
-	Pen.ellipse(c, 368, 333, 7, 2.6, Pen.hex(0x1a2333, 0.9))
+	Pen.ellipse(c, 368, 333, 7, 2.6, Pen.hex(0x202124, 0.9))
 	Pen.sellipse(c, 368, 333, 7, 2.6, Pen.alpha(detail, 0.4), 0.5)
 
 	# ---- Park: Baum, Bank mit Leser ----
-	var laub := Pen.mix(Pen.html("#3a6a55"), fog, 0.25)
+	var laub := Pen.mix(Pen.html("#086b4f"), fog, 0.25)
 	_tree(c, 491, 0.9, laub)
-	Pen.rect(c, 502, 312, 1.6, 8, Pen.hex(0x3a4358))
-	Pen.rect(c, 517, 312, 1.6, 8, Pen.hex(0x3a4358))
-	Pen.rect(c, 500, 311, 21, 1.8, Pen.hex(0x6b5a3f))
-	Pen.rect(c, 500, 305, 21, 1.4, Pen.hex(0x6b5a3f))
+	Pen.rect(c, 502, 312, 1.6, 8, Pen.hex(0x4c5056))
+	Pen.rect(c, 517, 312, 1.6, 8, Pen.hex(0x4c5056))
+	Pen.rect(c, 500, 311, 21, 1.8, Pen.hex(0x7c460a))
+	Pen.rect(c, 500, 305, 21, 1.4, Pen.hex(0x7c460a))
 	Pen.sitzend(c, 509, 310, Pen.P_BESUCH)
-	Pen.rect(c, 511.5, 302, 4, 3, Pen.hex(0xe9eef8, 0.9))
+	Pen.rect(c, 511.5, 302, 4, 3, Pen.hex(0xeeeff1, 0.9))
 
 	# ---- Hauptgebäude: Hülle, Geschossdecken, Aufzugsschacht ----
 	Pen.rect(c, HAUS.links, HAUS.dach, HAUS.rechts - HAUS.links, BODEN - HAUS.dach, wand)
@@ -593,72 +593,72 @@ func _draw_static(c: CanvasItem) -> void:
 	Pen.rect(c, HAUS.links, HAUS.dach, 6, BODEN - HAUS.dach, Pen.darken(sky_top, 0.5))
 	Pen.rect(c, HAUS.rechts - 8, HAUS.dach, 8, BODEN - HAUS.dach, Pen.darken(sky_top, 0.5))
 	Pen.rect(c, SCHACHT.links - 2, 142, SCHACHT.rechts - SCHACHT.links + 4, 316 - 142, Pen.darken(sky_top, 0.55))
-	Pen.rect(c, SCHACHT.links, 142, SCHACHT.rechts - SCHACHT.links, 316 - 142, Pen.hex(0x0b1322))
+	Pen.rect(c, SCHACHT.links, 142, SCHACHT.rechts - SCHACHT.links, 316 - 142, Pen.hex(0x111113))
 	Pen.rect(c, SCHACHT.links - 2, 122, SCHACHT.rechts - SCHACHT.links + 4, 16, wand)
 	Pen.rect(c, SCHACHT.links - 2, 122, SCHACHT.rechts - SCHACHT.links + 4, 1.5, Pen.alpha(detail, 0.8))
-	Pen.rect(c, SCHACHT.links + 6, 126, 9, 12, Pen.hex(0x0e1a2c))
+	Pen.rect(c, SCHACHT.links + 6, 126, 9, 12, Pen.hex(0x04163a))
 	Pen.circle(c, SCHACHT.links + 13, 132, 0.7, Pen.alpha(accent, 0.7))
 
 	# ---- Dach: Brüstung, Schild, Lüftung, Helipad, Antenne ----
 	Pen.rect(c, HAUS.links - 2, HAUS.dach - 2, HAUS.rechts - HAUS.links + 4, 2, Pen.alpha(detail, 0.9))
-	Pen.rect(c, 104, 116, 72, 22, Pen.hex(0x0d2440, 0.96))
+	Pen.rect(c, 104, 116, 72, 22, Pen.hex(0x04163a, 0.96))
 	Pen.srect(c, 104, 116, 72, 22, Pen.alpha(detail, 0.8), 1.0)
 	Pen.rect(c, 112, 129.5, 56, 1, Pen.alpha(K, 0.8))
-	Pen.rect(c, 246, 130, 14, 8, Pen.hex(0x39445e))
-	Pen.rect(c, 249, 126, 3, 4, Pen.hex(0x39445e))
-	Pen.rect(c, 255, 126, 3, 4, Pen.hex(0x39445e))
-	Pen.rect(c, 384, 132, 4, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 448, 132, 4, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 378, 128, 82, 4, Pen.hex(0x1c2536))
-	Pen.sellipse(c, 419, 130, 26, 2.6, Pen.hex(0xd8e0f0, 0.75), 1.2)
-	Pen.rect(c, 415, 128.6, 1.6, 2.8, Pen.hex(0xd8e0f0, 0.85))
-	Pen.rect(c, 421.4, 128.6, 1.6, 2.8, Pen.hex(0xd8e0f0, 0.85))
-	Pen.rect(c, 415, 129.6, 8, 0.9, Pen.hex(0xd8e0f0, 0.85))
-	Pen.rect(c, 466, 96, 1.8, 42, Pen.hex(0x39445e))
-	Pen.rect(c, 462, 104, 10, 1.2, Pen.hex(0x39445e))
-	Pen.rect(c, 463.5, 112, 7, 1.2, Pen.hex(0x39445e))
+	Pen.rect(c, 246, 130, 14, 8, Pen.hex(0x4c5056))
+	Pen.rect(c, 249, 126, 3, 4, Pen.hex(0x4c5056))
+	Pen.rect(c, 255, 126, 3, 4, Pen.hex(0x4c5056))
+	Pen.rect(c, 384, 132, 4, 6, Pen.hex(0x303236))
+	Pen.rect(c, 448, 132, 4, 6, Pen.hex(0x303236))
+	Pen.rect(c, 378, 128, 82, 4, Pen.hex(0x202124))
+	Pen.sellipse(c, 419, 130, 26, 2.6, Pen.hex(0xdfe3e6, 0.75), 1.2)
+	Pen.rect(c, 415, 128.6, 1.6, 2.8, Pen.hex(0xdfe3e6, 0.85))
+	Pen.rect(c, 421.4, 128.6, 1.6, 2.8, Pen.hex(0xdfe3e6, 0.85))
+	Pen.rect(c, 415, 129.6, 8, 0.9, Pen.hex(0xdfe3e6, 0.85))
+	Pen.rect(c, 466, 96, 1.8, 42, Pen.hex(0x4c5056))
+	Pen.rect(c, 462, 104, 10, 1.2, Pen.hex(0x4c5056))
+	Pen.rect(c, 463.5, 112, 7, 1.2, Pen.hex(0x4c5056))
 	Pen.ellipse(c, 463, 106, 4, 3, Pen.alpha(detail, 0.9))
 
 	# ================================================================ 2. OG
 	for tx in [190.0, 282.0, 372.0]:
 		Pen.rect(c, tx, 142, 2, 34, Pen.darken(sky_top, 0.45))
 	# OP: Lampe, Tisch, Geräteturm
-	Pen.rect(c, 137, 142, 1.4, 6, Pen.hex(0x39445e))
-	Pen.rect(c, 132, 148, 11, 2.6, Pen.hex(0xe9eef8, 0.95))
+	Pen.rect(c, 137, 142, 1.4, 6, Pen.hex(0x4c5056))
+	Pen.rect(c, 132, 148, 11, 2.6, Pen.hex(0xeeeff1, 0.95))
 	Pen.tri(c, 137.5, 151, 122, 168, 154, 168, Color(1, 1, 1, 0.06))
-	Pen.rect(c, 120, 168, 40, 2.4, Pen.hex(0x2f3a52))
-	Pen.rect(c, 126, 170, 3, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 150, 170, 3, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 104, 166, 9, 2, Pen.hex(0x39445e))
-	Pen.rect(c, 107, 168, 1.4, 8, Pen.hex(0x39445e))
-	Pen.rect(c, 105, 164.5, 2.5, 1.2, Pen.hex(0xd8e0f0, 0.9))
-	Pen.rect(c, 109, 164.5, 3.5, 1.2, Pen.hex(0xd8e0f0, 0.9))
+	Pen.rect(c, 120, 168, 40, 2.4, Pen.hex(0x303236))
+	Pen.rect(c, 126, 170, 3, 6, Pen.hex(0x303236))
+	Pen.rect(c, 150, 170, 3, 6, Pen.hex(0x303236))
+	Pen.rect(c, 104, 166, 9, 2, Pen.hex(0x4c5056))
+	Pen.rect(c, 107, 168, 1.4, 8, Pen.hex(0x4c5056))
+	Pen.rect(c, 105, 164.5, 2.5, 1.2, Pen.hex(0xdfe3e6, 0.9))
+	Pen.rect(c, 109, 164.5, 3.5, 1.2, Pen.hex(0xdfe3e6, 0.9))
 	# Labor
-	Pen.rect(c, 196, 164, 78, 2.4, Pen.hex(0x2f3a52))
-	Pen.rect(c, 200, 166.4, 2.4, 9.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 266, 166.4, 2.4, 9.6, Pen.hex(0x2f3a52))
+	Pen.rect(c, 196, 164, 78, 2.4, Pen.hex(0x303236))
+	Pen.rect(c, 200, 166.4, 2.4, 9.6, Pen.hex(0x303236))
+	Pen.rect(c, 266, 166.4, 2.4, 9.6, Pen.hex(0x303236))
 	Pen.rect(c, 198, 150, 44, 1.6, Pen.alpha(detail, 0.6))
-	var kolben := [0x7fd07f, 0x4de3ff, 0xffd75e, 0x7fd07f, 0x9a7ae8]
+	var kolben := [0x4fd3a1, 0x6797ff, 0xffd646, 0x4fd3a1, 0x9470f5]
 	for i in 5:
 		Pen.rect(c, 202 + i * 8, 146.5, 3, 3.5, Pen.hex(kolben[i], 0.85))
-	Pen.tri(c, 226, 164, 233, 164, 229.5, 157, Pen.hex(0x7fd07f, 0.9))
-	Pen.rect(c, 244, 158, 3, 6, Pen.hex(0x4de3ff, 0.9))
+	Pen.tri(c, 226, 164, 233, 164, 229.5, 157, Pen.hex(0x4fd3a1, 0.9))
+	Pen.rect(c, 244, 158, 3, 6, Pen.hex(0x6797ff, 0.9))
 	# KIM-Büro
-	Pen.rect(c, 292, 166, 34, 2.4, Pen.hex(0x2f3a52))
-	Pen.rect(c, 296, 168.4, 2.4, 7.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 318, 168.4, 2.4, 7.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 297, 157, 9, 7, Pen.hex(0x0a1220))
-	Pen.srect(c, 297, 157, 9, 7, Pen.hex(0x39445e), 0.6)
+	Pen.rect(c, 292, 166, 34, 2.4, Pen.hex(0x303236))
+	Pen.rect(c, 296, 168.4, 2.4, 7.6, Pen.hex(0x303236))
+	Pen.rect(c, 318, 168.4, 2.4, 7.6, Pen.hex(0x303236))
+	Pen.rect(c, 297, 157, 9, 7, Pen.hex(0x111113))
+	Pen.srect(c, 297, 157, 9, 7, Pen.hex(0x4c5056), 0.6)
 	Pen.rect(c, 338, 150, 16, 10, Pen.alpha(detail, 0.5))
-	Pen.rect(c, 340, 152, 4, 3, Pen.hex(0xffd75e, 0.7))
-	Pen.rect(c, 347, 154, 4, 3, Pen.hex(0x7fd07f, 0.7))
+	Pen.rect(c, 340, 152, 4, 3, Pen.hex(0xffd646, 0.7))
+	Pen.rect(c, 347, 154, 4, 3, Pen.hex(0x4fd3a1, 0.7))
 	# Röntgen
-	Pen.rect(c, 380, 146, 36, 24, Pen.hex(0x0a1626))
-	Pen.srect(c, 380, 146, 36, 24, Pen.hex(0x39445e), 0.8)
-	Pen.line(c, 398, 149, 398, 167, Pen.hex(0xcfe4ff, 0.75), 0.8)
+	Pen.rect(c, 380, 146, 36, 24, Pen.hex(0x111113))
+	Pen.srect(c, 380, 146, 36, 24, Pen.hex(0x4c5056), 0.8)
+	Pen.line(c, 398, 149, 398, 167, Pen.hex(0xdce7fd, 0.75), 0.8)
 	for i in 5:
-		Pen.sellipse(c, 398, 152 + i * 3.2, 10 - i * 0.8, 2, Pen.hex(0xcfe4ff, 0.6), 0.6)
-	var kn := Pen.hex(0xe9eef8, 0.9)
+		Pen.sellipse(c, 398, 152 + i * 3.2, 10 - i * 0.8, 2, Pen.hex(0xdce7fd, 0.6), 0.6)
+	var kn := Pen.hex(0xeeeff1, 0.9)
 	Pen.rect(c, 438, 148, 3.4, 3.4, kn)
 	Pen.rect(c, 439.2, 151.4, 1, 8, kn)
 	for i in 3:
@@ -675,24 +675,24 @@ func _draw_static(c: CanvasItem) -> void:
 	for fx in [112.0, 160.0, 226.0, 258.0, 318.0, 356.0]:
 		Pen.rect(c, fx, 184, 6, 8, Pen.alpha(fenster_hell, 0.85))
 		Pen.rect(c, fx, 184, 6, 0.8, Color(1, 1, 1, 0.12))
-	Pen.rect(c, 98, 192, 1.2, 22, Pen.hex(0x39445e))
-	Pen.rect(c, 95, 192, 7, 1.2, Pen.hex(0x39445e))
-	Pen.rect(c, 94.5, 193, 3, 4.4, Pen.hex(0xffd75e, 0.85))
-	Pen.rect(c, 262, 186, 14, 8, Pen.hex(0x0a1220))
-	Pen.srect(c, 262, 186, 14, 8, Pen.hex(0x39445e), 0.6)
-	Pen.rect(c, 240, 200, 12, 14, Pen.hex(0x2f3a52))
+	Pen.rect(c, 98, 192, 1.2, 22, Pen.hex(0x4c5056))
+	Pen.rect(c, 95, 192, 7, 1.2, Pen.hex(0x4c5056))
+	Pen.rect(c, 94.5, 193, 3, 4.4, Pen.hex(0xffd646, 0.85))
+	Pen.rect(c, 262, 186, 14, 8, Pen.hex(0x111113))
+	Pen.srect(c, 262, 186, 14, 8, Pen.hex(0x4c5056), 0.6)
+	Pen.rect(c, 240, 200, 12, 14, Pen.hex(0x303236))
 	Pen.rect(c, 240, 206.5, 12, 0.8, Pen.alpha(detail, 0.5))
-	Pen.scircle(c, 348, 209, 4.4, Pen.hex(0x8fa2c4, 0.9), 0.9)
-	Pen.scircle(c, 354.5, 211.5, 1.8, Pen.hex(0x8fa2c4, 0.9), 0.9)
-	Pen.rect(c, 344, 200, 7, 2, Pen.hex(0x2f3a52))
-	Pen.rect(c, 343, 196, 1.6, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 370, 204, 5, 6, Pen.hex(0x3a6a55))
-	Pen.rect(c, 369, 199, 7, 5, Pen.hex(0x7fd07f, 0.8))
-	Pen.rect(c, 392, 202, 30, 2.4, Pen.hex(0x2f3a52))
-	Pen.rect(c, 394, 204.4, 2.4, 9.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 416, 204.4, 2.4, 9.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 428, 196, 10, 12, Pen.hex(0x39445e))
-	Pen.rect(c, 430.5, 205.5, 3, 2, Pen.hex(0xd8e0f0, 0.85))
+	Pen.scircle(c, 348, 209, 4.4, Pen.hex(0xa1a8b3, 0.9), 0.9)
+	Pen.scircle(c, 354.5, 211.5, 1.8, Pen.hex(0xa1a8b3, 0.9), 0.9)
+	Pen.rect(c, 344, 200, 7, 2, Pen.hex(0x303236))
+	Pen.rect(c, 343, 196, 1.6, 6, Pen.hex(0x303236))
+	Pen.rect(c, 370, 204, 5, 6, Pen.hex(0x086b4f))
+	Pen.rect(c, 369, 199, 7, 5, Pen.hex(0x4fd3a1, 0.8))
+	Pen.rect(c, 392, 202, 30, 2.4, Pen.hex(0x303236))
+	Pen.rect(c, 394, 204.4, 2.4, 9.6, Pen.hex(0x303236))
+	Pen.rect(c, 416, 204.4, 2.4, 9.6, Pen.hex(0x303236))
+	Pen.rect(c, 428, 196, 10, 12, Pen.hex(0x4c5056))
+	Pen.rect(c, 430.5, 205.5, 3, 2, Pen.hex(0xdfe3e6, 0.85))
 
 	# ================================================================ EG-Flur
 	for tx in [120.0, 168.0, 216.0, 264.0, 312.0]:
@@ -700,12 +700,12 @@ func _draw_static(c: CanvasItem) -> void:
 		Pen.circle(c, tx + 8, 240, 0.7, Pen.alpha(accent, 0.5))
 		Pen.rect(c, tx + 2, 229, 6, 1.6, Pen.alpha(detail, 0.6))
 	Pen.rect(c, 92, 249, SCHACHT.links - 94, 1, Pen.alpha(detail, 0.3))
-	Pen.rect(c, 96, 240, 20, 1.8, Pen.hex(0xcfd6e6))
-	Pen.rect(c, 98, 242, 1.4, 8, Pen.hex(0x2f3a52))
-	Pen.rect(c, 111, 242, 1.4, 8, Pen.hex(0x2f3a52))
-	Pen.circle(c, 99, 251, 1.4, Pen.hex(0x8fa2c4, 0.9))
-	Pen.circle(c, 112, 251, 1.4, Pen.hex(0x8fa2c4, 0.9))
-	Pen.rect(c, 110, 237.6, 5, 2, Pen.hex(0xf2f5fb, 0.9))
+	Pen.rect(c, 96, 240, 20, 1.8, Pen.hex(0xcbd1d6))
+	Pen.rect(c, 98, 242, 1.4, 8, Pen.hex(0x303236))
+	Pen.rect(c, 111, 242, 1.4, 8, Pen.hex(0x303236))
+	Pen.circle(c, 99, 251, 1.4, Pen.hex(0xa1a8b3, 0.9))
+	Pen.circle(c, 112, 251, 1.4, Pen.hex(0xa1a8b3, 0.9))
+	Pen.rect(c, 110, 237.6, 5, 2, Pen.hex(0xeff6ff, 0.9))
 
 	# ================================================================ Erdgeschoss
 	Pen.rect(c, 152, 256, 2, 60, Pen.darken(sky_top, 0.45))
@@ -715,75 +715,75 @@ func _draw_static(c: CanvasItem) -> void:
 		Pen.rect(c, 102, ly, 38, 1, Pen.alpha(detail, 0.35))
 		ly += 6.0
 	Pen.tri(c, 96, BODEN + 6, 148, BODEN + 6, 148, BODEN - 2, gehweg)
-	Pen.rect(c, 184, 262, 40, 54, Pen.hex(0x0d1a2c))
+	Pen.rect(c, 184, 262, 40, 54, Pen.hex(0x04163a))
 	Pen.srect(c, 184, 262, 40, 54, Pen.alpha(detail, 0.7), 0.8)
-	Pen.rect(c, 178, 256, 52, 4, Pen.hex(0x2f3a52))
-	Pen.rect(c, 162, 257, 16, 12, Pen.hex(0x1d4f9c))
+	Pen.rect(c, 178, 256, 52, 4, Pen.hex(0x303236))
+	Pen.rect(c, 162, 257, 16, 12, Pen.hex(0x0f43b3))
 	Pen.rect(c, 165, 259.5, 2.4, 7, Color(1, 1, 1, 0.95))
 	Pen.rect(c, 172.6, 259.5, 2.4, 7, Color(1, 1, 1, 0.95))
 	Pen.rect(c, 165, 262, 10, 2, Color(1, 1, 1, 0.95))
 	Pen.ekg(c, 186, 259.5, 36, 2, 0.35, 0)
-	Pen.rect(c, 162, 271, 18, 14, Pen.hex(0x0e1a2c, 0.9))
-	var pfeile := [0x7fd07f, 0x4de3ff, 0xffd75e]
+	Pen.rect(c, 162, 271, 18, 14, Pen.hex(0x04163a, 0.9))
+	var pfeile := [0x4fd3a1, 0x6797ff, 0xffd646]
 	for i in 3:
 		Pen.rect(c, 164, 274 + i * 3.6, 10, 1.4, Pen.hex(pfeile[i], 0.85))
 		Pen.tri(c, 174, 273.2 + i * 3.6, 174, 276.4 + i * 3.6, 177, 274.8 + i * 3.6, Pen.hex(pfeile[i], 0.85))
-	Pen.rect(c, 230, 266, 14, 18, Pen.hex(0xf2f5fb, 0.92))
+	Pen.rect(c, 230, 266, 14, 18, Pen.hex(0xeff6ff, 0.92))
 	for i in 6:
 		for j in 6:
 			if (i * 3 + j * 5 + ((i * j) % 3)) % 4 < 2:
-				Pen.rect(c, 232 + i * 1.7, 268 + j * 1.7, 1.4, 1.4, Pen.hex(0x0d1a2c))
-	Pen.rect(c, 232, 268, 3.4, 3.4, Pen.hex(0x0d1a2c))
-	Pen.rect(c, 238.8, 268, 3.4, 3.4, Pen.hex(0x0d1a2c))
-	Pen.rect(c, 232, 274.8, 3.4, 3.4, Pen.hex(0x0d1a2c))
+				Pen.rect(c, 232 + i * 1.7, 268 + j * 1.7, 1.4, 1.4, Pen.hex(0x04163a))
+	Pen.rect(c, 232, 268, 3.4, 3.4, Pen.hex(0x04163a))
+	Pen.rect(c, 238.8, 268, 3.4, 3.4, Pen.hex(0x04163a))
+	Pen.rect(c, 232, 274.8, 3.4, 3.4, Pen.hex(0x04163a))
 	Pen.rect(c, 232, 280.5, 10, 1.6, Pen.alpha(K, 0.9))
-	Pen.rect(c, 258, 300, 64, 16, Pen.hex(0x2f3a52))
-	Pen.rect(c, 256, 298, 68, 3, Pen.hex(0x39445e))
+	Pen.rect(c, 258, 300, 64, 16, Pen.hex(0x303236))
+	Pen.rect(c, 256, 298, 68, 3, Pen.hex(0x4c5056))
 	Pen.rect(c, 256, 298, 68, 0.8, Color(1, 1, 1, 0.1))
-	Pen.rect(c, 264, 305, 4, 2.6, Pen.hex(0x7fd07f, 0.85))
-	Pen.rect(c, 270, 305, 4, 2.6, Pen.hex(0x4de3ff, 0.85))
-	Pen.rect(c, 276, 305, 4, 2.6, Pen.hex(0xffd75e, 0.85))
-	Pen.rect(c, 304, 290, 10, 8, Pen.hex(0x39445e))
-	Pen.rect(c, 305.5, 291.5, 7, 4, Pen.hex(0x0a1220))
-	Pen.rect(c, 313, 295.5, 3.4, 1.6, Pen.hex(0xffd75e, 0.95))
+	Pen.rect(c, 264, 305, 4, 2.6, Pen.hex(0x4fd3a1, 0.85))
+	Pen.rect(c, 270, 305, 4, 2.6, Pen.hex(0x6797ff, 0.85))
+	Pen.rect(c, 276, 305, 4, 2.6, Pen.hex(0xffd646, 0.85))
+	Pen.rect(c, 304, 290, 10, 8, Pen.hex(0x4c5056))
+	Pen.rect(c, 305.5, 291.5, 7, 4, Pen.hex(0x111113))
+	Pen.rect(c, 313, 295.5, 3.4, 1.6, Pen.hex(0xffd646, 0.95))
 	for cx in [346.0, 362.0, 378.0]:
-		Pen.rect(c, cx - 3, 306, 6, 1.6, Pen.hex(0x39445e))
-		Pen.rect(c, cx - 3, 307.6, 1.2, 8.4, Pen.hex(0x39445e))
-		Pen.rect(c, cx + 1.8, 307.6, 1.2, 8.4, Pen.hex(0x39445e))
-		Pen.rect(c, cx + 2.4, 298, 1.2, 8.4, Pen.hex(0x39445e))
-	Pen.rect(c, 424, 288, 18, 28, Pen.hex(0x2f3a52))
-	Pen.rect(c, 426, 290, 10, 20, Pen.hex(0x102138))
-	var snack := [0xffd75e, 0x7fd07f, 0x9a7ae8]
+		Pen.rect(c, cx - 3, 306, 6, 1.6, Pen.hex(0x4c5056))
+		Pen.rect(c, cx - 3, 307.6, 1.2, 8.4, Pen.hex(0x4c5056))
+		Pen.rect(c, cx + 1.8, 307.6, 1.2, 8.4, Pen.hex(0x4c5056))
+		Pen.rect(c, cx + 2.4, 298, 1.2, 8.4, Pen.hex(0x4c5056))
+	Pen.rect(c, 424, 288, 18, 28, Pen.hex(0x303236))
+	Pen.rect(c, 426, 290, 10, 20, Pen.hex(0x04163A))
+	var snack := [0xffd646, 0x4fd3a1, 0x9470f5]
 	for r in 3:
 		for col in 3:
 			Pen.rect(c, 427.5 + col * 3, 292 + r * 5, 2, 3, Pen.hex(snack[(r + col) % 3], 0.8))
-	Pen.rect(c, 394, 276, 24, 13, Pen.hex(0x0e1a2c, 0.92))
+	Pen.rect(c, 394, 276, 24, 13, Pen.hex(0x04163a, 0.92))
 	Pen.srect(c, 394, 276, 24, 13, Pen.alpha(detail, 0.7), 0.6)
-	Pen.rect(c, 338, 308, 5, 8, Pen.hex(0x3a6a55))
-	Pen.rect(c, 336.5, 302, 8, 6, Pen.hex(0x7fd07f, 0.8))
+	Pen.rect(c, 338, 308, 5, 8, Pen.hex(0x086b4f))
+	Pen.rect(c, 336.5, 302, 8, 6, Pen.hex(0x4fd3a1, 0.8))
 
 	# ================================================================ Keller: hier wohnt die TI
-	Pen.rect(c, KELLER.links, KELLER.oben, KELLER.rechts - KELLER.links, KELLER.unten - KELLER.oben, Pen.hex(0x080d16))
+	Pen.rect(c, KELLER.links, KELLER.oben, KELLER.rechts - KELLER.links, KELLER.unten - KELLER.oben, Pen.hex(0x111113))
 	Pen.srect(c, KELLER.links, KELLER.oben, KELLER.rechts - KELLER.links, KELLER.unten - KELLER.oben, Pen.alpha(Pen.darken(sky_top, 0.2), 0.5), 1.0)
 	for tx in [190.0, 300.0, 390.0]:
 		Pen.rect(c, tx, KELLER.oben, 2, KELLER.unten - KELLER.oben, Pen.darken(sky_top, 0.35))
-	Pen.rect(c, 108, 328, 20, 13, Pen.hex(0x3a4358))
+	Pen.rect(c, 108, 328, 20, 13, Pen.hex(0x4c5056))
 	Pen.srect(c, 108, 328, 20, 13, Pen.alpha(detail, 0.8), 0.7)
-	Pen.rect(c, 126.5, 336, 3.6, 2, Pen.hex(0xffd75e, 0.95))
+	Pen.rect(c, 126.5, 336, 3.6, 2, Pen.hex(0xffd646, 0.95))
 	Pen.rect(c, 192, KELLER.oben + 1, 106, KELLER.unten - KELLER.oben - 2, Pen.alpha(K, 0.05))
-	Pen.scircle(c, 191, 336, 5.5, Pen.hex(0x8fa2c4, 0.5), 1.2)
-	Pen.line(c, 186.5, 336, 195.5, 336, Pen.hex(0x8fa2c4, 0.45), 0.7)
-	Pen.line(c, 191, 331.5, 191, 340.5, Pen.hex(0x8fa2c4, 0.45), 0.7)
-	Pen.rect(c, 238, 340, 30, 2.2, Pen.hex(0x2f3a52))
-	Pen.rect(c, 241, 342.2, 2, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 262, 342.2, 2, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, 242, 333, 8, 6.4, Pen.hex(0x0a1220))
-	Pen.rect(c, 252, 333, 8, 6.4, Pen.hex(0x0a1220))
+	Pen.scircle(c, 191, 336, 5.5, Pen.hex(0xa1a8b3, 0.5), 1.2)
+	Pen.line(c, 186.5, 336, 195.5, 336, Pen.hex(0xa1a8b3, 0.45), 0.7)
+	Pen.line(c, 191, 331.5, 191, 340.5, Pen.hex(0xa1a8b3, 0.45), 0.7)
+	Pen.rect(c, 238, 340, 30, 2.2, Pen.hex(0x303236))
+	Pen.rect(c, 241, 342.2, 2, 6, Pen.hex(0x303236))
+	Pen.rect(c, 262, 342.2, 2, 6, Pen.hex(0x303236))
+	Pen.rect(c, 242, 333, 8, 6.4, Pen.hex(0x111113))
+	Pen.rect(c, 252, 333, 8, 6.4, Pen.hex(0x111113))
 	for rx in [308.0, 328.0, 348.0]:
-		Pen.rect(c, rx, 328, 14, 21, Pen.hex(0x141c2e))
+		Pen.rect(c, rx, 328, 14, 21, Pen.hex(0x202124))
 		Pen.srect(c, rx, 328, 14, 21, Pen.alpha(detail, 0.7), 0.7)
-	Pen.rect(c, 396, 335, 68, 1.4, Pen.hex(0x39445e))
-	Pen.rect(c, 396, 344.5, 68, 1.4, Pen.hex(0x39445e))
+	Pen.rect(c, 396, 335, 68, 1.4, Pen.hex(0x4c5056))
+	Pen.rect(c, 396, 344.5, 68, 1.4, Pen.hex(0x4c5056))
 	for i in 14:
 		Pen.rect(c, 398 + i * 4.6, 329 if i % 2 == 0 else 338.5, 3.4, 6, Pen.hex(pfeile[i % 3], 0.75))
 	Pen.pfad_linie(c, LEITUNG_A, Pen.alpha(K, 0.18), 0.6)
@@ -795,34 +795,34 @@ func _draw_static(c: CanvasItem) -> void:
 	Pen.rect(c, 522, 260, 96, 2, Pen.alpha(detail, 0.85))
 	Pen.rect(c, 532, 278, 44, 34, Pen.alpha(fenster_hell, 0.45))
 	Pen.srect(c, 532, 278, 44, 34, Pen.alpha(detail, 0.8), 0.8)
-	var regal := [0xffd75e, 0x7fd07f, 0x9a7ae8, 0x4de3ff]
+	var regal := [0xffd646, 0x4fd3a1, 0x9470f5, 0x6797ff]
 	for r in 2:
-		Pen.rect(c, 534, 288 + r * 9, 40, 1, Pen.hex(0x39445e, 0.9))
+		Pen.rect(c, 534, 288 + r * 9, 40, 1, Pen.hex(0x4c5056, 0.9))
 		for i in 7:
 			Pen.rect(c, 536 + i * 5.4, 284.5 + r * 9, 2.6, 3.2, Pen.hex(regal[(i + r) % 4], 0.8))
-	Pen.rect(c, 538, 296, 12, 12, Pen.hex(0xf2f5fb, 0.95))
+	Pen.rect(c, 538, 296, 12, 12, Pen.hex(0xeff6ff, 0.95))
 	for i in 5:
 		for j in 5:
 			if (i * 5 + j * 3 + ((i + j) * 2) % 5) % 4 < 2:
-				Pen.rect(c, 539.5 + i * 1.8, 297.5 + j * 1.8, 1.5, 1.5, Pen.hex(0x0d1a2c))
-	Pen.rect(c, 588, 288, 18, 28, Pen.hex(0x0d1a2c))
+				Pen.rect(c, 539.5 + i * 1.8, 297.5 + j * 1.8, 1.5, 1.5, Pen.hex(0x04163a))
+	Pen.rect(c, 588, 288, 18, 28, Pen.hex(0x04163a))
 	Pen.srect(c, 588, 288, 18, 28, Pen.alpha(detail, 0.8), 0.8)
 	Pen.circle(c, 603, 302, 0.8, Pen.alpha(accent, 0.6))
-	Pen.rect(c, 524, 274, 6, 1.6, Pen.hex(0x39445e))
-	Pen.rect(c, 519, 275.6, 11, 11, Pen.hex(0x0d2440, 0.95))
+	Pen.rect(c, 524, 274, 6, 1.6, Pen.hex(0x4c5056))
+	Pen.rect(c, 519, 275.6, 11, 11, Pen.hex(0x04163a, 0.95))
 	Pen.polyline(c, PackedVector2Array([Vector2(521, 284.6), Vector2(524.5, 277.6), Vector2(528, 284.6)]), Pen.alpha(accent, 0.95), 1.1)
 	Pen.line(c, 522.6, 282, 526.4, 282, Pen.alpha(accent, 0.95), 1.1)
-	Pen.rect(c, 532, 256.5, 6, 3.5, Pen.hex(0x1c2536))
-	Pen.rect(c, 536.5, 254.5, 3, 3, Pen.hex(0x1c2536))
-	Pen.tri(c, 536.5, 255, 537.5, 253, 538, 255, Pen.hex(0x1c2536))
-	Pen.tri(c, 538.2, 255, 539.2, 253, 539.6, 255, Pen.hex(0x1c2536))
+	Pen.rect(c, 532, 256.5, 6, 3.5, Pen.hex(0x202124))
+	Pen.rect(c, 536.5, 254.5, 3, 3, Pen.hex(0x202124))
+	Pen.tri(c, 536.5, 255, 537.5, 253, 538, 255, Pen.hex(0x202124))
+	Pen.tri(c, 538.2, 255, 539.2, 253, 539.6, 255, Pen.hex(0x202124))
 	# Laterne rechts
-	Pen.rect(c, 628, 282, 1.6, 38, Pen.hex(0x39445e))
-	Pen.rect(c, 626.6, 279, 4.4, 3.4, Pen.hex(0xffd9a0, 0.95))
+	Pen.rect(c, 628, 282, 1.6, 38, Pen.hex(0x4c5056))
+	Pen.rect(c, 626.6, 279, 4.4, 3.4, Pen.hex(0xffcda8, 0.95))
 	Pen.bodenschein(c, 629, BODEN + 1, 30, 0.08)
 
 	# ---- Tafel links (Steuerung + Rechtshinweis) ----
-	Pen.rrect(c, 4, 282, 82, 74, 3, Pen.hex(0x060d16, 0.8))
+	Pen.rrect(c, 4, 282, 82, 74, 3, Pen.hex(0x111113, 0.8))
 	Pen.srrect(c, 4, 282, 82, 74, 3, Color(1, 1, 1, 0.16), 0.7)
 	Pen.rect(c, 8, 295.5, 74, 0.6, Color(1, 1, 1, 0.16))
 	Pen.rect(c, 8, 337.5, 74, 0.6, Color(1, 1, 1, 0.12))
@@ -832,15 +832,15 @@ func _draw_glow(c: CanvasItem) -> void:
 	var accent: Color = theme["accent"]
 	Pen.glow(c, W / 2, 78, accent, 70, 0.16)
 	Pen.glow(c, 140, 126, accent, 24, 0.12)
-	Pen.glow(c, 204, 252, Pen.hex(0xcfe4ff), 20, 0.10)
+	Pen.glow(c, 204, 252, Pen.hex(0xdce7fd), 20, 0.10)
 	Pen.glow(c, 121, 264, Pen.WARM, 16, 0.09)
 	Pen.glow(c, 245, 338, Pen.K, 18, 0.13)
 	Pen.glow(c, 335, 338, Pen.K, 12, 0.07)
 	Pen.glow(c, 570, 270, accent, 16, 0.09)
 	Pen.glow(c, 564, 304, Pen.K, 11, 0.10)
-	Pen.glow(c, 629, 281, Pen.hex(0xffd9a0), 13, 0.15)
+	Pen.glow(c, 629, 281, Pen.hex(0xffcda8), 13, 0.15)
 	Pen.glow(c, 138, 152, Color.WHITE, 13, 0.08)
-	Pen.glow(c, 369, 263, Pen.hex(0x4d8dff), 10, 0.10)
+	Pen.glow(c, 369, 263, Pen.hex(0x6797ff), 10, 0.10)
 
 
 # ------------------------------------------------------------------- Leben
@@ -851,10 +851,10 @@ func _draw_life(c: CanvasItem) -> void:
 
 	# ---- Aufzug: Kabine mit Licht, Seil, winziger Fahrgast ----
 	var ay := _aufzug_y(t)
-	Pen.rect(c, SCHACHT.links + 1, 142, 1, ay - 142, Pen.hex(0x39445e))
-	Pen.rect(c, SCHACHT.links + 1, ay, SCHACHT.rechts - SCHACHT.links - 2, 28, Pen.hex(0xffe9b8, 0.22))
-	Pen.rect(c, SCHACHT.links + 1, ay, SCHACHT.rechts - SCHACHT.links - 2, 1.6, Pen.hex(0x2f3a52))
-	Pen.rect(c, SCHACHT.links + 1, ay + 26.4, SCHACHT.rechts - SCHACHT.links - 2, 1.6, Pen.hex(0x2f3a52))
+	Pen.rect(c, SCHACHT.links + 1, 142, 1, ay - 142, Pen.hex(0x4c5056))
+	Pen.rect(c, SCHACHT.links + 1, ay, SCHACHT.rechts - SCHACHT.links - 2, 28, Pen.hex(0xfdf1bf, 0.22))
+	Pen.rect(c, SCHACHT.links + 1, ay, SCHACHT.rechts - SCHACHT.links - 2, 1.6, Pen.hex(0x303236))
+	Pen.rect(c, SCHACHT.links + 1, ay + 26.4, SCHACHT.rechts - SCHACHT.links - 2, 1.6, Pen.hex(0x303236))
 	Pen.figur(c, SCHACHT.links + 12, ay + 26.4, Pen.P_BESUCH, 0, -1)
 
 	# ---- Flur-Läufer + Rollstuhl-Gespann ----
@@ -865,10 +865,10 @@ func _draw_life(c: CanvasItem) -> void:
 	var rp := Pen.pendel(t, 150, 400, 13, 11)
 	var vor: int = rp[1]
 	var rx: float = rp[0] + vor * 6
-	Pen.scircle(c, rx, 248.5, 3.4, Pen.hex(0x8fa2c4, 0.95), 0.9)
-	Pen.scircle(c, rx + vor * 4.6, 250.4, 1.5, Pen.hex(0x8fa2c4, 0.95), 0.9)
-	Pen.rect(c, rx - 3.4, 241.5, 6.8, 1.8, Pen.hex(0x2f3a52))
-	Pen.rect(c, rx - vor * 3.4 - 0.8, 236, 1.6, 7, Pen.hex(0x2f3a52))
+	Pen.scircle(c, rx, 248.5, 3.4, Pen.hex(0xa1a8b3, 0.95), 0.9)
+	Pen.scircle(c, rx + vor * 4.6, 250.4, 1.5, Pen.hex(0xa1a8b3, 0.95), 0.9)
+	Pen.rect(c, rx - 3.4, 241.5, 6.8, 1.8, Pen.hex(0x303236))
+	Pen.rect(c, rx - vor * 3.4 - 0.8, 236, 1.6, 7, Pen.hex(0x303236))
 	Pen.sitzend(c, rx, 243, Pen.P_PATIENT)
 	Pen.figur(c, rp[0] - vor * 3, FUSS.f1, Pen.P_PFLEGE, t * 1.9 * 0.5, vor)
 	# TIM-Ecke: Arzt am Telefon, Sprechblasen wechseln sich ab
@@ -876,28 +876,28 @@ func _draw_life(c: CanvasItem) -> void:
 	Pen.figur(c, 430, FUSS.f1, Pen.P_ARZT, 0, -1)
 	Pen.rect(c, 426.4, 243.6 + bob * 0.2, 1.6, 2.6, Pen.alpha(K, 0.9))
 	var wer := sin(t * 1.85)
-	Pen.rrect(c, 418, 228, 8, 5, 1.5, Pen.hex(0xe9eef8, 0.85 if wer > 0 else 0.2))
-	Pen.rrect(c, 428, 231.5, 8, 5, 1.5, Pen.hex(0x8fd6c8, 0.2 if wer > 0 else 0.85))
+	Pen.rrect(c, 418, 228, 8, 5, 1.5, Pen.hex(0xeeeff1, 0.85 if wer > 0 else 0.2))
+	Pen.rrect(c, 428, 231.5, 8, 5, 1.5, Pen.hex(0x8bf1ca, 0.2 if wer > 0 else 0.85))
 	# Wanduhr im Flur
-	Pen.scircle(c, 107, 228, 3, Pen.hex(0xd8e0f0, 0.9), 0.7)
-	Pen.line(c, 107, 228, 107 + sin(t * 0.105) * 2.4, 228 - cos(t * 0.105) * 2.4, Pen.hex(0xd8e0f0, 0.9), 0.7)
-	Pen.line(c, 107, 228, 108.6, 227, Pen.hex(0xd8e0f0, 0.9), 0.7)
+	Pen.scircle(c, 107, 228, 3, Pen.hex(0xdfe3e6, 0.9), 0.7)
+	Pen.line(c, 107, 228, 107 + sin(t * 0.105) * 2.4, 228 - cos(t * 0.105) * 2.4, Pen.hex(0xdfe3e6, 0.9), 0.7)
+	Pen.line(c, 107, 228, 108.6, 227, Pen.hex(0xdfe3e6, 0.9), 0.7)
 
 	# ---- 1. OG: Betten atmen, Monitore laufen, Visite, TV flimmert ----
-	_bett(c, 104, FUSS.f2, Pen.hex(0x5c7ba8), Pen.hex(HAUT[1]), 0.0)
+	_bett(c, 104, FUSS.f2, Pen.hex(0x787e8a), Pen.hex(HAUT[1]), 0.0)
 	_monitor(c, 132, FUSS.f2, 0.1)
-	_bett(c, 204, FUSS.f2, Pen.hex(0x8a5f9e), Pen.hex(HAUT[0]), 2.1)
-	_bett(c, 300, FUSS.f2, Pen.hex(0x4d8a70), Pen.hex(HAUT[2]), 4.2)
+	_bett(c, 204, FUSS.f2, Pen.hex(0x5b3fb8), Pen.hex(HAUT[0]), 2.1)
+	_bett(c, 300, FUSS.f2, Pen.hex(0x07966a), Pen.hex(HAUT[2]), 4.2)
 	_monitor(c, 328, FUSS.f2, 0.55)
 	var nick := sin(t * 1.6) * 0.5
 	Pen.figur(c, 150, FUSS.f2, Pen.P_ARZT, 0, -1)
-	Pen.rect(c, 145.2, 205.6 + nick * 0.3, 3, 4, Pen.hex(0xf2f5fb, 0.95))
+	Pen.rect(c, 145.2, 205.6 + nick * 0.3, 3, 4, Pen.hex(0xeff6ff, 0.95))
 	var uinf := fmod(t, 1.6) / 1.6
 	if uinf < 0.75:
-		Pen.rect(c, 95.6, 198 + uinf * 12, 1, 1.6, Pen.hex(0xffd75e, 0.9 - uinf))
-	Pen.rect(c, 263, 187, 12, 6, Pen.hex(0xcfe4ff, 0.1 + absf(sin(t * 2.7) * sin(t * 1.3)) * 0.12))
+		Pen.rect(c, 95.6, 198 + uinf * 12, 1, 1.6, Pen.hex(0xffd646, 0.9 - uinf))
+	Pen.rect(c, 263, 187, 12, 6, Pen.hex(0xdce7fd, 0.1 + absf(sin(t * 2.7) * sin(t * 1.3)) * 0.12))
 	Pen.sitzend(c, 404, 202, Pen.P_PFLEGE)
-	Pen.rect(c, 429, 198, 1.4, 1.4, Pen.hex(0x7fd07f, 0.9 if sin(t * 2.4) > 0 else 0.25))
+	Pen.rect(c, 429, 198, 1.4, 1.4, Pen.hex(0x4fd3a1, 0.9 if sin(t * 2.4) > 0 else 0.25))
 
 	# ---- 2. OG: OP läuft, Labor blubbert, KIM pingt, Röntgen flackert ----
 	var b1 := sin(t * 1.5) * 0.5
@@ -906,37 +906,37 @@ func _draw_life(c: CanvasItem) -> void:
 	Pen.figur(c, 156, FUSS.f3, Pen.P_OP, 0, -1)
 	Pen.rect(c, 127 + b1, 164.5, 2, 1.4, Pen.hex(HAUT[0]))
 	Pen.rect(c, 151 - b2, 164.5, 2, 1.4, Pen.hex(HAUT[0]))
-	Pen.rect(c, 124, 165.4, 22, 2.6, Pen.hex(0x69b894))
+	Pen.rect(c, 124, 165.4, 22, 2.6, Pen.hex(0x18ae80))
 	Pen.rect(c, 146, 164.8, 3, 2.6, Pen.hex(HAUT[2]))
 	Pen.ekg(c, 168, 158, 8, 2, t, 0.8)
 	var lp := Pen.pendel(t, 210, 262, 8, 5)
 	Pen.figur(c, lp[0], FUSS.f3, Pen.P_TECHNIK, t * 1.2 * 0.5, lp[1])
 	for i in 3:
 		var u := fmod(t * 0.7 + i * 0.33, 1.0)
-		Pen.circle(c, 229.5, 162 - u * 7, 0.8, Pen.hex(0x7fd07f, 0.7 - u * 0.6))
+		Pen.circle(c, 229.5, 162 - u * 7, 0.8, Pen.hex(0x4fd3a1, 0.7 - u * 0.6))
 	Pen.sitzend(c, 312, 166, Pen.P_PFLEGE)
 	var uk := fmod(t, 4.5) / 4.5
 	var pop := sin((uk / 0.18) * PI) if uk < 0.18 else 0.0
 	var ex := 301.5
 	var ey := 152 - pop * 2.5
-	Pen.rect(c, ex - 3, ey - 2, 6, 4, Pen.hex(0x8fd6c8, 0.55 + pop * 0.45))
-	Pen.polyline(c, PackedVector2Array([Vector2(ex - 3, ey - 2), Vector2(ex, ey + 0.5), Vector2(ex + 3, ey - 2)]), Pen.hex(0x0a1220, 0.9), 0.5)
-	Pen.rect(c, 380, 146, 36, 24, Pen.hex(0xcfe4ff, 0.03 + absf(sin(t * 3.1)) * 0.04))
+	Pen.rect(c, ex - 3, ey - 2, 6, 4, Pen.hex(0x8bf1ca, 0.55 + pop * 0.45))
+	Pen.polyline(c, PackedVector2Array([Vector2(ex - 3, ey - 2), Vector2(ex, ey + 0.5), Vector2(ex + 3, ey - 2)]), Pen.hex(0x111113, 0.9), 0.5)
+	Pen.rect(c, 380, 146, 36, 24, Pen.hex(0xdce7fd, 0.03 + absf(sin(t * 3.1)) * 0.04))
 	var tp := Pen.pendel(t, 424, 432, 3, 1)
 	Pen.figur(c, tp[0], FUSS.f3, Pen.P_TECHNIK, 0, tp[1])
 
 	# ---- EG: Empfang, Wartende, Putzroboter, Türen ----
 	var eb := sin(t * 2.3) * 0.4
-	Pen.rect(c, 291.4, 291.5 + eb * 0.3, 5.2, 6.5, Pen.hex(0x5fc4b8))
+	Pen.rect(c, 291.4, 291.5 + eb * 0.3, 5.2, 6.5, Pen.hex(0x4fd3a1))
 	Pen.rect(c, 292.2, 287.6 + eb * 0.4, 3.6, 3.8, Pen.hex(HAUT[2]))
-	Pen.rect(c, 292.2, 287.6 + eb * 0.4, 3.6, 1.3, Pen.hex(0x14101a))
+	Pen.rect(c, 292.2, 287.6 + eb * 0.4, 3.6, 1.3, Pen.hex(0x111113))
 	Pen.figur(c, 250, FUSS.eg, Pen.P_BESUCH, 0, 1)
-	Pen.rect(c, 253.4, 302.5, 3.2, 2.2, Pen.hex(0x7fd07f))
+	Pen.rect(c, 253.4, 302.5, 3.2, 2.2, Pen.hex(0x4fd3a1))
 	Pen.rect(c, 253.9, 303, 1, 0.8, Color(1, 1, 1, 0.4 + sin(t * 3.4) * 0.35))
 	Pen.sitzend(c, 346, 306, Pen.P_BESUCH)
 	Pen.sitzend(c, 362, 306, Pen.P_KIND, sin(t * 3.2) * 1.4)
 	var pr := Pen.pendel(t, 168, 420, 9, 4)
-	Pen.rrect(c, pr[0] - 4, FUSS.eg - 4.6, 8, 4, 1.6, Pen.hex(0x2f3a52))
+	Pen.rrect(c, pr[0] - 4, FUSS.eg - 4.6, 8, 4, 1.6, Pen.hex(0x303236))
 	Pen.rect(c, pr[0] - 1, FUSS.eg - 6, 2, 1.6, Pen.alpha(K, 0.95 if sin(t * 2.8) > 0 else 0.4))
 	Pen.rect(c, pr[0] - pr[1] * 7, FUSS.eg - 1.4, 4, 0.7, Color(1, 1, 1, 0.14))
 	# Besucher kommt von links, die Schiebetür öffnet sich
@@ -964,10 +964,10 @@ func _draw_life(c: CanvasItem) -> void:
 		if ue < 1.2:
 			tuer_auf = maxf(tuer_auf, 1 - (ue - 0.8) / 0.4)
 	var o := tuer_auf * 7
-	Pen.rect(c, 196 - o, 262, 8, 54, Pen.hex(0x9fc4e8, 0.3))
-	Pen.rect(c, 204 + o, 262, 8, 54, Pen.hex(0x9fc4e8, 0.3))
-	Pen.rect(c, 196 - o + 7, 262, 1, 54, Pen.hex(0xd8e0f0, 0.8))
-	Pen.rect(c, 204 + o, 262, 1, 54, Pen.hex(0xd8e0f0, 0.8))
+	Pen.rect(c, 196 - o, 262, 8, 54, Pen.hex(0xa9c8fc, 0.3))
+	Pen.rect(c, 204 + o, 262, 8, 54, Pen.hex(0xa9c8fc, 0.3))
+	Pen.rect(c, 196 - o + 7, 262, 1, 54, Pen.hex(0xdfe3e6, 0.8))
+	Pen.rect(c, 204 + o, 262, 1, 54, Pen.hex(0xdfe3e6, 0.8))
 	# Zwei Passanten auf dem Gehweg
 	var pa := Pen.pendel(t, 94, 620, 15, 40)
 	Pen.figur(c, pa[0], FUSS.strasse, Pen.P_GRUEN, t * 2.1 * 0.5, pa[1])
@@ -978,9 +978,9 @@ func _draw_life(c: CanvasItem) -> void:
 	var haengt := fmod(t, 12.0) > 8.4 and fmod(t, 12.0) < 9.9
 	for i in 4:
 		var an := sin(t * 2.2 + i * 1.9) > -0.2
-		Pen.rect(c, 111 + i * 3.6, 331, 1.8, 1.8, Pen.hex(0x333c4e if haengt else 0x7fd07f, 0.95 if (an and not haengt) else 0.25))
+		Pen.rect(c, 111 + i * 3.6, 331, 1.8, 1.8, Pen.hex(0x303236 if haengt else 0x4fd3a1, 0.95 if (an and not haengt) else 0.25))
 	if haengt:
-		Pen.rect(c, 111, 335, 1.8, 1.8, Pen.hex(0xff5050, 0.95))
+		Pen.rect(c, 111, 335, 1.8, 1.8, Pen.hex(0xed4242, 0.95))
 	Pen.sitzend(c, 256, 346, Pen.P_TECHNIK)
 	Pen.rect(c, 243, 334, 6, 4.4, Pen.alpha(K, 0.25 + absf(sin(t * 1.7)) * 0.25))
 	Pen.rect(c, 253, 334, 6, 4.4, Pen.alpha(K, 0.25 + absf(sin(t * 1.7 + 1.2)) * 0.25))
@@ -989,7 +989,7 @@ func _draw_life(c: CanvasItem) -> void:
 		for reihe in 6:
 			for sp in 3:
 				var an := (ri * 7 + reihe * 13 + sp * 5 + int(floor(t * 2.5)) * 29) % 11 < 4
-				Pen.rect(c, racks[ri] + 2.5 + sp * 3.6, 330.5 + reihe * 3, 1.6, 1.2, Pen.alpha(K, 0.9) if an else Pen.hex(0x333c4e, 0.3))
+				Pen.rect(c, racks[ri] + 2.5 + sp * 3.6, 330.5 + reihe * 3, 1.6, 1.2, Pen.alpha(K, 0.9) if an else Pen.hex(0x303236, 0.3))
 	for k in 3:
 		var pA := Pen.pfad_punkt(LEITUNG_A, fmod(t / 6 + k / 3.0, 1.0))
 		Pen.circle(c, pA.x, pA.y, 1.8, Pen.alpha(K, 0.25))
@@ -1000,34 +1000,34 @@ func _draw_life(c: CanvasItem) -> void:
 	var um := fmod(t, 23.0)
 	if um < 1.1:
 		var mx := 460 - (um / 1.1) * 62
-		Pen.rect(c, mx, 348.6, 3, 1.6, Pen.hex(0x8a8fa0, 0.95))
-		Pen.circle(c, mx - 0.4, 348.8, 0.8, Pen.hex(0x8a8fa0, 0.95))
-		Pen.line(c, mx + 3, 349.4, mx + 5.5, 348.6 + sin(t * 30) * 0.6, Pen.hex(0x8a8fa0, 0.8), 0.5)
+		Pen.rect(c, mx, 348.6, 3, 1.6, Pen.hex(0x8e95a2, 0.95))
+		Pen.circle(c, mx - 0.4, 348.8, 0.8, Pen.hex(0x8e95a2, 0.95))
+		Pen.line(c, mx + 3, 349.4, mx + 5.5, 348.6 + sin(t * 30) * 0.6, Pen.hex(0x8e95a2, 0.8), 0.5)
 
 	# ---- Helipad-Randlichter + Antennen-Beacon (1 Hz) ----
 	for i in 4:
 		var an := sin(t * TAU + i * 1.57) > 0.2
-		Pen.rect(c, 381 + i * 25.4, 127, 1.6, 1.6, Pen.hex(0x7fd07f, 0.9 if an else 0.15))
-	Pen.circle(c, 467, 94.5, 1.1, Pen.hex(0xff5050, 0.95 if sin(t * TAU) > 0.5 else 0.1))
+		Pen.rect(c, 381 + i * 25.4, 127, 1.6, 1.6, Pen.hex(0x4fd3a1, 0.9 if an else 0.15))
+	Pen.circle(c, 467, 94.5, 1.1, Pen.hex(0xed4242, 0.95 if sin(t * TAU) > 0.5 else 0.1))
 	# Tauben auf der Dachkante
 	for i in 3:
 		var ph := fmod(t * 0.42 + i * 2.3, 7.0)
 		var hop := sin((ph / 0.3) * PI) * 2 if ph < 0.3 else 0.0
 		var px := 300 + i * 17 + (1 if ph < 0.3 else 0)
-		Pen.rect(c, px, 133.4 - hop, 3, 2, Pen.hex(0x8a92a8))
-		Pen.circle(c, px + 3.2, 133.4 - hop, 1, Pen.hex(0x8a92a8))
+		Pen.rect(c, px, 133.4 - hop, 3, 2, Pen.hex(0x8e95a2))
+		Pen.circle(c, px + 3.2, 133.4 - hop, 1, Pen.hex(0x8e95a2))
 	# Katzenschwanz, Hund an der Laterne
-	Pen.line(c, 532.4, 258, 529.4, 256.6 + sin(t * 1.4) * 1.4, Pen.hex(0x1c2536), 0.9)
-	Pen.rect(c, 614, 315.4, 5, 2.6, Pen.hex(0x6b4326))
-	Pen.rect(c, 618.4, 313.6, 2.6, 2.6, Pen.hex(0x6b4326))
-	Pen.rect(c, 614.6, 318, 1, 2, Pen.hex(0x6b4326))
-	Pen.rect(c, 617.6, 318, 1, 2, Pen.hex(0x6b4326))
-	Pen.line(c, 614, 316, 611.8, 314.4 + sin(t * 6) * 1, Pen.hex(0x6b4326), 0.8)
+	Pen.line(c, 532.4, 258, 529.4, 256.6 + sin(t * 1.4) * 1.4, Pen.hex(0x202124), 0.9)
+	Pen.rect(c, 614, 315.4, 5, 2.6, Pen.hex(0x6a3718))
+	Pen.rect(c, 618.4, 313.6, 2.6, 2.6, Pen.hex(0x6a3718))
+	Pen.rect(c, 614.6, 318, 1, 2, Pen.hex(0x6a3718))
+	Pen.rect(c, 617.6, 318, 1, 2, Pen.hex(0x6a3718))
+	Pen.line(c, 614, 316, 611.8, 314.4 + sin(t * 6) * 1, Pen.hex(0x6a3718), 0.8)
 	# Dampf aus der Dachlüftung
 	for i in 3:
 		var k := fmod(t + i * 0.9, 2.6) / 2.6
 		var e := 1.0 - pow(1.0 - k, 2)
-		Pen.circle(c, 252 + (6 + i * 3) * e, 126 - (20 + i * 4) * e, 2.2 + 4.5 * e, Pen.hex(0xcfd8e8, 0.16 * (1 - k)))
+		Pen.circle(c, 252 + (6 + i * 3) * e, 126 - (20 + i * 4) * e, 2.2 + 4.5 * e, Pen.hex(0xcbd1d6, 0.16 * (1 - k)))
 
 	# ---- Hubschrauber: Anflug, Landung, Trage zur Dachtür, Abflug ----
 	var uh := fmod(t, 26.0)
@@ -1054,30 +1054,30 @@ func _draw_life(c: CanvasItem) -> void:
 		hx = 419 + (720 - 419) * k * k
 		hy = 125 - 82 * k
 	if hx > -900:
-		Pen.rrect(c, hx - 9, hy - 7, 18, 7, 3, Pen.hex(0xd8e0f0))
-		Pen.rect(c, hx + 3.5, hy - 6, 4.5, 3, Pen.hex(0x0d1a2c, 0.9))
-		Pen.rect(c, hx - 22, hy - 5, 14, 2, Pen.hex(0xd8e0f0))
-		Pen.rect(c, hx - 24, hy - 9, 2.6, 6, Pen.hex(0xd8e0f0))
+		Pen.rrect(c, hx - 9, hy - 7, 18, 7, 3, Pen.hex(0xdfe3e6))
+		Pen.rect(c, hx + 3.5, hy - 6, 4.5, 3, Pen.hex(0x04163a, 0.9))
+		Pen.rect(c, hx - 22, hy - 5, 14, 2, Pen.hex(0xdfe3e6))
+		Pen.rect(c, hx - 24, hy - 9, 2.6, 6, Pen.hex(0xdfe3e6))
 		Pen.ekg(c, hx - 7, hy - 3.4, 12, 1.2, 0.35, 0.6)
-		Pen.rect(c, hx - 8, hy + 0.6, 1.2, 2, Pen.hex(0x39445e))
-		Pen.rect(c, hx + 6, hy + 0.6, 1.2, 2, Pen.hex(0x39445e))
-		Pen.rect(c, hx - 10, hy + 2.6, 21, 1, Pen.hex(0x39445e))
+		Pen.rect(c, hx - 8, hy + 0.6, 1.2, 2, Pen.hex(0x4c5056))
+		Pen.rect(c, hx + 6, hy + 0.6, 1.2, 2, Pen.hex(0x4c5056))
+		Pen.rect(c, hx - 10, hy + 2.6, 21, 1, Pen.hex(0x4c5056))
 		if rotor > 0.5:
-			Pen.ellipse(c, hx, hy - 8.6, 34, 1.6, Pen.hex(0xcfd8e8, 0.3))
+			Pen.ellipse(c, hx, hy - 8.6, 34, 1.6, Pen.hex(0xcbd1d6, 0.3))
 		else:
 			var a := t * (2 + rotor * 26)
-			Pen.line(c, hx - cos(a) * 16, hy - 8.6, hx + cos(a) * 16, hy - 8.6, Pen.hex(0xcfd8e8, 0.85), 0.8)
-		Pen.circle(c, hx - 23, hy - 10, 0.9, Pen.hex(0xff5050, 0.9 if sin(t * TAU) > 0.4 else 0.1))
+			Pen.line(c, hx - cos(a) * 16, hy - 8.6, hx + cos(a) * 16, hy - 8.6, Pen.hex(0xcbd1d6, 0.85), 0.8)
+		Pen.circle(c, hx - 23, hy - 10, 0.9, Pen.hex(0xed4242, 0.9 if sin(t * TAU) > 0.4 else 0.1))
 		if uh >= 8 and uh < 13.5:
 			var k := (uh - 8) / 5.5
 			var tsx := 428 + (SCHACHT.links + 4 - 428) * k
 			Pen.figur(c, tsx - 5, 137.5, Pen.P_PFLEGE, t * 2 * 0.5, 1)
 			Pen.figur(c, tsx + 7, 137.5, Pen.P_PFLEGE, t * 2 * 0.5, 1)
-			Pen.rect(c, tsx - 4, 130.4, 10, 1.4, Pen.hex(0xcfd6e6))
-			Pen.rect(c, tsx - 2, 128.8, 6, 1.6, Pen.hex(0xe9eef8, 0.95))
+			Pen.rect(c, tsx - 4, 130.4, 10, 1.4, Pen.hex(0xcbd1d6))
+			Pen.rect(c, tsx - 2, 128.8, 6, 1.6, Pen.hex(0xeeeff1, 0.95))
 
 	# ---- Footer-Band: dunkler Verlauf hinter Tafel und Start-Zeile ----
-	Pen.vgradient(c, 0, H - 60, W, 60, Pen.hex(0x04070c, 0.0), Pen.hex(0x04070c, 0.5))
+	Pen.vgradient(c, 0, H - 60, W, 60, Pen.hex(0x0d0900, 0.0), Pen.hex(0x0d0900, 0.5))
 	# ---- Bedienungswahl (über dem Band, unter den Schriften) ----
 	_draw_pills(c)
 	_draw_flags(c)
@@ -1085,10 +1085,10 @@ func _draw_life(c: CanvasItem) -> void:
 
 
 func _bett(c: CanvasItem, x: float, y_boden: float, decke: Color, haut: Color, phase: float) -> void:
-	Pen.rect(c, x, y_boden - 6, 1.6, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, x + 20.5, y_boden - 6, 1.6, 6, Pen.hex(0x2f3a52))
-	Pen.rect(c, x - 0.5, y_boden - 7.6, 23, 1.8, Pen.hex(0xcfd6e6))
-	Pen.rect(c, x + 17, y_boden - 9.6, 5, 2.2, Pen.hex(0xf2f5fb, 0.95))
+	Pen.rect(c, x, y_boden - 6, 1.6, 6, Pen.hex(0x303236))
+	Pen.rect(c, x + 20.5, y_boden - 6, 1.6, 6, Pen.hex(0x303236))
+	Pen.rect(c, x - 0.5, y_boden - 7.6, 23, 1.8, Pen.hex(0xcbd1d6))
+	Pen.rect(c, x + 17, y_boden - 9.6, 5, 2.2, Pen.hex(0xeff6ff, 0.95))
 	Pen.rect(c, x + 18, y_boden - 11.2, 3.2, 2.6, haut)
 	var atem := sin(t * 1.4 + phase) * 0.5
 	Pen.rect(c, x + 1, y_boden - 9.8, 16.5, 2.6, decke)
@@ -1096,7 +1096,7 @@ func _bett(c: CanvasItem, x: float, y_boden: float, decke: Color, haut: Color, p
 
 
 func _monitor(c: CanvasItem, x: float, y_boden: float, phase: float) -> void:
-	Pen.rect(c, x + 3.6, y_boden - 6, 1.4, 6, Pen.hex(0x39445e))
-	Pen.rect(c, x, y_boden - 13, 9, 7, Pen.hex(0x0a1220))
-	Pen.srect(c, x, y_boden - 13, 9, 7, Pen.hex(0x39445e), 0.6)
+	Pen.rect(c, x + 3.6, y_boden - 6, 1.4, 6, Pen.hex(0x4c5056))
+	Pen.rect(c, x, y_boden - 13, 9, 7, Pen.hex(0x111113))
+	Pen.srect(c, x, y_boden - 13, 9, 7, Pen.hex(0x4c5056), 0.6)
 	Pen.ekg(c, x + 0.8, y_boden - 9.4, 7.4, 2.2, t, phase)
